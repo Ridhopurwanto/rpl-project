@@ -1,22 +1,32 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import "../css/app.css";
-import Login from "./pages/Login";
-import Home from "./pages/Home";
+import { createRoot } from 'react-dom/client';
+import { useState } from 'react';
+import Login from '@/pages/login.jsx';
+import Home from '@/pages/home.jsx';
+import '../css/app.css';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
-  const [username, setUsername] = React.useState("M. SONY");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState('');
 
-  return (
-    <div>
-      {!isLoggedIn ? (
-        <Login onLogin={() => setIsLoggedIn(true)} />
-      ) : (
-        <Home username={username} />
-      )}
-    </div>
-  );
+  function handleLogin(user) {
+    setUsername(user);
+    setIsLoggedIn(true);
+  }
+
+  function handleLogout() {
+    setIsLoggedIn(false);
+    setUsername('');
+  }
+
+  if (isLoggedIn) {
+    return <Home username={username} onLogout={handleLogout} />;
+  }
+  
+  return <Login onLogin={handleLogin} />;
 }
 
-ReactDOM.createRoot(document.getElementById("app")).render(<App />);
+const container = document.getElementById('app');
+if (container) {
+  const root = createRoot(container);
+  root.render(<App />);
+}

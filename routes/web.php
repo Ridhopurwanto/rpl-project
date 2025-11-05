@@ -2,11 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('index');
-});
-
-// ↓↓↓ TAMBAHKAN BARIS DI BAWAH INI ↓↓↓
-Route::get('/about', function () {
-    return view('about'); // Ini akan memanggil file 'resources/views/about.blade.php'
-});
+// Semua route akan render view yang sama (SPA)
+Route::get('/{any}', function () {
+    return view('welcome');
+})->where('any', '.*');
