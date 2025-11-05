@@ -1,11 +1,179 @@
-@import 'tailwindcss';
+/* === GLOBAL === */
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background-color: #f6f7f9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+/* === LOGIN PAGE === */
+.login-container {
+  width: 360px;
+  background: linear-gradient(to bottom, #0f1b3f 40%, #fff 40%);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+.login-card {
+  text-align: center;
+  padding: 20px;
+}
+
+.logo-section {
+  color: white;
+  padding: 20px;
+}
+
+.logo-shield {
+  background: white;
+  color: #0f1b3f;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin: 0 auto 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 1.5em;
+}
+
+.logo-text {
+  font-size: 1.8em;
+  margin: 0;
+}
+
+.logo-subtext {
+  font-size: 0.8em;
+  color: #d0d3db;
+}
+
+.login-title {
+  font-weight: bold;
+  margin: 15px 0;
+  color: #000;
+}
+
+.input-group {
+  text-align: left;
+  margin: 10px 0;
+}
+
+.input-group label {
+  font-size: 0.8em;
+  color: #555;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 20px;
+  border: none;
+  background-color: #e6e6e6;
+  font-weight: bold;
+  color: #333;
+}
+
+.password-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.toggle-eye {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+}
+
+.btn-login {
+  background-color: #0f1b3f;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 20px;
+  margin-top: 15px;
+  font-weight: bold;
+  width: 100%;
+  cursor: pointer;
+}
+
+/* === HOME PAGE === */
+.home-container {
+  width: 360px;
+  border: 2px solid #0f1b3f;
+  border-radius: 15px;
+  background-color: white;
+  overflow: hidden;
+  text-align: center;
+}
+
+.home-header {
+  background-color: #e9f0ff;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.home-btn {
+  background-color: #0f1b3f;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 5px 15px;
+  font-weight: bold;
+}
+
+.home-icons span {
+  margin: 0 4px;
+}
+
+.welcome-box {
+  background-color: #0f1b3f;
+  color: white;
+  margin: 20px auto;
+  padding: 15px;
+  width: 80%;
+  border-radius: 10px;
+}
+
+.clock {
+  background-color: white;
+  color: #0f1b3f;
+  font-weight: bold;
+  width: 60px;
+  margin: 10px auto 0;
+  border-radius: 10px;
+  padding: 5px;
+}
+
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.menu-btn {
+  background: linear-gradient(to bottom, #1b3b70, #0f1b3f);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 10px;
+  width: 80%;
+  margin: 0 auto;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.footer {
+  background-color: #f0f0f0;
+  padding: 10px;
+  font-size: 0.8em;
+  color: #555;
 }
