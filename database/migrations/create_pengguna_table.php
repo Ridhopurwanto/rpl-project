@@ -6,12 +6,8 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        // Sesuai diagram: PENGGUNA
         Schema::create('pengguna', function (Blueprint $table) {
             $table->id('id_pengguna'); // Primary Key: id_pengguna
             $table->string('nama_lengkap');
@@ -22,9 +18,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('pengguna');

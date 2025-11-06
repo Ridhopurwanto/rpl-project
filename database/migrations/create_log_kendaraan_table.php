@@ -6,12 +6,8 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        // Sesuai diagram: LOG_KENDARAAN
         Schema::create('log_kendaraan', function (Blueprint $table) {
             $table->id('id_log'); // Primary Key: id_log
             $table->unsignedBigInteger('id_kendaraan'); // Foreign Key: id_kendaraan
@@ -22,13 +18,13 @@ return new class extends Migration
             $table->date('tanggal');
             $table->timestamps();
 
-            // Relasi ke tabel kendaraans
+            // Relasi ke tabel kendaraan
             $table->foreign('id_kendaraan')
                   ->references('id_kendaraan')
                   ->on('kendaraan')
                   ->onDelete('cascade');
             
-            // Relasi ke tabel penggunas
+            // Relasi ke tabel pengguna
             $table->foreign('id_pengguna')
                   ->references('id_pengguna')
                   ->on('pengguna')
@@ -36,9 +32,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('log_kendaraan');

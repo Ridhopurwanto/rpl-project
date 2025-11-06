@@ -6,16 +6,12 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        // Sesuai diagram: PATROLI
         Schema::create('patroli', function (Blueprint $table) {
             $table->id('id_patroli'); // Primary Key: id_patroli
             $table->unsignedBigInteger('id_pengguna'); // Foreign Key: id_pengguna
-            $table->string('nama_lengkap'); // Kolom denormalisasi sesuai diagram
+            $table->string('nama_lengkap'); 
             $table->dateTime('waktu_exact');
             $table->dateTime('waktu_patroli');
             $table->string('wilayah');
@@ -23,7 +19,7 @@ return new class extends Migration
             $table->date('tanggal');
             $table->timestamps();
 
-            // Relasi ke tabel penggunas
+            // Relasi ke tabel pengguna
             $table->foreign('id_pengguna')
                   ->references('id_pengguna')
                   ->on('pengguna')
@@ -31,9 +27,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('patroli');

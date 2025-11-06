@@ -6,16 +6,12 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        // Sesuai diagram: PRESENSI
         Schema::create('presensi', function (Blueprint $table) {
             $table->id('id_presensi'); // Primary Key: id_presensi
             $table->unsignedBigInteger('id_pengguna'); // Foreign Key: id_pengguna
-            $table->string('nama_lengkap'); // Kolom denormalisasi sesuai diagram
+            $table->string('nama_lengkap'); 
             $table->dateTime('waktu_masuk');
             $table->string('foto_masuk');
             $table->dateTime('waktu_pulang')->nullable();
@@ -25,7 +21,7 @@ return new class extends Migration
             $table->date('tanggal');
             $table->timestamps();
 
-            // Relasi ke tabel penggunas
+            // Relasi ke tabel pengguna
             $table->foreign('id_pengguna')
                   ->references('id_pengguna')
                   ->on('pengguna')
@@ -33,9 +29,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('presensi');

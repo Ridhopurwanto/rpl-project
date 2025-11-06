@@ -6,12 +6,8 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        // Sesuai diagram: TAMU
         Schema::create('tamu', function (Blueprint $table) {
             $table->id('id_tamu'); // Primary Key: id_tamu
             $table->string('nama_tamu');
@@ -22,7 +18,7 @@ return new class extends Migration
             $table->dateTime('waktu_pulang')->nullable();
             $table->timestamps();
 
-            // Relasi ke tabel penggunas
+            // Relasi ke tabel pengguna
             $table->foreign('id_pengguna')
                   ->references('id_pengguna')
                   ->on('pengguna')
@@ -30,9 +26,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('tamu');

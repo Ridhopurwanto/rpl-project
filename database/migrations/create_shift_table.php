@@ -6,20 +6,16 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        // Sesuai diagram: SHIFT
         Schema::create('shift', function (Blueprint $table) {
             $table->id('id_shift'); // Primary Key: id_shift
             $table->unsignedBigInteger('id_pengguna'); // Foreign Key: id_pengguna
             $table->date('tanggal');
-            $table->enum('jenis_shift', ['Pagi', 'Malam', 'Off']); // Sesuai petunjuk
+            $table->enum('jenis_shift', ['Pagi', 'Malam', 'Off']); 
             $table->timestamps();
 
-            // Relasi ke tabel penggunas
+            // Relasi ke tabel pengguna
             $table->foreign('id_pengguna')
                   ->references('id_pengguna')
                   ->on('pengguna')
@@ -27,9 +23,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('shift');

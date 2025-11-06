@@ -6,12 +6,8 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        // Sesuai diagram: GANGGUAN_KAMTIBMAS
         Schema::create('gangguan_kamtibmas', function (Blueprint $table) {
             $table->id('id_gangguan'); // Primary Key: id_gangguan
             $table->unsignedBigInteger('id_pengguna'); // FK: Petugas yang melapor
@@ -23,7 +19,7 @@ return new class extends Migration
             $table->enum('status', ['selesai', 'belum selesai']);
             $table->timestamps();
 
-            // Relasi ke tabel penggunas
+            // Relasi ke tabel pengguna
             $table->foreign('id_pengguna')
                   ->references('id_pengguna')
                   ->on('pengguna')
@@ -31,9 +27,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('gangguan_kamtibmas');
