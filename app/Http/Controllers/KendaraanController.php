@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Kendaraan;
-use App\Models\LogKendaraan;
+use App\Models\LogKendaraan; // Pastikan ini ada
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
 
@@ -13,7 +13,7 @@ class KendaraanController extends Controller
 {
     /**
      * Menampilkan halaman utama laporan kendaraan (Riwayat & Master)
-     * [cite: KELOMPOK3_MILETSONE2.pdf, p. 48]
+     *
      */
     public function index(Request $request)
     {
@@ -51,7 +51,7 @@ class KendaraanController extends Controller
 
     /**
      * Menampilkan form edit Kendaraan Master
-     * [cite: KELOMPOK3_MILETSONE2.pdf, p. 48]
+     *
      */
     public function editMaster($id_kendaraan)
     {
@@ -72,7 +72,7 @@ class KendaraanController extends Controller
 
     /**
      * Menyimpan update Kendaraan Master
-     * Disesuaikan dengan kendaraan.sql (tanpa 'keterangan') [cite: kendaraan.sql]
+     * Disesuaikan dengan kendaraan.sql (tanpa 'keterangan')
      */
     public function updateMaster(Request $request, $id_kendaraan)
     {
@@ -98,7 +98,7 @@ class KendaraanController extends Controller
 
     /**
      * Menghapus data dari Kendaraan Master
-     * [cite: KELOMPOK3_MILETSONE2.pdf, p. 48]
+     *
      */
     public function destroyMaster($id_kendaraan)
     {
@@ -124,7 +124,7 @@ class KendaraanController extends Controller
 
     /**
      * Menghapus data dari Log Kendaraan (Riwayat)
-     * [cite: KELOMPOK3_MILETSONE2.pdf, p. 48]
+     *
      */
     public function destroyLog($id_log)
     {
@@ -143,4 +143,40 @@ class KendaraanController extends Controller
 
     // --- FUNGSI UNTUK ANGGOTA ---
     // (Nanti ditambahkan di sini)
+
+
+    // ▼▼▼ INI FUNGSI YANG HILANG & SAYA TAMBAHKAN ▼▼▼
+    
+    /**
+     * Mengupdate keterangan (menginap/tidak) dari tabel riwayat.
+     *
+     */
+    public function updateKeterangan(Request $request, $id_log)
+    {
+        // Keamanan: Hanya komandan yang boleh
+        if (Auth::user()->peran !== 'komandan') {
+            return redirect()->route('komandan.kendaraan')->with('error', 'Anda tidak memiliki hak akses.');
+        }
+
+        // Validasi input
+        $request->validate([
+            'keterangan' => 'required|string|in:menginap,tidak menginap',
+        ]);
+
+        try {
+            // Cari log berdasarkan ID
+            $log = LogKendaraan::findOrFail($id_log);
+            
+            // Update data
+            $log->update([
+                'keterangan' => $request->keterangan
+            ]);
+            
+            // Kembali ke halaman sebelumnya (halaman filter)
+            return redirect()->back()->with('success', 'Status keterangan berhasil diperbarui.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'GGagal memperbarui keterangan.');
+        }
+    }
 }
