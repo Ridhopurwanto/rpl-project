@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\PresensiController;
+use App\Http\Controllers\KendaraanController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -83,6 +84,19 @@ Route::middleware('auth')->group(function () {
     Route::put('/laporan/presensi/{id_presensi}', [PresensiController::class, 'update'])
          ->name('laporan.presensi.update');
     
+        // --- LAPORAN KENDARAAN (KOMANDAN & BAU) ---
+    Route::get('/laporan/kendaraan', [KendaraanController::class, 'index'])
+         ->name('laporan.kendaraan');
+    
+    // --- CRUD KENDARAAN (HANYA KOMANDAN) ---
+        Route::put('/laporan/kendaraan/log/{id_log}/update-keterangan', [KendaraanController::class, 'updateKeterangan'])
+         ->name('laporan.kendaraan.log.updateKeterangan');
+    Route::get('/laporan/kendaraan/master/{id_kendaraan}/edit', [KendaraanController::class, 'editMaster'])
+         ->name('laporan.kendaraan.master.edit');
+    Route::put('/laporan/kendaraan/master/{id_kendaraan}', [KendaraanController::class, 'updateMaster'])
+         ->name('laporan.kendaraan.master.update');
+    Route::delete('/laporan/kendaraan/master/{id_kendaraan}', [KendaraanController::class, 'destroyMaster'])
+         ->name('laporan.kendaraan.master.destroy');
 
     // Route Logout
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
