@@ -49,10 +49,6 @@
             <main class="flex-grow">
                 @yield('content')
             </main>
-
-            <footer class="w-full text-center py-4 text-sm text-gray-400">
-                Siap v.1.0.0
-            </footer>
         </div>
     </body>
 </html>

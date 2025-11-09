@@ -7,11 +7,8 @@
     <div class="bg-slate-800 rounded-lg shadow-lg p-4 flex justify-between items-center mb-6">
         <div>
             <p class="text-sm text-gray-300">Absensi Kehadiran</p>
-            <p class="text-lg font-semibold">27/06</p>
+            <p class="text-lg font-semibold">{{ now()->format('d/m') }}</p>
         </div>
-        <button class="bg-green-500 text-white font-bold py-2 px-4 rounded-lg">
-            CHECK-IN
-        </button>
     </div>
 
     <div class="space-y-4">
