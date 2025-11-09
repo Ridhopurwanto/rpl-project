@@ -75,7 +75,7 @@
 
         {{-- Panggil helper untuk setiap tombol --}}
         {!! renderMenuButton('PRESENSI', route('anggota.presensi')) !!}
-        {!! renderMenuButton('PATROLI') !!}
+        {!! renderMenuButton('PATROLI', route('anggota.patroli.index')) !!}
         {!! renderMenuButton('KENDARAAN') !!}
         {!! renderMenuButton('TAMU') !!}
         {!! renderMenuButton('BARANG') !!}

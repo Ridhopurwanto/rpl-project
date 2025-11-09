@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Patroli extends Model
 {
@@ -24,10 +25,40 @@ class Patroli extends Model
         'wilayah',
         'foto',
         'tanggal',
+        'jenis_patroli',
     ];
 
     protected $casts = [
         'waktu_exact' => 'datetime',
         'tanggal' => 'date',
     ];
+
+    /**
+     * Otomatis mengisi id_pengguna dan nama_lengkap
+     * saat data baru dibuat ('creating')
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (Auth::check()) {
+                $user = Auth::user();
+                if (empty($model->id_pengguna)) {
+                    $model->id_pengguna = $user->id_pengguna;
+                }
+                if (empty($model->nama_lengkap)) {
+                    $model->nama_lengkap = $user->nama_lengkap;
+                }
+            }
+        });
+    }
+
+    /**
+     * Relasi ke Pengguna (User)
+     */
+    public function pengguna()
+    {
+        return $this->belongsTo(User::class, 'id_pengguna', 'id_pengguna');
+    }
 }

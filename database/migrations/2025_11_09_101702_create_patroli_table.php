@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_pengguna')->index('patroli_id_pengguna_foreign');
             $table->string('nama_lengkap');
             $table->dateTime('waktu_exact');
-            $table->dateTime('waktu_patroli');
+            $table->dateTime('waktu_patroli')->nullable()->change();
             $table->string('wilayah');
             $table->string('foto');
             $table->date('tanggal');
