@@ -1,9 +1,17 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 Route::get('/', function () {
+    if (Auth::check()) {
+        // Ambil role user, default 'anggota' kalau kosong
+        $role = Auth::user()->role ?? 'anggota';
+
+        // Redirect ke dashboard sesuai role
+        return redirect()->route($role . '.dashboard');
+    }
     return redirect()->route('login');
 });
 
