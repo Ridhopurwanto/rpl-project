@@ -15,7 +15,6 @@
         editAction: '',
         editWaktuMasuk: '',
         editWaktuPulang: '',
-        editLokasi: '',
         editStatus: '',
         showDeleteModal: false,
         deleteAction: '' 
@@ -56,11 +55,24 @@
                            class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" 
                            value="{{ $tanggalTerpilih }}">
                 </div>
+                <div class="flex-1">
+            <label for="shift" class="block text-sm font-medium text-gray-700 mb-1">JENIS SHIFT:</label>
+            <select id="shift" name="shift" 
+                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <option value="semua">Semua Shift</option>
+                <option value="pagi">Shift Pagi</option>
+                <option value="siang">Shift Siang</option>
+                <option value="malam">Shift Malam</option>
+            </select>
+            </div>
                 <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition">
                     Tampilkan
                 </button>
             </div>
+            
         </div>
+
+        
     </form>
 
     {{-- Tabel 1: DAFTAR PRESENSI MASUK --}}
@@ -75,7 +87,6 @@
                         <th class="py-3 px-4 text-left">No</th>
                         <th class="py-3 px-4 text-left">Nama</th>
                         <th class="py-3 px-4 text-left">Waktu</th>
-                        <th class="py-3 px-4 text-left">Lokasi</th>
                         <th class="py-3 px-4 text-center">Foto</th>
                         <th class="py-3 px-4 text-left">Status</th>
                         <th class="py-3 px-4 text-center">Aksi</th>
@@ -87,7 +98,6 @@
                         <td class="py-2 px-4">{{ $index + 1 }}.</td>
                         <td class="py-2 px-4 font-medium">{{ $presensi->nama_lengkap }}</td>
                         <td class="py-2 px-4">{{ $presensi->waktu_masuk->format('H:i:s') }}</td>
-                        <td class="py-2 px-4">{{ $presensi->lokasi }}</td>
                         <td class="py-2 px-4 text-center">
                             {{-- ▼▼▼ PERBAIKAN TOMBOL BUKA (FOTO) ▼▼▼ --}}
                             <button @click="showPhotoModal = true; photoUrl = '{{ asset('storage/' . $presensi->foto_masuk) }}'" class="text-blue-500 hover:underline">
@@ -112,7 +122,6 @@
                                         editAction = '{{ route('komandan.presensi.update', $presensi->id_presensi) }}';
                                         editWaktuMasuk = '{{ $presensi->waktu_masuk->format('Y-m-d\TH:i') }}';
                                         editWaktuPulang = '{{ $presensi->waktu_pulang ? $presensi->waktu_pulang->format('Y-m-d\TH:i') : '' }}';
-                                        editLokasi = '{{ $presensi->lokasi }}';
                                         editStatus = '{{ $presensi->status }}';
                                     " class="text-blue-500 hover:text-blue-700" title="Edit">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
@@ -152,7 +161,6 @@
                         <th class="py-3 px-4 text-left">No</th>
                         <th class="py-3 px-4 text-left">Nama</th>
                         <th class="py-3 px-4 text-left">Waktu</th>
-                        <th class="py-3 px-4 text-left">Lokasi</th>
                         <th class="py-3 px-4 text-center">Foto</th>
                         <th class="py-3 px-4 text-left">Status</th>
                         <th class="py-3 px-4 text-center">Aksi</th>
@@ -164,7 +172,6 @@
                         <td class="py-2 px-4">{{ $index + 1 }}.</td>
                         <td class="py-2 px-4 font-medium">{{ $presensi->nama_lengkap }}</td>
                         <td class="py-2 px-4">{{ $presensi->waktu_pulang->format('H:i:s') }}</td>
-                        <td class="py-2 px-4">{{ $presensi->lokasi }}</td>
                         <td class="py-2 px-4 text-center">
                             {{-- ▼▼▼ PERBAIKAN TOMBOL BUKA (FOTO) ▼▼▼ --}}
                             <button @click="showPhotoModal = true; photoUrl = '{{ asset('storage/' . $presensi->foto_pulang) }}'" class="text-blue-500 hover:underline">
@@ -188,7 +195,6 @@
                                         editAction = '{{ route('komandan.presensi.update', $presensi->id_presensi) }}';
                                         editWaktuMasuk = '{{ $presensi->waktu_masuk->format('Y-m-d\TH:i') }}';
                                         editWaktuPulang = '{{ $presensi->waktu_pulang ? $presensi->waktu_pulang->format('Y-m-d\TH:i') : '' }}';
-                                        editLokasi = '{{ $presensi->lokasi }}';
                                         editStatus = '{{ $presensi->status }}';
                                     " class="text-blue-500 hover:text-blue-700" title="Edit">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
@@ -259,12 +265,6 @@
                     <div>
                         <label for="waktu_pulang" class="block text-sm font-medium text-gray-700 mb-1">Waktu Pulang:</label>
                         <input type="datetime-local" id="waktu_pulang" name="waktu_pulang" x-model="editWaktuPulang"
-                               class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-
-                    <div>
-                        <label for="lokasi" class="block text-sm font-medium text-gray-700 mb-1">Lokasi:</label>
-                        <input type="text" id="lokasi" name="lokasi" x-model="editLokasi"
                                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     </div>
 

@@ -98,7 +98,6 @@ class PresensiController extends Controller
             'waktu_masuk' => 'required|date',
             'waktu_pulang' => 'nullable|date|after_or_equal:waktu_masuk',
             'status' => 'required|in:tepat waktu,terlambat,terlalu cepat',
-            'lokasi' => 'required|string|max:255',
         ]);
 
         try {
@@ -108,7 +107,6 @@ class PresensiController extends Controller
                 'waktu_masuk' => $request->waktu_masuk,
                 'waktu_pulang' => $request->waktu_pulang,
                 'status' => $request->status,
-                'lokasi' => $request->lokasi,
                 'tanggal' => Carbon::parse($request->waktu_masuk)->format('Y-m-d'), // Update tanggal
             ]);
 
@@ -139,7 +137,6 @@ class PresensiController extends Controller
     {
         $request->validate([
             'foto' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'lokasi' => 'required_without:presensi_id'
         ]);
 
         $userId = Auth::id();
@@ -160,7 +157,6 @@ class PresensiController extends Controller
                     'nama_lengkap' => $namaLengkap,
                     'waktu_masuk' => now(),
                     'foto_masuk' => $path,
-                    'lokasi' => $request->lokasi,
                     'status' => $status,
                     'tanggal' => $today,
                 ]);
