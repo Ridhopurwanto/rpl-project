@@ -97,15 +97,15 @@ Route::middleware('auth')->group(function () {
     
 
     // Rute baru (GET) untuk menampilkan halaman
-    Route::get('/anggota/presensi', [PresensiController::class, 'index'])
+    Route::get('/anggota/presensi', [App\Http\Controllers\anggota\PresensiController::class, 'index'])
          ->name('anggota.presensi');
 
     // Rute BARU (GET) untuk menampilkan halaman "Ambil Gambar"
-    Route::get('/anggota/presensi/create', [PresensiController::class, 'create'])
+    Route::get('/anggota/presensi/create', [App\Http\Controllers\anggota\PresensiController::class, 'create'])
          ->name('anggota.presensi.create');
          
     // Rute baru (POST) untuk tombol '+' (check-in/out)
-    Route::post('/anggota/presensi', [PresensiController::class, 'store'])
+    Route::post('/anggota/presensi', [App\Http\Controllers\anggota\PresensiController::class, 'store'])
          ->name('anggota.presensi.store');
 
     // Route Logout
