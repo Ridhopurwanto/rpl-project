@@ -6,3 +6,4 @@ Bagian anggota:
 - patroli
   1. perhatikan lagi algoritma dan database
   2. penyesuaian ukuran live preview kamera
+  3. filter tanggal
