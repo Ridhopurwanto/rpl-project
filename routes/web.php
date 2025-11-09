@@ -8,28 +8,24 @@ use App\Http\Controllers\Anggota\PresensiController;
 Route::get('/', function () {
     if (Auth::check()) {
         // Ambil role user
-        $role = Auth::user()->role;
+        // PERBAIKAN: Gunakan 'peran' sesuai AuthenticatedSessionController
+        $peran = Auth::user()->peran; 
 
         // --- LOGIKA BARU ---
-        // Cek role dan redirect
-        if ($role == 'komandan') {
-            // KHUSUS KOMANDAN: Arahkan ke halaman pilih peran
+        // Cek peran dan redirect
+        if ($peran == 'komandan') {
             return redirect()->route('komandan.pilih-role');
         
-        } elseif ($role == 'anggota') {
-            // Anggota langsung ke dashboard-nya
+        } elseif ($peran == 'anggota') {
             return redirect()->route('anggota.dashboard');
         
-        } elseif ($role == 'bau') {
-            // BAU langsung ke dashboard-nya
+        } elseif ($peran == 'bau') {
             return redirect()->route('bau.dashboard');
         
         } else {
-            // Jika ada role lain atau null, default ke login
             Auth::logout();
-            return redirect()->route('login')->with('error', 'Role tidak dikenal.');
+            return redirect()->route('login')->with('error', 'Peran tidak dikenal.');
         }
-        // --- AKHIR LOGIKA BARU ---
     }
     return redirect()->route('login');
 });
@@ -45,23 +41,48 @@ Route::middleware('guest')->group(function () {
 // Rute untuk yang sudah login
 Route::middleware('auth')->group(function () {
     
-    // --- ROUTE BARU UNTUK KOMANDAN ---
+    // --- ROUTE UNTUK KOMANDAN ---
     Route::get('/komandan/pilih-role', function () {
-        return view('komandan.pilih-role'); // File blade yang akan kita buat di langkah 2
+        return view('komandan.pilih-role'); // File blade dari
     })->name('komandan.pilih-role');
 
-    // Halaman Dashboard Berdasarkan Role
+    Route::get('/komandan/dashboard', function () {
+        return view('komandan.dashboard'); // File yang akan kita buat
+    })->name('komandan.dashboard');
+
+
+    // --- ROUTE UNTUK ANGGOTA ---
     Route::get('/anggota/dashboard', function () {
         return view('anggota.dashboard'); // File asli Anda
     })->name('anggota.dashboard');
 
-    Route::get('/komandan/dashboard', function () {
-        return view('komandan.dashboard'); // File dummy
-    })->name('komandan.dashboard');
+    Route::get('/anggota/presensi', [PresensiController::class, 'createForAnggota'])
+         ->name('anggota.presensi');
+    Route::post('/anggota/presensi', [PresensiController::class, 'storeForAnggota'])
+         ->name('anggota.presensi.store');
 
+         
+    // --- ROUTE UNTUK BAU ---
     Route::get('/bau/dashboard', function () {
-        return view('bau.dashboard'); // File dummy
+        return view('bau.dashboard'); // File yang akan kita buat
     })->name('bau.dashboard');
+
+
+    // --- RUTE LAPORAN (UNTUK KOMANDAN & BAU) ---
+    Route::get('/laporan/presensi', [PresensiController::class, 'index'])
+         ->name('laporan.presensi');
+
+    // --- RUTE CRUD (HANYA UNTUK KOMANDAN) ---
+    Route::delete('/laporan/presensi/{id_presensi}', [PresensiController::class, 'destroy'])
+         ->name('laporan.presensi.destroy');
+
+    Route::get('/laporan/presensi/{id_presensi}/edit', [PresensiController::class, 'edit'])
+         ->name('laporan.presensi.edit');
+
+    // Rute untuk menyimpan perubahan (update)
+    Route::put('/laporan/presensi/{id_presensi}', [PresensiController::class, 'update'])
+         ->name('laporan.presensi.update');
+    
 
     // Rute baru (GET) untuk menampilkan halaman
     Route::get('/anggota/presensi', [PresensiController::class, 'index'])
