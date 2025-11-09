@@ -48,7 +48,7 @@ class AuthenticatedSessionController extends Controller
             case 'anggota':
                 return redirect()->route('anggota.dashboard');
             case 'komandan':
-                return redirect()->route('komandan.dashboard');
+                return redirect()->route('komandan.pilih-role');
             case 'bau':
                 return redirect()->route('bau.dashboard');
             default:

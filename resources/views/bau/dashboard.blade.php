@@ -9,9 +9,6 @@
             <p class="text-sm text-gray-300">Absensi Kehadiran</p>
             <p class="text-lg font-semibold">27/06</p>
         </div>
-        <button class="bg-green-500 text-white font-bold py-2 px-4 rounded-lg">
-            CHECK-IN
-        </button>
     </div>
 
     <div class="space-y-4">
