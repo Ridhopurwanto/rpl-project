@@ -97,7 +97,7 @@ class PresensiController extends Controller
         $request->validate([
             'waktu_masuk' => 'required|date',
             'waktu_pulang' => 'nullable|date|after_or_equal:waktu_masuk',
-            'status' => 'required|in:tepat waktu,terlambat,terlalu cepat',
+            'status' => 'required|in:tepat waktu,terlambat,terlalu cepat,izin',
         ]);
 
         try {
@@ -151,7 +151,7 @@ class PresensiController extends Controller
         try {
             if (!$presensiHariIni) {
                 // --- LOGIKA ABSEN MASUK ---
-                $status = (now()->format('H:i:s') > '08:00:00') ? 'terlambat' : 'tepat waktu';
+                $status = (now()->format('H:i:s') > '07:00:00') ? 'terlambat' : 'tepat waktu';
                 Presensi::create([
                     'id_pengguna' => $userId,
                     'nama_lengkap' => $namaLengkap,
