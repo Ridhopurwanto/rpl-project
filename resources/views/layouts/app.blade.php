@@ -25,7 +25,11 @@
                 <div class="flex justify-between items-center max-w-sm mx-auto">
                     <div>
                         <p class="text-sm text-gray-300">SELAMAT DATANG,</p>
-                        <h3 class="text-lg font-semibold">{{ Auth::user()->name ?? 'Pengguna' }}</h3>
+                        {{-- 
+                            INI ADALAH BARIS YANG DIPERBAIKI:
+                            Mengubah 'Auth::user()->name' menjadi 'Auth::user()->username'
+                        --}}
+                        <h3 class="text-lg font-semibold">{{ Auth::user()->username ?? 'Pengguna' }}</h3>
                     </div>
 
                     <div class="flex items-center space-x-3">

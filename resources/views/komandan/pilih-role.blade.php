@@ -38,10 +38,5 @@
 
         </div>
     </div>
-
-    {{-- Footer (dari gambar) --}}
-    <div class="text-center text-gray-500 text-sm">
-        Siap v 1.0.0
-    </div>
 </div>
 @endsection
