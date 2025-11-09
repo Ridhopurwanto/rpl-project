@@ -36,7 +36,7 @@
                     @show
                     
                     <div class="flex items-center space-x-2 bg-white p-1 rounded-full shadow">
-                        <a href="#" class="p-1">
+                        <a href="{{ route('anggota.dashboard') }}" class="p-1">
                             <img src="{{ asset('images/logo-siap.png') }}" alt="Logo" class="w-6 h-6">
                         </a>
                         <a href="#" class="p-1 text-gray-500">

@@ -1,5 +1,5 @@
 {{-- Menggunakan layout 'app' yang baru saja dibuat --}}
-@extends('layouts.app')
+@extends('layouts.anggota.app')
 
 @section('content')
 <div class="w-full max-w-sm mx-auto px-4 py-8">

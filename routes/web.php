@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Anggota\PresensiController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -62,11 +63,18 @@ Route::middleware('auth')->group(function () {
         return view('bau.dashboard'); // File dummy
     })->name('bau.dashboard');
 
-    // Rute baru untuk halaman presensi
-    Route::get('/anggota/presensi', function () {
-        return view('anggota.presensi'); // <-- File yang akan kita buat
-    })->name('anggota.presensi');
-    
+    // Rute baru (GET) untuk menampilkan halaman
+    Route::get('/anggota/presensi', [PresensiController::class, 'index'])
+         ->name('anggota.presensi');
+
+    // Rute BARU (GET) untuk menampilkan halaman "Ambil Gambar"
+    Route::get('/anggota/presensi/create', [PresensiController::class, 'create'])
+         ->name('anggota.presensi.create');
+         
+    // Rute baru (POST) untuk tombol '+' (check-in/out)
+    Route::post('/anggota/presensi', [PresensiController::class, 'store'])
+         ->name('anggota.presensi.store');
+
     // Route Logout
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
                 ->name('logout');
