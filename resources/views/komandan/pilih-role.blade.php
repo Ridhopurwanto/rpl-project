@@ -2,7 +2,7 @@
 
 @section('content')
 {{-- Wrapper konsisten dengan dashboard.blade.php --}}
-<div class="w-full max-w-sm mx-auto px-4 py-8">
+<div class="w-full px-4 py-8">
     
     {{-- Header (Logo, Judul) - Meniru style gambar & kode Anda --}}
     <div class="bg-slate-800 text-center p-8 rounded-xl shadow-lg mb-6">
@@ -37,11 +37,6 @@
             </a>
 
         </div>
-    </div>
-
-    {{-- Footer (dari gambar) --}}
-    <div class="text-center text-gray-500 text-sm">
-        Siap v 1.0.0
     </div>
 </div>
 @endsection
