@@ -39,7 +39,6 @@ class Presensi extends Model
         'foto_masuk',
         'waktu_pulang',
         'foto_pulang',
-        'lokasi',
         'status',
         'tanggal',
     ];

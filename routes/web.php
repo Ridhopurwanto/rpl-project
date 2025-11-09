@@ -84,33 +84,30 @@ Route::middleware('auth')->group(function () {
 
 
     // --- RUTE LAPORAN (UNTUK KOMANDAN & BAU) ---
-    Route::get('/laporan/presensi', [PresensiController::class, 'index'])
-         ->name('laporan.presensi');
+    Route::get('/presensi', [PresensiController::class, 'index'])
+         ->name('komandan.presensi');
 
     // --- RUTE CRUD (HANYA UNTUK KOMANDAN) ---
-    Route::delete('/laporan/presensi/{id_presensi}', [PresensiController::class, 'destroy'])
-         ->name('laporan.presensi.destroy');
-
-    Route::get('/laporan/presensi/{id_presensi}/edit', [PresensiController::class, 'edit'])
-         ->name('laporan.presensi.edit');
+    Route::delete('/presensi/{id_presensi}', [PresensiController::class, 'destroy'])
+         ->name('komandan.presensi.destroy');
 
     // Rute untuk menyimpan perubahan (update)
-    Route::put('/laporan/presensi/{id_presensi}', [PresensiController::class, 'update'])
-         ->name('laporan.presensi.update');
+    Route::put('/presensi/{id_presensi}', [PresensiController::class, 'update'])
+         ->name('komandan.presensi.update');
     
         // --- LAPORAN KENDARAAN (KOMANDAN & BAU) ---
-    Route::get('/laporan/kendaraan', [KendaraanController::class, 'index'])
-         ->name('laporan.kendaraan');
+    Route::get('/kendaraan', [KendaraanController::class, 'index'])
+         ->name('komandan.kendaraan');
     
     // --- CRUD KENDARAAN (HANYA KOMANDAN) ---
-        Route::put('/laporan/kendaraan/log/{id_log}/update-keterangan', [KendaraanController::class, 'updateKeterangan'])
-         ->name('laporan.kendaraan.log.updateKeterangan');
-    Route::get('/laporan/kendaraan/master/{id_kendaraan}/edit', [KendaraanController::class, 'editMaster'])
-         ->name('laporan.kendaraan.master.edit');
-    Route::put('/laporan/kendaraan/master/{id_kendaraan}', [KendaraanController::class, 'updateMaster'])
-         ->name('laporan.kendaraan.master.update');
-    Route::delete('/laporan/kendaraan/master/{id_kendaraan}', [KendaraanController::class, 'destroyMaster'])
-         ->name('laporan.kendaraan.master.destroy');
+        Route::put('/kendaraan/log/{id_log}/update-keterangan', [KendaraanController::class, 'updateKeterangan'])
+         ->name('komandan.kendaraan.log.updateKeterangan');
+    Route::get('/kendaraan/master/{id_kendaraan}/edit', [KendaraanController::class, 'editMaster'])
+         ->name('komandan.kendaraan.master.edit');
+    Route::put('/kendaraan/master/{id_kendaraan}', [KendaraanController::class, 'updateMaster'])
+         ->name(name: 'komandan.kendaraan.master.update');
+    Route::delete('/kendaraan/master/{id_kendaraan}', [KendaraanController::class, 'destroyMaster'])
+         ->name('komandan.kendaraan.master.destroy');
 
 // ----- ANGGOTA -----
     // Rute baru (GET) untuk menampilkan halaman

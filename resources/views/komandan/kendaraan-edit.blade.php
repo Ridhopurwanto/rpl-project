@@ -1,9 +1,8 @@
 @extends('layouts.app')
 
-{{-- Tombol KEMBALI ke halaman laporan --}}
 @section('header-left')
-    <a href="{{ route('laporan.kendaraan') }}" class="bg-slate-800 text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md hover:bg-slate-700 transition">
-        KEMBALI
+    <a class="bg-slate-800 text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md hover:bg-slate-700 transition">
+        KENDARAAN
     </a>
 @endsection
 
@@ -25,7 +24,7 @@
     @endif
 
     {{-- Form Edit, meniru [cite: image_80f35e.png] --}}
-    <form action="{{ route('laporan.kendaraan.master.update', $kendaraan->id_kendaraan) }}" method="POST" class="bg-white p-6 rounded-lg shadow-lg space-y-4">
+    <form action="{{ route('komandan.kendaraan.master.update', $kendaraan->id_kendaraan) }}" method="POST" class="bg-white p-6 rounded-lg shadow-lg space-y-4">
         @csrf
         @method('PUT') {{-- Method PUT untuk update --}}
 
