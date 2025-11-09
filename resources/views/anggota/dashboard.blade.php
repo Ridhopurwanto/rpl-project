@@ -6,7 +6,7 @@
     
     <div class="bg-slate-800 text-white rounded-2xl shadow-lg p-4 my-4">
         <p class="text-sm">SELAMAT DATANG,</p>
-        <h2 class="text-xl font-bold">{{ Auth::user()->nama_lengkap }}</h2>
+        <h2 class="text-xl font-bold">{{ Auth::user()->username }}</h2>
     </div>
 
     <div 
