@@ -9,7 +9,6 @@ use App\Http\Controllers\LaporanPatroliController;
 =======
 >>>>>>> d0f1f36263652bff7db4d805566e9b83ab6a5604
 
-
 Route::get('/', function () {
     if (Auth::check()) {
         // Ambil role user
