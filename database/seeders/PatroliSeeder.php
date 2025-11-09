@@ -26,6 +26,7 @@ class PatroliSeeder extends Seeder
                 'tanggal' => Carbon::today(),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
+                'jenis_patroli' => 'Patroli 1',
             ],
             [
                 'id_pengguna' => 2, // Anggota 1
@@ -37,6 +38,7 @@ class PatroliSeeder extends Seeder
                 'tanggal' => Carbon::today(),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
+                'jenis_patroli' => 'Patroli 2',
             ],
         ]);
     }
