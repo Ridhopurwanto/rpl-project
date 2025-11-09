@@ -3,12 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-<<<<<<< HEAD
 use App\Http\Controllers\PresensiController; 
 use App\Http\Controllers\LaporanPatroliController;
-=======
-use App\Http\Controllers\PresensiController;
->>>>>>> d0f1f36263652bff7db4d805566e9b83ab6a5604
 
 Route::get('/', function () {
     if (Auth::check()) {
