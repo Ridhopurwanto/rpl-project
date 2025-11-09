@@ -98,13 +98,13 @@ Route::middleware('auth')->group(function () {
          ->name('komandan.kendaraan');
     
     // --- CRUD KENDARAAN (HANYA KOMANDAN) ---
-        Route::put('/komandan/kendaraan/log/{id_log}/update-keterangan', [KendaraanController::class, 'updateKeterangan'])
+        Route::put('/kendaraan/log/{id_log}/update-keterangan', [KendaraanController::class, 'updateKeterangan'])
          ->name('komandan.kendaraan.log.updateKeterangan');
-    Route::get('/komandan/kendaraan/master/{id_kendaraan}/edit', [KendaraanController::class, 'editMaster'])
+    Route::get('/kendaraan/master/{id_kendaraan}/edit', [KendaraanController::class, 'editMaster'])
          ->name('komandan.kendaraan.master.edit');
-    Route::put('/komandan/kendaraan/master/{id_kendaraan}', [KendaraanController::class, 'updateMaster'])
+    Route::put('/kendaraan/master/{id_kendaraan}', [KendaraanController::class, 'updateMaster'])
          ->name(name: 'komandan.kendaraan.master.update');
-    Route::delete('/komandan/kendaraan/master/{id_kendaraan}', [KendaraanController::class, 'destroyMaster'])
+    Route::delete('/kendaraan/master/{id_kendaraan}', [KendaraanController::class, 'destroyMaster'])
          ->name('komandan.kendaraan.master.destroy');
 
     // Rute baru (GET) untuk menampilkan halaman

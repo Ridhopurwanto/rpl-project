@@ -24,7 +24,7 @@
     @endif
 
     {{-- Form Edit, meniru [cite: image_80f35e.png] --}}
-    <form action="{{ route('laporan.kendaraan.master.update', $kendaraan->id_kendaraan) }}" method="POST" class="bg-white p-6 rounded-lg shadow-lg space-y-4">
+    <form action="{{ route('komandan.kendaraan.master.update', $kendaraan->id_kendaraan) }}" method="POST" class="bg-white p-6 rounded-lg shadow-lg space-y-4">
         @csrf
         @method('PUT') {{-- Method PUT untuk update --}}
 

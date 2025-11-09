@@ -2,145 +2,154 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+// 'use App\Http\Controllers\KendaraanController;' DIHAPUS
 use Illuminate\Http\Request;
-use App\Models\Kendaraan;
-use App\Models\LogKendaraan;
+use App\Models\Kendaraan; 
+use App\Models\LogKendaraan; // Sesuai file Anda
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Validator;
+use Exception; 
 
-class KendaraanController extends Controller
+// PERBAIKAN: 'Controllers' diubah menjadi 'Controller'
+class KendaraanController extends Controller 
 {
     /**
-     * Menampilkan halaman utama laporan kendaraan (Riwayat & Master)
-     * [cite: KELOMPOK3_MILETSONE2.pdf, p. 48]
+     * Menampilkan halaman laporan kendaraan (master dan log).
+     * Rute: komandan.kendaraan
      */
-    public function index(Request $request)
+    public function index()
     {
-        // --- Filter untuk RIWAYAT ---
-        $tanggalFilter = $request->input('tanggal', now()->format('Y-m-d'));
-        $tipeFilter = $request->input('tipe'); // 'Roda 2' atau 'Roda 4'
+        try {
+            // Ambil data master kendaraan
+            $kendaraans = Kendaraan::orderBy('nomor_plat', 'asc')->get();
+            
+            // Ambil data log pengecekan
+            $logs = LogKendaraan::with('kendaraan', 'pengguna') // Asumsi ada relasi
+                                ->orderBy('waktu_pengecekan', 'desc')
+                                ->get();
 
-        $queryRiwayat = LogKendaraan::with('kendaraan', 'pengguna')
-                            ->whereDate('tanggal', $tanggalFilter);
+            return view('komandan.kendaraan', [
+                'kendaraans' => $kendaraans,
+                'logs' => $logs
+            ]);
 
-        if ($tipeFilter) {
-            $queryRiwayat->whereHas('kendaraan', function ($q) use ($tipeFilter) {
-                $q->where('tipe', $tipeFilter);
-            });
+        } catch (Exception $e) {
+            // Jika tabel tidak ada atau error query
+            return redirect()->back()->with('error', 'Gagal memuat data kendaraan: ' . $e->getMessage());
         }
-        
-        $riwayat = $queryRiwayat->orderBy('waktu_masuk', 'desc')->get();
-
-        // --- Data untuk KENDARAAN TERDAFTAR ---
-        $kendaraanMaster = Kendaraan::orderBy('pemilik', 'asc')->get();
-
-        $registeredPlates = $kendaraanMaster->pluck('nomor_plat')->toArray();
-
-        // --- PERBAIKAN: Mengarah ke folder 'komandan' ---
-        return view('komandan.kendaraan', [
-            'riwayat' => $riwayat,
-            'kendaraanMaster' => $kendaraanMaster,
-            'tanggalTerpilih' => $tanggalFilter,
-            'tipeTerpilih' => $tipeFilter,
-            'registeredPlates' => $registeredPlates, // <-- Kirim data plat ke view
-        ]);
     }
 
-    // --- FUNGSI CRUD UNTUK KENDARAAN MASTER ---
-
     /**
-     * Menampilkan form edit Kendaraan Master
-     * [cite: KELOMPOK3_MILETSONE2.pdf, p. 48]
+     * [DEPRECATED dengan Modal]
+     * Menampilkan halaman edit master (rute ini ada di web.php).
+     * Rute: komandan.kendaraan.master.edit
      */
     public function editMaster($id_kendaraan)
     {
         if (Auth::user()->peran !== 'komandan') {
-            return redirect()->route('laporan.kendaraan')->with('error', 'Anda tidak memiliki hak akses.');
+            return redirect()->route('komandan.kendaraan')->with('error', 'Anda tidak memiliki hak akses.');
         }
 
         try {
             $kendaraan = Kendaraan::findOrFail($id_kendaraan);
-            
-            // --- PERBAIKAN: Mengarah ke folder 'komandan' ---
+            // Rute ini tidak akan terpakai jika modal berhasil,
+            // tapi kita biarkan sesuai web.php
             return view('komandan.kendaraan_edit', ['kendaraan' => $kendaraan]);
-        
-        } catch (\Exception $e) {
-            return redirect()->route('laporan.kendaraan')->with('error', 'Kendaraan tidak ditemukan.');
+
+        } catch (Exception $e) {
+            return redirect()->route('komandan.kendaraan')->with('error', 'Data kendaraan tidak ditemukan.');
         }
     }
 
+
     /**
-     * Menyimpan update Kendaraan Master
-     * Disesuaikan dengan kendaraan.sql (tanpa 'keterangan') [cite: kendaraan.sql]
+     * Mengupdate data master kendaraan (dari modal).
+     * Rute: komandan.kendaraan.master.update
      */
     public function updateMaster(Request $request, $id_kendaraan)
     {
         if (Auth::user()->peran !== 'komandan') {
-            return redirect()->route('laporan.kendaraan')->with('error', 'Anda tidak memiliki hak akses.');
+            return redirect()->route('komandan.kendaraan')->with('error', 'Anda tidak memiliki hak akses.');
         }
 
-        $request->validate([
-            'nomor_plat' => 'required|string|max:255',
-            'pemilik' => 'required|string|max:255',
-            'tipe' => 'required|in:Roda 2,Roda 4',
+        $validator = Validator::make($request->all(), [
+            'nama_kendaraan' => 'required|string|max:255',
+            'nomor_plat' => 'required|string|max:20',
+            'status' => 'required|string|in:Tersedia,Digunakan,Perbaikan',
         ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('komandan.kendaraan')
+                             ->withErrors($validator)
+                             ->with('error', 'Validasi gagal. Pastikan semua field terisi.');
+        }
 
         try {
             $kendaraan = Kendaraan::findOrFail($id_kendaraan);
-            $kendaraan->update($request->only('nomor_plat', 'pemilik', 'tipe'));
             
-            return redirect()->route('laporan.kendaraan')->with('success', 'Data kendaraan berhasil diperbarui.');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal memperbarui data.');
+            $kendaraan->update([
+                'nama_kendaraan' => $request->nama_kendaraan,
+                'nomor_plat' => $request->nomor_plat,
+                'status' => $request->status,
+            ]);
+
+            return redirect()->route('komandan.kendaraan')->with('success', 'Data kendaraan berhasil diperbarui.');
+
+        } catch (Exception $e) {
+            return redirect()->route('komandan.kendaraan')->with('error', 'Gagal memperbarui data kendaraan: ' . $e->getMessage());
         }
     }
 
     /**
-     * Menghapus data dari Kendaraan Master
-     * [cite: KELOMPOK3_MILETSONE2.pdf, p. 48]
+     * Menghapus data master kendaraan.
+     * Rute: komandan.kendaraan.master.destroy
      */
     public function destroyMaster($id_kendaraan)
     {
         if (Auth::user()->peran !== 'komandan') {
-            return redirect()->route('laporan.kendaraan')->with('error', 'Anda tidak memiliki hak akses.');
+            return redirect()->route('komandan.kendaraan')->with('error', 'Anda tidak memiliki hak akses.');
         }
-
-        try {
-            // Cek jika kendaraan masih punya log, cegah hapus
-            $adaLog = LogKendaraan::where('id_kendaraan', $id_kendaraan)->exists();
-            if ($adaLog) {
-                return redirect()->back()->with('error', 'Gagal menghapus! Kendaraan masih memiliki riwayat log.');
-            }
-
-            $kendaraan = Kendaraan::findOrFail($id_kendaraan);
-            $kendaraan->delete();
-            return redirect()->back()->with('success', 'Data kendaraan master berhasil dihapus.');
         
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menghapus data.');
+        try {
+            $kendaraan = Kendaraan::findOrFail($id_kendaraan);
+            
+            if ($kendaraan->logs()->count() > 0) {
+                 return redirect()->route('komandan.kendaraan')->with('error', 'Gagal hapus: Kendaraan ini memiliki riwayat log pengecekan.');
+            }
+            
+            $kendaraan->delete();
+            
+            return redirect()->route('komandan.kendaraan')->with('success', 'Data kendaraan berhasil dihapus.');
+        
+        } catch (Exception $e) {
+            return redirect()->route('komandan.kendaraan')->with('error', 'Gagal menghapus data: ' . $e->getMessage());
         }
     }
-
+    
     /**
-     * Menghapus data dari Log Kendaraan (Riwayat)
-     * [cite: KELOMPOK3_MILETSONE2.pdf, p. 48]
+     * Mengupdate keterangan pada log pengecekan kendaraan.
+     * Rute: komandan.kendaraan.log.updateKeterangan
      */
-    public function destroyLog($id_log)
+    public function updateKeterangan(Request $request, $id_log)
     {
         if (Auth::user()->peran !== 'komandan') {
-            return redirect()->route('laporan.kendaraan')->with('error', 'Anda tidak memiliki hak akses.');
+            return redirect()->route('komandan.kendaraan')->with('error', 'Anda tidak memiliki hak akses.');
         }
+
+        $request->validate([
+            'keterangan' => 'nullable|string|max:1000',
+        ]);
 
         try {
             $log = LogKendaraan::findOrFail($id_log);
-            $log->delete();
-            return redirect()->back()->with('success', 'Data riwayat kendaraan berhasil dihapus.');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menghapus data riwayat.');
+            $log->update([
+                'keterangan' => $request->keterangan,
+            ]);
+            
+            return redirect()->route('komandan.kendaraan')->with('success', 'Keterangan log berhasil diperbarui.');
+
+        } catch (Exception $e) {
+            return redirect()->route('komandan.kendaraan')->with('error', 'Gagal memperbarui keterangan log.');
         }
     }
-
-    // --- FUNGSI UNTUK ANGGOTA ---
-    // (Nanti ditambahkan di sini)
 }
