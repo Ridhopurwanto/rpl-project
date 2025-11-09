@@ -6,8 +6,8 @@
 
     <div class="bg-slate-800 rounded-lg shadow-lg p-4 flex justify-between items-center mb-6">
         <div>
-            <p class="text-sm text-gray-300">Absensi Kehadiran</p>
-            <p class="text-lg font-semibold">{{ now()->format('d/m') }}</p>
+            <p class="text-sm text-gray-300">Selamat Datang</p>
+            <p class="text-lg font-semibold">Komandan</p>
         </div>
     </div>
 
