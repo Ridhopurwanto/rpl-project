@@ -1,14 +1,12 @@
 @extends('layouts.app')
 
-{{-- Tombol KEMBALI ke dashboard komandan --}}
 @section('header-left')
-    <a href="{{ route('komandan.dashboard') }}" class="bg-slate-800 text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md hover:bg-slate-700 transition">
-        KEMBALI
+    <a class="bg-slate-800 text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md hover:bg-slate-700 transition">
+        PRESENSI
     </a>
 @endsection
 
 @section('content')
-{{-- ▼▼▼ KITA TAMBAHKAN ALPINEJS DI SINI (seperti di patroli.blade.php) ▼▼▼ --}}
 <div class="w-full mx-auto"
      x-data="{ 
         showPhotoModal: false, 
@@ -49,7 +47,7 @@
 
 
     {{-- Form Filter (Sama) --}}
-    <form action="{{ route('laporan.presensi') }}" method="GET">
+    <form action="{{ route('komandan.presensi') }}" method="GET">
         <div class="bg-white p-4 rounded-lg shadow-md mb-6">
             <div class="flex flex-col sm:flex-row sm:items-end sm:space-x-4 space-y-4 sm:space-y-0">
                 <div class="flex-1">
@@ -111,7 +109,7 @@
                                     {{-- ▼▼▼ PERBAIKAN TOMBOL EDIT ▼▼▼ --}}
                                     <button @click="
                                         showEditModal = true; 
-                                        editAction = '{{ route('laporan.presensi.update', $presensi->id_presensi) }}';
+                                        editAction = '{{ route('komandan.presensi.update', $presensi->id_presensi) }}';
                                         editWaktuMasuk = '{{ $presensi->waktu_masuk->format('Y-m-d\TH:i') }}';
                                         editWaktuPulang = '{{ $presensi->waktu_pulang ? $presensi->waktu_pulang->format('Y-m-d\TH:i') : '' }}';
                                         editLokasi = '{{ $presensi->lokasi }}';
@@ -121,7 +119,7 @@
                                     </button>
                                     
                                     {{-- ▼▼▼ PERBAIKAN TOMBOL HAPUS ▼▼▼ --}}
-                                    <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('laporan.presensi.destroy', $presensi->id_presensi) }}'" class="text-red-500 hover:text-red-700" title="Hapus">
+                                    <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('komandan.presensi.destroy', $presensi->id_presensi) }}'" class="text-red-500 hover:text-red-700" title="Hapus">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
                                     </button>
                                 </div>
@@ -154,7 +152,9 @@
                         <th class="py-3 px-4 text-left">No</th>
                         <th class="py-3 px-4 text-left">Nama</th>
                         <th class="py-3 px-4 text-left">Waktu</th>
+                        <th class="py-3 px-4 text-left">Lokasi</th>
                         <th class="py-3 px-4 text-center">Foto</th>
+                        <th class="py-3 px-4 text-left">Status</th>
                         <th class="py-3 px-4 text-center">Aksi</th>
                     </tr>
                 </thead>
@@ -164,19 +164,28 @@
                         <td class="py-2 px-4">{{ $index + 1 }}.</td>
                         <td class="py-2 px-4 font-medium">{{ $presensi->nama_lengkap }}</td>
                         <td class="py-2 px-4">{{ $presensi->waktu_pulang->format('H:i:s') }}</td>
+                        <td class="py-2 px-4">{{ $presensi->lokasi }}</td>
                         <td class="py-2 px-4 text-center">
                             {{-- ▼▼▼ PERBAIKAN TOMBOL BUKA (FOTO) ▼▼▼ --}}
                             <button @click="showPhotoModal = true; photoUrl = '{{ asset('storage/' . $presensi->foto_pulang) }}'" class="text-blue-500 hover:underline">
                                 Buka
                             </button>
                         </td>
+                                                <td class="py-2 px-4">
+                            @if($presensi->status == 'tepat waktu')
+                                <span class="text-green-600 font-semibold">Tepat Waktu</span>
+                            @elseif($presensi->status == 'terlambat')
+                                <span class="text-red-500 font-semibold">Terlambat</span>
+                            @else
+                                <span class="text-yellow-500 font-semibold">{{ ucfirst($presensi->status) }}</span>
+                            @endif
+                        </td>
                         <td class="py-2 px-4">
                             @if(Auth::user()->peran == 'komandan')
                                 <div class="flex justify-center space-x-3">
-                                    {{-- ▼▼▼ PERBAIKAN TOMBOL EDIT ▼▼▼ --}}
                                     <button @click="
                                         showEditModal = true; 
-                                        editAction = '{{ route('laporan.presensi.update', $presensi->id_presensi) }}';
+                                        editAction = '{{ route('komandan.presensi.update', $presensi->id_presensi) }}';
                                         editWaktuMasuk = '{{ $presensi->waktu_masuk->format('Y-m-d\TH:i') }}';
                                         editWaktuPulang = '{{ $presensi->waktu_pulang ? $presensi->waktu_pulang->format('Y-m-d\TH:i') : '' }}';
                                         editLokasi = '{{ $presensi->lokasi }}';
@@ -185,8 +194,7 @@
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
                                     </button>
                                     
-                                    {{-- ▼▼▼ PERBAIKAN TOMBOL HAPUS ▼▼▼ --}}
-                                    <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('laporan.presensi.destroy', $presensi->id_presensi) }}'" class="text-red-500 hover:text-red-700" title="Hapus">
+                                    <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('komandan.presensi.destroy', $presensi->id_presensi) }}'" class="text-red-500 hover:text-red-700" title="Hapus">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
                                     </button>
                                 </div>

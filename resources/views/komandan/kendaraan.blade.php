@@ -1,10 +1,9 @@
 @extends('layouts.app')
 
-{{-- Tombol KEMBALI ke dashboard (dinamis) --}}
 @section('header-left')
     @php $peran = Auth::user()->peran; @endphp
-    <a href="{{ route($peran . '.dashboard') }}" class="bg-slate-800 text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md hover:bg-slate-700 transition">
-        KEMBALI
+    <a class="bg-slate-800 text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md hover:bg-slate-700 transition">
+        KENDARAAN
     </a>
 @endsection
 

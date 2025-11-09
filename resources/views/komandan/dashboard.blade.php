@@ -70,9 +70,9 @@
 
         {{-- Panggil helper untuk setiap tombol --}}
         {{-- Ini adalah tombol yang sama dengan anggota --}}
-        {!! renderMenuButton('PRESENSI', route('laporan.presensi')) !!}
+        {!! renderMenuButton('PRESENSI', route('komandan.presensi')) !!}
         {!! renderMenuButton('PATROLI', route('komandan.patroli')) !!}
-        {!! renderMenuButton('KENDARAAN', route('laporan.kendaraan')) !!}
+        {!! renderMenuButton('KENDARAAN', route('komandan.kendaraan')) !!}
         {!! renderMenuButton('TAMU') !!}
         {!! renderMenuButton('BARANG') !!}
         {!! renderMenuButton('GANGGUAN KAMTIBMAS') !!}

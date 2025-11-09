@@ -48,7 +48,7 @@ class PresensiController extends Controller
     {
         // Cek keamanan: Hanya 'komandan' yang boleh menghapus
         if (Auth::user()->peran !== 'komandan') {
-            return redirect()->route('laporan.presensi')->with('error', 'Anda tidak memiliki hak akses.');
+            return redirect()->route('komandan.presensi')->with('error', 'Anda tidak memiliki hak akses.');
         }
 
         try {
@@ -75,7 +75,7 @@ class PresensiController extends Controller
     public function edit($id_presensi)
     {
         if (Auth::user()->peran !== 'komandan') {
-            return redirect()->route('laporan.presensi')->with('error', 'Anda tidak memiliki hak akses.');
+            return redirect()->route('komandan.presensi')->with('error', 'Anda tidak memiliki hak akses.');
         }
 
         try {
@@ -83,14 +83,14 @@ class PresensiController extends Controller
             // Kirim data presensi ke view 'komandan.presensi_edit'
             return view('komandan.presensi_edit', ['presensi' => $presensi]);
         } catch (\Exception $e) {
-            return redirect()->route('laporan.presensi')->with('error', 'Data presensi tidak ditemukan.');
+            return redirect()->route('komandan.presensi')->with('error', 'Data presensi tidak ditemukan.');
         }
     }
 
     public function update(Request $request, $id_presensi)
     {
         if (Auth::user()->peran !== 'komandan') {
-            return redirect()->route('laporan.presensi')->with('error', 'Anda tidak memiliki hak akses.');
+            return redirect()->route('komandan.presensi')->with('error', 'Anda tidak memiliki hak akses.');
         }
 
         // Validasi input
@@ -112,7 +112,7 @@ class PresensiController extends Controller
                 'tanggal' => Carbon::parse($request->waktu_masuk)->format('Y-m-d'), // Update tanggal
             ]);
 
-            return redirect()->route('laporan.presensi')->with('success', 'Data presensi berhasil diperbarui.');
+            return redirect()->route('komandan.presensi')->with('success', 'Data presensi berhasil diperbarui.');
 
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
