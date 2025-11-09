@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-@extends('layouts.app') {{-- Menggunakan layout utama --}}
-=======
 @extends('layouts.app')
->>>>>>> 49638a05fee6a719c815cc5a6b3823519612a82e
 
 @section('content')
 <div class="w-full">
@@ -14,12 +10,6 @@
         <h2 class="text-xl font-bold">{{ Auth::user()->nama_lengkap ?? Auth::user()->username }}</h2>
     </div>
 
-<<<<<<< HEAD
-    <div class="bg-slate-800 rounded-lg shadow-lg p-4 flex justify-between items-center mb-6">
-        <div>
-            <p class="text-sm text-gray-300">Selamat Datang,</p>
-            <p class="text-lg font-semibold">Komandan</p>
-=======
     {{-- 2. JAM DIGITAL (via AlpineJS) --}}
     <div 
         x-data="{ 
@@ -54,7 +44,6 @@
         
         <div x-text="currentTime" 
              class="bg-slate-800 text-white text-xs font-semibold px-4 py-2 rounded-full">
->>>>>>> 49638a05fee6a719c815cc5a6b3823519612a82e
         </div>
     </div>
 
@@ -79,14 +68,9 @@
         }
         @endphp
 
-<<<<<<< HEAD
-        {{-- Menu untuk Komandan --}}
-        {!! renderMenuButton('PRESENSI', route('laporan.presensi')) !!}
-=======
         {{-- Panggil helper untuk setiap tombol --}}
         {{-- Ini adalah tombol yang sama dengan anggota --}}
-        {!! renderMenuButton('PRESENSI') !!}
->>>>>>> 49638a05fee6a719c815cc5a6b3823519612a82e
+        {!! renderMenuButton('PRESENSI', route('laporan.presensi')) !!}
         {!! renderMenuButton('PATROLI') !!}
         {!! renderMenuButton('KENDARAAN') !!}
         {!! renderMenuButton('TAMU') !!}
@@ -94,6 +78,7 @@
         {!! renderMenuButton('GANGGUAN KAMTIBMAS') !!}
         {!! renderMenuButton('MANAJEMEN AKUN') !!}
         {!! renderMenuButton('UNDUH LAPORAN') !!}
+
     </div>
 </div>
 @endsection
