@@ -46,7 +46,7 @@
                         USERNAME
                     </label>
                     <input id="username" type="text" name="username" 
-                           value="{{ old('username', 'M. SONY') }}" required autofocus
+                           value="{{ old('username') }}" required autofocus
                            placeholder="Username Anda"
                            class="w-full bg-gray-200 border-0 rounded-full text-gray-900 placeholder-gray-500 py-3 px-5 focus:ring-2 focus:ring-blue-500 shadow-sm">
                     
