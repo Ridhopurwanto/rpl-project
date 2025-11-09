@@ -96,6 +96,18 @@ Route::middleware('auth')->group(function () {
          ->name('laporan.presensi.update');
     
 
+    // Rute baru (GET) untuk menampilkan halaman
+    Route::get('/anggota/presensi', [PresensiController::class, 'index'])
+         ->name('anggota.presensi');
+
+    // Rute BARU (GET) untuk menampilkan halaman "Ambil Gambar"
+    Route::get('/anggota/presensi/create', [PresensiController::class, 'create'])
+         ->name('anggota.presensi.create');
+         
+    // Rute baru (POST) untuk tombol '+' (check-in/out)
+    Route::post('/anggota/presensi', [PresensiController::class, 'store'])
+         ->name('anggota.presensi.store');
+
     // Route Logout
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
                 ->name('logout');

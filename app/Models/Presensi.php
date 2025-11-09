@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Presensi extends Model
 {
@@ -43,6 +44,33 @@ class Presensi extends Model
         'tanggal',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        /**
+         * Event 'creating' ini berjalan SEBELUM data disimpan ke database.
+         * $model adalah data presensi yang AKAN dibuat.
+         */
+        static::creating(function ($model) {
+            
+            // Cek apakah ada pengguna yang sedang login
+            if (Auth::check()) {
+                
+                // 1. Isi 'id_pengguna' secara otomatis dari user yang login
+                //    (jika belum diisi)
+                if (empty($model->id_pengguna)) {
+                    $model->id_pengguna = Auth::user()->id_pengguna;
+                }
+                
+                // 2. Isi 'nama_lengkap' secara otomatis DARI user yang login
+                if (empty($model->nama_lengkap)) {
+                    $model->nama_lengkap = Auth::user()->nama_lengkap;
+                }
+            }
+        });
+    }
+    
     /**
      * Casting tipe data otomatis.
      * @var array
