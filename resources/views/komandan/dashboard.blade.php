@@ -72,7 +72,7 @@
         {{-- Ini adalah tombol yang sama dengan anggota --}}
         {!! renderMenuButton('PRESENSI', route('laporan.presensi')) !!}
         {!! renderMenuButton('PATROLI', route('patroli')) !!}
-        {!! renderMenuButton('KENDARAAN') !!}
+        {!! renderMenuButton('KENDARAAN', route('laporan.kendaraan')) !!}
         {!! renderMenuButton('TAMU') !!}
         {!! renderMenuButton('BARANG') !!}
         {!! renderMenuButton('GANGGUAN KAMTIBMAS') !!}
