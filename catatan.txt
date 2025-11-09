@@ -1,0 +1,8 @@
+Bagian anggota:
+- presensi
+  1. perlu penyesuaian tabel di database
+  2. penyesuaian ukuran live preview kamera
+
+- patroli
+  1. perhatikan lagi algoritma dan database
+  2. penyesuaian ukuran live preview kamera
