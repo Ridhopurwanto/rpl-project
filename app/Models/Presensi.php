@@ -69,7 +69,8 @@ class Presensi extends Model
                 }
             }
         });
-
+    }
+    
     /**
      * Casting tipe data otomatis.
      * @var array
