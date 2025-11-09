@@ -1,13 +1,12 @@
-{{-- Menggunakan layout 'app' yang baru saja dibuat --}}
-@extends('layouts.app')
+@extends('layouts.app') {{-- Menggunakan layout utama --}}
 
 @section('content')
 <div class="w-full max-w-sm mx-auto px-4 py-8">
 
     <div class="bg-slate-800 rounded-lg shadow-lg p-4 flex justify-between items-center mb-6">
         <div>
-            <p class="text-sm text-gray-300">Absensi Kehadiran</p>
-            <p class="text-lg font-semibold">{{ now()->format('d/m') }}</p>
+            <p class="text-sm text-gray-300">Selamat Datang,</p>
+            <p class="text-lg font-semibold">Komandan</p>
         </div>
     </div>
 
@@ -25,8 +24,8 @@
         }
         @endphp
 
-        {{-- Panggil helper untuk setiap tombol --}}
-        {!! renderMenuButton('PRESENSI') !!}
+        {{-- Menu untuk Komandan --}}
+        {!! renderMenuButton('PRESENSI', route('laporan.presensi')) !!}
         {!! renderMenuButton('PATROLI') !!}
         {!! renderMenuButton('KENDARAAN') !!}
         {!! renderMenuButton('TAMU') !!}
@@ -34,7 +33,6 @@
         {!! renderMenuButton('GANGGUAN KAMTIBMAS') !!}
         {!! renderMenuButton('MANAJEMEN AKUN') !!}
         {!! renderMenuButton('UNDUH LAPORAN') !!}
-
     </div>
 </div>
 @endsection
