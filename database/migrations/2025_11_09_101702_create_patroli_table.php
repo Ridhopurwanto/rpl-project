@@ -6,27 +6,28 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::create('patroli', function (Blueprint $table) {
-            $table->id('id_patroli'); // Primary Key: id_patroli
-            $table->unsignedBigInteger('id_pengguna'); // Foreign Key: id_pengguna
-            $table->string('nama_lengkap'); 
+            $table->bigIncrements('id_patroli');
+            $table->unsignedBigInteger('id_pengguna')->index('patroli_id_pengguna_foreign');
+            $table->string('nama_lengkap');
             $table->dateTime('waktu_exact');
             $table->dateTime('waktu_patroli');
             $table->string('wilayah');
             $table->string('foto');
             $table->date('tanggal');
             $table->timestamps();
-
-            // Relasi ke tabel pengguna
-            $table->foreign('id_pengguna')
-                  ->references('id_pengguna')
-                  ->on('pengguna')
-                  ->onDelete('cascade');
+            $table->enum('jenis_patroli', ['Patroli 1', 'Patroli 2', 'Patroli 3', 'Patroli 4', 'Patroli 5', 'Patroli 6'])->nullable();
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('patroli');

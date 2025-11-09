@@ -2,24 +2,53 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema; // Pastikan ini ada
+use Illuminate\Support\Facades\DB;     // Pastikan ini ada
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
      * Seed the application's database.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // 1. Matikan pengecekan foreign key
+        Schema::disableForeignKeyConstraints();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // 2. Kosongkan semua tabel (truncate)
+        //    DIMULAI DARI TABEL ANAK (CHILD) TERLEBIH DAHULU
+        //    (Tabel yang punya foreign key)
+        DB::table('shift')->truncate();
+        DB::table('presensi')->truncate();
+        DB::table('patroli')->truncate();
+        DB::table('log_kendaraan')->truncate(); // Anak dari pengguna & kendaraan
+        DB::table('tamu')->truncate();
+        DB::table('barang_temu')->truncate();
+        DB::table('barang_titip')->truncate();
+        DB::table('gangguan_kamtibmas')->truncate();
+
+        //    BARU KOSONGKAN TABEL INDUK (PARENT)
+        //    (Tabel yang jadi referensi foreign key)
+        DB::table('pengguna')->truncate();
+        DB::table('kendaraan')->truncate();
+
+        // 3. Nyalakan kembali pengecekan foreign key
+        Schema::enableForeignKeyConstraints();
+
+        // 4. Panggil semua seeder
+        $this->call([
+            PenggunaSeeder::class,
+            KendaraanSeeder::class,
+            ShiftSeeder::class,
+            PresensiSeeder::class,
+            PatroliSeeder::class,
+            LogKendaraanSeeder::class,
+            TamuSeeder::class,
+            BarangTemuSeeder::class,
+            BarangTitipSeeder::class,
+            GangguanKamtibmasSeeder::class,
         ]);
     }
 }

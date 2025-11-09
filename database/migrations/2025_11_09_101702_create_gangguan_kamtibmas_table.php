@@ -6,11 +6,14 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::create('gangguan_kamtibmas', function (Blueprint $table) {
-            $table->id('id_gangguan'); // Primary Key: id_gangguan
-            $table->unsignedBigInteger('id_pengguna'); // FK: Petugas yang melapor
+            $table->bigIncrements('id_gangguan');
+            $table->unsignedBigInteger('id_pengguna')->index('gangguan_kamtibmas_id_pengguna_foreign');
             $table->dateTime('waktu_lapor');
             $table->string('lokasi');
             $table->string('foto');
@@ -18,15 +21,12 @@ return new class extends Migration
             $table->integer('jumlah');
             $table->enum('status', ['selesai', 'belum selesai']);
             $table->timestamps();
-
-            // Relasi ke tabel pengguna
-            $table->foreign('id_pengguna')
-                  ->references('id_pengguna')
-                  ->on('pengguna')
-                  ->onDelete('cascade');
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('gangguan_kamtibmas');
