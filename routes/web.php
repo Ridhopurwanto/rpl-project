@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\PresensiController;
+use App\Http\Controllers\PatroliController;
 use App\Http\Controllers\KendaraanController;
 
 Route::get('/', function () {
@@ -51,6 +52,17 @@ Route::middleware('auth')->group(function () {
         return view('komandan.dashboard'); // File yang akan kita buat
     })->name('komandan.dashboard');
 
+    // Halaman Laporan Patroli (GET)
+    Route::get('/patroli', [PatroliController::class, 'index'])
+         ->name('komandan.patroli');
+
+    // Proses Update Laporan Patroli (PUT/PATCH)
+    Route::put('/patroli/{id}', [PatroliController::class, 'update'])
+         ->name('komandan.patroli.update');
+
+    // Proses Hapus Laporan Patroli (DELETE)
+    Route::delete('/patroli/{id}', [PatroliController::class, 'destroy'])
+         ->name('komandan.patroli.destroy');
 
     // --- ROUTE UNTUK ANGGOTA ---
     Route::get('/anggota/dashboard', function () {
@@ -97,6 +109,30 @@ Route::middleware('auth')->group(function () {
          ->name('laporan.kendaraan.master.update');
     Route::delete('/laporan/kendaraan/master/{id_kendaraan}', [KendaraanController::class, 'destroyMaster'])
          ->name('laporan.kendaraan.master.destroy');
+
+    // Rute baru (GET) untuk menampilkan halaman
+    Route::get('/anggota/presensi', [PresensiController::class, 'index'])
+         ->name('anggota.presensi');
+
+    // Rute BARU (GET) untuk menampilkan halaman "Ambil Gambar"
+    Route::get('/anggota/presensi/create', [PresensiController::class, 'create'])
+         ->name('anggota.presensi.create');
+         
+    // Rute baru (POST) untuk tombol '+' (check-in/out)
+    Route::post('/anggota/presensi', [PresensiController::class, 'store'])
+         ->name('anggota.presensi.store');
+
+    // Rute baru (GET) untuk menampilkan halaman
+    Route::get('/anggota/presensi', [PresensiController::class, 'index'])
+         ->name('anggota.presensi');
+
+    // Rute BARU (GET) untuk menampilkan halaman "Ambil Gambar"
+    Route::get('/anggota/presensi/create', [PresensiController::class, 'create'])
+         ->name('anggota.presensi.create');
+         
+    // Rute baru (POST) untuk tombol '+' (check-in/out)
+    Route::post('/anggota/presensi', [PresensiController::class, 'store'])
+         ->name('anggota.presensi.store');
 
     // Route Logout
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])

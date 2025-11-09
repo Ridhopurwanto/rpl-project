@@ -30,10 +30,7 @@
                       Blok ikon di sebelah kanan
                     --}}
                     <div class="flex items-center space-x-2 bg-white p-1 rounded-full shadow">
-                        
-                        {{-- 1. Logo (Link ke Halaman Utama) --}}
-                        {{-- Mengarah ke dashboard utama pengguna berdasarkan peran mereka --}}
-                        <a href="{{ route(Auth::user()->peran . '.dashboard') }}" class="p-1" title="Kembali ke Dashboard Utama">
+                        <a href="{{ route('anggota.dashboard') }}" class="p-1">
                             <img src="{{ asset('images/logo-siap.png') }}" alt="Logo" class="w-6 h-6">
                         </a>
                         

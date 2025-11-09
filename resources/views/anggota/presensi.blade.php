@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.anggota.app')
 
 {{-- 1. Ganti Tombol Header --}}
 @section('header-left')
@@ -13,8 +13,9 @@
 {{-- Inisialisasi Alpine.js untuk modal --}}
 <div x-data="{ showModal: false, modalPhoto: 'https://via.placeholder.com/400x300.png?text=Contoh+Foto' }">
 
-    <div class="text-center text-lg font-bold text-gray-800 mt-4">
-        OKTOBER 2025
+    <div classs="text-center text-lg font-bold text-gray-800 mt-4">
+        {{-- Variabel $namaBulan dari controller --}}
+        {{ strtoupper($namaBulan) }}
     </div>
 
     <div class="grid grid-cols-7 gap-1 text-center text-sm mt-2 font-semibold">
@@ -26,41 +27,26 @@
         <div class="text-gray-500">Tr</div>
         <div class="text-gray-500">Sa</div>
 
-        <div class="text-gray-300 p-2">28</div>
-        <div class="text-gray-300 p-2">29</div>
-        <div class="text-gray-300 p-2">30</div>
-        <div class="bg-red-500 text-white rounded-lg p-2">1</div>
-        <div class="bg-yellow-400 rounded-lg p-2">2</div>
-        <div class="bg-yellow-400 rounded-lg p-2">3</div>
-        <div class="bg-blue-400 rounded-lg p-2">4</div>
-        <div class="bg-blue-400 rounded-lg p-2">5</div>
-        <div class="bg-red-500 text-white rounded-lg p-2">6</div>
-        <div class="bg-red-500 text-white rounded-lg p-2">7</div>
-        <div class="bg-yellow-400 rounded-lg p-2">8</div>
-        <div class="bg-yellow-400 rounded-lg p-2">9</div>
-        <div class="bg-blue-400 rounded-lg p-2">10</div>
-        <div class="bg-blue-400 rounded-lg p-2">11</div>
-        <div class="bg-blue-400 rounded-lg p-2">12</div>
-        <div class="bg-red-500 text-white rounded-lg p-2">13</div>
-        <div class="bg-yellow-400 rounded-lg p-2">14</div>
-        <div class="bg-yellow-400 rounded-lg p-2">15</div>
-        <div class="bg-blue-400 rounded-lg p-2">16</div>
-        <div class="bg-blue-400 rounded-lg p-2">17</div>
-        <div class="bg-red-500 text-white rounded-lg p-2">18</div>
-        <div class="bg-red-500 text-white rounded-lg p-2">19</div>
-        <div class="bg-yellow-400 rounded-lg p-2">20</div>
-        <div class="bg-yellow-400 rounded-lg p-2">21</div>
-        <div class="bg-blue-400 rounded-lg p-2">22</div>
-        <div class="bg-blue-400 rounded-lg p-2">23</div>
-        <div class="bg-red-500 text-white rounded-lg p-2">24</div>
-        <div class="bg-red-500 text-white rounded-lg p-2">25</div>
-        <div class="bg-yellow-400 rounded-lg p-2">26</div>
-        <div class="bg-yellow-400 rounded-lg p-2">27</div>
-        <div class="bg-blue-400 rounded-lg p-2">28</div>
-        <div class="bg-blue-400 rounded-lg p-2">29</div>
-        <div class="bg-red-500 text-white rounded-lg p-2">30</div>
-        <div class="bg-red-500 text-white rounded-lg p-2">31</div>
-        <div class="text-gray-300 p-2">1</div>
+        {{-- Loop $dataKalender yang kita buat di controller --}}
+        @foreach($dataKalender as $hari)
+            @php
+                // Logika untuk menentukan warna background
+                $bgColor = 'bg-gray-100'; // Default jika shift null
+                if ($hari['jenis_shift'] === 'pagi') {
+                    $bgColor = 'bg-yellow-400';
+                } elseif ($hari['jenis_shift'] === 'malam') {
+                    $bgColor = 'bg-blue-400';
+                } elseif ($hari['jenis_shift'] === 'off') {
+                    $bgColor = 'bg-red-500 text-white';
+                } elseif ($hari['tanggal'] === null) {
+                    $bgColor = 'bg-transparent'; // Hari kosong (padding)
+                }
+            @endphp
+            
+            <div class="{{ $bgColor }} rounded-lg p-2">
+                {{ $hari['tanggal'] }}
+            </div>
+        @endforeach
     </div>
 
     <div class="flex flex-wrap justify-center items-center space-x-4 mt-4 text-xs">
@@ -110,34 +96,50 @@
                     </tr>
                 </thead>
                 <tbody class="text-gray-700">
-                    <tr class="border-b text-center">
-                        <td class="p-3">
-                            <a href="#" 
-                               @click.prevent="showModal = true; modalPhoto = 'https://via.placeholder.com/400x300.png?text=Foto+Masuk'" 
-                               class="text-blue-600 underline font-semibold">
-                                Buka
-                            </a>
-                        </td>
-                        <td class="p-3 font-medium">06:55:35</td>
-                        <td class="p-3 text-xs text-left">JL. OTTO ISKANDARDINATA NO. 64C LT. 012 RW. 004, CIPINANG CEMP..., (data lokasi)</td>
-                        <td class="p-3 text-green-600 font-semibold">
-                            Tepat Waktu
-                        </td>
-                    </tr>
-                    <tr class="border-b text-center">
-                        <td class="p-3">
-                            <a href="#" 
-                               @click.prevent="showModal = true; modalPhoto = 'https://via.placeholder.com/400x300.png?text=Foto+Pulang'" 
-                               class="text-blue-600 underline font-semibold">
-                                Buka
-                            </a>
-                        </td>
-                        <td class="p-3 font-medium">17:34:06</td>
-                        <td class="p-3 text-xs text-left">JL. OTTO ISKANDARDINATA NO. 64C LT. 012 RW. 004, CIPINANG CEMP..., (data lokasi)</td>
-                        <td class="p-3 text-green-600 font-semibold">
-                            Tepat Waktu
-                        </td>
-                    </tr>
+                    {{-- 
+                    'riwayatHariIni' adalah variabel yang kita kirim dari Controller.
+                    Kita cek apakah data hari ini ada.
+                    --}}
+                    @if($riwayatHariIni)
+                        <tr class="border-b text-center">
+                            <td class="p-3">
+                                <a href="#" 
+                                @click.prevent="showModal = true; modalPhoto = '{{ asset('storage/' . $riwayatHariIni->foto_masuk) }}'" 
+                                class="text-blue-600 underline font-semibold">
+                                    Buka
+                                </a>
+                            </td>
+                            <td class="p-3 font-medium">{{ $riwayatHariIni->waktu_masuk }}</td>
+                            <td class="p-3 text-xs text-left">{{ $riwayatHariIni->lokasi }}</td>
+                            <td class="p-3 text-green-600 font-semibold">
+                                {{ $riwayatHariIni->status }}
+                            </td>
+                        </tr>
+                        
+                        {{-- Kita cek apakah sudah ada data pulang --}}
+                        @if($riwayatHariIni->waktu_pulang)
+                            <tr class="border-b text-center">
+                                <td class="p-3">
+                                    <a href="#" 
+                                    @click.prevent="showModal = true; modalPhoto = '{{ asset('storage/' . $riwayatHariIni->foto_pulang) }}'" 
+                                    class="text-blue-600 underline font-semibold">
+                                        Buka
+                                    </a>
+                                </td>
+                                <td class="p-3 font-medium">{{ $riwayatHariIni->waktu_pulang }}</td>
+                                <td class="p-3 text-xs text-left">{{ $riwayatHariIni->lokasi }}</td>
+                                <td class="p-3 text-green-600 font-semibold">
+                                    {{ $riwayatHariIni->status }}
+                                </td>
+                            </tr>
+                        @endif
+                    @else
+                        <tr>
+                            <td colspan="4" class="p-4 text-center text-gray-500">
+                                Belum ada riwayat presensi untuk tanggal ini.
+                            </td>
+                        </tr>
+                    @endif
                 </tbody>
             </table>
         </div>
@@ -170,7 +172,9 @@
 
 {{-- 3. Tambahkan Tombol FAB (+) --}}
 @push('fab')
-    <button class="fixed z-50 bottom-6 right-6 md:right-[calc((100vw-768px)/2+24px)] p-4 bg-blue-700 rounded-full text-white shadow-lg hover:bg-blue-800 transition">
+    {{-- Ini sekarang adalah LINK ke halaman 'create', bukan form --}}
+    <a href="{{ route('anggota.presensi.create') }}" 
+       class="fixed z-50 bottom-6 right-6 md:right-[calc((100vw-768px)/2+24px)] p-4 bg-blue-700 rounded-full text-white shadow-lg hover:bg-blue-800 transition">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-    </button>
+    </a>
 @endpush
