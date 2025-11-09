@@ -22,6 +22,24 @@ class User extends Authenticatable
     protected $primaryKey = 'id_pengguna';
 
     /**
+     * Relasi ke tabel Presensi
+     */
+    public function presensi()
+    {
+        // Asumsi foreign key di tabel 'presensi' adalah 'id_pengguna'
+        return $this->hasMany(Presensi::class, 'id_pengguna', 'id_pengguna');
+    }
+
+    /**
+     * Relasi ke tabel Shift
+     */
+    public function shifts()
+    {
+        // Asumsi foreign key di tabel 'shift' adalah 'id_pengguna'
+        return $this->hasMany(Shift::class, 'id_pengguna', 'id_pengguna');
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>

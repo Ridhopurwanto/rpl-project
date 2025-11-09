@@ -31,6 +31,11 @@ Route::middleware('auth')->group(function () {
         return view('bau.dashboard'); // View dummy
     })->name('bau.dashboard');
 
+    // Rute baru untuk halaman presensi
+    Route::get('/anggota/presensi', function () {
+        return view('anggota.presensi'); // <-- File yang akan kita buat
+    })->name('anggota.presensi');
+    
     // Route Logout
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
                 ->name('logout');
