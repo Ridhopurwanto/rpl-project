@@ -33,6 +33,8 @@
         {!! renderMenuButton('TAMU') !!}
         {!! renderMenuButton('BARANG') !!}
         {!! renderMenuButton('GANGGUAN KAMTIBMAS') !!}
+        {!! renderMenuButton('MANAJEMEN AKUN') !!}
+        {!! renderMenuButton('UNDUH LAPORAN') !!}
 
     </div>
 </div>
