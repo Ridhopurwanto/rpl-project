@@ -8,16 +8,6 @@
 @endsection
 
 @section('content')
-{{-- 
-  Wrapper AlpineJS untuk mengelola state semua modal.
-  - showPhotoModal: Menampilkan/menyembunyikan modal foto.
-  - photoUrl: URL gambar yang akan ditampilkan di modal foto.
-  - showEditModal: Menampilkan/menyembunyikan modal edit.
-  - editAction: URL form (action) untuk modal edit.
-  - editWilayah: Data 'wilayah' yang sedang diedit.
-  - showDeleteModal: Menampilkan/menyembunyikan modal konfirmasi hapus.
-  - deleteAction: URL form (action) untuk modal hapus.
---}}
 <div class="w-full mx-auto" 
      x-data="{ 
          showPhotoModal: false, 
@@ -44,7 +34,7 @@
     @endif
 
     {{-- Form Filter (Sesuai Gambar) --}}
-    <form action="{{ route('laporan.patroli') }}" method="GET">
+    <form action="{{ route('komandan.patroli') }}" method="GET">
         <div class="bg-white p-4 rounded-lg shadow-md mb-6">
             <div class="flex flex-col sm:flex-row sm:items-end sm:space-x-4 space-y-4 sm:space-y-0">
                 
@@ -110,11 +100,11 @@
                             @if(Auth::user()->peran == 'komandan')
                                 <div class="flex justify-center space-x-3">
                                     {{-- Tombol untuk memicu MODAL EDIT --}}
-                                    <button @click="showEditModal = true; editAction = '{{ route('laporan.patroli.update', $item->id_patroli) }}'; editWilayah = '{{ $item->wilayah }}'" class="text-blue-500 hover:text-blue-700" title="Edit">
+                                    <button @click="showEditModal = true; editAction = '{{ route('komandan.patroli.update', $item->id_patroli) }}'; editWilayah = '{{ $item->wilayah }}'" class="text-blue-500 hover:text-blue-700" title="Edit">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
                                     </button>
                                     {{-- Tombol untuk memicu MODAL HAPUS --}}
-                                    <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('laporan.patroli.destroy', $item->id_patroli) }}'" class="text-red-500 hover:text-red-700" title="Hapus">
+                                    <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('komandan.patroli.destroy', $item->id_patroli) }}'" class="text-red-500 hover:text-red-700" title="Hapus">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
                                     </button>
                                 </div>

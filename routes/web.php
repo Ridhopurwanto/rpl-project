@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\PresensiController; 
-use App\Http\Controllers\LaporanPatroliController;
+use App\Http\Controllers\PatroliController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -52,16 +52,16 @@ Route::middleware('auth')->group(function () {
     })->name('komandan.dashboard');
 
     // Halaman Laporan Patroli (GET)
-    Route::get('/laporan/patroli', [LaporanPatroliController::class, 'index'])
-         ->name('laporan.patroli');
+    Route::get('/patroli', [PatroliController::class, 'index'])
+         ->name('komandan.patroli');
 
     // Proses Update Laporan Patroli (PUT/PATCH)
-    Route::put('/laporan/patroli/{id}', [LaporanPatroliController::class, 'update'])
-         ->name('laporan.patroli.update');
+    Route::put('/patroli/{id}', [PatroliController::class, 'update'])
+         ->name('komandan.patroli.update');
 
     // Proses Hapus Laporan Patroli (DELETE)
-    Route::delete('/laporan/patroli/{id}', [LaporanPatroliController::class, 'destroy'])
-         ->name('laporan.patroli.destroy');
+    Route::delete('/patroli/{id}', [PatroliController::class, 'destroy'])
+         ->name('komandan.patroli.destroy');
 
     // --- ROUTE UNTUK ANGGOTA ---
     Route::get('/anggota/dashboard', function () {

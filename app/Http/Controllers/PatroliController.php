@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Patroli; 
 use Illuminate\Support\Facades\Storage; // Untuk menghapus foto
 
-class LaporanPatroliController extends Controller
+class PatroliController extends Controller
 {
 
     public function index(Request $request)
@@ -31,7 +31,7 @@ class LaporanPatroliController extends Controller
         $dataPatroli = $query->orderBy('waktu_exact', 'asc')->get();
 
         // Kirim data ke view
-        return view('laporan.patroli', [
+        return view('komandan.patroli', [
             'dataPatroli' => $dataPatroli,
             'tanggalTerpilih' => $tanggalTerpilih,
             'jenisPatroliTerpilih' => $jenisPatroliTerpilih,
