@@ -3,8 +3,12 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+<<<<<<< HEAD
 use App\Http\Controllers\PresensiController; 
 use App\Http\Controllers\LaporanPatroliController;
+=======
+use App\Http\Controllers\PresensiController;
+>>>>>>> d0f1f36263652bff7db4d805566e9b83ab6a5604
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -27,7 +31,6 @@ Route::get('/', function () {
             Auth::logout();
             return redirect()->route('login')->with('error', 'Peran tidak dikenal.');
         }
-        // --- AKHIR LOGIKA BARU ---
     }
     return redirect()->route('login');
 });
@@ -69,7 +72,6 @@ Route::middleware('auth')->group(function () {
         return view('anggota.dashboard'); // File asli Anda
     })->name('anggota.dashboard');
 
-    // --- Rute Presensi ANGGOTA ---
     Route::get('/anggota/presensi', [PresensiController::class, 'createForAnggota'])
          ->name('anggota.presensi');
     Route::post('/anggota/presensi', [PresensiController::class, 'storeForAnggota'])
@@ -89,7 +91,13 @@ Route::middleware('auth')->group(function () {
     // --- RUTE CRUD (HANYA UNTUK KOMANDAN) ---
     Route::delete('/laporan/presensi/{id_presensi}', [PresensiController::class, 'destroy'])
          ->name('laporan.presensi.destroy');
-    // (Hak akses diatur di Controller dan View)
+
+    Route::get('/laporan/presensi/{id_presensi}/edit', [PresensiController::class, 'edit'])
+         ->name('laporan.presensi.edit');
+
+    // Rute untuk menyimpan perubahan (update)
+    Route::put('/laporan/presensi/{id_presensi}', [PresensiController::class, 'update'])
+         ->name('laporan.presensi.update');
     
 
     // Route Logout

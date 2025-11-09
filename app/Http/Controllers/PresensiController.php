@@ -34,7 +34,7 @@ class PresensiController extends Controller
         // --- ▼▼▼ INI PERUBAHANNYA ▼▼▼ ---
         // Kita panggil view 'komandan.presensi' sesuai lokasi file kamu
         return view('komandan.presensi', [ 
-        // --- ▲▲▲ BATAS PERUBAHAN ▲▲▲ ---
+
             'dataMasuk' => $dataMasuk,
             'dataPulang' => $dataPulang,
             'tanggalTerpilih' => $tanggalFilter,
@@ -71,6 +71,54 @@ class PresensiController extends Controller
             return redirect()->back()->with('error', 'Gagal menghapus data.');
         }
     }
+
+    public function edit($id_presensi)
+    {
+        if (Auth::user()->peran !== 'komandan') {
+            return redirect()->route('laporan.presensi')->with('error', 'Anda tidak memiliki hak akses.');
+        }
+
+        try {
+            $presensi = Presensi::findOrFail($id_presensi);
+            // Kirim data presensi ke view 'komandan.presensi_edit'
+            return view('komandan.presensi_edit', ['presensi' => $presensi]);
+        } catch (\Exception $e) {
+            return redirect()->route('laporan.presensi')->with('error', 'Data presensi tidak ditemukan.');
+        }
+    }
+
+    public function update(Request $request, $id_presensi)
+    {
+        if (Auth::user()->peran !== 'komandan') {
+            return redirect()->route('laporan.presensi')->with('error', 'Anda tidak memiliki hak akses.');
+        }
+
+        // Validasi input
+        $request->validate([
+            'waktu_masuk' => 'required|date',
+            'waktu_pulang' => 'nullable|date|after_or_equal:waktu_masuk',
+            'status' => 'required|in:tepat waktu,terlambat,terlalu cepat',
+            'lokasi' => 'required|string|max:255',
+        ]);
+
+        try {
+            $presensi = Presensi::findOrFail($id_presensi);
+            
+            $presensi->update([
+                'waktu_masuk' => $request->waktu_masuk,
+                'waktu_pulang' => $request->waktu_pulang,
+                'status' => $request->status,
+                'lokasi' => $request->lokasi,
+                'tanggal' => Carbon::parse($request->waktu_masuk)->format('Y-m-d'), // Update tanggal
+            ]);
+
+            return redirect()->route('laporan.presensi')->with('success', 'Data presensi berhasil diperbarui.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
+        }
+    }
+
 
     // --- FUNGSI UNTUK ANGGOTA ---
     // (Kode createForAnggota dan storeForAnggota tetap sama)
