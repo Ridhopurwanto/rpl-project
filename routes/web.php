@@ -3,7 +3,12 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+<<<<<<< HEAD
 use App\Http\Controllers\Anggota\PresensiController;
+use App\Http\Controllers\LaporanPatroliController;
+=======
+>>>>>>> d0f1f36263652bff7db4d805566e9b83ab6a5604
+
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -50,6 +55,17 @@ Route::middleware('auth')->group(function () {
         return view('komandan.dashboard'); // File yang akan kita buat
     })->name('komandan.dashboard');
 
+    // Halaman Laporan Patroli (GET)
+    Route::get('/laporan/patroli', [LaporanPatroliController::class, 'index'])
+         ->name('laporan.patroli');
+
+    // Proses Update Laporan Patroli (PUT/PATCH)
+    Route::put('/laporan/patroli/{id}', [LaporanPatroliController::class, 'update'])
+         ->name('laporan.patroli.update');
+
+    // Proses Hapus Laporan Patroli (DELETE)
+    Route::delete('/laporan/patroli/{id}', [LaporanPatroliController::class, 'destroy'])
+         ->name('laporan.patroli.destroy');
 
     // --- ROUTE UNTUK ANGGOTA ---
     Route::get('/anggota/dashboard', function () {
