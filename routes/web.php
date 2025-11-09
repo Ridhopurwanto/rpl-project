@@ -89,9 +89,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/laporan/presensi/{id_presensi}', [PresensiController::class, 'destroy'])
          ->name('laporan.presensi.destroy');
 
-    Route::get('/laporan/presensi/{id_presensi}/edit', [PresensiController::class, 'edit'])
-         ->name('laporan.presensi.edit');
-
     // Rute untuk menyimpan perubahan (update)
     Route::put('/laporan/presensi/{id_presensi}', [PresensiController::class, 'update'])
          ->name('laporan.presensi.update');

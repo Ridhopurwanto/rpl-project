@@ -105,9 +105,5 @@
             </table>
         </div>
     </div>
-    
-    {{-- TODO: Buat tabel kedua untuk 'DAFTAR PRESENSI PULANG' (data $dataPulang) --}}
-    {{-- ... (copy-paste tabel di atas dan ganti $dataMasuk -> $dataPulang) ... --}}
-
 </div>
 @endsection
