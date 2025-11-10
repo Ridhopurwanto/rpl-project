@@ -20,31 +20,33 @@
                 <div class="flex justify-between items-center">
                     
                     @section('header-left')
-                        <a href="{{ route('anggota.dashboard') }}" class="bg-slate-800 text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md">
+                        {{-- Tombol HOME (sudah diubah warnanya) --}}
+                        <a href="{{ route('anggota.dashboard') }}" class="bg-[#2a4a6f] text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md">
                             HOME
                         </a>
                     @show
                     
                     {{-- 
-                      PERUBAHAN DIMULAI DI SINI
-                      Blok ikon di sebelah kanan
+                      PERUBAHAN DI SINI
+                      - Wrapper luar tidak lagi punya bg-white atau rounded-full
                     --}}
-                    <div class="flex items-center space-x-2 bg-white p-1 rounded-full shadow">
-                        <a href="{{ route('anggota.dashboard') }}" class="p-1">
+                    <div class="flex items-center space-x-2">
+                        
+                        {{-- 1. Logo SIAP (diberi bg-white & rounded-full) --}}
+                        <a href="{{ route('anggota.dashboard') }}" class="bg-white p-2 rounded-full shadow">
                             <img src="{{ asset('images/logo-siap.png') }}" alt="Logo" class="w-6 h-6">
                         </a>
                         
-                        {{-- 2. Lonceng Notifikasi --}}
-                        <a href="#" class="p-1 text-gray-500" title="Notifikasi">
+                        {{-- 2. Lonceng Notifikasi (diberi bg-white & rounded-full) --}}
+                        <a href="#" class="bg-white p-2 rounded-full shadow text-gray-500" title="Notifikasi">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341A6.002 6.002 0 006 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
                         </a>
                         
-                        {{-- 3. Dropdown Profil (Menggunakan AlpineJS) --}}
-                        {{-- Ganti 'a' tag dengan 'div' + AlpineJS --}}
+                        {{-- 3. Dropdown Profil --}}
                         <div x-data="{ open: false }" class="relative">
                             
-                            {{-- Tombol Ikon Profil (Toggle) --}}
-                            <button @click="open = !open" class="p-1 text-gray-500 rounded-full focus:outline-none" title="Profil Pengguna">
+                            {{-- Tombol Ikon Profil (diberi bg-white & rounded-full) --}}
+                            <button @click="open = !open" class="bg-white p-2 rounded-full shadow text-gray-500 focus:outline-none" title="Profil Pengguna">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                             </button>
             
@@ -58,8 +60,9 @@
                                 {{-- Info Pengguna --}}
                                 <div class="flex items-center space-x-3 mb-4 pb-3 border-b border-gray-200">
                                     <div class="w-14 h-14 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400">
-                                         {{-- Placeholder Ikon Foto --}}
-                                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4V5h12v10zm-9.414-2.586a2 2 0 112.828 2.828L8.414 13H12v-1H6.586l1-1zM10 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path></svg>
+                                        {{-- Placeholder Ikon Foto --}}
+                                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4V5h12v10zm-9.414-2.586a2 2 0 112.828 2.828L8.414 13H12v-1H6.586l1-1zM10 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path></svg>
+_
                                     </div>
                                     <div>
                                         {{-- Mengambil nama_lengkap atau username --}}
@@ -103,7 +106,8 @@
                 @yield('content')
             </main>
 
-            <footer class="mt-auto w-full text-center py-3 text-white bg-slate-900 rounded-t-2xl">
+            {{-- Footer (sudah diubah warnanya) --}}
+            <footer class="mt-auto w-full text-center py-3 text-white bg-[#2a4a6f] rounded-t-2xl">
                 Siap v 1.0.0
             </footer>
             
