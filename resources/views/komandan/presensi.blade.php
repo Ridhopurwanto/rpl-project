@@ -109,6 +109,8 @@
                                 <span class="text-green-600 font-semibold">Tepat Waktu</span>
                             @elseif($presensi->status == 'terlambat')
                                 <span class="text-red-500 font-semibold">Terlambat</span>
+                            @elseif($presensi->status == 'izin')
+                                <span class="text-orange-500 font-semibold">Izin</span>
                             @else
                                 <span class="text-yellow-500 font-semibold">{{ ucfirst($presensi->status) }}</span>
                             @endif
@@ -183,6 +185,8 @@
                                 <span class="text-green-600 font-semibold">Tepat Waktu</span>
                             @elseif($presensi->status == 'terlambat')
                                 <span class="text-red-500 font-semibold">Terlambat</span>
+                            @elseif($presensi->status == 'izin')
+                                <span class="text-orange-500 font-semibold">Izin</span>
                             @else
                                 <span class="text-yellow-500 font-semibold">{{ ucfirst($presensi->status) }}</span>
                             @endif
@@ -275,6 +279,7 @@
                             <option value="tepat waktu">Tepat Waktu</option>
                             <option value="terlambat">Terlambat</option>
                             <option value="terlalu cepat">Terlalu Cepat</option>
+                            <option value="izin">Izin</option>
                         </select>
                     </div>
 
