@@ -8,6 +8,7 @@ use App\Http\Controllers\PatroliController;
 use App\Http\Controllers\KendaraanController;
 use App\Http\Controllers\Anggota\PresensiController as AnggotaPresensiController;
 use App\Http\Controllers\Anggota\PatroliController as AnggotaPatroliController;
+use App\Http\Controllers\RoleSwitchController;
 
 // Rute untuk tamu (belum login)
 Route::middleware('guest')->group(function () {
@@ -87,6 +88,10 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/kendaraan', [KendaraanController::class, 'index'])
             ->name('kendaraan'); // NAMA DIUBAH agar jelas
+
+        // Rute untuk menangani perpindahan role oleh Komandan
+        Route::post('/set-role', [RoleSwitchController::class, 'setRole'])
+            ->name('role.set');
 
         // CRUD Patroli
         Route::put('/patroli/{id}', [PatroliController::class, 'update'])

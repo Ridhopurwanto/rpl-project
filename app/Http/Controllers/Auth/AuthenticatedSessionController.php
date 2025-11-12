@@ -42,6 +42,8 @@ class AuthenticatedSessionController extends Controller
 
         // 6. LOGIKA REDIRECT BARU (INI YANG BERUBAH)
         $user = Auth::user();
+
+        $request->session()->put('current_role', $user->peran);
         
         // Menggunakan kolom 'peran' dari tabel baru Anda
         switch (strtolower($user->peran)) { // <--- PERUBAHAN DARI 'jabatan'
@@ -62,6 +64,8 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request)
     {
+        $request->session()->forget('current_role');
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

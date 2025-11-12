@@ -18,30 +18,31 @@
             
             <header class="w-full px-4 pt-4 pb-2">
                 <div class="flex justify-between items-center">
-                    
+                    @php
+                            $homeRoute = 'login'; // Default jika terjadi kesalahan
+
+                            if (Auth::check()) {
+                                // --- INI YANG DIUBAH ---
+                                // 1. Ambil peran DARI SESSION
+                                // 2. Jika di session tidak ada, baru ambil dari database (user->peran)
+                                $currentRole = session('current_role', Auth::user()->peran);
+                                // --- SELESAI PERUBAHAN ---
+
+                                if ($currentRole == 'komandan') {
+                                    $homeRoute = 'komandan.dashboard';
+                                } elseif ($currentRole == 'anggota') {
+                                    $homeRoute = 'anggota.dashboard';
+                                } elseif ($currentRole == 'bau') {
+                                    $homeRoute = 'bau.dashboard';
+                                }
+                            }
+                    @endphp
                     @section('header-left')
                         {{-- 
                             PERBAIKAN 1: Tombol HOME
                             href-nya sekarang dinamis berdasarkan peran
                         --}}
-                        <a href="
-                            @auth
-                                {{-- Pengguna sudah login, cek perannya --}}
-                                @if (Auth::user()->peran == 'anggota')
-                                    {{ route('anggota.dashboard') }}
-                                @elseif (Auth::user()->peran == 'komandan')
-                                    {{ route('komandan.dashboard') }}
-                                @elseif (Auth::user()->peran == 'bau')
-                                    {{ route('bau.dashboard') }}
-                                @else
-                                    {{-- Fallback jika peran tidak dikenal --}}
-                                    {{ url('/') }}
-                                @endif
-                            @else
-                                {{-- Pengguna adalah tamu (belum login), arahkan ke halaman login --}}
-                                {{ route('login') }}
-                            @endauth
-                        " class="bg-[#2a4a6f] text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md">
+                        <a href="{{ route($homeRoute) }}" class="bg-[#2a4a6f] text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md">
                             HOME
                         </a>
                     @show
@@ -57,24 +58,7 @@
                             PERBAIKAN 2: Tombol LOGO
                             href-nya sekarang dinamis berdasarkan peran
                         --}}
-                        <a href="
-                            @auth
-                                {{-- Pengguna sudah login, cek perannya --}}
-                                @if (Auth::user()->peran == 'anggota')
-                                    {{ route('anggota.dashboard') }}
-                                @elseif (Auth::user()->peran == 'komandan')
-                                    {{ route('komandan.dashboard') }}
-                                @elseif (Auth::user()->peran == 'bau')
-                                    {{ route('bau.dashboard') }}
-                                @else
-                                    {{-- Fallback jika peran tidak dikenal --}}
-                                    {{ url('/') }}
-                                @endif
-                            @else
-                                {{-- Pengguna adalah tamu (belum login), arahkan ke halaman login --}}
-                                {{ route('login') }}
-                            @endauth
-                        " class="bg-white p-2 rounded-full shadow">
+                        <a href="{{ route($homeRoute) }}" class="bg-white p-2 rounded-full shadow">
                             <img src="{{ asset('images/logo-siap.png') }}" alt="Logo" class="w-6 h-6">
                         </a>
                         
