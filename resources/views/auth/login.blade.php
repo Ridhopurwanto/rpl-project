@@ -9,7 +9,7 @@
 <div class="min-h-screen grid lg:grid-cols-2">
 
     <div class="hidden lg:flex flex-col items-center justify-center p-12 text-center
-                bg-gradient-to-b from-[#1a2847] via-[#243a5e] to-[#2a4a6f] text-white">
+                bg-gradient-to-b from-[#1a2847] via-[#243a5e] to-[#2a4a6f] text-white lg:rounded-r-3xl">
         
         {{-- ▼▼▼ PERBAIKAN: Logo bulat di Desktop (rounded-full) ▼▼▼ --}}
         <div class="relative w-64 h-64 bg-white rounded-full 
@@ -27,7 +27,7 @@
     <div class="min-h-screen flex items-center justify-center px-4 py-12 bg-gray-100 lg:bg-white">
 
         {{-- CARD UTAMA (KODE ASLI ANDA) --}}
-        <div class="w-full max-w-sm mx-auto shadow-2xl rounded-3xl overflow-hidden bg-white">
+        <div class="w-full max-w-sm mx-auto lg:shadow-2xl lg:rounded-3xl lg:overflow-hidden bg-white">
 
             {{-- 
               Header Card (Tampilan Mobile)
@@ -41,7 +41,6 @@
                     <img src="{{ asset('images/logo-siap.png') }}" alt="Logo SIAP" class="w-20 h-20 z-10">
                 </div>
                 
-                {{-- ▼▼▼ PERBAIKAN: Jarak (gap) di Mobile (mt-40 pt-2) ▼▼▼ --}}
                 <h1 class="text-white text-5xl font-bold mt-5 pt-2 tracking-wide">SIAP</h1>
                 <p class="text-gray-300 text-xs mt-2 tracking-wider px-4">
                     Sistem Informasi Administrasi dan Pelaporan
