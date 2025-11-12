@@ -43,7 +43,7 @@
         {{-- Bagian Kiri: Teks Selamat Datang --}}
         <div>
             <p class="text-sm">SELAMAT DATANG,</p>
-            <h2 class="text-xl font-bold">{{ Auth::user()->username }}</h2>
+            <h2 class="text-xl font-bold">{{ Auth::user()->nama_lengkap }}</h2>
         </div>
 
         {{-- Bagian Kanan: Tanggal & Waktu (bertumpuk) --}}
