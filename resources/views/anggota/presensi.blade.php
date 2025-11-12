@@ -1,8 +1,8 @@
-@extends('layouts.anggota.app')
+@extends('layouts.app')
 
 {{-- 1. Ganti Tombol Header & Warnanya --}}
 @section('header-left')
-    <a href="{{ route('anggota.presensi') }}" class="bg-[#2a4a6f] text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md">
+    <a href="{{ route('anggota.presensi.index') }}" class="bg-[#2a4a6f] text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md">
         PRESENSI
     </a>
 @endsection

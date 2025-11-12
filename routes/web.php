@@ -6,26 +6,28 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\PatroliController;
 use App\Http\Controllers\KendaraanController;
-use App\Http\Controllers\Anggota\PresensiController as anggotaPresensiController;
-use App\Http\Controllers\Anggota\PatroliController as anggotaPatroliController;
+use App\Http\Controllers\Anggota\PresensiController as AnggotaPresensiController;
+use App\Http\Controllers\Anggota\PatroliController as AnggotaPatroliController;
 
+// Rute untuk tamu (belum login)
+Route::middleware('guest')->group(function () {
+    Route::get('login', [AuthenticatedSessionController::class, 'create'])
+        ->name('login');
+
+    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+});
+
+// Rute utama (akan me-redirect jika sudah login)
 Route::get('/', function () {
     if (Auth::check()) {
-        // Ambil role user
-        // PERBAIKAN: Gunakan 'peran' sesuai AuthenticatedSessionController
-        $peran = Auth::user()->peran; 
+        $peran = Auth::user()->peran;
 
-        // --- LOGIKA BARU ---
-        // Cek peran dan redirect
         if ($peran == 'komandan') {
             return redirect()->route('komandan.pilih-role');
-        
         } elseif ($peran == 'anggota') {
             return redirect()->route('anggota.dashboard');
-        
         } elseif ($peran == 'bau') {
             return redirect()->route('bau.dashboard');
-        
         } else {
             Auth::logout();
             return redirect()->route('login')->with('error', 'Peran tidak dikenal.');
@@ -34,130 +36,89 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Rute untuk tamu (belum login)
-Route::middleware('guest')->group(function () {
-    Route::get('login', [AuthenticatedSessionController::class, 'create'])
-                ->name('login');
-
-    Route::post('login', [AuthenticatedSessionController::class, 'store']);
-});
 
 // Rute untuk yang sudah login
 Route::middleware('auth')->group(function () {
-    
-    // --- ROUTE UNTUK KOMANDAN ---
-    Route::get('/komandan/pilih-role', function () {
-        return view('komandan.pilih-role'); // File blade dari
-    })->name('komandan.pilih-role');
 
-    Route::get('/komandan/dashboard', function () {
-        return view('komandan.dashboard'); // File yang akan kita buat
-    })->name('komandan.dashboard');
+    // --- RUTE UNTUK ANGGOTA ---
+    Route::prefix('anggota')->name('anggota.')->group(function () {
+        
+        Route::get('/dashboard', function () {
+            return view('anggota.dashboard');
+        })->name('dashboard');
 
-    // Halaman Laporan Patroli (GET)
-    Route::get('/patroli', [PatroliController::class, 'index'])
-         ->name('komandan.patroli');
+        // Presensi Anggota
+        Route::get('/presensi', [AnggotaPresensiController::class, 'index'])
+            ->name('presensi.index'); // DIUBAH: Dulu 'anggota.presensi'
+        Route::get('/presensi/create', [AnggotaPresensiController::class, 'create'])
+            ->name('presensi.create');
+        Route::post('/presensi', [AnggotaPresensiController::class, 'store'])
+            ->name('presensi.store');
 
-    // Proses Update Laporan Patroli (PUT/PATCH)
-    Route::put('/patroli/{id}', [PatroliController::class, 'update'])
-         ->name('komandan.patroli.update');
+        // Patroli Anggota
+        Route::get('/patroli', [AnggotaPatroliController::class, 'index'])
+            ->name('patroli.index');
+        Route::get('/patroli/create-session', [AnggotaPatroliController::class, 'createSession'])
+            ->name('patroli.createSession');
+        Route::get('/patroli/create-checkpoint', [AnggotaPatroliController::class, 'createCheckpoint'])
+            ->name('patroli.createCheckpoint');
+        Route::post('/patroli/store-checkpoint', [AnggotaPatroliController::class, 'storeCheckpoint'])
+            ->name('patroli.storeCheckpoint');
+        Route::post('/patroli/submit-session', [AnggotaPatroliController::class, 'submitSession'])
+            ->name('patroli.submitSession');
+    });
 
-    // Proses Hapus Laporan Patroli (DELETE)
-    Route::delete('/patroli/{id}', [PatroliController::class, 'destroy'])
-         ->name('komandan.patroli.destroy');
+    // --- RUTE UNTUK KOMANDAN (CRUD & Manajemen) ---
+    Route::prefix('komandan')->name('komandan.')->group(function () {
+        
+        Route::get('/pilih-role', function () {
+            return view('komandan.pilih-role');
+        })->name('pilih-role');
 
-    // --- ROUTE UNTUK ANGGOTA ---
-    Route::get('/anggota/dashboard', function () {
-        return view('anggota.dashboard'); // File asli Anda
-    })->name('anggota.dashboard');
+        Route::get('/dashboard', function () {
+            return view('komandan.dashboard');
+        })->name('dashboard');
 
-    Route::get('/anggota/presensi', [PresensiController::class, 'createForAnggota'])
-         ->name('anggota.presensi');
-    Route::post('/anggota/presensi', [PresensiController::class, 'storeForAnggota'])
-         ->name('anggota.presensi.store');
+        Route::get('/presensi', [PresensiController::class, 'index'])
+            ->name('presensi'); // NAMA DIUBAH agar jelas
 
-         
-    // --- ROUTE UNTUK BAU ---
-    Route::get('/bau/dashboard', function () {
-        return view('bau.dashboard'); // File yang akan kita buat
-    })->name('bau.dashboard');
+        Route::get('/patroli', [PatroliController::class, 'index'])
+            ->name('patroli'); // NAMA DIUBAH agar jelas
 
+        Route::get('/kendaraan', [KendaraanController::class, 'index'])
+            ->name('kendaraan'); // NAMA DIUBAH agar jelas
 
-    // --- RUTE LAPORAN (UNTUK KOMANDAN & BAU) ---
-    Route::get('/presensi', [PresensiController::class, 'index'])
-         ->name('komandan.presensi');
-
-    // --- RUTE CRUD (HANYA UNTUK KOMANDAN) ---
-    Route::delete('/presensi/{id_presensi}', [PresensiController::class, 'destroy'])
-         ->name('komandan.presensi.destroy');
-
-    // Rute untuk menyimpan perubahan (update)
-    Route::put('/presensi/{id_presensi}', [PresensiController::class, 'update'])
-         ->name('komandan.presensi.update');
-    
-        // --- LAPORAN KENDARAAN (KOMANDAN & BAU) ---
-    Route::get('/kendaraan', [KendaraanController::class, 'index'])
-         ->name('komandan.kendaraan');
-    
-    // --- CRUD KENDARAAN (HANYA KOMANDAN) ---
+        // CRUD Patroli
+        Route::put('/patroli/{id}', [PatroliController::class, 'update'])
+            ->name('patroli.update');
+        Route::delete('/patroli/{id}', [PatroliController::class, 'destroy'])
+            ->name('patroli.destroy');
+        
+        // CRUD Presensi
+        Route::delete('/presensi/{id_presensi}', [PresensiController::class, 'destroy'])
+            ->name('presensi.destroy');
+        Route::put('/presensi/{id_presensi}', [PresensiController::class, 'update'])
+            ->name('presensi.update');
+        
+        // CRUD Kendaraan
         Route::put('/kendaraan/log/{id_log}/update-keterangan', [KendaraanController::class, 'updateKeterangan'])
-         ->name('komandan.kendaraan.log.updateKeterangan');
-    Route::get('/kendaraan/master/{id_kendaraan}/edit', [KendaraanController::class, 'editMaster'])
-         ->name('komandan.kendaraan.master.edit');
-    Route::put('/kendaraan/master/{id_kendaraan}', [KendaraanController::class, 'updateMaster'])
-         ->name(name: 'komandan.kendaraan.master.update');
-    Route::delete('/kendaraan/master/{id_kendaraan}', [KendaraanController::class, 'destroyMaster'])
-         ->name('komandan.kendaraan.master.destroy');
+            ->name('kendaraan.log.updateKeterangan');
+        Route::get('/kendaraan/master/{id_kendaraan}/edit', [KendaraanController::class, 'editMaster'])
+            ->name('kendaraan.master.edit');
+        Route::put('/kendaraan/master/{id_kendaraan}', [KendaraanController::class, 'updateMaster'])
+            ->name('kendaraan.master.update');
+        Route::delete('/kendaraan/master/{id_kendaraan}', [KendaraanController::class, 'destroyMaster'])
+            ->name('kendaraan.master.destroy');
+    });
 
-// ----- ANGGOTA -----
-    // Rute baru (GET) untuk menampilkan halaman
-    Route::get('/anggota/presensi', [anggotaPresensiController::class, 'index'])
-         ->name('anggota.presensi');
+    // --- RUTE UNTUK BAU ---
+    Route::prefix('bau')->name('bau.')->group(function () {
+        Route::get('/dashboard', function () {
+            return view('bau.dashboard');
+        })->name('dashboard');
+    });
 
-    // Rute BARU (GET) untuk menampilkan halaman "Ambil Gambar"
-    Route::get('/anggota/presensi/create', [anggotaPresensiController::class, 'create'])
-         ->name('anggota.presensi.create');
-         
-    // Rute baru (POST) untuk tombol '+' (check-in/out)
-    Route::post('/anggota/presensi', [anggotaPresensiController::class, 'store'])
-         ->name('anggota.presensi.store');
-
-    // Rute baru (GET) untuk menampilkan halaman
-    Route::get('/anggota/presensi', [anggotaPresensiController::class, 'index'])
-         ->name('anggota.presensi');
-
-    // Rute BARU (GET) untuk menampilkan halaman "Ambil Gambar"
-    Route::get('/anggota/presensi/create', [anggotaPresensiController::class, 'create'])
-         ->name('anggota.presensi.create');
-         
-    // Rute baru (POST) untuk tombol '+' (check-in/out)
-    Route::post('/anggota/presensi', [anggotaPresensiController::class, 'store'])
-         ->name('anggota.presensi.store');
-
-    /* --- RUTS PATROLI --- */
-    // Halaman utama (daftar)
-     // 1. Halaman Daftar Patroli (yang sudah ada)
-     Route::get('/anggota/patroli', [AnggotaPatroliController::class, 'index'])
-          ->name('anggota.patroli.index');
-
-     // 2. Halaman "Hub" / Grid 17 Area (Gambar 1)
-     //    Ini yang dipanggil tombol +
-     Route::get('/anggota/patroli/create-session', [AnggotaPatroliController::class, 'createSession'])
-          ->name('anggota.patroli.createSession');
-
-     // 3. Halaman "Kamera" untuk 1 area (Gambar 2)
-     Route::get('/anggota/patroli/create-checkpoint', [AnggotaPatroliController::class, 'createCheckpoint'])
-          ->name('anggota.patroli.createCheckpoint');
-
-     // 4. Aksi 'POST' untuk menyimpan 1 foto area
-     Route::post('/anggota/patroli/store-checkpoint', [AnggotaPatroliController::class, 'storeCheckpoint'])
-          ->name('anggota.patroli.storeCheckpoint');
-
-     // Untuk men-submit keseluruhan 17 area
-     Route::post('/anggota/patroli/submit-session', [AnggotaPatroliController::class, 'submitSession'])
-          ->name('anggota.patroli.submitSession');
-
-    // Route Logout
+    // --- RUTE LOGOUT ---
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
-                ->name('logout');
+        ->name('logout');
 });

@@ -1,5 +1,5 @@
 {{-- Menggunakan layout 'app' yang baru saja diperbarui --}}
-@extends('layouts.anggota.app')
+@extends('layouts.app')
 
 @section('content')
 <div class="w-full">
@@ -86,7 +86,7 @@
         @endphp
 
         {{-- Panggil helper untuk setiap tombol --}}
-        {!! renderMenuButton('PRESENSI', route('anggota.presensi')) !!}
+        {!! renderMenuButton('PRESENSI', route('anggota.presensi.index')) !!}
         {!! renderMenuButton('PATROLI', route('anggota.patroli.index')) !!}
         {!! renderMenuButton('KENDARAAN') !!}
         {!! renderMenuButton('TAMU') !!}

@@ -170,7 +170,7 @@ class PresensiController extends Controller
         }
         
         // 7. Redirect kembali ke halaman daftar presensi
-        return redirect()->route('anggota.presensi')
+        return redirect()->route('anggota.presensi.index')
                          ->with('success', 'Presensi berhasil dicatat!');
     }
 }
