@@ -215,7 +215,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="py-4 px-4 text-center text-gray-500">
+                        <td colspan="7" class="py-4 px-4 text-center text-gray-500">
                             Tidak ada data presensi pulang pada tanggal ini.
                         </td>
                     </tr>
