@@ -23,12 +23,14 @@ class LogKendaraan extends Model
     public $timestamps = true;
 
     protected $fillable = [
-        'id_kendaraan',
-        'id_pengguna',
+        'kendaraan_id',
+        'nopol',
+        'pemilik',
+        'tipe',
+        'keterangan',
         'waktu_masuk',
         'waktu_keluar',
-        'keterangan', // 'menginap' atau 'tidak menginap'
-        'tanggal',
+        'status',
     ];
 
     /**

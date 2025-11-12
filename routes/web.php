@@ -9,6 +9,7 @@ use App\Http\Controllers\KendaraanController;
 use App\Http\Controllers\Anggota\PresensiController as AnggotaPresensiController;
 use App\Http\Controllers\Anggota\PatroliController as AnggotaPatroliController;
 use App\Http\Controllers\RoleSwitchController;
+use App\Http\Controllers\Anggota\KendaraanController as AnggotaKendaraanController;
 
 // Rute untuk tamu (belum login)
 Route::middleware('guest')->group(function () {
@@ -67,6 +68,23 @@ Route::middleware('auth')->group(function () {
             ->name('patroli.storeCheckpoint');
         Route::post('/patroli/submit-session', [AnggotaPatroliController::class, 'submitSession'])
             ->name('patroli.submitSession');
+
+        // --- RUTE KENDARAAN ANGGOTA ---
+        Route::get('/kendaraan', [AnggotaKendaraanController::class, 'index'])
+            ->name('kendaraan.index');
+        // Rute untuk tombol + (menampilkan form check-in)
+        Route::get('/kendaraan/create', [AnggotaKendaraanController::class, 'create'])
+            ->name('kendaraan.create');
+        // Rute untuk menyimpan data check-in
+        Route::post('/kendaraan', [AnggotaKendaraanController::class, 'store'])
+            ->name('kendaraan.store');
+        // Rute untuk tombol "KELUAR" (memproses check-out)
+        Route::put('/kendaraan/checkout/{id}', [AnggotaKendaraanController::class, 'checkout'])
+            ->name('kendaraan.checkout');
+        Route::put('/kendaraan/{id_kendaraan_log}/update-keterangan', [AnggotaKendaraanController::class, 'updateKeterangan'])
+            ->name('kendaraan.updateKeterangan');
+        Route::get('/kendaraan/search-nopol', [AnggotaKendaraanController::class, 'searchNopol'])
+         ->name('kendaraan.searchNopol');
     });
 
     // --- RUTE UNTUK KOMANDAN (CRUD & Manajemen) ---

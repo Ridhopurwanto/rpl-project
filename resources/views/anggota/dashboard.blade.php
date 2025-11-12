@@ -88,7 +88,7 @@
         {{-- Panggil helper untuk setiap tombol --}}
         {!! renderMenuButton('PRESENSI', route('anggota.presensi.index')) !!}
         {!! renderMenuButton('PATROLI', route('anggota.patroli.index')) !!}
-        {!! renderMenuButton('KENDARAAN') !!}
+        {!! renderMenuButton('KENDARAAN', route('anggota.kendaraan.index')) !!}
         {!! renderMenuButton('TAMU') !!}
         {!! renderMenuButton('BARANG') !!}
         {!! renderMenuButton('GANGGUAN KAMTIBMAS') !!}
