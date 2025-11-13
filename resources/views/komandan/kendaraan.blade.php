@@ -87,8 +87,8 @@
                     @forelse($riwayat as $index => $log)
                     <tr>
                         <td class="py-2 px-4">{{ $index + 1 }}.</td>
-                        <td class="py-2 px-4 font-medium">{{ $log->kendaraan->nomor_plat ?? 'N/A' }}</td>
-                        <td class="py-2 px-4">{{ $log->kendaraan->pemilik ?? 'N/A' }}</td>
+                        <td class="py-2 px-4 font-medium">{{ $log->nopol ?? 'N/A' }}</td>
+                        <td class="py-2 px-4">{{ $log->pemilik ?? 'N/A' }}</td>
                         <td class="py-2 px-4">{{ $log->waktu_masuk ? $log->waktu_masuk->format('H:i:s') : '-' }}</td>
                         <td class="py-2 px-4">{{ $log->waktu_keluar ? $log->waktu_keluar->format('H:i:s') : '-' }}</td>
                         <td class="py-2 px-4">

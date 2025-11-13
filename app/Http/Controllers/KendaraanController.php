@@ -22,7 +22,7 @@ class KendaraanController extends Controller
         $tipeFilter = $request->input('tipe'); // 'Roda 2' atau 'Roda 4'
 
         $queryRiwayat = LogKendaraan::with('kendaraan', 'pengguna')
-                            ->whereDate('tanggal', $tanggalFilter);
+                            ->whereDate('waktu_masuk', $tanggalFilter);
 
         if ($tipeFilter) {
             $queryRiwayat->whereHas('kendaraan', function ($q) use ($tipeFilter) {
