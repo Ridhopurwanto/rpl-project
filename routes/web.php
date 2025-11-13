@@ -10,6 +10,8 @@ use App\Http\Controllers\Anggota\PresensiController as AnggotaPresensiController
 use App\Http\Controllers\Anggota\PatroliController as AnggotaPatroliController;
 use App\Http\Controllers\RoleSwitchController;
 use App\Http\Controllers\Anggota\KendaraanController as AnggotaKendaraanController;
+use App\Http\Controllers\Anggota\TamuController as AnggotaTamuController;
+use App\Http\Controllers\Anggota\GangguanKamtibmasController as AnggotaGangguanKamtibmasController;
 
 // Rute untuk tamu (belum login)
 Route::middleware('guest')->group(function () {
@@ -85,6 +87,26 @@ Route::middleware('auth')->group(function () {
             ->name('kendaraan.updateKeterangan');
         Route::get('/kendaraan/search-nopol', [AnggotaKendaraanController::class, 'searchNopol'])
          ->name('kendaraan.searchNopol');
+
+         // --- RUTE TAMU ---
+        Route::get('/tamu', [AnggotaTamuController::class, 'index'])
+            ->name('tamu.index');
+            
+        Route::get('/tamu/create', [AnggotaTamuController::class, 'create'])
+            ->name('tamu.create');
+            
+        Route::post('/tamu', [AnggotaTamuController::class, 'store'])
+            ->name('tamu.store');
+
+        // --- RUTE GANGGUAN KAMTIBMAS ---
+        Route::get('/gangguan-kamtibmas', [AnggotaGangguanKamtibmasController::class, 'index'])
+            ->name('gangguan.index');
+            
+        Route::get('/gangguan-kamtibmas/create', [AnggotaGangguanKamtibmasController::class, 'create'])
+            ->name('gangguan.create');
+            
+        Route::post('/gangguan-kamtibmas', [AnggotaGangguanKamtibmasController::class, 'store'])
+            ->name('gangguan.store');
     });
 
     // --- RUTE UNTUK KOMANDAN (CRUD & Manajemen) ---

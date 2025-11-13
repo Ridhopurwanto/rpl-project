@@ -89,7 +89,7 @@
         {!! renderMenuButton('PRESENSI', route('anggota.presensi.index')) !!}
         {!! renderMenuButton('PATROLI', route('anggota.patroli.index')) !!}
         {!! renderMenuButton('KENDARAAN', route('anggota.kendaraan.index')) !!}
-        {!! renderMenuButton('TAMU') !!}
+        {!! renderMenuButton('TAMU', route('anggota.tamu.index')) !!}
         {!! renderMenuButton('BARANG') !!}
         {!! renderMenuButton('GANGGUAN KAMTIBMAS') !!}
 
