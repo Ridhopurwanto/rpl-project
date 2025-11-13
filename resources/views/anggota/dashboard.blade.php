@@ -91,7 +91,7 @@
         {!! renderMenuButton('KENDARAAN', route('anggota.kendaraan.index')) !!}
         {!! renderMenuButton('TAMU', route('anggota.tamu.index')) !!}
         {!! renderMenuButton('BARANG') !!}
-        {!! renderMenuButton('GANGGUAN KAMTIBMAS') !!}
+        {!! renderMenuButton('GANGGUAN KAMTIBMAS',  route('anggota.gangguan.index')) !!}
 
     </div>
 </div>
