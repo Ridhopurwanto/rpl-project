@@ -158,34 +158,24 @@ class BarangController extends Controller
      */
     public function selesaiTitipan(Request $request, $id_barang)
     {
+        // PERUBAHAN: Validasi foto base64 dihapus
         $request->validate([
             'nama_penerima' => 'required|string|max:255',
-            'foto_penerima_base64' => 'required|string', // <-- Validasi Base64
             'tanggal_selesai_manual' => 'required|date',
             'waktu_selesai_jam_manual' => 'required|date_format:H:i',
         ]);
 
         $barang = BarangTitipan::findOrFail($id_barang);
         
-        // Logika konversi Base64 ke File
-        $pathFotoPenerima = null;
-        if ($request->foto_penerima_base64) {
-            list($type, $data) = explode(';', $request->foto_penerima_base64);
-            list(, $data) = explode(',', $data);
-            $imageData = base64_decode($data);
-            
-            $filename = 'foto_penerima/' . Str::random(20) . '.jpg';
-            Storage::disk('public')->put($filename, $imageData);
-            $pathFotoPenerima = $filename;
-        }
-
+        // PERUBAHAN: Logika konversi Base64 ke File DIHAPUS
+        
         $waktu_selesai_gabungan = Carbon::parse($request->tanggal_selesai_manual . ' ' . $request->waktu_selesai_jam_manual);
 
         $barang->update([
             'status' => 'selesai',
             'waktu_selesai' => $waktu_selesai_gabungan,
             'nama_penerima' => $request->nama_penerima,
-            'foto_penerima' => $pathFotoPenerima,
+            'foto_penerima' => null, // PERUBAHAN: Dibuat null
         ]);
 
         return redirect()->route('anggota.barang.index')
@@ -197,37 +187,27 @@ class BarangController extends Controller
      */
     public function selesaiTemuan(Request $request, $id_barang)
     {
+        // PERUBAHAN: Validasi foto base64 dihapus
         $request->validate([
             'nama_penerima' => 'required|string|max:255',
-            'foto_penerima_base64' => 'required|string', // <-- Validasi Base64
             'tanggal_selesai_manual' => 'required|date',
             'waktu_selesai_jam_manual' => 'required|date_format:H:i',
         ]);
 
-        $barang = BarangTemuan::findOrFail($id_barang);
-
-        // Logika konversi Base64 ke File
-        $pathFotoPenerima = null;
-        if ($request->foto_penerima_base64) {
-            list($type, $data) = explode(';', $request->foto_penerima_base64);
-            list(, $data) = explode(',', $data);
-            $imageData = base64_decode($data);
-            
-            $filename = 'foto_penerima/' . Str::random(20) . '.jpg';
-            Storage::disk('public')->put($filename, $imageData);
-            $pathFotoPenerima = $filename;
-        }
-
+        $barang = BarangTitipan::findOrFail($id_barang);
+        
+        // PERUBAHAN: Logika konversi Base64 ke File DIHAPUS
+        
         $waktu_selesai_gabungan = Carbon::parse($request->tanggal_selesai_manual . ' ' . $request->waktu_selesai_jam_manual);
 
         $barang->update([
             'status' => 'selesai',
             'waktu_selesai' => $waktu_selesai_gabungan,
             'nama_penerima' => $request->nama_penerima,
-            'foto_penerima' => $pathFotoPenerima,
+            'foto_penerima' => null, // PERUBAHAN: Dibuat null
         ]);
 
         return redirect()->route('anggota.barang.index')
-                         ->with('success', 'Barang temuan telah ditandai selesai.');
+                         ->with('success', 'Barang titipan telah ditandai selesai.');
     }
 }
