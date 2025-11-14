@@ -90,7 +90,7 @@
         {!! renderMenuButton('PATROLI', route('anggota.patroli.index')) !!}
         {!! renderMenuButton('KENDARAAN', route('anggota.kendaraan.index')) !!}
         {!! renderMenuButton('TAMU', route('anggota.tamu.index')) !!}
-        {!! renderMenuButton('BARANG') !!}
+        {!! renderMenuButton('BARANG', route('anggota.barang.index')) !!}
         {!! renderMenuButton('GANGGUAN KAMTIBMAS',  route('anggota.gangguan.index')) !!}
 
     </div>

@@ -18,14 +18,7 @@ return new class extends Migration
             $table->string('lokasi');
             $table->string('foto');
             $table->text('deskripsi');
-            $table->enum('kategori', [
-                'Unjuk Rasa',
-                'Pembakaran Lahan',
-                'Bentrokan Kepolisian',
-                'Kriminalitas',
-                'Kecelakaan',
-                'Lainnya'
-            ])->default('Lainnya');
+            $table->enum('kategori', ['Unjuk Rasa', 'Pembakaran Lahan', 'Bentrokan Kepolisian', 'Kriminalitas', 'Kecelakaan', 'Lainnya'])->default('Lainnya');
             $table->timestamps();
         });
     }

@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
         DB::table('barang_temu')->truncate();
         DB::table('barang_titip')->truncate();
         DB::table('gangguan_kamtibmas')->truncate();
+        DB::table('barang')->truncate();
 
         //    BARU KOSONGKAN TABEL INDUK (PARENT)
         //    (Tabel yang jadi referensi foreign key)
@@ -49,6 +50,7 @@ class DatabaseSeeder extends Seeder
             BarangTemuSeeder::class,
             BarangTitipSeeder::class,
             GangguanKamtibmasSeeder::class,
+            BarangSeeder::class,
         ]);
     }
 }

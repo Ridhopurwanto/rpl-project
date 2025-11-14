@@ -12,6 +12,7 @@ use App\Http\Controllers\RoleSwitchController;
 use App\Http\Controllers\Anggota\KendaraanController as AnggotaKendaraanController;
 use App\Http\Controllers\Anggota\TamuController as AnggotaTamuController;
 use App\Http\Controllers\Anggota\GangguanKamtibmasController as AnggotaGangguanKamtibmasController;
+use App\Http\Controllers\Anggota\BarangController as AnggotaBarangController;
 
 // Rute untuk tamu (belum login)
 Route::middleware('guest')->group(function () {
@@ -107,6 +108,21 @@ Route::middleware('auth')->group(function () {
             
         Route::post('/gangguan-kamtibmas', [AnggotaGangguanKamtibmasController::class, 'store'])
             ->name('gangguan.store');
+
+        // --- RUTE BARANG ---
+        Route::get('/barang', [AnggotaBarangController::class, 'index'])
+             ->name('barang.index');
+             
+        Route::get('/barang/create', [AnggotaBarangController::class, 'create'])
+             ->name('barang.create');
+             
+        Route::post('/barang', [AnggotaBarangController::class, 'store'])
+             ->name('barang.store');
+             
+        // Rute untuk tombol "Selesai"
+        Route::put('/barang/{id_barang}/selesai', [AnggotaBarangController::class, 'selesai'])
+             ->name('barang.selesai')
+             ->whereNumber('id_barang');
     });
 
     // --- RUTE UNTUK KOMANDAN (CRUD & Manajemen) ---

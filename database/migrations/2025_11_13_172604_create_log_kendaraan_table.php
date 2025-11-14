@@ -9,28 +9,18 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    // ..._create_log_kendaraans_table.php
-    public function up()
+    public function up(): void
     {
         Schema::create('log_kendaraan', function (Blueprint $table) {
             $table->bigIncrements('id_log');
-            
-            // Link ke tabel master, BISA NULL (jika tidak terdaftar)
-            $table->unsignedBigInteger('id_kendaraan')->nullable();
-            
-            // Data duplikat (tetap dicatat meski tidak ada di master)
+            $table->unsignedBigInteger('id_kendaraan')->nullable()->index('log_kendaraan_id_kendaraan_foreign');
             $table->string('nopol');
             $table->string('pemilik');
             $table->string('tipe');
-            
-            // Keterangan yang bisa diedit (sesuai permintaan Anda)
-            $table->string('keterangan'); // "Menginap" atau "Tidak Menginap"
-            
-            // Waktu & Status
+            $table->string('keterangan');
             $table->dateTime('waktu_masuk');
             $table->dateTime('waktu_keluar')->nullable();
-            $table->string('status')->default('Masuk'); // "Masuk" atau "Keluar"
-            
+            $table->string('status')->default('Masuk');
             $table->timestamps();
         });
     }
