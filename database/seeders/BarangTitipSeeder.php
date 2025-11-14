@@ -17,15 +17,32 @@ class BarangTitipSeeder extends Seeder
 
         DB::table('barang_titip')->insert([
             [
-                'nama_penitip' => 'Kurir AnterAja',
-                'id_pengguna' => 2, // Diterima Anggota 1
-                'waktu_titip' => Carbon::now()->subMinutes(30),
+                'id_pengguna' => 2,
+                'nama_barang' => 'Paket Shopee',
+                'nama_penitip' => 'J&T Express', // <-- Kolom baru
+                'tujuan' => 'Kessya (Kamar 201)', // <-- Kolom baru
+                'waktu_titip' => Carbon::now()->subHours(2),
                 'waktu_selesai' => null,
+                'nama_penerima' => null,
                 'status' => 'belum selesai',
-                'foto' => 'titipan/paket_1.jpg',
-                'catatan' => 'Paket untuk Bp. Komandan, ditaruh di pos jaga',
+                'foto' => 'foto_barang/sample_paket.jpg',
+                'catatan' => 'Box Coklat',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
+            ],
+            [
+                'id_pengguna' => 2,
+                'nama_barang' => 'Makanan (GoFood)',
+                'nama_penitip' => 'Driver Gojek', // <-- Kolom baru
+                'tujuan' => 'Arkan (Kamar 305)', // <-- Kolom baru
+                'waktu_titip' => Carbon::today()->addHours(10),
+                'waktu_selesai' => Carbon::today()->addHours(10)->addMinutes(15),
+                'nama_penerima' => 'Arkan',
+                'status' => 'selesai',
+                'foto' => null,
+                'catatan' => 'Ayam Geprek',
+                'created_at' => Carbon::today()->addHours(10),
+                'updated_at' => Carbon::today()->addHours(10)->addMinutes(15),
             ],
         ]);
     }

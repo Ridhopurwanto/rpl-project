@@ -1,13 +1,101 @@
 @extends('layouts.app')
 
 @section('content')
+{{-- 
+  Setup Alpine.js untuk semua state halaman:
+  1. photoModal...: Untuk modal "Lihat Foto"
+  2. selesaiModalOpen, selesaiFormAction: Untuk modal "Selesai"
+  3. Logika Kamera (cameraState, stream, imageBase64): Untuk modal "Selesai"
+  4. Properti Form (namaPenerima, dll): Untuk data di modal "Selesai"
+--}}
 <div class="w-full min-h-screen bg-slate-100 p-4 pb-32" 
      x-data="{ 
         photoModalOpen: false, 
         photoModalImage: '',
+        
         selesaiModalOpen: false,
-        selesaiFormAction: ''
-     }">
+        selesaiFormAction: '',
+        
+        // State untuk Kamera di Modal Selesai
+        cameraState: 'idle', // 'idle', 'camera', 'preview'
+        stream: null,
+        imageBase64: '', // Akan menyimpan data foto Base64
+        
+        // Properti untuk Form Selesai
+        namaPenerima: '',
+        tanggalSelesai: '{{ now()->format('Y-m-d') }}',
+        waktuSelesai: '{{ now()->format('H:i') }}',
+        
+        // --- Fungsi Kamera (diadaptasi dari 'gangguan') ---
+
+        startSelesaiCamera() {
+            this.cameraState = 'camera';
+            this.imageBase64 = '';
+            // Gunakan kamera depan ('user') untuk foto penerima
+            navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: 'user' }, 
+                audio: false 
+            })
+            .then(stream => {
+                this.stream = stream;
+                // Pastikan $refs sudah ada sebelum menggunakannya
+                if (this.$refs.selesaiVideoFeed) {
+                    this.$refs.selesaiVideoFeed.srcObject = stream;
+                }
+            })
+            .catch(err => {
+                console.error('Error accessing camera:', err);
+                alert('Tidak bisa mengakses kamera. Pastikan Anda memberi izin.');
+            });
+        },
+
+        stopSelesaiCamera() {
+            if (this.stream) {
+                this.stream.getTracks().forEach(track => track.stop());
+            }
+            this.stream = null;
+            this.cameraState = 'idle'; // Reset ke idle
+            this.imageBase64 = '';
+            this.namaPenerima = '';
+        },
+
+        takeSelesaiSnapshot() {
+            const video = this.$refs.selesaiVideoFeed;
+            const canvas = this.$refs.selesaiCanvas;
+            
+            if (!video || !canvas) return;
+            
+            // --- TAMBAHAN PENTING ---
+            // Periksa apakah metadata video sudah dimuat (dimensi > 0)
+            if (video.videoWidth === 0 || video.videoHeight === 0) {
+                // Beri tahu pengguna jika kamera belum siap
+                alert('Kamera belum siap. Harap tunggu sesaat dan coba lagi.');
+                // Hentikan eksekusi fungsi
+                return; 
+            }
+            // --- AKHIR TAMBAHAN ---
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            // Mirror (balik horizontal) kamera depan
+            const ctx = canvas.getContext('2d');
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            this.imageBase64 = canvas.toDataURL('image/jpeg', 0.8);
+            this.cameraState = 'preview';
+            this.stopSelesaiCamera(); // Otomatis matikan stream setelah foto
+        },
+
+        retakeSelesaiPhoto() {
+            this.startSelesaiCamera(); // Nyalakan lagi kameranya
+        }
+     }"
+     {{-- Matikan kamera jika pengguna pindah halaman (PENTING) --}}
+     @beforeunload.window="stopSelesaiCamera()"
+>
 
     {{-- 1. BAGIAN BARANG TITIPAN (AKTIF) --}}
     <details open class="mb-4">
@@ -15,14 +103,13 @@
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             BARANG TITIPAN :
         </summary>
-        
         <div class="bg-white rounded-lg shadow-md p-4 mt-2 overflow-x-auto">
             <table class="w-full min-w-[700px] text-sm text-left">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                     <tr>
                         <th class="py-3 px-4">No</th>
                         <th class="py-3 px-4">Tanggal</th>
-                        <th class="py-3 px-4">Nama Barang</th> {{-- Diperbarui --}}
+                        <th class="py-3 px-4">Nama Barang</th>
                         <th class="py-3 px-4">Penitip</th>
                         <th class="py-3 px-4">Tujuan</th>
                         <th class="py-3 px-4">Catatan</th>
@@ -33,16 +120,20 @@
                     @forelse($barang_titipan as $barang)
                     <tr class="bg-white hover:bg-gray-50">
                         <td class="py-3 px-4">{{ $loop->iteration }}.</td>
-                        <td class="py-3 px-4">{{ $barang->waktu_lapor->format('d/m/y') }}</td>
-                        <td class="py-3 px-4 font-medium">{{ $barang->nama_barang }}</td> {{-- Diperbarui --}}
-                        <td class="py-3 px-4">{{ $barang->nama_pelapor }}</td>
+                        <td class="py-3 px-4">{{ $barang->waktu_titip->format('d/m/y') }}</td>
+                        <td class="py-3 px-4 font-medium">{{ $barang->nama_barang }}</td>
+                        <td class="py-3 px-4">{{ $barang->nama_penitip }}</td>
                         <td class="py-3 px-4">{{ $barang->tujuan }}</td>
                         <td class="py-3 px-4">{{ $barang->catatan }}</td>
                         <td class="py-3 px-4 text-center">
+                            {{-- Tombol ini sekarang juga menyalakan kamera --}}
                             <button 
                                 @click.prevent="
                                     selesaiModalOpen = true; 
-                                    selesaiFormAction = '{{ route('anggota.barang.selesai', $barang->id_barang) }}'
+                                    selesaiFormAction = '{{ route('anggota.barang.selesaiTitipan', $barang->id_barang) }}';
+                                    tanggalSelesai = '{{ now()->format('Y-m-d') }}';
+                                    waktuSelesai = '{{ now()->format('H:i') }}';
+                                    $nextTick(() => startSelesaiCamera()); // Nyalakan kamera
                                 "
                                 class="bg-blue-600 text-white text-xs font-bold uppercase px-4 py-2 rounded-md shadow hover:bg-blue-700">
                                 Selesai
@@ -69,9 +160,9 @@
                     <tr>
                         <th class="py-3 px-4">No</th>
                         <th class="py-3 px-4">Tanggal</th>
-                        <th class="py-3 px-4">Nama Barang</th> {{-- Diperbarui --}}
+                        <th class="py-3 px-4">Nama Barang</th>
                         <th class="py-3 px-4">Pelapor</th>
-                        <th class="py-3 px-4">Lokasi Penemuan</th> {{-- Diperbarui --}}
+                        <th class="py-3 px-4">Lokasi Penemuan</th>
                         <th class="py-3 px-4">Catatan</th>
                         <th class="py-3 px-4 text-center">Aksi</th>
                     </tr>
@@ -81,15 +172,19 @@
                     <tr class="bg-white hover:bg-gray-50">
                         <td class="py-3 px-4">{{ $loop->iteration }}.</td>
                         <td class="py-3 px-4">{{ $barang->waktu_lapor->format('d/m/y') }}</td>
-                        <td class="py-3 px-4 font-medium">{{ $barang->nama_barang }}</td> {{-- Diperbarui --}}
+                        <td class="py-3 px-4 font-medium">{{ $barang->nama_barang }}</td>
                         <td class="py-3 px-4">{{ $barang->nama_pelapor }}</td>
-                        <td class="py-3 px-4">{{ $barang->lokasi_penemuan }}</td> {{-- Diperbarui --}}
+                        <td class="py-3 px-4">{{ $barang->lokasi_penemuan }}</td>
                         <td class="py-3 px-4">{{ $barang->catatan }}</td>
                         <td class="py-3 px-4 text-center">
+                            {{-- Tombol ini sekarang juga menyalakan kamera --}}
                             <button 
                                 @click.prevent="
                                     selesaiModalOpen = true; 
-                                    selesaiFormAction = '{{ route('anggota.barang.selesai', $barang->id_barang) }}'
+                                    selesaiFormAction = '{{ route('anggota.barang.selesaiTemuan', $barang->id_barang) }}';
+                                    tanggalSelesai = '{{ now()->format('Y-m-d') }}';
+                                    waktuSelesai = '{{ now()->format('H:i') }}';
+                                    $nextTick(() => startSelesaiCamera()); // Nyalakan kamera
                                 "
                                 class="bg-blue-600 text-white text-xs font-bold uppercase px-4 py-2 rounded-md shadow hover:bg-blue-700">
                                 Selesai
@@ -138,12 +233,13 @@
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                     <tr>
                         <th class="py-3 px-4">No</th>
-                        <th class="py-3 px-4">Foto</th>
-                        <th class="py-3 px-4">Nama Barang</th> {{-- Diperbarui --}}
+                        <th class="py-3 px-4">Foto Bar.</th>
+                        <th class="py-3 px-4">Nama Barang</th>
                         <th class="py-3 px-4">Pelapor/Penitip</th>
                         <th class="py-3 px-4">Lokasi/Tujuan</th>
                         <th class="py-3 px-4">Catatan</th>
                         <th class="py-3 px-4">Penerima</th>
+                        <th class="py-3 px-4">Foto Penerima</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y">
@@ -160,19 +256,40 @@
                                 class="text-blue-600 hover:underline">
                                 Buka
                             </button>
+                            @else - @endif
+                        </td>
+                        <td class="py-3 px-4 font-medium">{{ $barang->nama_barang }}</td>
+                        <td class="py-3 px-4">
+                            @if($barang instanceof \App\Models\BarangTitipan)
+                                {{ $barang->nama_penitip }}
                             @else
-                            -
+                                {{ $barang->nama_pelapor }}
                             @endif
                         </td>
-                        <td class="py-3 px-4 font-medium">{{ $barang->nama_barang }}</td> {{-- Diperbarui --}}
-                        <td class="py-3 px-4">{{ $barang->nama_pelapor }}</td>
-                        {{-- Logika diperbarui --}}
-                        <td class="py-3 px-4">{{ $barang->kategori == 'titip' ? $barang->tujuan : $barang->lokasi_penemuan }}</td>
+                        <td class="py-3 px-4">
+                            @if($barang instanceof \App\Models\BarangTitipan)
+                                {{ $barang->tujuan }}
+                            @else
+                                {{ $barang->lokasi_penemuan }}
+                            @endif
+                        </td>
                         <td class="py-3 px-4">{{ $barang->catatan }}</td>
                         <td class="py-3 px-4 font-semibold">{{ $barang->nama_penerima }}</td>
+                        <td class="py-3 px-4">
+                            @if($barang->foto_penerima)
+                            <button 
+                                @click.prevent="
+                                    photoModalOpen = true; 
+                                    photoModalImage = '{{ Storage::url($barang->foto_penerima) }}'
+                                "
+                                class="text-blue-600 hover:underline">
+                                Buka
+                            </button>
+                            @else - @endif
+                        </td>
                     </tr>
                     @empty
-                    <tr><td colspan="7" class="py-4 px-4 text-center text-gray-500">Tidak ada riwayat pada filter ini.</td></tr>
+                    <tr><td colspan="8" class="py-4 px-4 text-center text-gray-500">Tidak ada riwayat pada filter ini.</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -184,31 +301,16 @@
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
     </a>
 
-    {{-- 5. MODAL FOTO (POP-UP) --}}
-    <div 
-        x-show="photoModalOpen" 
-        x-transition:enter="ease-out duration-300"
-        x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100"
-        x-transition:leave="ease-in duration-200"
-        x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0"
-        class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50"
-        style="display: none;"
-    >
-        <div 
-            @click.outside="photoModalOpen = false"
-            class="bg-white rounded-lg shadow-xl w-full max-w-lg p-4 relative"
-        >
-            <button 
-                @click.prevent="photoModalOpen = false" 
-                class="absolute -top-4 -right-4 bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg text-2xl font-bold">&times;</button>
+    {{-- 5. MODAL FOTO (POP-UP) (Tetap Sama) --}}
+    <div x-show="photoModalOpen" style="display: none;" ...>
+        <div @click.outside="photoModalOpen = false" class="bg-white rounded-lg shadow-xl w-full max-w-lg p-4 relative">
+            <button @click.prevent="photoModalOpen = false" class="absolute -top-4 -right-4 ...">&times;</button>
             <h3 class="text-xl font-bold text-center mb-4">PHOTO</h3>
             <img :src="photoModalImage" alt="Foto Barang" class="w-full h-auto max-h-[70vh] object-contain">
         </div>
     </div>
 
-    {{-- 6. MODAL KONFIRMASI "SELESAI" --}}
+    {{-- 6. MODAL KONFIRMASI "SELESAI" (DIROMBAK TOTAL) --}}
     <div 
         x-show="selesaiModalOpen" 
         x-transition
@@ -216,24 +318,102 @@
         style="display: none;"
     >
         <div 
-            @click.outside="selesaiModalOpen = false"
-            class="bg-white rounded-lg shadow-xl w-full max-w-sm"
+            @click.outside="selesaiModalOpen = false; stopSelesaiCamera();"
+            class="bg-white rounded-lg shadow-xl w-full max-w-sm relative overflow-hidden"
         >
+            <button @click.prevent="selesaiModalOpen = false; stopSelesaiCamera();" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl font-bold z-10 p-1">&times;</button>
+            
             <form :action="selesaiFormAction" method="POST" class="p-6">
                 @csrf
                 @method('PUT')
-                <h3 class="text-lg font-bold text-gray-800 mb-4">Konfirmasi Pengambilan Barang</h3>
-                <p class="text-sm text-gray-600 mb-4">Silakan masukkan nama penerima barang sebelum menyelesaikan.</p>
-                <div>
-                    <label for="nama_penerima" class="block text-sm font-medium text-gray-700">Nama Penerima</label>
-                    <input type="text" name="nama_penerima" id="nama_penerima" required 
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                
+                {{-- Input tersembunyi untuk foto base64 --}}
+                <input type="hidden" name="foto_penerima_base64" x-model="imageBase64">
+                {{-- Canvas tersembunyi untuk snapshot --}}
+                <canvas x-ref="selesaiCanvas" class="hidden"></canvas>
+
+                <h3 class="text-xl font-bold text-gray-800 text-center mb-6">PENGAMBILAN BARANG</h3>
+                
+                {{-- Area Kamera Live --}}
+                <div class="mb-4 border-2 border-gray-300 border-dashed rounded-lg p-4 flex flex-col items-center justify-center bg-gray-50 h-48 relative overflow-hidden">
+                    
+                    {{-- Tampilan Video Live --}}
+                    <video 
+                        x-show="cameraState === 'camera'" 
+                        x-ref="selesaiVideoFeed" 
+                        autoplay playsinline 
+                        class="absolute inset-0 w-full h-full object-cover"
+                    ></video>
+
+                    {{-- Tampilan Preview Snapshot --}}
+                    <img 
+                        x-show="cameraState === 'preview'" 
+                        :src="imageBase64" 
+                        alt="Preview Foto Penerima" 
+                        class="absolute inset-0 w-full h-full object-cover"
+                        style="display: none;"
+                    >
+                    
+                    {{-- Tampilan Placeholder (Idle) --}}
+                    <div x-show="cameraState === 'idle'" class="text-center text-gray-400">
+                        <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <p class="mt-2 text-sm">Ambil Foto Penerima</p>
+                    </div>
                 </div>
-                <div class="mt-6 flex justify-end space-x-3">
-                    <button type="button" @click.prevent="selesaiModalOpen = false" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">
+
+                {{-- Tombol Aksi Kamera (dipindahkan ke sini) --}}
+                <div class="flex justify-center mb-6">
+                    <button 
+                        type="button" 
+                        x-show="cameraState === 'camera'"
+                        @click="takeSelesaiSnapshot()"
+                        class="bg-blue-600 text-white text-xs font-bold uppercase px-4 py-2 rounded-md shadow-lg hover:bg-blue-700 w-full sm:w-auto">
+                        AMBIL GAMBAR
+                    </button>
+                    <button 
+                        type="button" 
+                        x-show="cameraState === 'preview'"
+                        @click="retakeSelesaiPhoto()"
+                        style="display: none;"
+                        class="bg-blue-700 text-white text-xs font-bold uppercase px-4 py-2 rounded-md shadow-lg hover:bg-blue-800 w-full sm:w-auto">
+                        AMBIL ULANG FOTO
+                    </button>
+                </div>
+
+                {{-- Input Nama --}}
+                <div class="mb-4">
+                    <label for="nama_penerima" class="block text-sm font-semibold text-gray-700 mb-1">NAMA :</label>
+                    <input type="text" x-model="namaPenerima" name="nama_penerima" id="nama_penerima" required 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                </div>
+
+                {{-- Input Tanggal --}}
+                <div class="mb-4">
+                    <label for="tanggal_selesai_manual" class="block text-sm font-semibold text-gray-700 mb-1">TANGGAL :</label>
+                    <input type="date" x-model="tanggalSelesai" name="tanggal_selesai_manual" id="tanggal_selesai_manual" required 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                </div>
+
+                {{-- Input Waktu --}}
+                <div class="mb-6">
+                    <label for="waktu_selesai_jam_manual" class="block text-sm font-semibold text-gray-700 mb-1">WAKTU :</label>
+                    <input type="time" x-model="waktuSelesai" name="waktu_selesai_jam_manual" id="waktu_selesai_jam_manual" required 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                </div>
+
+                <div class="flex justify-end space-x-3">
+                    {{-- Tombol Batal --}}
+                    <button type="button" 
+                            @click.prevent="selesaiModalOpen = false; stopSelesaiCamera();" 
+                            class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">
                         Batal
                     </button>
-                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                    {{-- Tombol Submit, hanya aktif jika foto sudah diambil --}}
+                    <button 
+                        type="submit" 
+                        :disabled="cameraState !== 'preview'"
+                        :class="cameraState === 'preview' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'"
+                        class="text-white px-4 py-2 rounded-md">
                         Simpan & Selesai
                     </button>
                 </div>

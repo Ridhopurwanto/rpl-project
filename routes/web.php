@@ -120,9 +120,13 @@ Route::middleware('auth')->group(function () {
              ->name('barang.store');
              
         // Rute untuk tombol "Selesai"
-        Route::put('/barang/{id_barang}/selesai', [AnggotaBarangController::class, 'selesai'])
-             ->name('barang.selesai')
-             ->whereNumber('id_barang');
+        Route::put('/barang-titipan/{id_barang}/selesai', [AnggotaBarangController::class, 'selesaiTitipan'])
+         ->name('barang.selesaiTitipan')
+         ->whereNumber('id_barang');
+         
+        Route::put('/barang-temuan/{id_barang}/selesai', [AnggotaBarangController::class, 'selesaiTemuan'])
+            ->name('barang.selesaiTemuan')
+            ->whereNumber('id_barang');
     });
 
     // --- RUTE UNTUK KOMANDAN (CRUD & Manajemen) ---
