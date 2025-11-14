@@ -69,44 +69,23 @@
         <h3 class="text-xs font-semibold text-gray-500 uppercase">RIWAYAT :</h3>
         
         <div class="flex flex-col space-y-2 mt-2">
-            {{-- (BARU) Tombol Tanggal diganti jadi Form Input Date --}}
-            <form action="{{ route('anggota.presensi.index') }}" method="GET" class="flex items-center justify-between">
+            
+            {{-- 'space-x-2' diganti menjadi 'justify-between' --}}
+            <div class="flex items-center justify-between">
                 <label for="riwayat-tanggal" class="text-sm font-semibold text-gray-700">TANGGAL :</label>
-                <input type="date"
-                       id="riwayat-tanggal"
-                       name="tanggal"
-                       {{-- Isi nilainya dengan tanggal yang dipilih dari controller --}}
-                       value="{{ $tanggalTerpilih->format('Y-m-d') }}"
-                       {{-- Otomatis submit form saat tanggal diubah --}}
-                       onchange="this.form.submit()"
-                       {{-- Styling agar mirip tombol --}}
-                       class="bg-[#2a4a6f] text-white text-sm font-semibold px-4 py-2 rounded-full shadow-md border-none cursor-pointer"
-                       style="color-scheme: dark;"> {{-- (Agar ikon kalender putih) --}}
-            </form>
+                <button id="riwayat-tanggal" class="flex items-center justify-between bg-[#2a4a6f] text-white text-sm font-semibold px-4 py-2 rounded-full shadow-md">
+                    <span>10/10/2025</span>
+                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                </button>
+            </div>
             
-            {{-- (BARU) Logika untuk menampilkan shift hari ini --}}
-            @php
-                $namaShift = 'TIDAK ADA JADWAL';
-                $classShift = 'bg-gray-400 text-white'; // Default jika null
-                
-                if ($shiftHariIni === 'pagi') {
-                    $namaShift = 'SHIFT PAGI';
-                    $classShift = 'bg-yellow-400 text-black'; // Pagi
-                } elseif ($shiftHariIni === 'malam') {
-                    $namaShift = 'SHIFT MALAM';
-                    $classShift = 'bg-blue-400 text-white'; // Malam
-                } elseif ($shiftHariIni === 'off') {
-                    $namaShift = 'OFF';
-                    $classShift = 'bg-red-500 text-white'; // Off
-                }
-            @endphp
-            
-            {{-- Tombol Shift diganti jadi Tampilan Teks Dinamis --}}
+            {{-- 'space-x-2' diganti menjadi 'justify-between' --}}
             <div class="flex items-center justify-between">
                 <label for="riwayat-shift" class="text-sm font-semibold text-gray-700">JENIS SHIFT :</label>
-                <div id="riwayat-shift" class="flex items-center justify-center {{ $classShift }} text-sm font-semibold px-4 py-2 rounded-full shadow-md w-[150px]">
-                    <span>{{ $namaShift }}</span>
-                </div>
+                <button id="riwayat-shift" class="flex items-center justify-between bg-[#2a4a6f] text-white text-sm font-semibold px-4 py-2 rounded-full shadow-md">
+                    <span>SHIFT PAGI</span>
+                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
             </div>
             
         </div>

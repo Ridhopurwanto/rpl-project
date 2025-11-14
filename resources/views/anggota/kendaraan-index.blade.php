@@ -92,11 +92,20 @@
         </summary>
         
         {{-- Filter Tanggal --}}
-        <div class="flex justify-between items-center my-3">
-            <label class="text-sm font-semibold text-slate-600">TANGGAL :</label>
-            {{-- Ganti input ini dengan datepicker favorit Anda jika perlu --}}
-            <input type="date" value="2025-10-10" class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400">
-        </div>
+        <div class="flex justify-between items-center my-3 px-2">
+        <label for="tanggal" class="text-lg font-bold text-slate-700 uppercase">RIWAYAT :</label>
+        
+        <form action="{{ route('anggota.kendaraan.index') }}" method="GET">
+            <input 
+                type="date" 
+                id="tanggal"
+                name="tanggal"
+                value="{{ $tanggal_terpilih }}"
+                onchange="this.form.submit()" {{-- Auto submit saat tanggal ganti --}}
+                class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+        </form>
+    </div>
 
         {{-- Kontainer tabel riwayat --}}
         <div class="bg-white rounded-lg shadow-md p-4 mt-2 overflow-x-auto">

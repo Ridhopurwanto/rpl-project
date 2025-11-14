@@ -26,15 +26,20 @@ class PresensiController extends Controller
         // Dapatkan pengguna yang sedang login
         $user = Auth::user();
 
-        // Tentukan bulan dan tahun yang akan dilihat.
-        // Jika ada input 'month', gunakan itu. Jika tidak, gunakan bulan ini.
-        $tanggalSekarang = Carbon::parse($request->input('month', 'now'));
-        
-        $bulan = $tanggalSekarang->month;
-        $tahun = $tanggalSekarang->year;
+        // =======================================================
+        // 1. TENTUKAN TANGGAL TERPILIH (SUMBER KEBENARAN)
+        // =======================================================
+        // Gunakan input 'tanggal', jika tidak ada, gunakan hari ini.
+        $tanggalTerpilih = $request->input('tanggal') 
+                            ? Carbon::parse($request->input('tanggal')) 
+                            : Carbon::today();
+
+        // Dapatkan bulan dan tahun DARI tanggal yang dipilih
+        $bulan = $tanggalTerpilih->month;
+        $tahun = $tanggalTerpilih->year;
 
         // =======================================================
-        // 1. AMBIL DATA SHIFT (DARI DATABASE)
+        // 2. AMBIL DATA SHIFT (DARI DATABASE)
         // =======================================================
         
         // Ambil SEMUA shift untuk bulan & tahun yang dipilih
@@ -43,69 +48,65 @@ class PresensiController extends Controller
                             ->whereYear('tanggal', $tahun)
                             ->get();
 
-        // Ubah data shift menjadi "lookup map" agar mudah dicari
-        // Hasilnya akan seperti: ['2025-10-01' => 'off', '2025-10-02' => 'pagi']
+        // Ubah data shift menjadi "lookup map" ['2025-10-01' => 'pagi']
         $shiftMap = $shiftsDariDB->keyBy(function ($shift) {
             return Carbon::parse($shift->tanggal)->format('Y-m-d');
         })->map(function ($shift) {
-            // Asumsi Anda punya kolom 'jenis_shift' ('pagi', 'malam', 'off')
             return strtolower($shift->jenis_shift);; 
         });
 
 
         // =======================================================
-        // 2. BUAT DATA KALENDER LENGKAP
+        // 3. BUAT DATA KALENDER LENGKAP
         // =======================================================
         
-        // Tentukan hari pertama dan terakhir dari bulan yang dipilih
-        $tanggalAwal = $tanggalSekarang->copy()->startOfMonth();
-        $tanggalAkhir = $tanggalSekarang->copy()->endOfMonth();
+        // Tentukan hari pertama dan terakhir DARI BULAN YANG DIPILIH
+        $tanggalAwal = $tanggalTerpilih->copy()->startOfMonth();
+        $tanggalAkhir = $tanggalTerpilih->copy()->endOfMonth();
 
-        // Buat "kalender virtual" dari tanggal awal sampai akhir
+        // Buat "kalender virtual"
         $period = CarbonPeriod::create($tanggalAwal, $tanggalAkhir);
-
         $dataKalender = [];
 
         // Tambahkan padding (hari kosong) di awal kalender
-        // 'dayOfWeek' (0=Minggu, 1=Senin, ... 6=Sabtu)
         $hariKosongDiAwal = $tanggalAwal->dayOfWeek;
         for ($i = 0; $i < $hariKosongDiAwal; $i++) {
-            $dataKalender[] = [
-                'tanggal' => null,
-                'jenis_shift' => null,
-            ];
+            $dataKalender[] = ['tanggal' => null, 'jenis_shift' => null];
         }
 
         // Isi kalender dengan data shift
         foreach ($period as $date) {
             $tanggalString = $date->format('Y-m-d');
-            
-            // Cek di "lookup map" apakah ada shift untuk tanggal ini
-            $jenisShift = $shiftMap->get($tanggalString); // Akan 'null' jika tidak ada
+            $jenisShift = $shiftMap->get($tanggalString); // 'pagi', 'malam', 'off', atau null
 
             $dataKalender[] = [
-                'tanggal' => $date->format('d'), // Hanya angkanya (1, 2, 3...)
-                'jenis_shift' => $jenisShift,    // 'pagi', 'malam', 'off', atau null
+                'tanggal' => $date->format('d'),
+                'jenis_shift' => $jenisShift,
             ];
         }
 
         // =======================================================
-        // 3. AMBIL DATA TABEL RIWAYAT (Tetap sama)
+        // 4. AMBIL DATA RIWAYAT & SHIFT HARI INI
         // =======================================================
-        $tanggalRiwayat = $request->input('tanggal') ? Carbon::parse($request->input('tanggal')) : Carbon::today();
         
+        // Ambil riwayat presensi UNTUK TANGGAL TERPILIH
         $riwayatHariIni = $user->presensi()
-                            ->whereDate('tanggal', $tanggalRiwayat)
-                            ->first();
+                            ->whereDate('tanggal', $tanggalTerpilih)
+                            ->first(); //
+
+        // (BARU) Ambil data shift UNTUK TANGGAL TERPILIH dari map
+        $shiftHariIni = $shiftMap->get($tanggalTerpilih->format('Y-m-d'));
+
 
         // =======================================================
-        // 4. KIRIM SEMUA DATA KE VIEW
+        // 5. KIRIM SEMUA DATA KE VIEW
         // =======================================================
         return view('anggota.presensi', [
-            'namaBulan' => $tanggalSekarang->format('F Y'), // e.g., "OKTOBER 2025"
-            'dataKalender' => $dataKalender,     // DATA KALENDER BARU (LENGKAP)
-            'riwayatHariIni' => $riwayatHariIni, // Data untuk tabel
-            'tanggalTerpilih' => $tanggalRiwayat, // Untuk filter
+            'namaBulan' => $tanggalTerpilih->format('F Y'), // e.g., "OKTOBER 2025"
+            'dataKalender' => $dataKalender,
+            'riwayatHariIni' => $riwayatHariIni,
+            'tanggalTerpilih' => $tanggalTerpilih, // Kirim objek Carbon tanggal
+            'shiftHariIni' => $shiftHariIni, // Kirim string shift ('pagi', 'off', null)
         ]);
     }
 
