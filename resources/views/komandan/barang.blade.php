@@ -118,7 +118,7 @@
                                 <td class="py-2 px-4">{{ $barang->catatan }}</td>
                                 <td class="py-2 px-4">
                                     <span class="px-3 py-1 rounded-full text-xs font-semibold
-                                        {{ $barang->status == 'belum selesai' ? 'bg-yellow-200 text-yellow-800' : 'bg-green-200 text-green-800' }}">
+                                        {{ $barang->status == 'belum selesai' ? 'bg-red-200 text-yellow-800' : 'bg-green-200 text-green-800' }}">
                                         {{ $barang->status }}
                                     </span>
                                 </td>
@@ -144,7 +144,7 @@
                                 <td class="py-2 px-4">{{ $barang->catatan }}</td>
                                 <td class="py-2 px-4">
                                     <span class="px-3 py-1 rounded-full text-xs font-semibold
-                                        {{ $barang->status == 'belum selesai' ? 'bg-yellow-200 text-yellow-800' : 'bg-green-200 text-green-800' }}">
+                                        {{ $barang->status == 'belum selesai' ? 'bg-red-200 text-yellow-800' : 'bg-green-200 text-green-800' }}">
                                         {{ $barang->status }}
                                     </span>
                                 </td>
