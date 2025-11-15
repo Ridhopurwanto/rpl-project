@@ -55,6 +55,12 @@
         </div>
     </div>
 
+    <div class="bg-gradient-to-b from-[#2a4a6f] via-[#365c82] to-[#476c94] text-white rounded-2xl shadow-lg p-4 my-4 flex justify-between items-start"
+    role="alert">
+        <p class="font-bold">Mode Tampilan</p>
+        <p class="font-bold">Anda masuk sebagai BAU. Semua menu laporan bersifat hanya-lihat (read-only).</p>
+    </div>
+
     {{-- 3. DAFTAR MENU KOMANDAN --}}
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
         
