@@ -79,12 +79,12 @@
 
         {{-- Panggil helper untuk setiap tombol --}}
         {{-- Ini adalah tombol yang sama dengan anggota --}}
-        {!! renderMenuButton('PRESENSI') !!}
-        {!! renderMenuButton('PATROLI') !!}
-        {!! renderMenuButton('KENDARAAN') !!}
-        {!! renderMenuButton('TAMU') !!}
-        {!! renderMenuButton('BARANG') !!}
-        {!! renderMenuButton('GANGGUAN KAMTIBMAS') !!}
+        {!! renderMenuButton('PRESENSI', route('komandan.presensi')) !!}
+        {!! renderMenuButton('PATROLI', route('komandan.patroli')) !!}
+        {!! renderMenuButton('KENDARAAN', route('komandan.kendaraan')) !!}
+        {!! renderMenuButton('TAMU', href: route('komandan.tamu')) !!}
+        {!! renderMenuButton('BARANG', href: route('komandan.barang')) !!}
+        {!! renderMenuButton('GANGGUAN KAMTIBMAS', href: route('komandan.gangguan')) !!}
         {!! renderMenuButton('DAFTAR AKUN') !!}
         {!! renderMenuButton('UNDUH LAPORAN') !!}
 
