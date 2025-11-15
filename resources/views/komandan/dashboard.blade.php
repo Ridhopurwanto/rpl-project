@@ -84,7 +84,7 @@
         {!! renderMenuButton('KENDARAAN', route('komandan.kendaraan')) !!}
         {!! renderMenuButton('TAMU', href: route('komandan.tamu')) !!}
         {!! renderMenuButton('BARANG', href: route('komandan.barang')) !!}
-        {!! renderMenuButton('GANGGUAN KAMTIBMAS') !!}
+        {!! renderMenuButton('GANGGUAN KAMTIBMAS', href: route('komandan.gangguan')) !!}
         {!! renderMenuButton('MANAJEMEN AKUN') !!}
         {!! renderMenuButton('UNDUH LAPORAN') !!}
 

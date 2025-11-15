@@ -8,6 +8,7 @@ use App\Http\Controllers\PatroliController;
 use App\Http\Controllers\KendaraanController;
 use App\Http\Controllers\TamuController;
 use App\Http\Controllers\BarangController;
+use App\Http\Controllers\GangguanKamtibmasController;
 use App\Http\Controllers\Anggota\PresensiController as AnggotaPresensiController;
 use App\Http\Controllers\Anggota\PatroliController as AnggotaPatroliController;
 use App\Http\Controllers\RoleSwitchController;
@@ -156,6 +157,9 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/barang', [BarangController::class, 'index'])
             ->name('barang');
+
+        Route::get('/gangguan', [GangguanKamtibmasController::class, 'index'])
+            ->name('gangguan');
         
 
         // Rute untuk menangani perpindahan role oleh Komandan
@@ -189,6 +193,12 @@ Route::middleware('auth')->group(function () {
             ->name('tamu.update');
         Route::delete('/tamu/{id_tamu}', [TamuController::class, 'destroy'])
             ->name('tamu.destroy');
+
+        //CRUD Gangguan Kamtibmas
+        Route::put('/gangguan/{id_gangguan}', [GangguanKamtibmasController::class, 'update'])
+            ->name('gangguan.update');
+        Route::delete('/gangguan/{id_gangguan}', [GangguanKamtibmasController::class, 'destroy'])
+            ->name('gangguan.destroy');
     });
 
     // --- RUTE UNTUK BAU ---

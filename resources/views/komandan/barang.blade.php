@@ -11,7 +11,12 @@
 @endsection
 
 @section('content')
-<div class="w-full mx-auto">
+{{-- ▼▼▼ PERUBAHAN 1: Tambahkan x-data untuk modal foto ▼▼▼ --}}
+<div class="w-full mx-auto"
+     x-data="{ 
+        showPhotoModal: false, 
+        photoUrl: ''
+     }">
     
     <h2 class="text-2xl font-bold text-slate-800 mb-4">Laporan Barang</h2>
 
@@ -60,12 +65,13 @@
         <div class="overflow-x-auto">
             <table class="w-full min-w-max">
                 
-                {{-- Header Tabel dinamis berdasarkan kategori --}}
                 @if($kategoriTerpilih == 'temuan')
-                    {{-- Header untuk Barang Temuan [cite: 2441] --}}
+                    {{-- Header untuk Barang Temuan --}}
                     <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                         <tr>
                             <th class="py-3 px-4 text-left">No</th>
+                            {{-- ▼▼▼ PERUBAHAN 2: Tambah Header Foto ▼▼▼ --}}
+                            <th class="py-3 px-4 text-center">Foto</th>
                             <th class="py-3 px-4 text-left">Jenis (Nama Barang)</th>
                             <th class="py-3 px-4 text-left">Pelapor</th>
                             <th class="py-3 px-4 text-left">Lokasi Temuan</th>
@@ -78,6 +84,8 @@
                     <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                         <tr>
                             <th class="py-3 px-4 text-left">No</th>
+                            {{-- ▼▼▼ PERUBAHAN 2: Tambah Header Foto ▼▼▼ --}}
+                            <th class="py-3 px-4 text-center">Foto</th>
                             <th class="py-3 px-4 text-left">Jenis (Nama Barang)</th>
                             <th class="py-3 px-4 text-left">Penitip</th>
                             <th class="py-3 px-4 text-left">Tujuan (Penerima)</th>
@@ -89,18 +97,28 @@
 
                 <tbody class="text-sm divide-y divide-gray-200">
                     @forelse($riwayatBarang as $index => $barang)
-                        {{-- Body Tabel dinamis --}}
                         @if($kategoriTerpilih == 'temuan')
                             {{-- Data untuk Barang Temuan --}}
                             <tr>
                                 <td class="py-2 px-4">{{ $index + 1 }}.</td>
+                                {{-- ▼▼▼ PERUBAHAN 3: Tambah Kolom Foto (Temuan) ▼▼▼ --}}
+                                <td class="py-2 px-4 text-center">
+                                    @if($barang->foto)
+                                        <button @click="showPhotoModal = true; photoUrl = '{{ asset('storage/' . $barang->foto) }}'" 
+                                                class="text-blue-500 hover:underline">
+                                            Buka
+                                        </button>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td class="py-2 px-4 font-medium">{{ $barang->nama_barang }}</td>
                                 <td class="py-2 px-4">{{ $barang->nama_pelapor }}</td>
                                 <td class="py-2 px-4">{{ $barang->lokasi_penemuan }}</td>
                                 <td class="py-2 px-4">{{ $barang->catatan }}</td>
                                 <td class="py-2 px-4">
                                     <span class="px-3 py-1 rounded-full text-xs font-semibold
-                                        {{ $barang->status == 'belum selesai' ? 'bg-red-200 text-yellow-800' : 'bg-green-200 text-green-800' }}">
+                                        {{ $barang->status == 'belum selesai' ? 'bg-yellow-200 text-yellow-800' : 'bg-green-200 text-green-800' }}">
                                         {{ $barang->status }}
                                     </span>
                                 </td>
@@ -109,13 +127,24 @@
                             {{-- Data untuk Barang Titipan --}}
                             <tr>
                                 <td class="py-2 px-4">{{ $index + 1 }}.</td>
+                                {{-- ▼▼▼ PERUBAHAN 3: Tambah Kolom Foto (Titipan) ▼▼▼ --}}
+                                <td class="py-2 px-4 text-center">
+                                    @if($barang->foto)
+                                        <button @click="showPhotoModal = true; photoUrl = '{{ asset('storage/' . $barang->foto) }}'" 
+                                                class="text-blue-500 hover:underline">
+                                            Buka
+                                        </button>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td class="py-2 px-4 font-medium">{{ $barang->nama_barang }}</td>
                                 <td class="py-2 px-4">{{ $barang->nama_penitip }}</td>
                                 <td class="py-2 px-4">{{ $barang->tujuan }}</td>
                                 <td class="py-2 px-4">{{ $barang->catatan }}</td>
                                 <td class="py-2 px-4">
                                     <span class="px-3 py-1 rounded-full text-xs font-semibold
-                                        {{ $barang->status == 'belum selesai' ? 'bg-red-200 text-yellow-800' : 'bg-green-200 text-green-800' }}">
+                                        {{ $barang->status == 'belum selesai' ? 'bg-yellow-200 text-yellow-800' : 'bg-green-200 text-green-800' }}">
                                         {{ $barang->status }}
                                     </span>
                                 </td>
@@ -123,7 +152,8 @@
                         @endif
                     @empty
                     <tr>
-                        <td colspan="6" class="py-4 px-4 text-center text-gray-500">
+                        {{-- ▼▼▼ PERUBAHAN 4: Ubah colspan jadi 7 ▼▼▼ --}}
+                        <td colspan="7" class="py-4 px-4 text-center text-gray-500">
                             Tidak ada data barang pada tanggal dan kategori ini.
                         </td>
                     </tr>
@@ -133,6 +163,21 @@
         </div>
     </div>
 
-    {{-- Tidak ada modal karena Komandan/BAU read-only untuk menu ini [cite: 2360, 2363, 2367, 2442] --}}
+    {{-- ▼▼▼ PERUBAHAN 5: Tambahkan Modal Tampil Foto ▼▼▼ --}}
+    <div x-show="showPhotoModal" 
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
+         @click.away="showPhotoModal = false"
+         style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-4 relative" @click.stop>
+            <div class="flex justify-between items-center pb-3 border-b">
+                <h3 class="text-xl font-bold text-gray-800">FOTO BARANG</h3>
+                <button @click="showPhotoModal = false" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+            </div>
+            <div class="mt-4">
+                <img :src="photoUrl" alt="Foto Barang" class="w-full h-auto rounded">
+            </div>
+        </div>
+    </div>
+
 </div>
 @endsection
