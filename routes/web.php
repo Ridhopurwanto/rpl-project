@@ -6,6 +6,8 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\PatroliController;
 use App\Http\Controllers\KendaraanController;
+use App\Http\Controllers\TamuController;
+use App\Http\Controllers\BarangController;
 use App\Http\Controllers\Anggota\PresensiController as AnggotaPresensiController;
 use App\Http\Controllers\Anggota\PatroliController as AnggotaPatroliController;
 use App\Http\Controllers\RoleSwitchController;
@@ -148,6 +150,13 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/kendaraan', [KendaraanController::class, 'index'])
             ->name('kendaraan'); // NAMA DIUBAH agar jelas
+        
+        Route::get('/tamu', [TamuController::class, 'index'])
+            ->name('tamu');
+
+        Route::get('/barang', [BarangController::class, 'index'])
+            ->name('barang');
+        
 
         // Rute untuk menangani perpindahan role oleh Komandan
         Route::post('/set-role', [RoleSwitchController::class, 'setRole'])
@@ -174,6 +183,12 @@ Route::middleware('auth')->group(function () {
             ->name('kendaraan.master.update');
         Route::delete('/kendaraan/master/{id_kendaraan}', [KendaraanController::class, 'destroyMaster'])
             ->name('kendaraan.master.destroy');
+        
+        // CRUD Tamu
+        Route::put('/tamu/{id_tamu}', [TamuController::class, 'update'])
+            ->name('tamu.update');
+        Route::delete('/tamu/{id_tamu}', [TamuController::class, 'destroy'])
+            ->name('tamu.destroy');
     });
 
     // --- RUTE UNTUK BAU ---

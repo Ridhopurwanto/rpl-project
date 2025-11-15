@@ -24,6 +24,7 @@ class Tamu extends Model
 
     protected $casts = [
         'waktu_datang' => 'datetime',
+        'waktu_pulang' => 'datetime',
     ];
 
     /**
@@ -33,6 +34,6 @@ class Tamu extends Model
     {
         // Asumsi model Pengguna Anda adalah App\Models\Pengguna
         // Ganti jika nama modelnya beda (misal: App\Models\User)
-        return $this->belongsTo(Pengguna::class, 'id_pengguna', 'id_pengguna');
+        return $this->belongsTo(User::class, 'id_pengguna', 'id_pengguna');
     }
 }

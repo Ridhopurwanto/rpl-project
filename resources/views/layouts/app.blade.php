@@ -14,7 +14,7 @@
         <script src="//unpkg.com/alpinejs" defer></script>
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen flex flex-col max-w-sm mx-auto bg-gray-100 shadow-lg lg:max-w-7xl relative">
+        <div class="min-h-screen flex flex-col max-w-sm mx-auto bg-gray-100 shadow-lg lg:max-w-none lg:mx-0 lg:shadow-none relative">
             
             <header class="w-full px-4 pt-4 pb-2">
                 <div class="flex justify-between items-center">

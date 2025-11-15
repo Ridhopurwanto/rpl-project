@@ -82,8 +82,8 @@
         {!! renderMenuButton('PRESENSI', route('komandan.presensi')) !!}
         {!! renderMenuButton('PATROLI', route('komandan.patroli')) !!}
         {!! renderMenuButton('KENDARAAN', route('komandan.kendaraan')) !!}
-        {!! renderMenuButton('TAMU') !!}
-        {!! renderMenuButton('BARANG') !!}
+        {!! renderMenuButton('TAMU', href: route('komandan.tamu')) !!}
+        {!! renderMenuButton('BARANG', href: route('komandan.barang')) !!}
         {!! renderMenuButton('GANGGUAN KAMTIBMAS') !!}
         {!! renderMenuButton('MANAJEMEN AKUN') !!}
         {!! renderMenuButton('UNDUH LAPORAN') !!}
