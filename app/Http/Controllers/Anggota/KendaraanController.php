@@ -63,20 +63,20 @@ class KendaraanController extends Controller
 
         // 2. LOGIKA BARU: Update atau Buat di tabel master 'kendaraans'
         // Ini mendaftarkan kendaraan di master list secara otomatis
-        $kendaraan = Kendaraan::updateOrCreate(
-            ['nomor_plat' => $nopol], // Kunci pencarian
-            [ // Data untuk update/create
-                'pemilik' => $request->pemilik,
-                'tipe' => $request->tipe
-            ]
-        );
+        // $kendaraan = Kendaraan::updateOrCreate(
+        //     ['nomor_plat' => $nopol], // Kunci pencarian
+        //     [ // Data untuk update/create
+        //         'pemilik' => $request->pemilik,
+        //         'tipe' => $request->tipe
+        //     ]
+        // );
 
         // 3. Gabungkan tanggal dan waktu
         $waktu_masuk = Carbon::parse($request->tanggal . ' ' . $request->waktu);
 
         // 4. Buat Log Kendaraan (Sesuai alur Anda)
         LogKendaraan::create([
-            'id_kendaraan' => $kendaraan->id, // Link ke master
+            //'id_kendaraan' => $kendaraan->id, // Link ke master
             'nopol' => $nopol, // Duplikat data nopol
             'pemilik' => $request->pemilik, // Duplikat data pemilik
             'tipe' => $request->tipe, // Duplikat data tipe
