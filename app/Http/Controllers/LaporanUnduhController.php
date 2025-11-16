@@ -7,10 +7,10 @@ use Illuminate\Http\Request;
 use App\Models\Presensi;
 use App\Models\Patroli;
 use App\Models\Shift;
-use App\Models\Tamu;       // Pastikan Anda punya Model ini
-use App\Models\Barang;    // Pastikan Anda punya Model ini
-use App\Models\Kendaraan; // Pastikan Anda punya Model ini
-use App\Models\GangguanKamtibmas;  // Pastikan Anda punya Model ini
+use App\Models\Tamu;       
+use App\Models\Barang;    
+use App\Models\Kendaraan; 
+use App\Models\GangguanKamtibmas;  
 
 class LaporanUnduhController extends Controller
 {
@@ -39,7 +39,7 @@ class LaporanUnduhController extends Controller
         $tanggalMulai = $request->date_from;
         $tanggalSelesai = $request->date_to;
         $laporanDiminta = $request->laporan; // Array: ['presensi', 'patroli', ...]
-        $format = $request->format;
+        $format = $request->input('format');
 
         // Siapkan array untuk menampung semua data
         $dataGabungan = [];

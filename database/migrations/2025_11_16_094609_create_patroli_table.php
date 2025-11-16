@@ -16,7 +16,13 @@ return new class extends Migration
             $table->unsignedBigInteger('id_pengguna')->index('patroli_id_pengguna_foreign');
             $table->string('nama_lengkap');
             $table->dateTime('waktu_exact');
-            $table->enum('wilayah', ['Area Pos 2', 'Lobby VVIP', 'Lobby Audit', 'Kolam Ikan VVIP', 'Area BAU', 'Area Kantin', 'Area BAAK', 'Akses Lorong Gd. 3', 'Akses Lorong Gd. 2', 'Area Pos 3', 'Akses Besi Gd. 2', 'Akses Kaca Gd. 2', 'Akses Selatan Audit', 'Akses Ruang Lektor', 'Akses Parkir Basement', 'Akses Lift Gd. 2', 'Area Pos 1']);
+            $table->enum('wilayah', [
+                'AREA POS 2', 'LOBBY VVIP', 'LOBBY AUDIT', 'KOLAM IKAN VVIP', 
+                'AREA BAU', 'AREA KANTIN', 'AREA BAAK', 'AKSES LORONG GD 3',
+                'AKSES LORONG GD 2', 'AREA POS 3', 'AKSES BESI GD 2', 'AKSES KACA GD 2',
+                'AKSES SELATAN AUDIT', 'AKSES RUANG LETKOR', 'AKSES PARKIR BASEMENT',
+                'AKSES LIFT GD 2', 'AREA POS 1'
+            ]);
             $table->string('foto');
             $table->date('tanggal');
             $table->timestamps();

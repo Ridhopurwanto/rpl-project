@@ -86,7 +86,7 @@
         {!! renderMenuButton('BARANG', href: route('komandan.barang')) !!}
         {!! renderMenuButton('GANGGUAN KAMTIBMAS', href: route('komandan.gangguan')) !!}
         {!! renderMenuButton('MANAJEMEN AKUN', href: route('komandan.akun.index')) !!}
-        {!! renderMenuButton('UNDUH LAPORAN') !!}
+        {!! renderMenuButton('UNDUH LAPORAN', href: route('komandan.laporan.unduh')) !!}
 
     </div>
 </div>
