@@ -18,6 +18,7 @@ use App\Http\Controllers\Anggota\KendaraanController as AnggotaKendaraanControll
 use App\Http\Controllers\Anggota\TamuController as AnggotaTamuController;
 use App\Http\Controllers\Anggota\GangguanKamtibmasController as AnggotaGangguanKamtibmasController;
 use App\Http\Controllers\Anggota\BarangController as AnggotaBarangController;
+use App\Http\Controllers\LaporanUnduhController;
 
 // Rute untuk tamu (belum login)
 Route::middleware('guest')->group(function () {
@@ -206,6 +207,13 @@ Route::middleware('auth')->group(function () {
             ->name('gangguan.update');
         Route::delete('/gangguan/{id_gangguan}', [GangguanKamtibmasController::class, 'destroy'])
             ->name('gangguan.destroy');
+
+        //CRUD Laporan Unduh
+        Route::get('/laporan/unduh', [LaporanUnduhController::class, 'index'])
+            ->name('laporan.unduh');
+        Route::post('/laporan/download', [LaporanUnduhController::class, 'download'])
+            ->name('laporan.download');
+});
     });
 
     // --- RUTE UNTUK BAU ---
