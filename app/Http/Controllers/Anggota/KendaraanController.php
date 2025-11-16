@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Anggota;
 
 use App\Http\Controllers\Controller;
 use App\Models\LogKendaraan;
-use App\Models\Kendaraan; // <-- TAMBAHKAN INI
+use App\Models\Kendaraan; // Pastikan ini di-import
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth; // <-- Tetap di sini untuk nanti
 
 class KendaraanController extends Controller
 {
@@ -21,11 +22,12 @@ class KendaraanController extends Controller
                             ->get();
 
         // 2. Filter tanggal riwayat
+        // PERBAIKAN: Filter berdasarkan 'waktu_keluar' karena kolom 'tanggal' tidak ada
         $tanggal_riwayat = $request->input('tanggal', Carbon::today()->toDateString());
 
         // 3. Ambil riwayat kendaraan yang "Keluar"
         $riwayat_kendaraan = LogKendaraan::where('status', 'Keluar')
-                            ->whereDate('waktu_keluar', $tanggal_riwayat)
+                            ->whereDate('waktu_keluar', $tanggal_riwayat) // <-- Diubah ke waktu_keluar
                             ->orderBy('waktu_keluar', 'desc')
                             ->get();
 
@@ -45,7 +47,10 @@ class KendaraanController extends Controller
     }
 
     /**
-     * Menyimpan data kendaraan baru dari form.
+     * =========================================================
+     * PERBAIKAN FUNGSI STORE
+     * Menghapus 'id_pengguna' dan 'tanggal' agar sesuai DB
+     * =========================================================
      */
     public function store(Request $request)
     {
@@ -61,28 +66,27 @@ class KendaraanController extends Controller
 
         $nopol = strtoupper($request->nopol);
 
-        // 2. LOGIKA BARU: Update atau Buat di tabel master 'kendaraans'
-        // Ini mendaftarkan kendaraan di master list secara otomatis
-        $kendaraan = Kendaraan::updateOrCreate(
-            ['nomor_plat' => $nopol], // Kunci pencarian
-            [ // Data untuk update/create
-                'pemilik' => $request->pemilik,
-                'tipe' => $request->tipe
-            ]
-        );
+        // 2. LOGIKA BARU:
+        // Cukup CARI kendaraan di tabel master. JANGAN buat baru.
+        $kendaraanMaster = Kendaraan::where('nomor_plat', $nopol)->first();
+        
+        // Dapatkan ID-nya jika ada, jika tidak, biarkan NULL
+        $idKendaraan = $kendaraanMaster ? $kendaraanMaster->id_kendaraan : null;
 
         // 3. Gabungkan tanggal dan waktu
         $waktu_masuk = Carbon::parse($request->tanggal . ' ' . $request->waktu);
 
-        // 4. Buat Log Kendaraan (Sesuai alur Anda)
+        // 4. Buat Log Kendaraan
         LogKendaraan::create([
-            'id_kendaraan' => $kendaraan->id, // Link ke master
-            'nopol' => $nopol, // Duplikat data nopol
-            'pemilik' => $request->pemilik, // Duplikat data pemilik
-            'tipe' => $request->tipe, // Duplikat data tipe
-            'keterangan' => $request->keterangan, // Simpan Menginap/Tidak
-            'waktu_masuk' => $waktu_masuk,
-            'status' => 'Masuk',
+            'id_kendaraan' => $idKendaraan, 
+            // 'id_pengguna' DIHAPUS
+            'nopol'        => $nopol, 
+            'pemilik'      => $request->pemilik,
+            'tipe'         => $request->tipe,
+            'keterangan'   => $request->keterangan,
+            'waktu_masuk'  => $waktu_masuk,
+            'status'       => 'Masuk',
+            // 'tanggal' DIHAPUS
         ]);
 
         return redirect()->route('anggota.kendaraan.index')
@@ -90,7 +94,7 @@ class KendaraanController extends Controller
     }
 
     /**
-     * BARU: Meng-update Keterangan (Menginap/Tidak) dari halaman index.
+     * Meng-update Keterangan (Menginap/Tidak) dari halaman index.
      */
     public function updateKeterangan(Request $request, $id_kendaraan_log)
     {
@@ -100,7 +104,6 @@ class KendaraanController extends Controller
 
         $log = LogKendaraan::findOrFail($id_kendaraan_log);
 
-        // Pastikan hanya update jika status masih "Masuk"
         if ($log->status == 'Masuk') {
             $log->update(['keterangan' => $request->keterangan]);
             return redirect()->route('anggota.kendaraan.index')->with('success', 'Keterangan berhasil diperbarui.');
@@ -115,36 +118,40 @@ class KendaraanController extends Controller
      */
     public function checkout(Request $request, $id_kendaraan_log)
     {
-        // (Logika ini kembali seperti semula, hanya update status & waktu)
-        
+        $request->validate([
+            'menginap' => 'required|boolean',
+        ]);
+
         $log = LogKendaraan::findOrFail($id_kendaraan_log);
 
-        // Update data kendaraan
+        $keterangan = $request->menginap == '1' ? 'Menginap' : 'Tidak Menginap';
+
         $log->update([
             'waktu_keluar' => Carbon::now(),
-            'status' => 'Keluar',
+            'status'       => 'Keluar',
+            'keterangan'   => $keterangan,
         ]);
 
         return redirect()->route('anggota.kendaraan.index')
                          ->with('success', 'Kendaraan berhasil dikeluarkan.');
     }
 
+    /**
+     * API untuk fitur autocomplete di form create
+     */
     public function searchNopol(Request $request)
     {
         $request->validate(['search' => 'nullable|string|max:20']);
-
         $searchTerm = $request->input('search');
 
         if (empty($searchTerm)) {
             return response()->json([]);
         }
 
-        // Cari di tabel master 'kendaraan' berdasarkan 'nomor_plat'
         $kendaraan = Kendaraan::where('nomor_plat', 'LIKE', $searchTerm . '%')
-                              ->take(5) // Ambil 5 hasil teratas
+                              ->take(5)
                               ->get();
 
-        // Kembalikan sebagai JSON
         return response()->json($kendaraan);
     }
 }

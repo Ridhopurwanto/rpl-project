@@ -21,7 +21,7 @@ class KendaraanController extends Controller
         $tanggalFilter = $request->input('tanggal', now()->format('Y-m-d'));
         $tipeFilter = $request->input('tipe'); // 'Roda 2' atau 'Roda 4'
 
-        $queryRiwayat = LogKendaraan::with('kendaraan', 'pengguna')
+        $queryRiwayat = LogKendaraan::with('kendaraan')
                             ->whereDate('waktu_masuk', $tanggalFilter);
 
         if ($tipeFilter) {
@@ -177,6 +177,52 @@ class KendaraanController extends Controller
 
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'GGagal memperbarui keterangan.');
+        }
+    }
+    
+    /**
+     * "Mempromosikan" data dari log ke tabel master.
+     * Ini dipanggil oleh tombol (+) di tabel Riwayat.
+     */
+    public function promoteLogToMaster($id_log)
+    {
+        if (Auth::user()->peran !== 'komandan') {
+            return redirect()->back()->with('error', 'Anda tidak memiliki hak akses.');
+        }
+
+        try {
+            $log = LogKendaraan::findOrFail($id_log);
+
+            // 1. Cek apakah sudah dipromosikan (id_kendaraan sudah terisi)
+            if ($log->id_kendaraan) {
+                return redirect()->back()->with('error', 'Kendaraan ini sudah ada di master.');
+            }
+            
+            // 2. Cek apakah plat nomornya sudah ada (kasus log lain dipromote duluan)
+            $existingMaster = Kendaraan::where('nomor_plat', $log->nopol)->first();
+
+            if ($existingMaster) {
+                // Jika sudah ada, cukup update log-nya
+                $log->update(['id_kendaraan' => $existingMaster->id_kendaraan]);
+                return redirect()->back()->with('success', 'Kendaraan sudah ada di master. Log telah ditautkan.');
+            }
+
+            // 3. Buat data baru di tabel master 'kendaraan'
+            $kendaraanMaster = Kendaraan::create([
+                'nomor_plat' => $log->nopol,
+                'pemilik'    => $log->pemilik,
+                'tipe'       => $log->tipe,
+            ]);
+
+            // 4. Tautkan log ini ke master yang baru dibuat
+            $log->update([
+                'id_kendaraan' => $kendaraanMaster->id_kendaraan
+            ]);
+
+            return redirect()->back()->with('success', 'Kendaraan berhasil ditambahkan ke Daftar Master.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mempromosikan kendaraan: ' . $e->getMessage());
         }
     }
 }

@@ -5,32 +5,29 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * Model untuk tabel 'log_kendaraan' (Riwayat)
- * Disesuaikan dengan log_kendaraan.sql [cite: log_kendaraan.sql]
- */
 class LogKendaraan extends Model
 {
     use HasFactory;
 
     protected $table = 'log_kendaraan';
     protected $primaryKey = 'id_log';
-
-    /**
-     * Tabel ini menggunakan timestamps (created_at, updated_at)
-     * [cite: log_kendaraan.sql]
-     */
     public $timestamps = true;
 
+    /**
+     * PERBAIKAN:
+     * Menyesuaikan $fillable agar sesuai dengan database Anda
+     */
     protected $fillable = [
-        'kendaraan_id',
-        'nopol',
-        'pemilik',
-        'tipe',
-        'keterangan',
-        'waktu_masuk',
-        'waktu_keluar',
-        'status',
+        'id_kendaraan', // Ada di DB
+        'nopol',        // Ada di DB
+        'pemilik',      // Ada di DB
+        'tipe',         // Ada di DB (meskipun tidak terlihat di screenshot)
+        'keterangan',   // Ada di DB
+        'waktu_masuk',  // Ada di DB
+        'waktu_keluar', // Ada di DB
+        'status',       // Ada di DB
+        // 'id_pengguna' Dihapus (tidak ada di DB)
+        // 'tanggal' Dihapus (tidak ada di DB)
     ];
 
     /**
@@ -39,12 +36,11 @@ class LogKendaraan extends Model
     protected $casts = [
         'waktu_masuk' => 'datetime',
         'waktu_keluar' => 'datetime',
-        'tanggal' => 'date',
+        // 'tanggal' Dihapus
     ];
 
     /**
      * Relasi many-to-one ke Kendaraan (Master)
-     * [cite: KELOMPOK3_MILETSONE2.pdf, p. 116]
      */
     public function kendaraan()
     {
@@ -52,13 +48,8 @@ class LogKendaraan extends Model
     }
 
     /**
-     * Relasi many-to-one ke Pengguna (Anggota yang mencatat)
-     * [cite: KELOMPOK3_MILETSONE2.pdf, p. 115]
+     * Relasi pengguna() DIHAPUS karena
+     * kolom 'id_pengguna' tidak ada di database Anda
      */
-    public function pengguna()
-    {
-        // Ganti \App\Models\User::class dengan model Pengguna kamu jika beda
-        // (Misal: \App\Models\Pengguna::class)
-        return $this->belongsTo(\App\Models\User::class, 'id_pengguna', 'id_pengguna');
-    }
+    // public function pengguna() { ... }
 }

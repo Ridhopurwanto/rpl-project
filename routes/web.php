@@ -195,6 +195,8 @@ Route::middleware('auth')->group(function () {
             ->name('kendaraan.master.update');
         Route::delete('/kendaraan/master/{id_kendaraan}', [KendaraanController::class, 'destroyMaster'])
             ->name('kendaraan.master.destroy');
+        Route::post('/kendaraan/log/{id_log}/promote', [KendaraanController::class, 'promoteLogToMaster'])
+            ->name('kendaraan.log.promote');
         
         // CRUD Tamu
         Route::put('/tamu/{id_tamu}', [TamuController::class, 'update'])
