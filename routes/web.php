@@ -147,13 +147,13 @@ Route::middleware('auth')->group(function () {
         })->name('dashboard');
 
         Route::get('/presensi', [PresensiController::class, 'index'])
-            ->name('presensi'); // NAMA DIUBAH agar jelas
+            ->name('presensi'); 
 
         Route::get('/patroli', [PatroliController::class, 'index'])
-            ->name('patroli'); // NAMA DIUBAH agar jelas
+            ->name('patroli'); 
 
         Route::get('/kendaraan', [KendaraanController::class, 'index'])
-            ->name('kendaraan'); // NAMA DIUBAH agar jelas
+            ->name('kendaraan');
         
         Route::get('/tamu', [TamuController::class, 'index'])
             ->name('tamu');
@@ -208,12 +208,16 @@ Route::middleware('auth')->group(function () {
         Route::delete('/gangguan/{id_gangguan}', [GangguanKamtibmasController::class, 'destroy'])
             ->name('gangguan.destroy');
 
+        //CRUD Manajemen Akun
+        Route::post('akun/shift/update', [ManajemenShiftController::class, 'update'])
+             ->name('akun.shift.update');
+
         //CRUD Laporan Unduh
         Route::get('/laporan/unduh', [LaporanUnduhController::class, 'index'])
             ->name('laporan.unduh');
         Route::post('/laporan/download', [LaporanUnduhController::class, 'download'])
             ->name('laporan.download');
-});
+
     });
 
     // --- RUTE UNTUK BAU ---

@@ -1,16 +1,12 @@
 {{-- 
   File: resources/views/komandan/akun/shift.blade.php
-  Perbaikan: Memindahkan blok <style> ke @push('styles')
+  Versi FINAL: Kalender Interaktif dengan Modal Edit
 --}}
 
 @extends('layouts.app')
 
-{{-- Ganti tombol "HOME" di header menjadi "MANAJEMEN AKUN" --}}
+{{-- Ganti tombol "HOME" di header --}}
 @section('header-left')
-    {{-- 
-      Anda bisa mengganti teks 'MANAJEMEN AKUN' menjadi 'M. SONY SHIFT' 
-      jika ingin sesuai dengan mockup
-    --}}
     <a href="{{ route('komandan.akun.index') }}" class="bg-slate-800 text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md hover:bg-slate-700 transition">
         {{ $user->nama_lengkap }} - SHIFT
     </a>
@@ -18,30 +14,42 @@
 
 @section('content')
 
-{{-- Override layout 'max-w-sm' agar lebih lebar --}}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+{{-- 
+  =================================
+  BUNGKUSAN ALPINEJS
+  Untuk mengelola state modal
+  =================================
+--}}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" x-data="{
+    isModalOpen: false,
+    selectedDate: '',
+    selectedShift: '',
+    selectedUserId: {{ $user->id_pengguna }},
+    feedbackMessage: '',
+    isSuccess: false
+}">
     
     {{-- Tombol Kembali --}}
     <a href="{{ route('komandan.akun.index') }}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-gray-900 mb-2">
-        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
         Kembali ke Manajemen Akun
     </a>
 
-    {{-- 
-      Header Halaman Kalender
-      (Ini sudah diwakili oleh @section('header-left') di atas)
-    --}}
+    {{-- Feedback Message (untuk notifikasi sukses/error) --}}
+    <div x-show="feedbackMessage"
+         :class="isSuccess ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'"
+         class="border px-4 py-3 rounded relative mb-4" role="alert">
+        <span class="block sm:inline" x-text="feedbackMessage"></span>
+        <button @click="feedbackMessage = ''" class="absolute top-0 bottom-0 right-0 px-4 py-3">&times;</button>
+    </div>
     
-    {{-- 
-      =================================
-      KALENDER SHIFT
-      =================================
-    --}}
+    {{-- KALENDER SHIFT --}}
     <div class="bg-white p-4 rounded-lg shadow-md">
+        {{-- Div ini akan diisi oleh FullCalendar --}}
         <div id="calendar"></div>
     </div>
     
-    {{-- Legenda Warna (Sesuai Mockup) --}}
+    {{-- Legenda Warna --}}
     <div class="flex justify-center flex-wrap space-x-4 mt-4 text-sm">
         <div class="flex items-center">
             <span class="w-4 h-4 rounded-full bg-yellow-400 mr-2"></span>
@@ -54,6 +62,48 @@
         <div class="flex items-center">
             <span class="w-4 h-4 rounded-full bg-red-500 mr-2"></span>
             <span>Off</span>
+        </div>
+    </div>
+
+    {{-- 
+      =================================
+      MODAL EDIT SHIFT (SESUAI PERMINTAAN ANDA)
+      =================================
+    --}}
+    <div x-show="isModalOpen" @keydown.escape.window="isModalOpen = false" class="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-gray-900 bg-opacity-50" style="display: none;">
+        <div class="relative w-full max-w-sm p-6 mx-4 bg-white rounded-lg shadow-xl" @click.away="isModalOpen = false">
+            
+            {{-- Header Modal --}}
+            <div class="flex justify-between items-center pb-3 border-b">
+                <h5 class="text-xl font-semibold text-gray-800">Ubah Shift</h5>
+                <button type="button" @click="isModalOpen = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+            </div>
+            
+            {{-- Body Modal --}}
+            <div class="modal-body py-4">
+                <p class="mb-2">Ubah shift untuk tanggal:</p>
+                <p class="text-lg font-bold text-blue-900 mb-4" x-text="selectedDate"></p>
+                
+                <label for="jenis_shift" class="block text-sm font-medium text-gray-700">Pilih Shift Baru:</label>
+                <select id="jenis_shift" x-model="selectedShift"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                    <option value="Pagi">Pagi</option>
+                    <option value="Malam">Malam</option>
+                    <option value="Off">Off</option>
+                </select>
+            </div>
+            
+            {{-- Footer Modal --}}
+            <div class="modal-footer flex justify-end pt-3 border-t">
+                <button type="button" @click="isModalOpen = false" class="px-4 py-2 mr-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">Batal</button>
+                {{-- 
+                  Tombol "Simpan" ini akan memanggil fungsi 'updateShift' 
+                  yang kita definisikan di @push('scripts')
+                --}}
+                <button type="button" @click="updateShift()" class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                    Simpan
+                </button>
+            </div>
         </div>
     </div>
 
@@ -95,12 +145,18 @@
     .fc .fc-day-today {
         background-color: #EFF6FF !important; /* bg-blue-50 */
     }
-    /* Kustomisasi event agar sesuai mockup */
     .fc .fc-daygrid-event {
         border-radius: 4px;
         padding: 2px 4px;
         font-size: 0.875rem; /* text-sm */
         font-weight: 700; /* font-bold */
+    }
+    /* Membuat tanggal bisa diklik */
+    .fc .fc-daygrid-day {
+        cursor: pointer;
+    }
+    .fc .fc-daygrid-day:hover {
+        background-color: #F9FAFB; /* gray-50 */
     }
 </style>
 @endpush
@@ -114,66 +170,141 @@
 @push('scripts')
 {{-- 1. Load library FullCalendar --}}
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+{{-- 2. Load library Axios (untuk kirim data ke controller) --}}
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // 2. Ambil data shift dari Controller
-        const shiftsData = @json($shifts);
+    // Variabel kalender kita buat global agar bisa di-refetch
+    let calendar;
 
-        // 3. Definisikan Warna (Sesuai Mockup)
-        const colors = {
-            'Pagi': '#FACC15', // Kuning (bg-yellow-400)
-            'Malam': '#60A5FA', // Biru Muda (bg-blue-400)
-            'Off': '#EF4444'   // Merah (bg-red-500)
+    // Ambil data shift dari Controller
+    const shiftsData = @json($shifts);
+
+    // Definisikan Warna
+    const colors = {
+        'Pagi': '#FACC15', // Kuning
+        'Malam': '#60A5FA', // Biru Muda
+        'Off': '#EF4444'   // Merah
+    };
+    
+    // Ubah format data agar bisa dibaca FullCalendar
+    const events = shiftsData.map(shift => {
+        const shiftType = shift.jenis_shift;
+        const color = colors[shiftType] || '#808080'; 
+
+        return {
+            id: shift.tanggal, // Kita beri ID agar mudah di-update
+            title: shiftType,
+            start: shift.tanggal,
+            backgroundColor: color,
+            borderColor: color,
+            textColor: (shiftType === 'Pagi') ? '#1F2937' : '#FFFFFF' 
         };
+    });
 
-        // 4. Ubah format data agar bisa dibaca FullCalendar
-        const events = shiftsData.map(shift => {
-            // Asumsi nama kolom 'jenis_shift' dari model Shift.php
-            const shiftType = shift.jenis_shift; 
-            const color = colors[shiftType] || '#808080'; // Default ke abu-abu jika tidak cocok
-
-            return {
-                title: shiftType,
-                start: shift.tanggal, // Asumsi nama kolom 'tanggal'
-                backgroundColor: color,
-                borderColor: color,
-                // Teks hitam untuk kuning, putih untuk lainnya (agar terbaca)
-                textColor: (shiftType === 'Pagi') ? '#1F2937' : '#FFFFFF' 
-            };
-        });
-
-        // 5. Inisialisasi Kalender
+    document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('calendar');
-        var calendar = new FullCalendar.Calendar(calendarEl, {
+        calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
-            locale: 'id', // Bahasa Indonesia
-            height: 'auto', // Biarkan tinggi menyesuaikan
-
-            // Header kalender (Sesuai Mockup)
+            locale: 'id',
+            height: 'auto',
             headerToolbar: {
                 left: '',
                 center: 'prev title next',
                 right: ''
             },
             
-            // Masukkan data shift ke kalender
-            events: events,
+            events: events, // Masukkan data shift
 
-            // Kustomisasi tampilan
-            eventDidMount: function(info) {
-                // Membuat teks tebal
-                info.el.style.fontWeight = 'bold';
+            // ======================================================
+            // FUNGSI UTAMA: Saat tanggal diklik
+            // ======================================================
+            dateClick: function(info) {
+                // Ambil scope AlpineJS
+                let alpineScope = document.querySelector('[x-data]')._x_dataStack[0];
+
+                // Set data di Alpine untuk modal
+                alpineScope.selectedDate = info.dateStr; // Format 'YYYY-MM-DD'
+                
+                // Cek apakah sudah ada shift di tanggal itu
+                let existingEvent = calendar.getEventById(info.dateStr);
+                if (existingEvent) {
+                    alpineScope.selectedShift = existingEvent.title; // 'Pagi', 'Malam', atau 'Off'
+                } else {
+                    alpineScope.selectedShift = 'Off'; // Default jika belum di-set
+                }
+
+                // Buka modal
+                alpineScope.isModalOpen = true;
             },
 
-            // Kustomisasi tanggal di kalender (misal: "26", "27")
+            eventDidMount: function(info) {
+                info.el.style.fontWeight = 'bold';
+            },
             dayCellDidMount: function(info) {
                 info.el.style.padding = '4px';
             }
         });
         
-        // 6. Tampilkan kalender
         calendar.render();
     });
+
+    /**
+     * Fungsi ini dipanggil oleh tombol "Simpan" di modal AlpineJS
+     */
+    function updateShift() {
+        // Ambil scope AlpineJS
+        let alpineScope = document.querySelector('[x-data]')._x_dataStack[0];
+        
+        // Ambil data dari modal
+        const data = {
+            id_pengguna: alpineScope.selectedUserId,
+            tanggal: alpineScope.selectedDate,
+            jenis_shift: alpineScope.selectedShift,
+            _token: "{{ csrf_token() }}" // Jangan lupa CSRF token
+        };
+
+        // Kirim data ke controller menggunakan Axios
+        axios.post("{{ route('komandan.akun.shift.update') }}", data)
+            .then(function(response) {
+                // Jika SUKSES
+                if (response.data.success) {
+                    // 1. Tampilkan notifikasi sukses
+                    alpineScope.isSuccess = true;
+                    alpineScope.feedbackMessage = response.data.message;
+
+                    // 2. Hapus event lama (jika ada)
+                    let oldEvent = calendar.getEventById(data.tanggal);
+                    if (oldEvent) {
+                        oldEvent.remove();
+                    }
+
+                    // 3. Tambahkan event baru ke kalender (tanpa reload halaman)
+                    const newShiftType = response.data.jenis_shift;
+                    const newColor = colors[newShiftType] || '#808080';
+                    
+                    calendar.addEvent({
+                        id: data.tanggal,
+                        title: newShiftType,
+                        start: data.tanggal,
+                        backgroundColor: newColor,
+                        borderColor: newColor,
+                        textColor: (newShiftType === 'Pagi') ? '#1F2937' : '#FFFFFF'
+                    });
+
+                    // 4. Tutup modal
+                    alpineScope.isModalOpen = false;
+                }
+            })
+            .catch(function(error) {
+                // Jika GAGAL
+                alpineScope.isSuccess = false;
+                if (error.response && error.response.data && error.response.data.message) {
+                    alpineScope.feedbackMessage = error.response.data.message;
+                } else {
+                    alpineScope.feedbackMessage = "Terjadi kesalahan. Silakan coba lagi.";
+                }
+            });
+    }
 </script>
 @endpush
