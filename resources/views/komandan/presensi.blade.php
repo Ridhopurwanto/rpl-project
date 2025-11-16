@@ -61,7 +61,6 @@
                 class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
                 <option value="semua">Semua Shift</option>
                 <option value="pagi">Shift Pagi</option>
-                <option value="siang">Shift Siang</option>
                 <option value="malam">Shift Malam</option>
             </select>
             </div>
