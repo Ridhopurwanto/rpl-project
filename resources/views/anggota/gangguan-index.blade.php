@@ -1,4 +1,9 @@
 @extends('layouts.app')
+@section('header-left')
+    <a href="{{ route('anggota.gangguan.index') }}" class="bg-[#2a4a6f] text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md">
+        GANGGUAN KAMTIBMAS
+    </a>
+@endsection
 
 @section('content')
 {{-- 
