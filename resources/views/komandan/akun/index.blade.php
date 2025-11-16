@@ -1,6 +1,6 @@
 {{-- 
   File: resources/views/komandan/akun/index.blade.php
-  Versi FINAL (Perbaikan AlpineJS Scope + Update Modal Styling)
+  Perbaikan: Logic data binding AlpineJS untuk Edit Modal
 --}}
 
 @extends('layouts.app')
@@ -78,24 +78,25 @@
                     {{-- Bagian Kanan: Tombol Aksi --}}
                     <div class="flex flex-shrink-0 space-x-1.5">
                         
-                        {{-- Tombol Shift (Biru) --}}
                         <a href="{{ route('komandan.akun.shift', $user->id_pengguna) }}" class="px-2 py-1 bg-blue-500 rounded-md shadow-sm" title="Shift">
                             <span class="text-white text-xs font-semibold">Shift</span>
                         </a>
                         
-                        {{-- Tombol Info (Hijau) --}}
                         <button @click="openInfoModal = true; infoUser = {{ json_encode($user) }};" 
                                 class="px-2 py-1 bg-green-500 rounded-md shadow-sm" title="Info">
                             <span class="text-white text-xs font-semibold">Info</span>
                         </button>
                         
-                        {{-- Tombol Edit (Kuning) --}}
+                        {{-- 
+                          PERBAIKAN: 
+                          Saat tombol edit diklik, kita set 'editUser' di scope global.
+                          Modal 'Edit' nanti akan mengambil data dari 'editUser' ini.
+                        --}}
                         <button @click="openEditModal = true; editUser = {{ json_encode($user) }}; editFormAction = '{{ route('komandan.akun.update', $user->id_pengguna) }}';" 
                                 class="px-2 py-1 bg-yellow-500 rounded-md shadow-sm" title="Edit">
                             <span class="text-white text-xs font-semibold">Edit</span>
                         </button>
                         
-                        {{-- Tombol Hapus (Merah) --}}
                         <button @click="openHapusModal = true; hapusUserName = '{{ $user->nama_lengkap }}'; hapusFormAction = '{{ route('komandan.akun.destroy', $user->id_pengguna) }}';" 
                                 class="px-2 py-1 bg-red-600 rounded-md shadow-sm" title="Delete">
                             <span class="text-white text-xs font-semibold">Delete</span>
@@ -123,11 +124,9 @@
                     <h5 class="text-xl font-semibold text-gray-800 uppercase">Tambah Akun</h5>
                     <button type="button" @click="openCreateModal = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
                 </div>
-                {{-- Body Modal --}}
                 <div class="modal-body max-h-[70vh] overflow-y-auto p-2">
                     @include('komandan.akun.partials.form-fields')
                 </div>
-                {{-- Footer Modal --}}
                 <div class="modal-footer pt-3 mt-3 border-t">
                     <button type="submit" class="w-full px-4 py-2.5 text-white bg-[#2a4a6f] rounded-lg hover:bg-opacity-90">
                         BUAT AKUN
@@ -142,48 +141,38 @@
     {{-- ================================= --}}
     <div x-show="openInfoModal" class="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-gray-900 bg-opacity-50" style="display: none;">
         <div class="relative w-full max-w-md p-4 mx-4 bg-white rounded-lg shadow-xl" @click.away="openInfoModal = false">
-            {{-- Header --}}
             <div class="flex justify-between items-center pb-3 mb-3 border-b">
                 <h5 class="text-xl font-semibold text-gray-800 uppercase">Detail Profil</h5>
                 <button type="button" @click="openInfoModal = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
             </div>
-            {{-- Body --}}
             <div class="modal-body max-h-[70vh] overflow-y-auto p-2">
-                {{-- Foto Placeholder --}}
                 <div class="w-full bg-gray-200 rounded-lg p-4 text-center mb-4">
                     <img :src="infoUser.foto_profil ? `/storage/${infoUser.foto_profil}` : defaultFoto" alt="Foto Profil" 
                          class="w-32 h-32 mx-auto rounded-full object-cover border-4 border-white shadow-md">
                 </div>
-                {{-- Detail Info --}}
                 <div class="space-y-3">
-                    {{-- NAMA --}}
                     <div class="flex items-center">
                         <label class="w-1/3 text-sm font-medium text-gray-700">NAMA</label>
                         <div class="w-2/3 bg-[#2a4a6f] text-white text-sm font-semibold rounded-md shadow-sm px-4 py-2.5" x-text="infoUser.nama_lengkap || '-'"></div>
                     </div>
-                    {{-- TANGGAL LAHIR --}}
                     <div class="flex items-center">
                         <label class="w-1/3 text-sm font-medium text-gray-700">TANGGAL LAHIR</label>
-                        <div class="w-2/3 bg-[#2a4a6f] text-white text-sm font-semibold rounded-md shadow-sm px-4 py-2.5" x-text="infoUser.tanggal_lahir || '-'"></div>
+                        <div class="w-2/3 bg-[#2a4a6f] text-white text-sm font-semibold rounded-md shadow-sm px-4 py-2.5" x-text="infoUser.tanggal_lahir ? infoUser.tanggal_lahir.substring(0, 10) : '-'"></div>
                     </div>
-                    {{-- NO. HP --}}
                     <div class="flex items-center">
                         <label class="w-1/3 text-sm font-medium text-gray-700">NO. HP</label>
                         <div class="w-2/3 bg-[#2a4a6f] text-white text-sm font-semibold rounded-md shadow-sm px-4 py-2.5" x-text="infoUser.no_hp || '-'"></div>
                     </div>
-                    {{-- ALAMAT --}}
                     <div class="flex items-start">
                         <label class="w-1/3 text-sm font-medium text-gray-700 pt-2.5">ALAMAT</label>
                         <div class="w-2/3 bg-[#2a4a6f] text-white text-sm font-semibold rounded-md shadow-sm px-4 py-2.5" x-text="infoUser.alamat || '-'"></div>
                     </div>
-                    {{-- STATUS --}}
                     <div class="flex items-center">
                         <label class="w-1/3 text-sm font-medium text-gray-700">STATUS</label>
                         <div class="w-2/3 bg-[#2a4a6f] text-white text-sm font-semibold rounded-md shadow-sm px-4 py-2.5" x-text="infoUser.status || '-'"></div>
                     </div>
                 </div>
             </div>
-            {{-- Footer --}}
             <div class="modal-footer flex justify-end pt-3 mt-3 border-t">
                 <button type="button" @click="openInfoModal = false" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">Tutup</button>
             </div>
@@ -203,15 +192,12 @@
                     <button type="button" @click="openEditModal = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
                 </div>
                 <div class="modal-body max-h-[70vh] overflow-y-auto p-2">
-                    {{-- Foto Placeholder --}}
                     <div class="w-full bg-gray-200 rounded-lg p-4 text-center mb-4">
                         <img :src="editUser.foto_profil ? `/storage/${editUser.foto_profil}` : defaultFoto" alt="Foto Profil" 
                              class="w-32 h-32 mx-auto rounded-full object-cover border-4 border-white shadow-md">
                     </div>
-                    {{-- Panggil partial form --}}
                     @include('komandan.akun.partials.form-fields', ['isEdit' => true])
                 </div>
-                {{-- Footer Modal --}}
                 <div class="modal-footer pt-3 mt-3 border-t">
                     <button type="submit" class="w-full px-4 py-2.5 text-white bg-[#2a4a6f] rounded-lg hover:bg-opacity-90">
                         APPLY
@@ -272,32 +258,36 @@
 <script>
     document.addEventListener('alpine:init', () => {
         // Mendefinisikan komponen Alpine untuk form
-        Alpine.data('formFields', (isEdit = false, userData = {}) => ({
-            // Tentukan SEMUA kemungkinan field di sini
-            nama_lengkap: userData.nama_lengkap || '',
-            username: userData.username || '',
-            peran: userData.peran || 'anggota',
-            status: userData.status || 'Aktif',
-            tanggal_lahir: userData.tanggal_lahir || '',
-            no_hp: userData.no_hp || '',
-            alamat: userData.alamat || '',
+        Alpine.data('formFields', (isEdit = false) => ({
+            isEdit: isEdit,
+            // Variabel lokal untuk form
+            nama_lengkap: '',
+            username: '',
+            peran: 'anggota',
+            status: 'Aktif',
+            tanggal_lahir: '',
+            no_hp: '',
+            alamat: '',
             
-            // Fungsi ini akan dipanggil saat data 'editUser' di global berubah
-            updateData(newUser) {
-                if (isEdit) {
-                    this.nama_lengkap = newUser.nama_lengkap || '';
-                    this.username = newUser.username || '';
-                    this.peran = newUser.peran || 'anggota';
-                    this.status = newUser.status || 'Aktif';
-                    this.tanggal_lahir = newUser.tanggal_lahir || '';
-                    this.no_hp = newUser.no_hp || '';
-                    this.alamat = newUser.alamat || '';
+            // Fungsi untuk MENGISI form ini dengan data
+            // Ini akan dipicu oleh $watch
+            fillData(userData) {
+                if (this.isEdit && userData) {
+                    this.nama_lengkap = userData.nama_lengkap || '';
+                    this.username = userData.username || '';
+                    this.peran = userData.peran || 'anggota';
+                    this.status = userData.status || 'Aktif';
+                    // PERBAIKAN BUG TANGGAL:
+                    // Ambil 10 karakter pertama (YYYY-MM-DD)
+                    this.tanggal_lahir = userData.tanggal_lahir ? userData.tanggal_lahir.substring(0, 10) : '';
+                    this.no_hp = userData.no_hp || '';
+                    this.alamat = userData.alamat || '';
                 }
             },
             
-            // Fungsi untuk mereset form tambah
+            // Fungsi untuk MERESET form "Tambah Akun"
             resetCreateForm() {
-                if (!isEdit) {
+                if (!this.isEdit) {
                     this.nama_lengkap = '';
                     this.username = '';
                     this.peran = 'anggota';
@@ -308,48 +298,48 @@
                 }
             }
         }));
+
+        // DAFTARKAN EVENT LISTENER GLOBAL
+        // Ini akan dipicu oleh 'effect' di bawah
+        
+        // 1. Saat 'editUser' global berubah, panggil 'fillData' di form edit
+        window.addEventListener('fill-edit-form', (event) => {
+            const editForm = document.querySelector('[x-data^="formFields(true"]');
+            if (editForm && editForm._x_dataStack) {
+                editForm._x_dataStack[0].fillData(event.detail);
+            }
+        });
+        
+        // 2. Saat modal create ditutup, panggil 'resetCreateForm'
+        window.addEventListener('reset-create-form', () => {
+             const createForm = document.querySelector('[x-data^="formFields(false"]');
+             if (createForm && createForm._x_dataStack) {
+                createForm._x_dataStack[0].resetCreateForm();
+             }
+        });
     });
 
-    // Script untuk memicu update/reset pada form partial
+    // SCRIPT INI AKAN MEMANTAU PERUBAHAN DI 'x-data' UTAMA
     document.addEventListener('DOMContentLoaded', () => {
         if (typeof Alpine !== 'undefined') {
             Alpine.effect(() => {
-                // Cari div x-data utama
-                const mainDataEl = document.querySelector('[x-data]');
-                if (!mainDataEl) return;
-                const mainData = mainDataEl._x_dataStack[0];
+                const mainEl = document.querySelector('[x-data]');
+                if (!mainEl || !mainEl._x_dataStack) return;
+                
+                const mainData = mainEl._x_dataStack[0];
+                if (!mainData) return;
 
-                // 1. Picu update pada form EDIT saat 'editUser' berubah
+                // 1. Amati 'editUser'. Jika berubah, kirim event
                 const editUser = mainData.editUser;
                 if (editUser && editUser.id_pengguna) {
-                    window.dispatchEvent(new CustomEvent('update-edit-form', { detail: editUser }));
+                    window.dispatchEvent(new CustomEvent('fill-edit-form', { detail: editUser }));
                 }
                 
-                // 2. Picu reset pada form CREATE saat 'openCreateModal' ditutup
+                // 2. Amati 'openCreateModal'. Jika ditutup, kirim event
                 const createModalOpen = mainData.openCreateModal;
                 if (createModalOpen === false) {
                     window.dispatchEvent(new CustomEvent('reset-create-form'));
                 }
-            });
-
-            // Listener untuk form-fields (edit)
-            window.addEventListener('update-edit-form', event => {
-                const editForms = document.querySelectorAll('[x-data^="formFields(true"]');
-                editForms.forEach(form => {
-                    if (form._x_dataStack) {
-                        form._x_dataStack[0].updateData(event.detail);
-                    }
-                });
-            });
-            
-            // Listener untuk form-fields (create)
-            window.addEventListener('reset-create-form', () => {
-                 const createForms = document.querySelectorAll('[x-data^="formFields(false"]');
-                 createForms.forEach(form => {
-                    if (form._x_dataStack) {
-                        form._x_dataStack[0].resetCreateForm();
-                    }
-                 });
             });
         }
     });
