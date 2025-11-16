@@ -10,59 +10,48 @@ class Presensi extends Model
 {
     use HasFactory;
 
-    /**
-     * Nama tabel yang terkait dengan model.
-     * @var string
-     */
-    protected $table = 'presensi'; // Sesuai nama tabel
-
-    /**
-     * Primary key tabel.
-     * @var string
-     */
-    protected $primaryKey = 'id_presensi'; // Sesuai primary key
-
-    /**
-     * Menentukan apakah model harus mencatat timestamp (created_at, updated_at).
-     * @var bool
-     */
-    public $timestamps = true; // Sesuai di .sql
+    protected $table = 'presensi';
+    protected $primaryKey = 'id_presensi';
+    public $timestamps = true;
 
     /**
      * Kolom-kolom yang boleh diisi.
-     * @var array
+     * DISESUAIKAN DENGAN DATABASE ANDA (image_a1eb42.png)
      */
     protected $fillable = [
         'id_pengguna',
+        'id_shift', // <-- PENTING
         'nama_lengkap',
-        'waktu_masuk',
-        'foto_masuk',
-        'waktu_pulang',
-        'foto_pulang',
+        'waktu', // <-- DULU 'waktu_masuk'
+        'foto', // <-- DULU 'foto_masuk'
         'status',
+        'jenis_presensi', // <-- PENTING
         'tanggal',
     ];
 
+    /**
+     * Casting tipe data otomatis.
+     * INI ADALAH PERBAIKAN UTAMA UNTUK ERROR ANDA
+     */
+    protected $casts = [
+        'waktu' => 'datetime', // <-- DULU 'waktu_masuk' & 'waktu_pulang'
+        'tanggal' => 'date',
+    ];
+
+    /**
+     * Event 'creating' untuk mengisi data otomatis.
+     * (Kode 'boot' Anda sudah bagus, saya hanya merapikannya)
+     */
     protected static function boot()
     {
         parent::boot();
 
-        /**
-         * Event 'creating' ini berjalan SEBELUM data disimpan ke database.
-         * $model adalah data presensi yang AKAN dibuat.
-         */
         static::creating(function ($model) {
-            
-            // Cek apakah ada pengguna yang sedang login
             if (Auth::check()) {
-                
-                // 1. Isi 'id_pengguna' secara otomatis dari user yang login
-                //    (jika belum diisi)
                 if (empty($model->id_pengguna)) {
-                    $model->id_pengguna = Auth::user()->id_pengguna;
+                    // Pastikan model User Anda punya 'id_pengguna'
+                    $model->id_pengguna = Auth::user()->id_pengguna; 
                 }
-                
-                // 2. Isi 'nama_lengkap' secara otomatis DARI user yang login
                 if (empty($model->nama_lengkap)) {
                     $model->nama_lengkap = Auth::user()->nama_lengkap;
                 }
@@ -71,22 +60,22 @@ class Presensi extends Model
     }
     
     /**
-     * Casting tipe data otomatis.
-     * @var array
-     */
-    protected $casts = [
-        'waktu_masuk' => 'datetime',
-        'waktu_pulang' => 'datetime',
-        'tanggal' => 'date',
-    ];
-
-    /**
-     * Relasi ke model Pengguna (jika kamu punya model Pengguna)
-     * Ganti 'App\Models\Pengguna' dengan model user-mu
+     * Relasi ke model Pengguna (Asumsi Anda punya model User/Pengguna)
      */
     public function pengguna()
     {
-        // Asumsi primary key di model Pengguna adalah 'id_pengguna'
-        return $this->belongsTo('App\Models\Pengguna', 'id_pengguna', 'id_pengguna');
+        // Sesuaikan 'App\Models\User' jika nama model Anda beda
+        return $this->belongsTo('App\Models\User', 'id_pengguna', 'id_pengguna');
+    }
+
+    /**
+     * Relasi ke model Shift (PENTING UNTUK FILTER)
+     */
+    public function shift()
+    {
+        // Menghubungkan ke Model Shift
+        // Foreign key di 'presensi' adalah 'id_shift'
+        // Primary key di 'shift' adalah 'id_shift'
+        return $this->belongsTo(Shift::class, 'id_shift', 'id_shift');
     }
 }

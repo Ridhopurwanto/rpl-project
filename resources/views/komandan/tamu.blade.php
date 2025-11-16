@@ -48,7 +48,7 @@
         </div>
     @endif
 
-    {{-- Form Filter Tanggal [cite: 1012, 2437] --}}
+    {{-- Form Filter Tanggal --}}
     <form action="{{ route('komandan.tamu') }}" method="GET">
         <div class="bg-white p-4 rounded-lg shadow-md mb-6">
             <div class="flex flex-col sm:flex-row sm:items-end sm:space-x-4 space-y-4 sm:space-y-0">
@@ -74,13 +74,15 @@
             <table class="w-full min-w-max">
                 <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                     <tr>
-                        <th class="py-3 px-4 text-left">No</th>
+                        <th class="py-3 px-4 text-left w-16">No</th>
                         <th class="py-3 px-4 text-left">Nama</th>
-                        <th class="py-3 px-4 text-left">Instansi</th>
-                        <th class="py-3 px-4 text-left">Waktu Datang</th>
-                        <th class="py-3 px-4 text-left">Waktu Pulang</th>
+                        <th class="py-3 px-4 text-left w-48">Instansi</th>
+                        <th class="py-3 px-4 text-left w-32">Waktu Datang</th>
+                        <th class="py-3 px-4 text-left w-32">Waktu Pulang</th>
                         <th class="py-3 px-4 text-left">Tujuan</th>
-                        <th class="py-3 px-4 text-center">Aksi</th>
+                        @if(Auth::user()->peran == 'komandan')
+                            <th class="py-3 px-4 text-center w-28">Aksi</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody class="text-sm divide-y divide-gray-200">
@@ -92,9 +94,8 @@
                         <td class="py-2 px-4">{{ $tamu->waktu_datang->format('H:i:s') }}</td>
                         <td class="py-2 px-4">{{ $tamu->waktu_pulang ? $tamu->waktu_pulang->format('H:i:s') : '-' }}</td>
                         <td class="py-2 px-4">{{ $tamu->tujuan }}</td>
-                        <td class="py-2 px-4">
-                            {{-- Tampilkan tombol Aksi HANYA untuk Komandan [cite: 2355, 2414] --}}
-                            @if(Auth::user()->peran == 'komandan')
+                        @if(Auth::user()->peran == 'komandan')
+                            <td class="py-2 px-4">
                                 <div class="flex justify-center space-x-3">
                                     {{-- Tombol Edit --}}
                                     <button @click="
@@ -117,14 +118,12 @@
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
                                     </button>
                                 </div>
-                            @else
-                                -
-                            @endif
-                        </td>
+                            </td>
+                        @endif
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="py-4 px-4 text-center text-gray-500">
+                        <td colspan="{{ Auth::user()->peran == 'komandan' ? '7' : '6' }}" class="py-4 px-4 text-center text-gray-500">
                             Tidak ada data kunjungan tamu pada tanggal ini.
                         </td>
                     </tr>
@@ -134,9 +133,7 @@
         </div>
     </div>
 
-    {{-- === MODAL POP-UP (Edit dan Hapus) === --}}
-
-    {{-- 1. Modal Edit Tamu --}}
+    {{-- Modal Edit Tamu --}}
     <div x-show="showEditModal"
          class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
          @click.away="showEditModal = false"
@@ -186,7 +183,7 @@
         </div>
     </div>
 
-    {{-- 2. Modal Hapus --}}
+    {{-- Modal Hapus --}}
     <div x-show="showDeleteModal"
          class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
          @click.away="showDeleteModal = false"

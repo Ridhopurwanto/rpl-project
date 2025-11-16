@@ -74,13 +74,15 @@
             <table class="w-full min-w-max">
                 <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                     <tr>
-                        <th class="py-3 px-4 text-left">No</th>
-                        <th class="py-3 px-4 text-left">Nopol</th>
+                        <th class="py-3 px-4 text-left w-16">No</th>
+                        <th class="py-3 px-4 text-left w-32">Nopol</th>
                         <th class="py-3 px-4 text-left">Pemilik</th>
-                        <th class="py-3 px-4 text-left">Masuk</th>
-                        <th class="py-3 px-4 text-left">Keluar</th>
-                        <th class="py-3 px-4 text-left">Ket.</th>
-                        <th class="py-3 px-4 text-center">Aksi</th>
+                        <th class="py-3 px-4 text-left w-28">Masuk</th>
+                        <th class="py-3 px-4 text-left w-28">Keluar</th>
+                        <th class="py-3 px-4 text-left w-40">Ket.</th>
+                        @if(Auth::user()->peran == 'komandan')
+                            <th class="py-3 px-4 text-center w-28">Aksi</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody class="text-sm divide-y divide-gray-200">
@@ -112,10 +114,9 @@
                                 {{ $log->keterangan }}
                             @endif
                         </td>
-                        <td class="py-2 px-4">
-                            @if(Auth::user()->peran == 'komandan')
+                        @if(Auth::user()->peran == 'komandan')
+                            <td class="py-2 px-4">
                                 <div class="flex justify-center">
-                                    
                                     {{-- Cek jika relasi kendaraan ada SEBELUM cek plat --}}
                                     @if($log->kendaraan)
                                         {{-- Cek apakah plat nomor dari log ini SUDAH ADA di daftar master --}}
@@ -136,16 +137,13 @@
                                     @else
                                         <span class="text-gray-400" title="Data Kendaraan Error">-</span>
                                     @endif
-
                                 </div>
-                            @else
-                                -
-                            @endif
-                        </td>
+                            </td>
+                        @endif
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="py-4 px-4 text-center text-gray-500">
+                        <td colspan="{{ Auth::user()->peran == 'komandan' ? '7' : '6' }}" class="py-4 px-4 text-center text-gray-500">
                             Tidak ada riwayat kendaraan pada tanggal ini.
                         </td>
                     </tr>
@@ -164,11 +162,13 @@
             <table class="w-full min-w-max">
                 <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                     <tr>
-                        <th class="py-3 px-4 text-left">No</th>
-                        <th class="py-3 px-4 text-left">Nopol</th>
+                        <th class="py-3 px-4 text-left w-16">No</th>
+                        <th class="py-3 px-4 text-left w-40">Nopol</th>
                         <th class="py-3 px-4 text-left">Pemilik</th>
-                        <th class="py-3 px-4 text-left">Tipe</th>
-                        <th class="py-3 px-4 text-center">Aksi</th>
+                        <th class="py-3 px-4 text-left w-32">Tipe</th>
+                        @if(Auth::user()->peran == 'komandan')
+                            <th class="py-3 px-4 text-center w-28">Aksi</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody class="text-sm divide-y divide-gray-200">
@@ -178,11 +178,9 @@
                         <td class="py-2 px-4 font-medium">{{ $kendaraan->nomor_plat }}</td>
                         <td class="py-2 px-4">{{ $kendaraan->pemilik }}</td>
                         <td class="py-2 px-4">{{ $kendaraan->tipe }}</td>
-                        <td class="py-2 px-4">
-                            @if(Auth::user()->peran == 'komandan')
+                        @if(Auth::user()->peran == 'komandan')
+                            <td class="py-2 px-4">
                                 <div class="flex justify-center space-x-3">
-                                    
-                                    {{-- ▼▼▼ PERBAIKAN TOMBOL EDIT (Mengikuti presensi.blade.php) ▼▼▼ --}}
                                     <button @click="
                                         showEditModal = true; 
                                         editAction = '{{ route('komandan.kendaraan.master.update', $kendaraan->id_kendaraan) }}';
@@ -193,7 +191,6 @@
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
                                     </button>
                                     
-                                    {{-- ▼▼▼ PERBAIKAN TOMBOL HAPUS (Mengikuti presensi.blade.php) ▼▼▼ --}}
                                     <button @click.prevent="
                                         showDeleteModal = true; 
                                         deleteAction = '{{ route('komandan.kendaraan.master.destroy', $kendaraan->id_kendaraan) }}'
@@ -201,14 +198,12 @@
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
                                     </button>
                                 </div>
-                            @else
-                                -
-                            @endif
-                        </td>
+                            </td>
+                        @endif
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="py-4 px-4 text-center text-gray-500">
+                        <td colspan="{{ Auth::user()->peran == 'komandan' ? '5' : '4' }}" class="py-4 px-4 text-center text-gray-500">
                             Tidak ada data kendaraan terdaftar.
                         </td>
                     </tr>
@@ -219,7 +214,7 @@
     </div>
 
 
-    {{-- ▼▼▼ PERBAIKAN MODAL EDIT KENDARAAN (Mengganti field Waktu/Status) ▼▼▼ --}}
+    {{-- Modal Edit Kendaraan --}}
     <div x-show="showEditModal"
          class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
          @click.away="showEditModal = false"
@@ -229,27 +224,23 @@
                 <h3 class="text-xl font-bold text-gray-800">EDIT KENDARAAN MASTER</h3>
                 <button @click="showEditModal = false" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
             </div>
-            {{-- Form Edit --}}
             <form :action="editAction" method="POST" class="mt-4">
                 @csrf
                 @method('PUT')
                 <div class="space-y-4">
                     
-                    {{-- Field untuk Nomor Plat --}}
                     <div>
                         <label for="edit_nomor_plat" class="block text-sm font-medium text-gray-700 mb-1">Nomor Plat:</label>
                         <input type="text" id="edit_nomor_plat" name="nomor_plat" x-model="editPlat"
                                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     </div>
                     
-                    {{-- Field untuk Pemilik --}}
                     <div>
                         <label for="edit_pemilik" class="block text-sm font-medium text-gray-700 mb-1">Pemilik:</label>
                         <input type="text" id="edit_pemilik" name="pemilik" x-model="editPemilik"
                                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     </div>
 
-                    {{-- Field untuk Tipe --}}
                     <div>
                         <label for="edit_tipe" class="block text-sm font-medium text-gray-700 mb-1">Tipe:</label>
                         <select id="edit_tipe" name="tipe" x-model="editTipe"
@@ -267,7 +258,7 @@
         </div>
     </div>
 
-    {{-- Modal Hapus (Sudah benar, tidak perlu diubah) --}}
+    {{-- Modal Hapus --}}
     <div x-show="showDeleteModal"
          class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
          @click.away="showDeleteModal = false"

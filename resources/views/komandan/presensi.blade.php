@@ -1,28 +1,29 @@
 @extends('layouts.app')
 
+{{-- Tombol KEMBALI --}}
 @section('header-left')
-    <a class="bg-slate-800 text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md hover:bg-slate-700 transition">
-        PRESENSI
+    <a href="{{ route('komandan.dashboard') }}" class="bg-slate-800 text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md hover:bg-slate-700 transition">
+        KEMBALI
     </a>
 @endsection
 
 @section('content')
 <div class="w-full mx-auto"
      x-data="{ 
-        showPhotoModal: false, 
-        photoUrl: '', 
-        showEditModal: false, 
-        editAction: '',
-        editWaktuMasuk: '',
-        editWaktuPulang: '',
-        editStatus: '',
-        showDeleteModal: false,
-        deleteAction: '' 
+         showPhotoModal: false, 
+         photoUrl: '', 
+         showEditModal: false, 
+         editAction: '',
+         editWaktu: '',
+         editStatus: '',
+         editJenisPresensi: '',
+         showDeleteModal: false,
+         deleteAction: '' 
      }">
     
     <h2 class="text-2xl font-bold text-slate-800 mb-4">Laporan Presensi Anggota</h2>
 
-    {{-- Tampilkan Notifikasi Sukses/Error --}}
+    {{-- Tampilkan Notifikasi --}}
     @if(session('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
             <span>{{ session('success') }}</span>
@@ -44,8 +45,7 @@
         </div>
     @endif
 
-
-    {{-- Form Filter (Sama) --}}
+    {{-- Form Filter --}}
     <form action="{{ route('komandan.presensi') }}" method="GET">
         <div class="bg-white p-4 rounded-lg shadow-md mb-6">
             <div class="flex flex-col sm:flex-row sm:items-end sm:space-x-4 space-y-4 sm:space-y-0">
@@ -56,22 +56,21 @@
                            value="{{ $tanggalTerpilih }}">
                 </div>
                 <div class="flex-1">
-            <label for="shift" class="block text-sm font-medium text-gray-700 mb-1">JENIS SHIFT:</label>
-            <select id="shift" name="shift" 
-                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                <option value="semua">Semua Shift</option>
-                <option value="pagi">Shift Pagi</option>
-                <option value="malam">Shift Malam</option>
-            </select>
-            </div>
+                    <label for="shift" class="block text-sm font-medium text-gray-700 mb-1">JENIS SHIFT:</label>
+                    <select id="shift" name="shift" 
+                            class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <option value="semua" @if($shiftTerpilih == 'semua') selected @endif>Semua Shift</option>
+                        <option value="Pagi" @if($shiftTerpilih == 'Pagi') selected @endif>Shift Pagi</option>
+                        <option value="Malam" @if($shiftTerpilih == 'Malam') selected @endif>Shift Malam</option>
+                        <option value="Non Shift" @if($shiftTerpilih == 'Non Shift') selected @endif>Non Shift</option>
+                        <option value="Off" @if($shiftTerpilih == 'Off') selected @endif>Off</option>
+                    </select>
+                </div>
                 <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition">
                     Tampilkan
                 </button>
             </div>
-            
         </div>
-
-        
     </form>
 
     {{-- Tabel 1: DAFTAR PRESENSI MASUK --}}
@@ -83,12 +82,14 @@
             <table class="w-full min-w-max">
                 <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                     <tr>
-                        <th class="py-3 px-4 text-left">No</th>
-                        <th class="py-3 px-4 text-left">Nama</th>
-                        <th class="py-3 px-4 text-left">Waktu</th>
-                        <th class="py-3 px-4 text-center">Foto</th>
-                        <th class="py-3 px-4 text-left">Status</th>
-                        <th class="py-3 px-4 text-center">Aksi</th>
+                        <th class="py-3 px-4 text-left w-16">No</th>
+                        <th class="py-3 px-4 text-center w-25">Nama</th>
+                        <th class="py-3 px-4 text-left w-25">Waktu</th>
+                        <th class="py-3 px-4 text-center w-25">Foto</th>
+                        <th class="py-3 px-4 text-center w-25">Status</th>
+                        @if(Auth::user()->peran == 'komandan')
+                            <th class="py-3 px-4 text-center w-28">Aksi</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody class="text-sm divide-y divide-gray-200">
@@ -96,10 +97,9 @@
                     <tr>
                         <td class="py-2 px-4">{{ $index + 1 }}.</td>
                         <td class="py-2 px-4 font-medium">{{ $presensi->nama_lengkap }}</td>
-                        <td class="py-2 px-4">{{ $presensi->waktu_masuk->format('H:i:s') }}</td>
+                        <td class="py-2 px-4">{{ $presensi->waktu->format('H:i:s') }}</td>
                         <td class="py-2 px-4 text-center">
-                            {{-- ▼▼▼ PERBAIKAN TOMBOL BUKA (FOTO) ▼▼▼ --}}
-                            <button @click="showPhotoModal = true; photoUrl = '{{ asset('storage/' . $presensi->foto_masuk) }}'" class="text-blue-500 hover:underline">
+                            <button @click="showPhotoModal = true; photoUrl = '{{ asset('storage/' . $presensi->foto) }}'" class="text-blue-500 hover:underline">
                                 Buka
                             </button>
                         </td>
@@ -108,39 +108,32 @@
                                 <span class="text-green-600 font-semibold">Tepat Waktu</span>
                             @elseif($presensi->status == 'terlambat')
                                 <span class="text-red-500 font-semibold">Terlambat</span>
-                            @elseif($presensi->status == 'izin')
-                                <span class="text-orange-500 font-semibold">Izin</span>
                             @else
                                 <span class="text-yellow-500 font-semibold">{{ ucfirst($presensi->status) }}</span>
                             @endif
                         </td>
-                        <td class="py-2 px-4">
-                            @if(Auth::user()->peran == 'komandan')
+                        @if(Auth::user()->peran == 'komandan')
+                            <td class="py-2 px-4">
                                 <div class="flex justify-center space-x-3">
-                                    {{-- ▼▼▼ PERBAIKAN TOMBOL EDIT ▼▼▼ --}}
                                     <button @click="
                                         showEditModal = true; 
                                         editAction = '{{ route('komandan.presensi.update', $presensi->id_presensi) }}';
-                                        editWaktuMasuk = '{{ $presensi->waktu_masuk->format('Y-m-d\TH:i') }}';
-                                        editWaktuPulang = '{{ $presensi->waktu_pulang ? $presensi->waktu_pulang->format('Y-m-d\TH:i') : '' }}';
+                                        editWaktu = '{{ $presensi->waktu->format('Y-m-d\TH:i') }}';
                                         editStatus = '{{ $presensi->status }}';
+                                        editJenisPresensi = '{{ $presensi->jenis_presensi }}';
                                     " class="text-blue-500 hover:text-blue-700" title="Edit">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
                                     </button>
-                                    
-                                    {{-- ▼▼▼ PERBAIKAN TOMBOL HAPUS ▼▼▼ --}}
                                     <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('komandan.presensi.destroy', $presensi->id_presensi) }}'" class="text-red-500 hover:text-red-700" title="Hapus">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
                                     </button>
                                 </div>
-                            @else
-                                -
-                            @endif
-                        </td>
+                            </td>
+                        @endif
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="py-4 px-4 text-center text-gray-500">
+                        <td colspan="{{ Auth::user()->peran == 'komandan' ? '6' : '5' }}" class="py-4 px-4 text-center text-gray-500">
                             Tidak ada data presensi masuk pada tanggal ini.
                         </td>
                     </tr>
@@ -159,12 +152,14 @@
             <table class="w-full min-w-max">
                 <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                     <tr>
-                        <th class="py-3 px-4 text-left">No</th>
-                        <th class="py-3 px-4 text-left">Nama</th>
-                        <th class="py-3 px-4 text-left">Waktu</th>
-                        <th class="py-3 px-4 text-center">Foto</th>
-                        <th class="py-3 px-4 text-left">Status</th>
-                        <th class="py-3 px-4 text-center">Aksi</th>
+                        <th class="py-3 px-4 text-left w-16">No</th>
+                        <th class="py-3 px-4 text-center w-25">Nama</th>
+                        <th class="py-3 px-4 text-left w-25">Waktu</th>
+                        <th class="py-3 px-4 text-center w-25">Foto</th>
+                        <th class="py-3 px-4 text-center w-25">Status</th>
+                        @if(Auth::user()->peran == 'komandan')
+                            <th class="py-3 px-4 text-center">Aksi</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody class="text-sm divide-y divide-gray-200">
@@ -172,49 +167,43 @@
                     <tr>
                         <td class="py-2 px-4">{{ $index + 1 }}.</td>
                         <td class="py-2 px-4 font-medium">{{ $presensi->nama_lengkap }}</td>
-                        <td class="py-2 px-4">{{ $presensi->waktu_pulang->format('H:i:s') }}</td>
+                        <td class="py-2 px-4">{{ $presensi->waktu->format('H:i:s') }}</td>
                         <td class="py-2 px-4 text-center">
-                            {{-- ▼▼▼ PERBAIKAN TOMBOL BUKA (FOTO) ▼▼▼ --}}
-                            <button @click="showPhotoModal = true; photoUrl = '{{ asset('storage/' . $presensi->foto_pulang) }}'" class="text-blue-500 hover:underline">
+                            <button @click="showPhotoModal = true; photoUrl = '{{ asset('storage/' . $presensi->foto) }}'" class="text-blue-500 hover:underline">
                                 Buka
                             </button>
                         </td>
-                                                <td class="py-2 px-4">
+                        <td class="py-2 px-4">
                             @if($presensi->status == 'tepat waktu')
                                 <span class="text-green-600 font-semibold">Tepat Waktu</span>
                             @elseif($presensi->status == 'terlambat')
                                 <span class="text-red-500 font-semibold">Terlambat</span>
-                            @elseif($presensi->status == 'izin')
-                                <span class="text-orange-500 font-semibold">Izin</span>
                             @else
                                 <span class="text-yellow-500 font-semibold">{{ ucfirst($presensi->status) }}</span>
                             @endif
                         </td>
-                        <td class="py-2 px-4">
-                            @if(Auth::user()->peran == 'komandan')
+                        @if(Auth::user()->peran == 'komandan')
+                            <td class="py-2 px-4">
                                 <div class="flex justify-center space-x-3">
                                     <button @click="
                                         showEditModal = true; 
                                         editAction = '{{ route('komandan.presensi.update', $presensi->id_presensi) }}';
-                                        editWaktuMasuk = '{{ $presensi->waktu_masuk->format('Y-m-d\TH:i') }}';
-                                        editWaktuPulang = '{{ $presensi->waktu_pulang ? $presensi->waktu_pulang->format('Y-m-d\TH:i') : '' }}';
+                                        editWaktu = '{{ $presensi->waktu->format('Y-m-d\TH:i') }}';
                                         editStatus = '{{ $presensi->status }}';
+                                        editJenisPresensi = '{{ $presensi->jenis_presensi }}';
                                     " class="text-blue-500 hover:text-blue-700" title="Edit">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
                                     </button>
-                                    
                                     <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('komandan.presensi.destroy', $presensi->id_presensi) }}'" class="text-red-500 hover:text-red-700" title="Hapus">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
                                     </button>
                                 </div>
-                            @else
-                                -
-                            @endif
-                        </td>
+                            </td>
+                        @endif
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="py-4 px-4 text-center text-gray-500">
+                        <td colspan="{{ Auth::user()->peran == 'komandan' ? '6' : '5' }}" class="py-4 px-4 text-center text-gray-500">
                             Tidak ada data presensi pulang pada tanggal ini.
                         </td>
                     </tr>
@@ -225,7 +214,7 @@
     </div>
 
 
-    {{-- === ▼▼▼ MODAL POP-UP (Foto, Edit, Hapus) - SEPERTI DI PATROLI ▼▼▼ === --}}
+    {{-- Modal Pop-up --}}
 
     {{-- 1. Modal Tampil Foto --}}
     <div x-show="showPhotoModal" 
@@ -253,24 +242,17 @@
                 <h3 class="text-xl font-bold text-gray-800">EDIT PRESENSI</h3>
                 <button @click="showEditModal = false" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
             </div>
-            {{-- Form Edit --}}
             <form :action="editAction" method="POST" class="mt-4">
                 @csrf
                 @method('PUT')
                 <div class="space-y-4">
                     
                     <div>
-                        <label for="waktu_masuk" class="block text-sm font-medium text-gray-700 mb-1">Waktu Masuk:</label>
-                        <input type="datetime-local" id="waktu_masuk" name="waktu_masuk" x-model="editWaktuMasuk"
+                        <label for="waktu" class="block text-sm font-medium text-gray-700 mb-1">Waktu:</label>
+                        <input type="datetime-local" id="waktu" name="waktu" x-model="editWaktu"
                                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     </div>
                     
-                    <div>
-                        <label for="waktu_pulang" class="block text-sm font-medium text-gray-700 mb-1">Waktu Pulang:</label>
-                        <input type="datetime-local" id="waktu_pulang" name="waktu_pulang" x-model="editWaktuPulang"
-                               class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-
                     <div>
                         <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status:</label>
                         <select id="status" name="status" x-model="editStatus"
@@ -279,6 +261,15 @@
                             <option value="terlambat">Terlambat</option>
                             <option value="terlalu cepat">Terlalu Cepat</option>
                             <option value="izin">Izin</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="jenis_presensi" class="block text-sm font-medium text-gray-700 mb-1">Jenis Presensi:</label>
+                        <select id="jenis_presensi" name="jenis_presensi" x-model="editJenisPresensi"
+                                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <option value="Masuk">Masuk</option>
+                            <option value="Pulang">Pulang</option>
                         </select>
                     </div>
 
@@ -313,7 +304,5 @@
         </div>
     </div>
     
-    {{-- === ▲▲▲ BATAS AKHIR MODAL POP-UP ▲▲▲ === --}}
-
 </div>
 @endsection

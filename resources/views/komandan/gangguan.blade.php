@@ -92,13 +92,15 @@
             <table class="w-full min-w-max">
                 <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                     <tr>
-                        <th class="py-3 px-4 text-left">No</th>
-                        <th class="py-3 px-4 text-center">Foto</th>
-                        <th class="py-3 px-4 text-left">Tanggal</th>
-                        <th class="py-3 px-4 text-left">Lokasi</th>
-                        <th class="py-3 px-4 text-left">Kategori</th>
+                        <th class="py-3 px-4 text-left w-16">No</th>
+                        <th class="py-3 px-4 text-center w-24">Foto</th>
+                        <th class="py-3 px-4 text-left w-40">Tanggal</th>
+                        <th class="py-3 px-4 text-left w-48">Lokasi</th>
+                        <th class="py-3 px-4 text-left w-40">Kategori</th>
                         <th class="py-3 px-4 text-left">Ket. (Deskripsi)</th>
-                        <th class="py-3 px-4 text-center">Aksi</th>
+                        @if(Auth::user()->peran == 'komandan')
+                            <th class="py-3 px-4 text-center w-28">Aksi</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody class="text-sm divide-y divide-gray-200">
@@ -116,33 +118,31 @@
                         <td class="py-2 px-4">{{ $gangguan->lokasi }}</td>
                         <td class="py-2 px-4">{{ $gangguan->kategori }}</td>
                         <td class="py-2 px-4">{{ $gangguan->deskripsi }}</td>
+                        @if(Auth::user()->peran == 'komandan')
                         <td class="py-2 px-4">
-                            {{-- Aksi HANYA untuk Komandan --}}
-                            @if(Auth::user()->peran == 'komandan')
-                                <div class="flex justify-center space-x-3">
-                                    {{-- Tombol Edit --}}
-                                    <button @click="
-                                        showEditModal = true; 
-                                        editAction = '{{ route('komandan.gangguan.update', $gangguan->id_gangguan) }}';
-                                        editWaktu = '{{ $gangguan->waktu_lapor->format('Y-m-d\TH:i') }}';
-                                        editLokasi = '{{ $gangguan->lokasi }}';
-                                        editKategori = '{{ $gangguan->kategori }}';
-                                        editDeskripsi = '{{ $gangguan->deskripsi }}';
-                                    " class="text-blue-500 hover:text-blue-700" title="Edit">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
-                                    </button>
-                                    
-                                    {{-- Tombol Hapus --}}
-                                    <button @click.prevent="
-                                        showDeleteModal = true; 
-                                        deleteAction = '{{ route('komandan.gangguan.destroy', $gangguan->id_gangguan) }}'
-                                    " class="text-red-500 hover:text-red-700" title="Hapus">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                                    </button>
-                                </div>
-                            @else
-                                -
-                            @endif
+                            <div class="flex justify-center space-x-3">
+                                {{-- Tombol Edit --}}
+                                <button @click="
+                                    showEditModal = true; 
+                                    editAction = '{{ route('komandan.gangguan.update', $gangguan->id_gangguan) }}';
+                                    editWaktu = '{{ $gangguan->waktu_lapor->format('Y-m-d\TH:i') }}';
+                                    editLokasi = '{{ $gangguan->lokasi }}';
+                                    editKategori = '{{ $gangguan->kategori }}';
+                                    editDeskripsi = '{{ $gangguan->deskripsi }}';
+                                " class="text-blue-500 hover:text-blue-700" title="Edit">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
+                                </button>
+                                
+                                {{-- Tombol Hapus --}}
+                                <button @click.prevent="
+                                    showDeleteModal = true; 
+                                    deleteAction = '{{ route('komandan.gangguan.destroy', $gangguan->id_gangguan) }}'
+                                " class="text-red-500 hover:text-red-700" title="Hapus">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                                </button>
+                            </div>
+                        </td>
+                        @endif
                         </td>
                     </tr>
                     @empty
