@@ -21,11 +21,11 @@ class PatroliController extends Controller
                             ? Carbon::parse($request->input('tanggal')) 
                             : Carbon::today();
         
-        // Kueri DIUBAH: Hanya ambil yang 'waktu_patroli' TIDAK NULL
+        // Kueri DIUBAH: Hanya ambil yang 'waktu_exact' TIDAK NULL
         $allPatrols = Patroli::where('id_pengguna', Auth::id())
                         ->whereDate('tanggal', $tanggalTerpilih)
-                        ->whereNotNull('waktu_patroli') // <-- HANYA TAMPILKAN YANG SUDAH SELESAI
-                        ->orderBy('waktu_patroli', 'asc')
+                        ->whereNotNull('waktu_exact') // <-- HANYA TAMPILKAN YANG SUDAH SELESAI
+                        ->orderBy('waktu_exact', 'asc')
                         ->get();
         
         $patrolGroups = $allPatrols->groupBy('jenis_patroli');
@@ -47,11 +47,11 @@ class PatroliController extends Controller
 
         // 2. Daftar 17 Area (Hardcoded sesuai desain Anda)
         $semuaArea = [
-            'AREA POS-2', 'LOBBY VVIP', 'LOBBY AUDIT', 'KOLAM IKAN VVIP', 
-            'AREA BAU', 'AREA KANTIN', 'AREA BAAK', 'AKSES LORONG GD-3',
-            'AKSES LORONG GD-2', 'AREA POS-3', 'AKSES BESI GD-2', 'AKSES KACA GD-2',
+            'AREA POS 2', 'LOBBY VVIP', 'LOBBY AUDIT', 'KOLAM IKAN VVIP', 
+            'AREA BAU', 'AREA KANTIN', 'AREA BAAK', 'AKSES LORONG GD 3',
+            'AKSES LORONG GD 2', 'AREA POS 3', 'AKSES BESI GD 2', 'AKSES KACA GD 2',
             'AKSES SELATAN AUDIT', 'AKSES RUANG LETKOR', 'AKSES PARKIR BASEMENT',
-            'AKSES LIFT GD-2', 'AREA POS-1'
+            'AKSES LIFT GD 2', 'AREA POS 1'
         ];
 
         // 3. Opsi untuk dropdown
@@ -65,8 +65,9 @@ class PatroliController extends Controller
         $completedCheckpoints = Patroli::where('id_pengguna', $user->id_pengguna)
                                 ->whereDate('tanggal', $tanggal)
                                 ->where('jenis_patroli', $jenisPatroliTerpilih)
-                                ->whereNull('waktu_patroli') // <-- HANYA HITUNG YANG 'IN PROGRESS'
                                 ->pluck('wilayah')
+                                ->map(function($value) {
+                                      return strtoupper($value);})
                                 ->toArray();
 
         return view('anggota.patroli-create-session', [
@@ -123,7 +124,7 @@ class PatroliController extends Controller
         Patroli::create([
             'tanggal' => Carbon::today(),
             'waktu_exact' => now(), // Waktu foto diambil
-            'waktu_patroli' => now(), // Jika ini juga diisi dengan waktu yang sama?
+            'waktu_exact' => now(), // Jika ini juga diisi dengan waktu yang sama?
             'jenis_patroli' => $request->jenis_patroli,
             'wilayah' => $request->wilayah,
             'foto' => $fileName,
@@ -137,7 +138,7 @@ class PatroliController extends Controller
 
     /**
      * Aksi: Men-submit Sesi Patroli (17 area)
-     * Mengisi 'waktu_patroli' untuk semua checkpoint.
+     * Mengisi 'waktu_exact' untuk semua checkpoint.
      */
     public function submitSession(Request $request)
     {
@@ -148,14 +149,14 @@ class PatroliController extends Controller
         $user = Auth::user();
         $tanggal = Carbon::today();
         $jenisPatroli = $request->jenis_patroli;
-        $waktuSubmit = now(); // Ini adalah 'waktu_patroli' keseluruhan
+        $waktuSubmit = now(); // Ini adalah 'waktu_exact' keseluruhan
 
-        // 1. Cari semua checkpoint "In Progress" (yang waktu_patroli-nya NULL)
+        // 1. Cari semua checkpoint "In Progress" (yang waktu_exact-nya NULL)
         //    untuk sesi ini.
         $checkpointsToSubmit = Patroli::where('id_pengguna', $user->id_pengguna)
                                     ->whereDate('tanggal', $tanggal)
                                     ->where('jenis_patroli', $jenisPatroli)
-                                    ->whereNull('waktu_patroli'); // <-- Hanya yang masih 'In Progress'
+                                    ->whereNull('waktu_exact'); // <-- Hanya yang masih 'In Progress'
 
         // 2. Cek apakah jumlahnya 17 (atau sesuai kebutuhan)
         if ($checkpointsToSubmit->count() < 17) {
@@ -165,7 +166,7 @@ class PatroliController extends Controller
 
         // 3. Update semua 17 rekaman tersebut
         $checkpointsToSubmit->update([
-            'waktu_patroli' => $waktuSubmit
+            'waktu_exact' => $waktuSubmit
         ]);
 
         // 4. Redirect ke halaman index (daftar utama)

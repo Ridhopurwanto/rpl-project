@@ -21,7 +21,6 @@ class Patroli extends Model
         'id_pengguna',
         'nama_lengkap',
         'waktu_exact',
-        'waktu_patroli',
         'wilayah',
         'foto',
         'tanggal',
