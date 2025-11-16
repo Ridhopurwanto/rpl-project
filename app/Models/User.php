@@ -49,6 +49,11 @@ class User extends Authenticatable
         'username',
         'password',
         'peran',
+        'tanggal_lahir', 
+        'no_hp',         
+        'alamat',        
+        'status',        
+        'foto_profil',
     ];
 
     /**

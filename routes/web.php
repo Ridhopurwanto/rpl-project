@@ -9,6 +9,8 @@ use App\Http\Controllers\KendaraanController;
 use App\Http\Controllers\TamuController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\GangguanKamtibmasController;
+use App\Http\Controllers\ManajemenAkunController;
+use App\Http\Controllers\ManajemenShiftController;
 use App\Http\Controllers\Anggota\PresensiController as AnggotaPresensiController;
 use App\Http\Controllers\Anggota\PatroliController as AnggotaPatroliController;
 use App\Http\Controllers\RoleSwitchController;
@@ -160,7 +162,12 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/gangguan', [GangguanKamtibmasController::class, 'index'])
             ->name('gangguan');
-        
+            
+        Route::resource('akun', ManajemenAkunController::class)->except(['show']);
+
+        // Rute khusus untuk halaman "Manajemen Shift" per pengguna (sesuai UI/UX )
+        Route::get('akun/{id_pengguna}/shift', [ManajemenShiftController::class, 'index'])
+             ->name('akun.shift');
 
         // Rute untuk menangani perpindahan role oleh Komandan
         Route::post('/set-role', [RoleSwitchController::class, 'setRole'])
