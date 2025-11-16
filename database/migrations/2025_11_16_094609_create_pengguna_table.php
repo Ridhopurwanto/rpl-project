@@ -17,6 +17,11 @@ return new class extends Migration
             $table->string('username')->unique();
             $table->string('password');
             $table->enum('peran', ['anggota', 'komandan', 'bau']);
+            $table->date('tanggal_lahir')->nullable();
+            $table->string('no_hp', 20)->nullable();
+            $table->text('alamat')->nullable();
+            $table->enum('status', ['Aktif', 'Tidak Aktif'])->default('Aktif');
+            $table->string('foto_profil')->nullable();
             $table->timestamps();
         });
     }

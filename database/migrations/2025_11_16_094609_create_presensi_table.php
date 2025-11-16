@@ -14,13 +14,12 @@ return new class extends Migration
         Schema::create('presensi', function (Blueprint $table) {
             $table->bigIncrements('id_presensi');
             $table->unsignedBigInteger('id_pengguna')->index('presensi_id_pengguna_foreign');
+            $table->unsignedBigInteger('id_shift')->nullable()->index('presensi_id_shift_foreign');
             $table->string('nama_lengkap');
-            $table->dateTime('waktu_masuk');
-            $table->string('foto_masuk');
-            $table->dateTime('waktu_pulang')->nullable();
-            $table->string('foto_pulang')->nullable();
-            $table->string('lokasi');
+            $table->dateTime('waktu');
+            $table->string('foto');
             $table->enum('status', ['tepat waktu', 'terlambat', 'terlalu cepat']);
+            $table->enum('jenis_presensi', ['Masuk', 'Pulang'])->nullable();
             $table->date('tanggal');
             $table->timestamps();
         });

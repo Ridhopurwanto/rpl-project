@@ -13,7 +13,7 @@ class ShiftSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('shift')->truncate();
+       // DB::table('shift')->truncate();
 
         DB::table('shift')->insert([
             [
