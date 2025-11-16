@@ -217,7 +217,6 @@ Route::middleware('auth')->group(function () {
             ->name('laporan.unduh');
         Route::post('/laporan/download', [LaporanUnduhController::class, 'download'])
             ->name('laporan.download');
-
     });
 
     // --- RUTE UNTUK BAU ---
