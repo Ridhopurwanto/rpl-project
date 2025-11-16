@@ -1,5 +1,11 @@
 @extends('layouts.app')
 
+@section('header-left')
+    <a href="{{ route('anggota.kendaraan.index') }}" class="bg-[#2a4a6f] text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md">
+        KENDARAAN
+    </a>
+@endsection
+
 @section('content')
 {{-- 
   Kita bungkus semua dengan div x-data untuk mengelola state modal.

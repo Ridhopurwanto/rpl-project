@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('header-left')
-    <a href="{{ route('anggota.patroli.index') }}" class="bg-blue-600 text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md">
+    <a href="{{ route('anggota.patroli.index') }}" class="bg-[#2a4a6f] text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md">
         PATROLI
     </a>
 @endsection
@@ -26,21 +26,29 @@
     {{-- Filter Tanggal --}}
     <div class="mt-4 p-4 bg-white rounded-lg shadow">
         <h3 class="text-xs font-semibold text-gray-500 uppercase mb-2">DAFTAR PATROLI :</h3>
-        <div class="flex items-center justify-end gap-4">
-            <label class="text-sm font-semibold text-gray-700 whitespace-nowrap">TANGGAL :</label>
+        <form action="{{ route('anggota.patroli.index') }}" method="GET" class="flex items-center justify-end gap-4">
+            <label for="filter-tanggal" class="text-sm font-semibold text-gray-700 whitespace-nowrap">TANGGAL :</label>
+            
+            {{-- Div 'relative' tetap di sini untuk styling ikon --}}
             <div class="relative">
                 <input 
                     type="date" 
                     id="filter-tanggal"
+                    name="tanggal" {{-- PENTING: Tambahkan 'name' agar data terkirim --}}
                     value="{{ $tanggalTerpilih->format('Y-m-d') }}"
-                    onchange="window.location.href = '{{ route('anggota.patroli.index') }}?tanggal=' + this.value"
+                    
+                    {{-- PENTING: Ubah 'onchange' untuk submit form ini --}}
+                    onchange="this.form.submit()" 
+                    
                     class="w-48 appearance-none bg-slate-800 text-white text-sm font-semibold px-4 py-2 rounded-full shadow-md focus:ring-2 focus:ring-blue-500 cursor-pointer pr-10"
                     style="color-scheme: dark;">
+                
+                {{-- Ikon SVG tetap sama --}}
                 <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
             </div>
-        </div>
+        </form>
     </div>
 
     {{-- Tabel Patroli --}}
@@ -55,30 +63,34 @@
                 </tr>
             </thead>
             <tbody class="text-gray-700">
-                @forelse($patrolGroups as $jenisPatroli => $checkpoints)
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="p-3 text-center align-middle">{{ $loop->iteration }}</td>
-                    <td class="p-3 text-center align-middle">
-                        <a href="#" 
-                           @click.prevent="
-                               showModal = true;
-                               modalGroup = {{ $checkpoints->values() }}; 
-                               selectedCheckpointIndex = 0;
-                           "
-                           class="inline-block bg-blue-600 text-white text-xs font-semibold px-4 py-1 rounded hover:bg-blue-700">
-                            Buka
-                        </a>
-                    </td>
-                    <td class="p-3 text-center align-middle font-medium">{{ $jenisPatroli }}</td>
-                    <td class="p-3 text-center align-middle font-medium">{{ $checkpoints->first()->nama_lengkap }}</td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="4" class="p-6 text-center text-gray-500">
-                        Belum ada data patroli untuk tanggal ini.
-                    </td>
-                </tr>
-                @endforelse
+                @if ($patrolGroups->filter(fn($g) => $g->count() == 17)->isEmpty())
+                    <tr>
+                        <td colspan="4" class="p-6 text-center text-gray-500">
+                            Belum ada data patroli untuk tanggal ini.
+                        </td>
+                    </tr>
+                @else
+                    @foreach($patrolGroups as $jenisPatroli => $checkpoints)
+                        @if($checkpoints->count() >= 17)
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="p-3 text-center align-middle">{{ $loop->iteration }}</td>
+                            <td class="p-3 text-center align-middle">
+                                <a href="#" 
+                                @click.prevent="
+                                    showModal = true;
+                                    modalGroup = {{ $checkpoints->values() }}; 
+                                    selectedCheckpointIndex = 0;
+                                "
+                                class="inline-block bg-blue-600 text-white text-xs font-semibold px-4 py-1 rounded hover:bg-blue-700">
+                                    Buka
+                                </a>
+                            </td>
+                            <td class="p-3 text-center align-middle font-medium">{{ $jenisPatroli }}</td>
+                            <td class="p-3 text-center align-middle font-medium">{{ $checkpoints->first()->nama_lengkap }}</td>
+                        </tr>
+                        @endif
+                    @endforeach
+                @endif
             </tbody>
         </table>
     </div>
