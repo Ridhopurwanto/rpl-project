@@ -30,6 +30,31 @@ class AuthenticatedSessionController extends Controller
         // 2. Siapkan kredensial (Tetap sama)
         $credentials = $request->only('username', 'password');
 
+        // 3. TAHAP 1: Cek Username & Password dulu
+        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+            
+            // Jika gagal di sini, pasti karena Username/Password salah
+            throw ValidationException::withMessages([
+                'username' => 'Username/Password Salah', 
+            ]);
+        }
+
+        // 4. TAHAP 2: Cek Status Akun secara manual setelah berhasil login sementara
+        $user = Auth::user();
+
+        if ($user->status !== 'Aktif') {
+            // Login berhasil secara password, tapi statusnya mati.
+            // Kita paksa logout lagi.
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            // Tampilkan pesan khusus status
+            throw ValidationException::withMessages([
+                'username' => 'Akun Anda Tidak Valid',
+            ]);
+        }
+        
         // 3. Coba lakukan login (Tetap sama, 'Auth' akan diatur di Model)
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             throw ValidationException::withMessages([
