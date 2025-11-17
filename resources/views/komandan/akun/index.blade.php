@@ -1,8 +1,3 @@
-{{-- 
-  File: resources/views/komandan/akun/index.blade.php
-  Versi FINAL: Perbaikan Binding Data untuk Modal Edit
---}}
-
 @extends('layouts.app')
 
 @section('header-left')
@@ -25,6 +20,9 @@
     hapusUserName: '',
     hapusFormAction: '',
     defaultFoto: '{{ asset('images/default-profile.png') }}'
+    resetForm() {
+        $dispatch('reset-create-data')
+    }
 }"
 @open-create-modal.window="openCreateModal = true" 
 >
@@ -47,7 +45,7 @@
         {{-- Daftar Kartu Akun --}}
         <div class="space-y-3">
             @foreach ($users as $user) 
-                    <div class="{{ $user->status == 'Tidak Aktif' ? 'bg-gray-500' : 'bg-[#2a4a6f]' }} rounded-lg shadow-md p-4 flex items-center justify-between transition-colors duration-300">                    
+                    <div class="{{ $user->status == 'Tidak Aktif' ? 'bg-[#567ba5]' : 'bg-[#2a4a6f]' }} rounded-lg shadow-md p-4 flex items-center justify-between transition-colors duration-300">                    
                     <div class="flex items-center space-x-3">
                         <div class="bg-gray-600 rounded-full p-2 flex-shrink-0">
                             <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
