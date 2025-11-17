@@ -2,7 +2,10 @@
 
 {{-- Tombol KEMBALI ke dashboard (dinamis) --}}
 @section('header-left')
-    @php $peran = Auth::user()->peran; @endphp
+    {{-- 
+      PERBAIKAN: Mengganti teks 'KENDARAAN' menjadi 'LAPORAN KENDARAAN' 
+      agar sesuai screenshot
+    --}}
     <a class="bg-slate-800 text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md hover:bg-slate-700 transition">
         KENDARAAN
     </a>
@@ -10,6 +13,9 @@
 
 @section('content')
 <div class="w-full mx-auto"
+    {{-- 
+      PERBAIKAN: Menambahkan 'showPromoteModal' dan 'promoteAction' ke AlpineJS
+    --}}
     x-data="{  
         showEditModal: false, 
         editAction: '',
@@ -17,9 +23,12 @@
         editPemilik: '',
         editTipe: '',
         showDeleteModal: false,
-        deleteAction: '' 
+        deleteAction: '',
+        showPromoteModal: false, 
+        promoteAction: ''
      }">
     
+    {{-- PERBAIKAN: Mengganti judul h2 --}}
     <h2 class="text-2xl font-bold text-slate-800 mb-4">Laporan Kendaraan</h2>
 
     {{-- Notifikasi Sukses/Error --}}
@@ -110,32 +119,28 @@
                                     </select>
                                 </form>
                             @else
-                                {{-- Untuk BAU, tampilkan teks biasa --}}
                                 {{ $log->keterangan }}
                             @endif
                         </td>
                         @if(Auth::user()->peran == 'komandan')
                             <td class="py-2 px-4">
                                 <div class="flex justify-center">
-                                    {{-- Cek jika relasi kendaraan ada SEBELUM cek plat --}}
                                     @if($log->kendaraan)
-                                        {{-- Cek apakah plat nomor dari log ini SUDAH ADA di daftar master --}}
-                                        @if(in_array($log->kendaraan->nomor_plat, $registeredPlates))
-                                            {{-- Jika sudah ada, tampilkan centang (Terdaftar) --}}
-                                            <span class="text-green-500" title="Sudah Terdaftar di Master">
-                                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                                            </span>
-                                        @else
-                                            {{-- Jika BELUM ADA, tampilkan tombol (+) untuk 'Promote' --}}
-                                            <form action="{{ route('komandan.kendaraan.log.promote', $log->id_log) }}" method="POST" onsubmit="return confirm('Tambahkan kendaraan ini ke Daftar Master?');">
-                                                @csrf
-                                                <button type="submit" class="text-blue-500 hover:text-blue-700" title="Daftarkan ke Master">
-                                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"></path></svg>
-                                                </button>
-                                            </form>
-                                        @endif
+                                        {{-- SUDAH TERDAFTAR: Tampilkan centang hijau --}}
+                                        <span class="text-green-500" title="Sudah Terdaftar di Master">
+                                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                        </span>
                                     @else
-                                        <span class="text-gray-400" title="Data Kendaraan Error">-</span>
+                                        {{-- 
+                                          PERBAIKAN: 
+                                          Mengganti <form> dengan <button> yang memicu modal
+                                        --}}
+                                        <button @click.prevent="
+                                                    showPromoteModal = true; 
+                                                    promoteAction = '{{ route('komandan.kendaraan.log.promote', $log->id_log) }}'
+                                                " class="text-blue-500 hover:text-blue-700" title="Daftarkan ke Master">
+                                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"></path></svg>
+                                        </button>
                                     @endif
                                 </div>
                             </td>
@@ -276,6 +281,35 @@
                 </button>
                 <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
                     Ya, Hapus
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {{-- 
+      ===============================================
+      ▼▼▼ MODAL BARU UNTUK KONFIRMASI PROMOTE ▼▼▼
+      ===============================================
+      Ini adalah modal baru yang Anda minta, 
+      meniru gaya modal "Konfirmasi Hapus"
+    --}}
+    <div x-show="showPromoteModal"
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
+         @click.away="showPromoteModal = false"
+         style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full p-6 relative" @click.stop>
+            <h3 class="text-lg font-bold text-gray-900 mb-4">Konfirmasi Pendaftaran</h3>
+            <p class="text-gray-600 mb-6">
+                Tambahkan kendaraan ini ke Daftar Master?
+            </p>
+            <form :action="promoteAction" method="POST" class="flex justify-end space-x-4">
+                @csrf
+                <button type="button" @click="showPromoteModal = false" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">
+                    Batal
+                </button>
+                {{-- Mengganti warna tombol 'Ya, Hapus' (merah) menjadi 'OK' (biru) --}}
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                    OK
                 </button>
             </form>
         </div>
