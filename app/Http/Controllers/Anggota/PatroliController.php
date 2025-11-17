@@ -5,15 +5,15 @@ namespace App\Http\Controllers\Anggota;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use App\Models\Patroli; // <-- Import model Patroli
-use Illuminate\Support\Facades\Auth; // <-- Import Auth
-use Illuminate\Support\Facades\Storage; // Untuk simpan foto
-use Illuminate\Support\Str; // Untuk nama file
+use App\Models\Patroli;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class PatroliController extends Controller
 {
     /**
-     * Menampilkan daftar patroli (Gambar 1)
+     * Menampilkan daftar patroli (Halaman Index)
      */
     public function index(Request $request)
     {
@@ -21,14 +21,16 @@ class PatroliController extends Controller
                             ? Carbon::parse($request->input('tanggal')) 
                             : Carbon::today();
         
-        // Kueri DIUBAH: Hanya ambil yang 'waktu_exact' TIDAK NULL
+        // Ambil semua patroli yang sudah lengkap 17 area
         $allPatrols = Patroli::where('id_pengguna', Auth::id())
                         ->whereDate('tanggal', $tanggalTerpilih)
-                        ->whereNotNull('waktu_exact') // <-- HANYA TAMPILKAN YANG SUDAH SELESAI
                         ->orderBy('waktu_exact', 'asc')
                         ->get();
         
-        $patrolGroups = $allPatrols->groupBy('jenis_patroli');
+        // Filter hanya yang sudah lengkap 17 area
+        $patrolGroups = $allPatrols->groupBy('jenis_patroli')->filter(function($group) {
+            return $group->count() >= 17;
+        });
                         
         return view('anggota.patroli-index', [
             'patrolGroups' => $patrolGroups,
@@ -36,16 +38,54 @@ class PatroliController extends Controller
         ]);
     }
 
+    /**
+     * Halaman Grid 17 Area (Create Session)
+     */
     public function createSession(Request $request)
     {
         $user = Auth::user();
         $tanggal = Carbon::today();
 
-        // 1. Tentukan Jenis Patroli yang sedang dipilih
-        // Ambil dari URL query (?jenis_patroli=...) atau default ke 'Patroli 1'
-        $jenisPatroliTerpilih = $request->input('jenis_patroli', 'Patroli 1');
+        // 1. Opsi dropdown
+        $opsiJenisPatroli = [
+            'Patroli 1', 'Patroli 2', 'Patroli 3', 
+            'Patroli 4', 'Patroli 5', 'Patroli 6'
+        ];
 
-        // 2. Daftar 17 Area (Hardcoded sesuai desain Anda)
+        // 2. Cek patroli mana saja yang SUDAH LENGKAP 17 AREA
+        $patroliYangSudahSubmit = [];
+        foreach ($opsiJenisPatroli as $opsi) {
+            $jumlah = Patroli::where('id_pengguna', $user->id_pengguna)
+                            ->whereDate('tanggal', $tanggal)
+                            ->where('jenis_patroli', $opsi)
+                            ->count();
+            
+            if ($jumlah >= 17) {
+                $patroliYangSudahSubmit[] = $opsi;
+            }
+        }
+
+        // 3. Tentukan patroli yang dipilih
+        $jenisPatroliTerpilih = $request->input('jenis_patroli');
+        
+        if (!$jenisPatroliTerpilih) {
+            // Cari patroli pertama yang belum lengkap
+            foreach ($opsiJenisPatroli as $opsi) {
+                if (!in_array($opsi, $patroliYangSudahSubmit)) {
+                    $jenisPatroliTerpilih = $opsi;
+                    break;
+                }
+            }
+            
+            if (!$jenisPatroliTerpilih) {
+                $jenisPatroliTerpilih = 'Patroli 1';
+            }
+        }
+
+        // 4. Cek apakah patroli yang dipilih sudah submit
+        $sudahSubmit = in_array($jenisPatroliTerpilih, $patroliYangSudahSubmit);
+
+        // 5. Daftar 17 Area
         $semuaArea = [
             'AREA POS 2', 'LOBBY VVIP', 'LOBBY AUDIT', 'KOLAM IKAN VVIP', 
             'AREA BAU', 'AREA KANTIN', 'AREA BAAK', 'AKSES LORONG GD 3',
@@ -54,37 +94,35 @@ class PatroliController extends Controller
             'AKSES LIFT GD 2', 'AREA POS 1'
         ];
 
-        // 3. Opsi untuk dropdown
-        $opsiJenisPatroli = [
-            'Patroli 1', 'Patroli 2', 'Patroli 3', 
-            'Patroli 4', 'Patroli 5', 'Patroli 6'
-        ];
-
-        // 4. Ambil data patroli (checkpoint) yang SUDAH SELESAI
-        //    untuk tanggal ini dan jenis patroli ini
-        $completedCheckpoints = Patroli::where('id_pengguna', $user->id_pengguna)
-                                ->whereDate('tanggal', $tanggal)
-                                ->where('jenis_patroli', $jenisPatroliTerpilih)
-                                ->pluck('wilayah')
-                                ->map(function($value) {
-                                      return strtoupper($value);})
-                                ->toArray();
+        // 6. Ambil checkpoint yang sudah selesai
+        $completedCheckpoints = [];
+        if (!$sudahSubmit) {
+            $completedCheckpoints = Patroli::where('id_pengguna', $user->id_pengguna)
+                                    ->whereDate('tanggal', $tanggal)
+                                    ->where('jenis_patroli', $jenisPatroliTerpilih)
+                                    ->pluck('wilayah')
+                                    ->map(function($value) {
+                                        return strtoupper($value);
+                                    })
+                                    ->toArray();
+        }
 
         return view('anggota.patroli-create-session', [
             'semuaArea' => $semuaArea,
             'opsiJenisPatroli' => $opsiJenisPatroli,
             'jenisPatroliTerpilih' => $jenisPatroliTerpilih,
-            'completedCheckpoints' => $completedCheckpoints, // Array wilayah yg selesai
-            'totalCompleted' => count($completedCheckpoints) // Jumlah yg selesai
+            'completedCheckpoints' => $completedCheckpoints,
+            'totalCompleted' => count($completedCheckpoints),
+            'sudahSubmit' => $sudahSubmit,
+            'patroliYangSudahSubmit' => $patroliYangSudahSubmit
         ]);
     }
 
     /**
-     * Halaman 2: Menampilkan Halaman Kamera (Gambar 2)
+     * Halaman Kamera
      */
     public function createCheckpoint(Request $request)
     {
-        // Ambil data dari URL
         $jenisPatroli = $request->query('jenis_patroli');
         $wilayah = $request->query('wilayah');
 
@@ -92,7 +130,6 @@ class PatroliController extends Controller
             abort(400, 'Jenis patroli dan wilayah diperlukan.');
         }
 
-        // Kirim data ke view (untuk ditampilkan di header & hidden input)
         return view('anggota.patroli-create-checkpoint', [
             'jenisPatroli' => $jenisPatroli,
             'wilayah' => $wilayah
@@ -100,7 +137,7 @@ class PatroliController extends Controller
     }
 
     /**
-     * Aksi: Menyimpan 1 foto checkpoint (Gambar 3)
+     * Menyimpan 1 foto checkpoint
      */
     public function storeCheckpoint(Request $request)
     {
@@ -111,7 +148,20 @@ class PatroliController extends Controller
             'wilayah' => 'required|string',
         ]);
 
-        // 2. Decode & Simpan Foto (Sama seperti Presensi)
+        // 2. Cek duplikat
+        $sudahAda = Patroli::where('id_pengguna', Auth::id())
+                        ->whereDate('tanggal', Carbon::today())
+                        ->where('jenis_patroli', $request->jenis_patroli)
+                        ->where('wilayah', $request->wilayah)
+                        ->exists();
+
+        if ($sudahAda) {
+            return redirect()->route('anggota.patroli.createSession', [
+                'jenis_patroli' => $request->jenis_patroli
+            ])->with('error', 'Area ' . $request->wilayah . ' sudah difoto!');
+        }
+
+        // 3. Simpan foto
         $imageData = $request->foto_base64;
         @list($type, $imageData) = explode(';', $imageData);
         @list(, $imageData) = explode(',', $imageData);
@@ -119,26 +169,23 @@ class PatroliController extends Controller
         $fileName = 'patroli/' . Auth::id() . '_' . Str::uuid() . '.jpg';
         Storage::disk('public')->put($fileName, $fileData);
 
-        // 3. Simpan data checkpoint ke Database
-        // Model Event 'boot()' di Model Patroli akan auto-fill 'id_pengguna' & 'nama_lengkap'
+        // 4. Simpan ke database dengan waktu sekarang
         Patroli::create([
             'tanggal' => Carbon::today(),
-            'waktu_exact' => now(), // Waktu foto diambil
-            'waktu_exact' => now(), // Jika ini juga diisi dengan waktu yang sama?
+            'waktu_exact' => now(), // Langsung isi waktu saat foto diambil
             'jenis_patroli' => $request->jenis_patroli,
             'wilayah' => $request->wilayah,
             'foto' => $fileName,
         ]);
 
-        // 4. Redirect KEMBALI ke halaman Grid (dengan jenis patroli yang sama)
+        // 5. Redirect ke grid (BUKAN ke submitSession!)
         return redirect()->route('anggota.patroli.createSession', [
             'jenis_patroli' => $request->jenis_patroli
         ])->with('success', 'Checkpoint ' . $request->wilayah . ' disimpan!');
     }
 
     /**
-     * Aksi: Men-submit Sesi Patroli (17 area)
-     * Mengisi 'waktu_exact' untuk semua checkpoint.
+     * Submit Patroli (Validasi 17 area)
      */
     public function submitSession(Request $request)
     {
@@ -149,27 +196,19 @@ class PatroliController extends Controller
         $user = Auth::user();
         $tanggal = Carbon::today();
         $jenisPatroli = $request->jenis_patroli;
-        $waktuSubmit = now(); // Ini adalah 'waktu_exact' keseluruhan
 
-        // 1. Cari semua checkpoint "In Progress" (yang waktu_exact-nya NULL)
-        //    untuk sesi ini.
-        $checkpointsToSubmit = Patroli::where('id_pengguna', $user->id_pengguna)
-                                    ->whereDate('tanggal', $tanggal)
-                                    ->where('jenis_patroli', $jenisPatroli)
-                                    ->whereNull('waktu_exact'); // <-- Hanya yang masih 'In Progress'
+        // Cek jumlah checkpoint
+        $jumlahCheckpoint = Patroli::where('id_pengguna', $user->id_pengguna)
+                                ->whereDate('tanggal', $tanggal)
+                                ->where('jenis_patroli', $jenisPatroli)
+                                ->count();
 
-        // 2. Cek apakah jumlahnya 17 (atau sesuai kebutuhan)
-        if ($checkpointsToSubmit->count() < 17) {
-            // Seharusnya tidak terjadi jika tombolnya nonaktif, tapi ini pengaman
+        // Validasi harus tepat 17 area
+        if ($jumlahCheckpoint != 17) {
             return redirect()->back()->with('error', 'Semua 17 area belum selesai.');
         }
 
-        // 3. Update semua 17 rekaman tersebut
-        $checkpointsToSubmit->update([
-            'waktu_exact' => $waktuSubmit
-        ]);
-
-        // 4. Redirect ke halaman index (daftar utama)
+        // Redirect ke index (waktu sudah tercatat saat foto diambil)
         return redirect()->route('anggota.patroli.index')
                          ->with('success', 'Sesi ' . $jenisPatroli . ' berhasil disubmit!');
     }
