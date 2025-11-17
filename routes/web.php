@@ -215,9 +215,9 @@ Route::middleware('auth')->group(function () {
              ->name('akun.shift.update');
 
         //CRUD Laporan Unduh
-        Route::get('/laporan/unduh', [LaporanUnduhController::class, 'index'])
-            ->name('laporan.unduh');
-        Route::post('/laporan/download', [LaporanUnduhController::class, 'download'])
+        Route::get('/komandan/unduh', [LaporanUnduhController::class, 'index'])
+            ->name('unduh');
+        Route::post('komandan/laporan/download', [LaporanUnduhController::class, 'download'])
             ->name('laporan.download');
     });
 

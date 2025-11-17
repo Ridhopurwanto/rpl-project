@@ -2,7 +2,7 @@
 
 {{-- Tombol KEMBALI (atau judul) --}}
 @section('header-left')
-    <a href="{{ route('komandan.dashboard') }}" class="bg-slate-800 text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md hover:bg-slate-700 transition">
+    <a class="bg-slate-800 text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md hover:bg-slate-700 transition">
         UNDUH
     </a>
 @endsection
@@ -24,7 +24,7 @@
       Formulir ini akan mengirim SEMUA data yang dicentang sekaligus 
       saat "UNDUH LAPORAN GABUNGAN" ditekan.
     --}}
-    <form action="{{ route('laporan.download') }}" method="POST">
+    <form action="{{ route('komandan.laporan.download') }}" method="POST">
         @csrf
 
         {{-- BAGIAN FILTER ATAS --}}

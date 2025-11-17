@@ -10,7 +10,9 @@ use App\Models\Shift;
 use App\Models\Tamu;       
 use App\Models\Barang;    
 use App\Models\Kendaraan; 
-use App\Models\GangguanKamtibmas;  
+use App\Models\GangguanKamtibmas;
+use App\Exports\LaporanGabunganExport;
+use Maatwebsite\Excel\Facades\Excel;  
 
 class LaporanUnduhController extends Controller
 {
@@ -20,7 +22,7 @@ class LaporanUnduhController extends Controller
     public function index()
     {
         // Hanya menampilkan view
-        return view('laporan.unduh');
+        return view('komandan.unduh');
     }
 
     /**
@@ -78,13 +80,14 @@ class LaporanUnduhController extends Controller
         // Jalankan: composer require maatwebsite/excel
         
         // (Contoh logika jika Anda menggunakan Laravel Excel)
+        // (Contoh logika jika Anda menggunakan Laravel Excel)
         if ($format == 'excel') {
-            // Anda harus membuat "Export Class"
-            // php artisan make:export LaporanGabunganExport --model=Presensi
-            // return (new LaporanGabunganExport($dataGabungan))->download('laporan_gabungan.xlsx');
             
-            // Untuk sekarang, kita kembalikan JSON untuk tes
-            return response()->json($dataGabungan);
+            // Hasilkan nama file yang dinamis
+            $fileName = 'Laporan_Gabungan_' . $tanggalMulai . '_sd_' . $tanggalSelesai . '.xlsx';
+
+            // Panggil Export Class, kirim data, dan download
+            return Excel::download(new LaporanGabunganExport($dataGabungan), $fileName);
         }
 
         // (Contoh logika jika Anda menggunakan Laravel DOMPDF)
