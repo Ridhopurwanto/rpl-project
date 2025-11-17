@@ -193,7 +193,7 @@
                 </div>
                 <div class="modal-body max-h-[70vh] overflow-y-auto p-2">
                     <div class="w-full bg-gray-200 rounded-lg p-4 text-center mb-4">
-                        <img :src="editUser.foto_profil ? `/storage/${editUser.foto_profil}` : defaultFoto" alt="Foto Profil" 
+                        <img :src="editUser.foto_profil ? /storage/${editUser.foto_profil} : defaultFoto" alt="Foto Profil" 
                              class="w-32 h-32 mx-auto rounded-full object-cover border-4 border-white shadow-md">
                     </div>
                     @include('komandan.akun.partials.form-fields', ['isEdit' => true])
