@@ -128,7 +128,7 @@
                 <p class="text-xs text-gray-500">POLITEKNIK STATISTIKA STIS</p>
             </div>
         </div>
-        <div class="w-full bg-slate-800 text-white rounded-lg p-4 text-center my-4 shadow-lg">
+        <div class="w-full bg-[#2a4a6f] text-white rounded-lg p-4 text-center my-4 shadow-lg">
             <p class="text-xs">WAKTU</p>
             <h2 class="text-3xl font-bold" x-text="currentTime + ' WIB'"></h2>
         </div>
@@ -139,7 +139,7 @@
                 x-show="state === 'camera'" 
                 type="button" 
                 @click="takeSnapshot()" {{-- Panggil fungsi snapshot --}}
-                class="w-full flex items-center justify-center text-base py-3 px-4 rounded-lg shadow-md font-medium text-white bg-slate-800 hover:bg-slate-700">
+                class="w-full flex items-center justify-center text-base py-3 px-4 rounded-lg shadow-md font-medium text-white bg-[#2a4a6f] hover:bg-blue-800">
                 AMBIL GAMBAR
             </button>
 
@@ -147,13 +147,13 @@
                 <button 
                     type="button" 
                     @click="retakePhoto()" {{-- Panggil fungsi retake --}}
-                    class="w-full flex items-center justify-center text-base py-3 px-4 rounded-lg shadow-md font-medium text-white bg-blue-700 hover:bg-blue-800 gap-y-2">
+                    class="w-full flex items-center justify-center text-base py-3 px-4 rounded-lg shadow-md font-medium text-white bg-[#2a4a6f] hover:bg-blue-800 gap-y-2">
                     AMBIL ULANG FOTO
                 </button>
                 
                 <button 
                     type="submit" {{-- Ini tombol SUBMIT FORM yang sebenarnya --}}
-                    class="w-full flex items-center justify-center text-base py-3 px-4 rounded-lg shadow-md font-medium text-white bg-blue-700 hover:bg-blue-800">
+                    class="w-full flex items-center justify-center text-base py-3 px-4 rounded-lg shadow-md font-medium text-white bg-[#2a4a6f] hover:bg-blue-800">
                     SUBMIT PRESENSI
                 </button>
             </div>

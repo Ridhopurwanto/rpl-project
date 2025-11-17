@@ -40,7 +40,7 @@
                     {{-- PENTING: Ubah 'onchange' untuk submit form ini --}}
                     onchange="this.form.submit()" 
                     
-                    class="w-48 appearance-none bg-slate-800 text-white text-sm font-semibold px-4 py-2 rounded-full shadow-md focus:ring-2 focus:ring-blue-500 cursor-pointer pr-10"
+                    class="w-48 appearance-none bg-[#2a4a6f] text-white text-sm font-semibold px-4 py-2 rounded-full shadow-md focus:ring-2 focus:ring-blue-500 cursor-pointer pr-10"
                     style="color-scheme: dark;">
                 
                 {{-- Ikon SVG tetap sama --}}
@@ -54,7 +54,7 @@
     {{-- Tabel Patroli --}}
     <div class="mt-4 mb-32 bg-white rounded-lg shadow overflow-hidden">
         <table class="w-full text-sm table-fixed">
-            <thead class="bg-slate-800 text-white">
+            <thead class="bg-[#2a4a6f] text-white">
                 <tr>
                     <th class="w-16 p-3 font-semibold text-center">NO</th>
                     <th class="w-24 p-3 font-semibold text-center">FOTO</th>
@@ -81,7 +81,7 @@
                                     modalGroup = {{ $checkpoints->values() }}; 
                                     selectedCheckpointIndex = 0;
                                 "
-                                class="inline-block bg-blue-600 text-white text-xs font-semibold px-4 py-1 rounded hover:bg-blue-700">
+                                class="inline-block bg-blue-600 text-white text-xs font-semibold px-4 py-1 rounded hover:bg-[#2a4a6f]">
                                     Buka
                                 </a>
                             </td>
@@ -137,7 +137,7 @@
 
 @push('fab')
     <a href="{{ route('anggota.patroli.createSession') }}" 
-       class="fixed z-50 bottom-28 right-6 md:right-[calc((100vw-768px)/2+24px)] bg-blue-700 p-4 rounded-full text-white shadow-lg hover:bg-blue-800 transition">
+       class="fixed z-50 bottom-28 right-6 md:right-[calc((100vw-768px)/2+24px)] bg-[#2a4a6f] p-4 rounded-full text-white shadow-lg transform hover:scale-110 transition-transform">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path>
         </svg>

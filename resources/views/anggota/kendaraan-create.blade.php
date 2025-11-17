@@ -14,7 +14,7 @@
       Kita akan kelola semua state form di sini.
     --}}
     <div 
-        class="w-full max-w-md mx-auto bg-slate-800 rounded-xl shadow-lg p-6"
+        class="w-full max-w-md mx-auto bg-[#2a4a6f] rounded-xl shadow-lg p-6"
         x-data="formKendaraan()" 
         @click.outside="suggestions = []" {{-- Sembunyikan suggestion jika klik di luar --}}
     >
@@ -122,7 +122,7 @@
             <div class="mt-8">
                 <button 
                     type="submit" 
-                    class="w-full bg-gray-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors duration-300">
+                    class="w-full bg-green-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors duration-300">
                     SUBMIT
                 </button>
             </div>

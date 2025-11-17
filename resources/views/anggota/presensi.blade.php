@@ -199,7 +199,7 @@
 {{-- 3. Tambahkan Tombol FAB (+) --}}
 @push('fab')
     <a href="{{ route('anggota.presensi.create') }}" 
-       class="fixed z-50 bottom-6 right-6 md:right-[calc((100vw-768px)/2+24px)] p-4 bg-[#2a4a6f] rounded-full text-white shadow-lg hover:bg-[#365c82] transition">
+       class="fixed z-50 bottom-6 right-6 md:right-[calc((100vw-768px)/2+24px)] p-4 bg-[#2a4a6f] rounded-full text-white shadow-lg transform hover:scale-110 transition-transform">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
     </a>
 @endpush

@@ -14,7 +14,7 @@
             <label class="text-sm font-semibold text-gray-700">WAKTU PATROLI</label>
             <select name="jenis_patroli" 
                     onchange="this.form.submit()" {{-- Reload halaman saat ganti --}}
-                    class="bg-slate-800 text-white text-sm font-semibold px-4 py-2 rounded-full shadow-md border-0 focus:ring-2 focus:ring-blue-500">
+                    class="bg-[#2a4a6f] text-white text-sm font-semibold px-4 py-2 rounded-full shadow-md border-0 focus:ring-2 focus:ring-blue-500">
                 
                 @foreach($opsiJenisPatroli as $opsi)
                     <option value="{{ $opsi }}" {{ $opsi == $jenisPatroliTerpilih ? 'selected' : '' }}>
@@ -38,7 +38,7 @@
 
                 @if($isCompleted)
                     {{-- Tampilan JIKA SUDAH SELESAI (Abu-abu + Ceklis) --}}
-                    <div class="relative bg-slate-800 text-white p-4 rounded-lg shadow text-center font-semibold text-sm">
+                    <div class="relative bg-[#2a4a6f] text-white p-4 rounded-lg shadow text-center font-semibold text-sm">
                         {{ $area }}
                         {{-- Ikon Ceklis Hijau --}}
                         <div class="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center border-2 border-white">

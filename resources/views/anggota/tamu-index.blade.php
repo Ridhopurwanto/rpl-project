@@ -19,7 +19,8 @@
                 name="tanggal"
                 value="{{ $tanggal_terpilih }}"
                 onchange="this.form.submit()" {{-- Auto submit saat tanggal ganti --}}
-                class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+                class="bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+                style="color-scheme: dark;"
             >
         </form>
     </div>
@@ -57,7 +58,7 @@
     </div>
 
     {{-- Tombol Aksi Tambah (FAB) --}}
-    <a href="{{ route('anggota.tamu.create') }}" class="fixed bottom-24 right-4 bg-blue-800 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform">
+    <a href="{{ route('anggota.tamu.create') }}" class="fixed bottom-24 right-4 bg-[#2a4a6f] text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
     </a>
 

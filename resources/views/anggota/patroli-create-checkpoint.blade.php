@@ -87,7 +87,7 @@
         <input type="hidden" name="jenis_patroli" value="{{ $jenisPatroli }}">
         <input type="hidden" name="wilayah" value="{{ $wilayah }}">
         
-        <div class="w-full bg-slate-800 text-white rounded-lg p-3 text-center mb-4 shadow-lg">
+        <div class="w-full bg-[#2a4a6f] text-white rounded-lg p-3 text-center mb-4 shadow-lg">
             <h2 class="text-lg font-bold">{{ $wilayah }}</h2>
         </div>
 
@@ -115,19 +115,19 @@
             <button x-show="state === 'camera'" 
                     type="button" 
                     @click="takeSnapshot()"
-                    class="w-full flex items-center justify-center text-base py-3 px-4 rounded-lg shadow-md font-medium text-white bg-slate-800 hover:bg-slate-700">
+                    class="w-full flex items-center justify-center text-base py-3 px-4 rounded-lg shadow-md font-medium text-white bg-[#2a4a6f] hover:bg-slate-700">
                 AMBIL GAMBAR
             </button>
 
             <div x-show="state === 'preview'" class="space-y-3" style="display: none;">
                 <button type="button" 
                         @click="retakePhoto()"
-                        class="w-full flex items-center justify-center text-base py-3 px-4 rounded-lg shadow-md font-medium text-white bg-gray-500 hover:bg-gray-600">
+                        class="w-full flex items-center justify-center text-base py-3 px-4 rounded-lg shadow-md font-medium text-white bg-[#2a4a6f] hover:bg-blue-800">
                     AMBIL ULANG FOTO
                 </button>
                 
                 <button type="submit"
-                        class="w-full flex items-center justify-center text-base py-3 px-4 rounded-lg shadow-md font-medium text-white bg-blue-700 hover:bg-blue-800">
+                        class="w-full flex items-center justify-center text-base py-3 px-4 rounded-lg shadow-md font-medium text-white bg-[#2a4a6f] hover:bg-blue-800">
                     SUBMIT FOTO AREA
                 </button>
             </div>
