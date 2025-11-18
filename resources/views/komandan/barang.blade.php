@@ -88,7 +88,7 @@
                             <th class="py-3 px-4 text-center">Foto</th>
                             <th class="py-3 px-4 text-left">Nama Barang</th>
                             <th class="py-3 px-4 text-left">Penitip</th>
-                            <th class="py-3 px-4 text-left">Tujuan (Penerima)</th>
+                            <th class="py-3 px-4 text-left">Penerima</th>
                             <th class="py-3 px-4 text-left">Catatan</th>
                             <th class="py-3 px-4 text-left">Status</th>
                         </tr>
