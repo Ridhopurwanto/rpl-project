@@ -44,7 +44,7 @@
 
                 {{-- Filter Jenis (Nama Barang) --}}
                 <div class="sm:col-span-1">
-                    <label for="jenis" class="block text-sm font-medium text-gray-700 mb-1">JENIS (NAMA BARANG):</label>
+                    <label for="jenis" class="block text-sm font-medium text-gray-700 mb-1">NAMA BARANG:</label>
                     <input type="text" id="jenis" name="jenis" 
                            class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" 
                            value="{{ $jenisTerpilih }}" placeholder="Cth: Atribut / Dompet">
@@ -72,7 +72,7 @@
                             <th class="py-3 px-4 text-left">No</th>
                             {{-- ▼▼▼ PERUBAHAN 2: Tambah Header Foto ▼▼▼ --}}
                             <th class="py-3 px-4 text-center">Foto</th>
-                            <th class="py-3 px-4 text-left">Jenis (Nama Barang)</th>
+                            <th class="py-3 px-4 text-left">Nama Barang</th>
                             <th class="py-3 px-4 text-left">Pelapor</th>
                             <th class="py-3 px-4 text-left">Lokasi Temuan</th>
                             <th class="py-3 px-4 text-left">Catatan</th>
@@ -86,7 +86,7 @@
                             <th class="py-3 px-4 text-left">No</th>
                             {{-- ▼▼▼ PERUBAHAN 2: Tambah Header Foto ▼▼▼ --}}
                             <th class="py-3 px-4 text-center">Foto</th>
-                            <th class="py-3 px-4 text-left">Jenis (Nama Barang)</th>
+                            <th class="py-3 px-4 text-left">Nama Barang</th>
                             <th class="py-3 px-4 text-left">Penitip</th>
                             <th class="py-3 px-4 text-left">Tujuan (Penerima)</th>
                             <th class="py-3 px-4 text-left">Catatan</th>
