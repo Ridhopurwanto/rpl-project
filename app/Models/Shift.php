@@ -14,6 +14,17 @@ class Shift extends Model
     protected $primaryKey = 'id_shift';
 
     /**
+     * PERBAIKAN: Menambahkan properti $fillable.
+     * Ini wajib ada agar fungsi updateOrCreate() di controller bisa berjalan
+     * dan menyimpan data ke kolom-kolom ini.
+     */
+    protected $fillable = [
+        'id_pengguna',
+        'tanggal',
+        'jenis_shift',
+    ];
+
+    /**
      * Relasi ke model Pengguna (User)
      */
     public function pengguna()
