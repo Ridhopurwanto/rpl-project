@@ -6,7 +6,7 @@
 @extends('layouts.app')
 
 @section('header-left')
-    <a class="bg-[#2a4a6f] text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md hover:bg-[#1e3a5c] transition">
+    <a href="{{ route('komandan.akun.index') }}" class="bg-[#2a4a6f] text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md hover:bg-[#1e3a5c] transition">
         <i class="fas fa-arrow-left mr-2"></i> MANAJEMEN SHIFT
     </a>
 @endsection
