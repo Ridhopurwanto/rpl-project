@@ -126,7 +126,7 @@
         
         <div class="text-center md:text-left">
             <h2 class="text-xl md:text-3xl font-bold text-gray-800 uppercase">{{ $user->nama_lengkap }}</h2>
-            <p class="text-sm md:text-base font-bold text-gray-500 tracking-widest mt-1">MANAJEMEN JADWAL SHIFT</p>
+            <p class="text-sm md:text-base font-bold text-gray-500 tracking-widest mt-1">{{ strtoupper($user->peran) }}</p>
         </div>
     </div>
 

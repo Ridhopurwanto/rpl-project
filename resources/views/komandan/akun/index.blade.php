@@ -206,8 +206,13 @@
 
 {{-- Tombol FAB --}}
 @push('fab')
-<div class="absolute bottom-16 right-4 z-50">
-    <button @click="$dispatch('open-create-modal')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold w-14 h-14 rounded-full flex items-center justify-center shadow-lg">
+<div x-data class="absolute bottom-16 right-4 z-50">
+    {{-- 
+       Saat diklik, tombol ini mengirim sinyal 'open-create-modal' ke window.
+       Sinyal ini akan ditangkap oleh listener di x-data utama di atas.
+    --}}
+    <button @click="$dispatch('open-create-modal')" 
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform transform hover:scale-110">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
     </button>
 </div>
