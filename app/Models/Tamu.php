@@ -19,12 +19,10 @@ class Tamu extends Model
         'tujuan',
         'id_pengguna',
         'waktu_datang',
-        'waktu_pulang',
     ];
 
     protected $casts = [
         'waktu_datang' => 'datetime',
-        'waktu_pulang' => 'datetime',
     ];
 
     /**

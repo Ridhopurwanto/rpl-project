@@ -19,7 +19,6 @@
         editInstansi: '',
         editTujuan: '',
         editWaktuDatang: '',
-        editWaktuPulang: '',
         showDeleteModal: false,
         deleteAction: '' 
      }">
@@ -52,13 +51,24 @@
     <form action="{{ route('komandan.tamu') }}" method="GET">
         <div class="bg-white p-4 rounded-lg shadow-md mb-6">
             <div class="flex flex-col sm:flex-row sm:items-end sm:space-x-4 space-y-4 sm:space-y-0">
-                <div class="flex-1">
-                    <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">TANGGAL:</label>
-                    <input type="date" id="tanggal" name="tanggal" 
-                           class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" 
-                           value="{{ $tanggalTerpilih }}">
+                
+                {{-- Input Rentang Tanggal (Grid 2 Kolom) --}}
+                <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">DARI TANGGAL:</label>
+                        <input type="date" id="start_date" name="start_date" 
+                               class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" 
+                               value="{{ $startDate }}">
+                    </div>
+                    <div>
+                        <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">SAMPAI TANGGAL:</label>
+                        <input type="date" id="end_date" name="end_date" 
+                               class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" 
+                               value="{{ $endDate }}">
+                    </div>
                 </div>
-                <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition">
+
+                <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white px-6 py-2 rounded-lg shadow hover:bg-blue-700 transition font-semibold">
                     Tampilkan
                 </button>
             </div>
@@ -77,8 +87,7 @@
                         <th class="py-3 px-4 text-left w-16">No</th>
                         <th class="py-3 px-4 text-left">Nama</th>
                         <th class="py-3 px-4 text-left w-48">Instansi</th>
-                        <th class="py-3 px-4 text-left w-32">Waktu Datang</th>
-                        <th class="py-3 px-4 text-left w-32">Waktu Pulang</th>
+                        <th class="py-3 px-4 text-left w-32">Waktu Kunjungan</th>
                         <th class="py-3 px-4 text-left">Tujuan</th>
                         @if(Auth::user()->peran == 'komandan')
                             <th class="py-3 px-4 text-center w-28">Aksi</th>
@@ -91,8 +100,9 @@
                         <td class="py-2 px-4">{{ $index + 1 }}.</td>
                         <td class="py-2 px-4 font-medium">{{ $tamu->nama_tamu }}</td>
                         <td class="py-2 px-4">{{ $tamu->instansi }}</td>
-                        <td class="py-2 px-4">{{ $tamu->waktu_datang->format('H:i:s') }}</td>
-                        <td class="py-2 px-4">{{ $tamu->waktu_pulang ? $tamu->waktu_pulang->format('H:i:s') : '-' }}</td>
+                        <td class="py-2 px-4 text-gray-700 whitespace-nowrap">
+                            {{ $tamu->waktu_datang->format('d/m/Y H:i') }}
+                        </td>
                         <td class="py-2 px-4">{{ $tamu->tujuan }}</td>
                         @if(Auth::user()->peran == 'komandan')
                             <td class="py-2 px-4">
@@ -105,8 +115,7 @@
                                         editInstansi = '{{ $tamu->instansi }}';
                                         editTujuan = '{{ $tamu->tujuan }}';
                                         editWaktuDatang = '{{ $tamu->waktu_datang->format('Y-m-d\TH:i') }}';
-                                        editWaktuPulang = '{{ $tamu->waktu_pulang ? $tamu->waktu_pulang->format('Y-m-d\TH:i') : '' }}';
-                                    " class="text-blue-500 hover:text-blue-700" title="Edit">
+                                        " class="text-blue-500 hover:text-blue-700" title="Edit">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
                                     </button>
                                     
@@ -165,16 +174,10 @@
                                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     </div>
                     <div>
-                        <label for="waktu_datang" class="block text-sm font-medium text-gray-700 mb-1">Waktu Datang:</label>
+                        <label for="waktu_datang" class="block text-sm font-medium text-gray-700 mb-1">Waktu Kunjungan:</label>
                         <input type="datetime-local" id="waktu_datang" name="waktu_datang" x-model="editWaktuDatang"
                                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     </div>
-                    <div>
-                        <label for="waktu_pulang" class="block text-sm font-medium text-gray-700 mb-1">Waktu Pulang: (Opsional)</label>
-                        <input type="datetime-local" id="waktu_pulang" name="waktu_pulang" x-model="editWaktuPulang"
-                               class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-
                     <button type="submit" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg shadow hover:bg-green-600 transition">
                         SUBMIT
                     </button>

@@ -17,18 +17,18 @@ class TamuController extends Controller
     public function index(Request $request)
     {
         // Ambil tanggal dari filter. Default: hari ini.
-        $tanggalFilter = $request->input('tanggal', now()->format('Y-m-d'));
-
+        $startDate = $request->input('start_date', now()->format('Y-m-d'));
+        $endDate = $request->input('end_date', now()->format('Y-m-d'));
         // Ambil data tamu berdasarkan filter tanggal
-        $riwayatTamu = Tamu::whereDate('waktu_datang', $tanggalFilter)
-                            ->orderBy('waktu_datang', 'asc')
-                            ->get();
+        $riwayatTamu = Tamu::whereDate('waktu_datang', '>=', $startDate)
+                           ->whereDate('waktu_datang', '<=', $endDate)
+                           ->orderBy('waktu_datang', 'asc')
+                           ->get();
         
-        // Tampilkan view Komandan
-        //
         return view('komandan.tamu', [
             'riwayatTamu' => $riwayatTamu,
-            'tanggalTerpilih' => $tanggalFilter,
+            'startDate' => $startDate, // Kirim balik ke view agar input tetap terisi
+            'endDate' => $endDate,     // Kirim balik ke view agar input tetap terisi
         ]);
     }
 
@@ -47,7 +47,6 @@ class TamuController extends Controller
             'instansi' => 'required|string|max:255',
             'tujuan' => 'required|string|max:255',
             'waktu_datang' => 'required|date',
-            'waktu_pulang' => 'nullable|date|after_or_equal:waktu_datang',
         ]);
 
         try {
@@ -58,7 +57,6 @@ class TamuController extends Controller
                 'instansi' => $request->instansi,
                 'tujuan' => $request->tujuan,
                 'waktu_datang' => $request->waktu_datang,
-                'waktu_pulang' => $request->waktu_pulang, 
             ]);
 
             return redirect()->back()->with('success', 'Data tamu berhasil diperbarui.');
