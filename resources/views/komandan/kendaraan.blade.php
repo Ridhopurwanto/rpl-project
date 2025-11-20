@@ -100,8 +100,29 @@
                         <td class="py-2 px-4">{{ $index + 1 }}.</td>
                         <td class="py-2 px-4 font-medium">{{ $log->nopol ?? 'N/A' }}</td>
                         <td class="py-2 px-4">{{ $log->pemilik ?? 'N/A' }}</td>
-                        <td class="py-2 px-4">{{ $log->waktu_masuk ? $log->waktu_masuk->format('H:i:s') : '-' }}</td>
-                        <td class="py-2 px-4">{{ $log->waktu_keluar ? $log->waktu_keluar->format('H:i:s') : '-' }}</td>
+                        {{-- 
+                           LOGIKA MASUK:
+                           Hanya tampilkan Jam Masuk jika tanggal Masuk == Tanggal Filter 
+                        --}}
+                        <td class="py-2 px-4 text-gray-700">
+                            @if($log->waktu_masuk && $log->waktu_masuk->format('Y-m-d') == $tanggalTerpilih)
+                                {{ $log->waktu_masuk->format('H:i:s') }}
+                            @else
+                                <span class="text-gray-400">-</span>
+                            @endif
+                        </td>
+
+                        {{-- 
+                           LOGIKA KELUAR:
+                           Hanya tampilkan Jam Keluar jika tanggal Keluar == Tanggal Filter 
+                        --}}
+                        <td class="py-2 px-4 text-gray-700">
+                            @if($log->waktu_keluar && $log->waktu_keluar->format('Y-m-d') == $tanggalTerpilih)
+                                {{ $log->waktu_keluar->format('H:i:s') }}
+                            @else
+                                <span class="text-gray-400">-</span>
+                            @endif
+                        </td>
                         <td class="py-2 px-4">
                             @if(Auth::user()->peran == 'komandan')
                                 <form action="{{ route('komandan.kendaraan.log.updateKeterangan', $log->id_log) }}" method="POST">
@@ -113,7 +134,7 @@
                                         <option value="tidak menginap" {{ $log->keterangan == 'tidak menginap' ? 'selected' : '' }}>
                                             Tidak Menginap
                                         </option>
-                                        <option value="menginap" {{ $log->keterangan == 'menginap' ? 'selected' : '' }}>
+                                        <option value="menginap" {{ $log->keterangan == 'Menginap' ? 'selected' : '' }}>
                                             Menginap
                                         </option>
                                     </select>

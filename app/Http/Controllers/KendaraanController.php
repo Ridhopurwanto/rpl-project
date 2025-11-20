@@ -22,7 +22,10 @@ class KendaraanController extends Controller
         $tipeFilter = $request->input('tipe'); // 'Roda 2' atau 'Roda 4'
 
         $queryRiwayat = LogKendaraan::with('kendaraan')
-                            ->whereDate('waktu_masuk', $tanggalFilter);
+            ->where(function($q) use ($tanggalFilter) {
+                $q->whereDate('waktu_masuk', $tanggalFilter)
+                  ->orWhereDate('waktu_keluar', $tanggalFilter);
+            });
 
         if ($tipeFilter) {
             $queryRiwayat->whereHas('kendaraan', function ($q) use ($tipeFilter) {
@@ -107,16 +110,19 @@ class KendaraanController extends Controller
         }
 
         try {
-            // Cek jika kendaraan masih punya log, cegah hapus
-            $adaLog = LogKendaraan::where('id_kendaraan', $id_kendaraan)->exists();
-            if ($adaLog) {
-                return redirect()->back()->with('error', 'Gagal menghapus! Kendaraan masih memiliki riwayat log.');
-            }
-
             $kendaraan = Kendaraan::findOrFail($id_kendaraan);
+
+            // LANGKAH PENTING:
+            // Sebelum menghapus Master, kita harus "memutuskan hubungan" dengan Log-nya dulu.
+            // Kita update semua Log yang punya id_kendaraan ini menjadi NULL.
+            // Jadi datanya tetap ada di riwayat (sebagai teks nopol/pemilik), tapi tidak lagi terikat ke ID Master ini.
+            LogKendaraan::where('id_kendaraan', $id_kendaraan)
+                        ->update(['id_kendaraan' => null]);
+
+            // Setelah log-nya "dilepas", baru kita hapus Masternya dengan aman.
             $kendaraan->delete();
-            return redirect()->back()->with('success', 'Data kendaraan master berhasil dihapus.');
-        
+            
+            return redirect()->back()->with('success', 'Data kendaraan berhasil dihapus dari Daftar Kendaraan (Riwayat tetap tersimpan).');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal menghapus data.');
         }

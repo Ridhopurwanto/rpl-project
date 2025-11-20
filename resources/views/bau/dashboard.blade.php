@@ -85,8 +85,8 @@
         {!! renderMenuButton('TAMU', href: route('komandan.tamu')) !!}
         {!! renderMenuButton('BARANG', href: route('komandan.barang')) !!}
         {!! renderMenuButton('GANGGUAN KAMTIBMAS', href: route('komandan.gangguan')) !!}
-        {!! renderMenuButton('DAFTAR AKUN') !!}
-        {!! renderMenuButton('UNDUH LAPORAN') !!}
+        {!! renderMenuButton('DAFTAR AKUN', href: route('komandan.akun.index')) !!}
+        {!! renderMenuButton('UNDUH LAPORAN', href: route('komandan.unduh')) !!}
 
     </div>
 </div>
