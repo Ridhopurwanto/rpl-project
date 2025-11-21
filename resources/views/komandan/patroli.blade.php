@@ -50,9 +50,18 @@
                     <label for="jenis_patroli" class="block text-sm font-medium text-gray-700 mb-1">JENIS PATROLI:</label>
                     <select id="jenis_patroli" name="jenis_patroli" 
                             class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        <option value="semua" @if($jenisPatroliTerpilih == 'semua') selected @endif>Semua Patroli</option>
-                        <option value="patroli_1" @if($jenisPatroliTerpilih == 'patroli_1') selected @endif>Patroli 1</option>
-                        <option value="patroli_2" @if($jenisPatroliTerpilih == 'patroli_2') selected @endif>Patroli 2</option>
+                        
+                        {{-- Opsi "Semua" DIHAPUS sesuai permintaan --}}
+                        
+                        @forelse($jenisPatroliOptions as $opsi)
+                            <option value="{{ $opsi }}" {{ $jenisPatroliTerpilih == $opsi ? 'selected' : '' }}>
+                                {{-- Menampilkan nama patroli apa adanya dari DB --}}
+                                {{ $opsi }}
+                            </option>
+                        @empty
+                            <option value="" disabled selected>Tidak ada data jenis patroli</option>
+                        @endforelse
+                        
                     </select>
                 </div>
 
@@ -74,10 +83,11 @@
                 <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                     <tr>
                         <th class="py-3 px-4 text-left w-16">No</th>
-                        <th class="py-3 px-4 text-center w-24">Foto</th>
                         <th class="py-3 px-4 text-left w-32">Waktu</th>
+                        <th class="py-3 px-4 text-left w-32">Jenis</th>
                         <th class="py-3 px-4 text-left">Wilayah</th>
                         <th class="py-3 px-4 text-left w-48">Nama</th>
+                        <th class="py-3 px-4 text-center w-24">Detail</th>
                         @if(Auth::user()->peran == 'komandan')
                             <th class="py-3 px-4 text-center w-28">Aksi</th>
                         @endif
@@ -87,14 +97,19 @@
                     @forelse($dataPatroli as $index => $item)
                     <tr>
                         <td class="py-2 px-4">{{ $index + 1 }}.</td>
+                        <td class="py-2 px-4">{{ $item->waktu_exact->format('H:i:s') }}</td>
+                        <td class="py-2 px-4">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                                {{ $item->jenis_patroli }}
+                            </span>
+                        </td>
+                        <td class="py-2 px-4 font-medium">{{ $item->wilayah }}</td>
+                        <td class="py-2 px-4">{{ $item->nama_lengkap }}</td>
                         <td class="py-2 px-4 text-center">
                             <button @click="showPhotoModal = true; photoUrl = '{{ asset('storage/' . $item->foto) }}'" class="text-blue-500 hover:underline">
                                 Buka
                             </button>
                         </td>
-                        <td class="py-2 px-4">{{ $item->waktu_exact->format('H:i:s') }}</td>
-                        <td class="py-2 px-4 font-medium">{{ $item->wilayah }}</td>
-                        <td class="py-2 px-4">{{ $item->nama_lengkap }}</td>
                         @if(Auth::user()->peran == 'komandan')
                             <td class="py-2 px-4">
                                 <div class="flex justify-center space-x-3">
@@ -143,7 +158,7 @@
          style="display: none;">
         <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-4 relative" @click.stop>
             <div class="flex justify-between items-center pb-3 border-b">
-                <h3 class="text-xl font-bold text-gray-800">DETAIL PATROLI (EDIT)</h3>
+                <h3 class="text-xl font-bold text-gray-800">EDIT PATROLI</h3>
                 <button @click="showEditModal = false" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
             </div>
             <form :action="editAction" method="POST" class="mt-4">

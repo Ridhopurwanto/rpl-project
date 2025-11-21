@@ -14,9 +14,6 @@ class Patroli extends Model
 
     protected $primaryKey = 'id_patroli';
 
-    /**
-     * Mengatur kolom mana yang boleh diisi.
-     */
     protected $fillable = [
         'id_pengguna',
         'nama_lengkap',
@@ -32,10 +29,6 @@ class Patroli extends Model
         'tanggal' => 'date',
     ];
 
-    /**
-     * Otomatis mengisi id_pengguna dan nama_lengkap
-     * saat data baru dibuat ('creating')
-     */
     protected static function boot()
     {
         parent::boot();
@@ -53,9 +46,6 @@ class Patroli extends Model
         });
     }
 
-    /**
-     * Relasi ke Pengguna (User)
-     */
     public function pengguna()
     {
         return $this->belongsTo(User::class, 'id_pengguna', 'id_pengguna');
