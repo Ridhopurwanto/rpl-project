@@ -47,6 +47,10 @@
         {{-- Daftar Kartu Akun --}}
         <div class="space-y-3">
             @foreach ($users as $user) 
+
+                @php
+                    $isLocked = in_array(strtolower($user->peran), ['komandan', 'bau']);
+                @endphp
             {{-- 
                 LOGIKA WARNA:
                 Jika status 'Tidak Aktif' -> Pakai warna abu-abu (bg-gray-500)
@@ -89,10 +93,16 @@
                         </button>
                         
                         {{-- Tombol HAPUS --}}
-                        <button @click="openHapusModal = true; hapusUserName = '{{ $user->nama_lengkap }}'; hapusFormAction = '{{ route('komandan.akun.destroy', $user->id_pengguna) }}';" 
-                                class="px-2 py-1 bg-red-600 rounded-md shadow-sm" title="Delete">
-                            <span class="text-white text-xs font-semibold">Delete</span>
-                        </button>
+                        @if($isLocked)
+                            <button disabled class="px-2 py-1 bg-gray-400 rounded-md shadow-sm cursor-not-allowed opacity-70" title="Terkunci">
+                                <span class="text-white text-xs font-semibold">Delete</span>
+                            </button>
+                        @else
+                            <button @click="openHapusModal = true; hapusUserName = '{{ $user->nama_lengkap }}'; hapusFormAction = '{{ route('komandan.akun.destroy', $user->id_pengguna) }}';" 
+                                    class="px-2 py-1 bg-red-600 rounded-md shadow-sm hover:bg-red-700 transition" title="Delete">
+                                <span class="text-white text-xs font-semibold">Delete</span>
+                            </button>
+                        @endif
                     </div>
                 </div>
             @endforeach

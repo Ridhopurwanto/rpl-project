@@ -1,7 +1,3 @@
-{{-- 
-  File: resources/views/komandan/akun/partials/form-fields.blade.php
-  Versi FINAL: Auto-fill data saat Edit
---}}
 @php
     $isEdit = $isEdit ?? false;
 @endphp
@@ -132,12 +128,16 @@
             <svg class="w-4 h-4 mr-2 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
             PERAN (ROLE)
         </label>
-        <select id="peran" name="peran" x-model="peran" required
-                class="w-full bg-[#2a4a6f] text-white border-none rounded-md shadow-sm px-4 py-2.5 focus:ring-blue-500">
-            <option value="anggota">Anggota</option>
-            <option value="komandan">Komandan</option>
-            <option value="bau">BAU</option>
-        </select>
+        
+        {{-- Tampilan Visual (Terkunci) --}}
+        <div class="relative">
+            <input type="text" value="Anggota" disabled
+                   class="w-full bg-gray-300 text-gray-600 border-none rounded-md shadow-sm px-4 py-2.5 font-bold cursor-not-allowed focus:ring-0">
+            
+            {{-- Input Hidden (Agar nilai 'anggota' terkirim ke server) --}}
+            <input type="hidden" name="peran" value="anggota" x-model="peran">
+        </div>
+        <p class="text-xs text-gray-500 mt-1 italic">*Hanya dapat menambahkan akun Anggota.</p>
     </div>
 
     {{-- Status Akun (Hanya tampil di "Edit Akun") --}}

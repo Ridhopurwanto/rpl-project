@@ -2,8 +2,8 @@
 
 {{-- Tombol KEMBALI --}}
 @section('header-left')
-    <a href="{{ route('komandan.dashboard') }}" class="bg-slate-800 text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md hover:bg-slate-700 transition">
-        KEMBALI
+    <a class="bg-slate-800 text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md hover:bg-slate-700 transition">
+        PRESENSI
     </a>
 @endsection
 
