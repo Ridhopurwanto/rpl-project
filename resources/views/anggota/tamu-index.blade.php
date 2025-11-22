@@ -94,6 +94,7 @@
                     <th class="py-3 px-4">No</th>
                     <th class="py-3 px-4">Nama</th>
                     <th class="py-3 px-4">Instansi</th>
+                    <th class="py-3 px-4">No. Identitas</th>
                     <th class="py-3 px-4">Waktu</th>
                     <th class="py-3 px-4">Tujuan</th>
                 </tr>
@@ -104,6 +105,7 @@
                     <td class="py-3 px-4 font-medium">{{ $loop->iteration }}.</td>
                     <td class="py-3 px-4 font-medium">{{ $tamu->nama_tamu }}</td>
                     <td class="py-3 px-4">{{ $tamu->instansi }}</td>
+                    <td class="py-3 px-4 font-medium">{{ !empty($tamu->no_identitas) ? $tamu->no_identitas : '-' }}</td>
                     <td class="py-3 px-4">
                         <div class="flex flex-col">
                             <span class="font-bold">{{ $tamu->waktu_datang->format('H:i') }}</span>
@@ -181,6 +183,17 @@
                             id="instansi" 
                             name="instansi" 
                             placeholder="Contoh: BPS Pusat"
+                            class="w-full px-4 py-2 bg-white text-gray-900 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required>
+                    </div>
+
+                    <label for="no_identitas" class="col-span-1 text-gray-300 font-semibold text-sm self-center whitespace-wrap">No. Identitas (NIK, NIP) :</label>
+                    <div class="col-span-2">
+                        <input 
+                            type="text" 
+                            id="no_identitas" 
+                            name="no_identitas" 
+                            placeholder="Contoh: 6402021212120001"
                             class="w-full px-4 py-2 bg-white text-gray-900 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             required>
                     </div>

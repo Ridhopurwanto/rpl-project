@@ -69,6 +69,7 @@ class TamuController extends Controller
             'instansi' => $request->instansi,
             'tujuan' => $request->tujuan,
             'waktu_datang' => $waktu_datang_gabungan, // Gunakan yang sudah digabung
+            'no_identitas' => $request->no_identitas,
             'id_pengguna' => Auth::id(), // ID Anggota yang login
         ]);
 

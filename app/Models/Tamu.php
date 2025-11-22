@@ -19,6 +19,7 @@ class Tamu extends Model
         'tujuan',
         'id_pengguna',
         'waktu_datang',
+        'no_identitas',
     ];
 
     protected $casts = [
