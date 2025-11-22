@@ -16,19 +16,25 @@ class TamuController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. Tentukan tanggal filter
-        $tanggal_riwayat = $request->input('tanggal', Carbon::today()->toDateString());
+        // 1. Tentukan default tanggal (Hari ini dan 7 hari lalu)
+        $defaultStartDate = Carbon::now()->subWeek()->toDateString();
+        $defaultEndDate = Carbon::now()->toDateString();
 
-        // 2. Ambil riwayat tamu pada tanggal tersebut
-        // (Berdasarkan 'waktu_datang' karena 'waktu_pulang' tidak ada)
-        $riwayat_tamu = Tamu::whereDate('waktu_datang', $tanggal_riwayat)
+        // 2. Ambil input dari request, jika tidak ada gunakan default
+        $startDate = $request->input('start_date', $defaultStartDate);
+        $endDate = $request->input('end_date', $defaultEndDate);
+
+        // 3. Query dengan filter range tanggal
+        $riwayat_tamu = Tamu::whereDate('waktu_datang', '>=', $startDate)
+                            ->whereDate('waktu_datang', '<=', $endDate)
                             ->orderBy('waktu_datang', 'desc')
                             ->get();
 
-        // 3. Kirim data ke view
+        // 4. Kirim data ke view (termasuk variabel tanggal untuk mengisi value input)
         return view('anggota.tamu-index', [
             'riwayat_tamu' => $riwayat_tamu,
-            'tanggal_terpilih' => $tanggal_riwayat,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
         ]);
     }
 
