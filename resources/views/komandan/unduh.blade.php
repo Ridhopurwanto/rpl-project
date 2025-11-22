@@ -45,6 +45,7 @@
                 <div>
                     <label for="date_from" class="block text-sm font-medium text-gray-700 mb-1">DARI TANGGAL:</label>
                     <input type="date" id="date_from" name="date_from" 
+                           onchange="this.form.submit()"
                            class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" 
                            value="{{ now()->format('Y-m-d') }}">
                 </div>
@@ -53,6 +54,7 @@
                 <div>
                     <label for="date_to" class="block text-sm font-medium text-gray-700 mb-1">SAMPAI TANGGAL:</label>
                     <input type="date" id="date_to" name="date_to" 
+                           onchange="this.form.submit()"
                            class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" 
                            value="{{ now()->format('Y-m-d') }}">
                 </div>
