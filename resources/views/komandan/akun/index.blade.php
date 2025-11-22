@@ -50,6 +50,7 @@
 
                 @php
                     $isLocked = in_array(strtolower($user->peran), ['komandan', 'bau']);
+                    $isShiftLocked = (strtolower($user->peran) == 'bau');
                 @endphp
             {{-- 
                 LOGIKA WARNA:
@@ -67,9 +68,15 @@
                     </div>
 
                     <div class="flex flex-shrink-0 space-x-1.5">
-                        <a href="{{ route('komandan.akun.shift', $user->id_pengguna) }}" class="px-2 py-1 bg-blue-500 rounded-md shadow-sm" title="Shift">
-                            <span class="text-white text-xs font-semibold">Shift</span>
-                        </a>
+                        @if($isShiftLocked)
+                            <button disabled class="px-2 py-1 bg-gray-400 rounded-md shadow-sm cursor-not-allowed opacity-70" title="Shift Tidak Tersedia untuk BAU">
+                                <span class="text-white text-xs font-semibold">Shift</span>
+                            </button>
+                        @else
+                            <a href="{{ route('komandan.akun.shift', $user->id_pengguna) }}" class="px-2 py-1 bg-blue-500 rounded-md shadow-sm hover:bg-blue-600 transition" title="Atur Shift">
+                                <span class="text-white text-xs font-semibold">Shift</span>
+                            </a>
+                        @endif
                         
                         {{-- Tombol INFO --}}
                         <button @click="openInfoModal = true; infoUser = {{ json_encode($user) }};" 
