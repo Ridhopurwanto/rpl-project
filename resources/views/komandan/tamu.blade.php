@@ -57,20 +57,18 @@
                     <div>
                         <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">DARI TANGGAL:</label>
                         <input type="date" id="start_date" name="start_date" 
+                               onchange="this.form.submit()"
                                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" 
                                value="{{ $startDate }}">
                     </div>
                     <div>
                         <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">SAMPAI TANGGAL:</label>
                         <input type="date" id="end_date" name="end_date" 
+                               onchange="this.form.submit()"
                                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" 
                                value="{{ $endDate }}">
                     </div>
                 </div>
-
-                <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white px-6 py-2 rounded-lg shadow hover:bg-blue-700 transition font-semibold">
-                    Tampilkan
-                </button>
             </div>
         </div>
     </form>

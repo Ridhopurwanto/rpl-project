@@ -52,6 +52,7 @@
                 <div class="flex-1">
                     <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">TANGGAL:</label>
                     <input type="date" id="tanggal" name="tanggal" 
+                           onchange="this.form.submit()"
                            class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" 
                            value="{{ $tanggalTerpilih }}">
                 </div>
@@ -60,16 +61,13 @@
                 <div class="flex-1">
                     <label for="tipe" class="block text-sm font-medium text-gray-700 mb-1">TIPE:</label>
                     <select id="tipe" name="tipe" 
+                            onchange="this.form.submit()"
                             class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         <option value="">Semua Tipe</option>
                         <option value="Roda 2" {{ $tipeTerpilih == 'Roda 2' ? 'selected' : '' }}>Roda 2</option>
                         <option value="Roda 4" {{ $tipeTerpilih == 'Roda 4' ? 'selected' : '' }}>Roda 4</option>
                     </select>
                 </div>
-
-                <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition">
-                    Tampilkan
-                </button>
             </div>
         </div>
     </form>

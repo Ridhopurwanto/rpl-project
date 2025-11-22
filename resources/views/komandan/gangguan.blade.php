@@ -58,6 +58,7 @@
                 <div class="flex-1">
                     <label for="bulan" class="block text-sm font-medium text-gray-700 mb-1">BULAN:</label>
                     <input type="month" id="bulan" name="bulan" 
+                           onchange="this.form.submit()"
                            class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" 
                            value="{{ $bulanTerpilih }}">
                 </div>
@@ -66,6 +67,7 @@
                 <div class="flex-1">
                     <label for="kategori" class="block text-sm font-medium text-gray-700 mb-1">KATEGORI:</label>
                     <select id="kategori" name="kategori" 
+                            onchange="this.form.submit()"
                             class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         <option value="semua">Semua Kategori</option>
                         @foreach($kategoriOptions as $kategori)
@@ -75,10 +77,6 @@
                         @endforeach
                     </select>
                 </div>
-
-                <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition">
-                    Tampilkan
-                </button>
             </div>
         </div>
     </form>

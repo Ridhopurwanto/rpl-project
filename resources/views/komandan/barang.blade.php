@@ -28,6 +28,7 @@
                 <div class="sm:col-span-1">
                     <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">TANGGAL:</label>
                     <input type="date" id="tanggal" name="tanggal" 
+                           onchange="this.form.submit()"
                            class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" 
                            value="{{ $tanggalTerpilih }}">
                 </div>
@@ -36,6 +37,7 @@
                 <div class="sm:col-span-1">
                     <label for="kategori" class="block text-sm font-medium text-gray-700 mb-1">KATEGORI:</label>
                     <select id="kategori" name="kategori" 
+                            onchange="this.form.submit()"
                             class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         <option value="temuan" {{ $kategoriTerpilih == 'temuan' ? 'selected' : '' }}>Barang Temuan</option>
                         <option value="titipan" {{ $kategoriTerpilih == 'titipan' ? 'selected' : '' }}>Barang Titipan</option>
@@ -46,13 +48,10 @@
                 <div class="sm:col-span-1">
                     <label for="jenis" class="block text-sm font-medium text-gray-700 mb-1">NAMA BARANG:</label>
                     <input type="text" id="jenis" name="jenis" 
+                           onchange="this.form.submit()"
                            class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" 
                            value="{{ $jenisTerpilih }}" placeholder="Cth: Atribut / Dompet">
                 </div>
-
-                <button type="submit" class="w-full sm:w-auto sm:self-end bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition">
-                    Tampilkan
-                </button>
             </div>
         </div>
     </form>

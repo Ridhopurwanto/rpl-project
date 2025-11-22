@@ -41,6 +41,7 @@
                 <div class="flex-1">
                     <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">TANGGAL:</label>
                     <input type="date" id="tanggal" name="tanggal" 
+                           onchange="this.form.submit()"
                            class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" 
                            value="{{ $tanggalTerpilih }}">
                 </div>
@@ -49,6 +50,7 @@
                 <div class="flex-1">
                     <label for="jenis_patroli" class="block text-sm font-medium text-gray-700 mb-1">JENIS PATROLI:</label>
                     <select id="jenis_patroli" name="jenis_patroli" 
+                            onchange="this.form.submit()"
                             class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         
                         {{-- Opsi "Semua" DIHAPUS sesuai permintaan --}}
@@ -65,9 +67,6 @@
                     </select>
                 </div>
 
-                <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition">
-                    Tampilkan
-                </button>
             </div>
         </div>
     </form>
