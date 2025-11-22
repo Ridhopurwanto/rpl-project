@@ -147,7 +147,7 @@
          style="display: none;">
         <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-4 relative" @click.stop>
             <div class="flex justify-between items-center pb-3 border-b">
-                <h3 class="text-xl font-bold text-gray-800">EDIT DETAIL TAMU</h3>
+                <h3 class="text-xl font-bold text-gray-800">EDIT DATA TAMU</h3>
                 <button @click="showEditModal = false" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
             </div>
             
