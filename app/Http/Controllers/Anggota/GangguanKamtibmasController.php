@@ -18,33 +18,30 @@ class GangguanKamtibmasController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. Tentukan tanggal filter (range)
-        $tanggal_mulai = $request->input('tanggal_mulai', Carbon::today()->toDateString());
-        $tanggal_selesai = $request->input('tanggal_selesai', Carbon::today()->toDateString());
-        $kategori = $request->input('kategori');
+        // 1. Ambil input filter, default ke bulan saat ini
+        $bulan_terpilih = $request->input('bulan', date('Y-m'));
+        $kategori_terpilih = $request->input('kategori', 'semua');
 
-        // 2. Query data
-        $query = GangguanKamtibmas::query();
+        // 2. Parsing bulan (YYYY-MM)
+        $carbonDate = Carbon::createFromFormat('Y-m', $bulan_terpilih);
 
-        // Filter berdasarkan range tanggal 'waktu_lapor'
-        $query->whereBetween('waktu_lapor', [
-            Carbon::parse($tanggal_mulai)->startOfDay(),
-            Carbon::parse($tanggal_selesai)->endOfDay()
-        ]);
+        // 3. Query Data
+        $query = GangguanKamtibmas::query()
+                    ->whereYear('waktu_lapor', $carbonDate->year)
+                    ->whereMonth('waktu_lapor', $carbonDate->month);
 
-        // Filter berdasarkan kategori (deskripsi) jika ada
-        if ($kategori && $kategori != 'semua') {
-            $query->where('kategori', $kategori);
+        // 4. Filter Kategori jika bukan 'semua'
+        if ($kategori_terpilih !== 'semua') {
+            $query->where('kategori', $kategori_terpilih);
         }
 
         $laporan_gangguan = $query->orderBy('waktu_lapor', 'desc')->get();
 
-        // 3. Kirim data ke view
+        // 5. Kirim ke View
         return view('anggota.gangguan-index', [
             'laporan_gangguan' => $laporan_gangguan,
-            'tanggal_mulai' => $tanggal_mulai,
-            'tanggal_selesai' => $tanggal_selesai,
-            'kategori_terpilih' => $kategori,
+            'bulan_terpilih' => $bulan_terpilih,
+            'kategori_terpilih' => $kategori_terpilih,
         ]);
     }
 
