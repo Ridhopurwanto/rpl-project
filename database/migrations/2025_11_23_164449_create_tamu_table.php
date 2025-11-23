@@ -19,6 +19,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_pengguna')->index('tamu_id_pengguna_foreign');
             $table->dateTime('waktu_datang');
             $table->dateTime('waktu_pulang')->nullable();
+            $table->string('no_identitas', 45)->nullable();
             $table->timestamps();
         });
     }
