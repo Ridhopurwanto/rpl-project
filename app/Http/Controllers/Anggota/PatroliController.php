@@ -22,15 +22,12 @@ class PatroliController extends Controller
                             : Carbon::today();
         
         // Ambil semua patroli yang sudah lengkap 17 area
-        $allPatrols = Patroli::where('id_pengguna', Auth::id())
-                        ->whereDate('tanggal', $tanggalTerpilih)
-                        ->orderBy('waktu_exact', 'asc')
+        $allPatrols = Patroli::whereDate('tanggal', $tanggalTerpilih)
+                        ->orderBy('jenis_patroli', 'asc')
                         ->get();
         
         // Filter hanya yang sudah lengkap 17 area
-        $patrolGroups = $allPatrols->groupBy('jenis_patroli')->filter(function($group) {
-            return $group->count() >= 17;
-        });
+        $patrolGroups = $allPatrols->groupBy('jenis_patroli');
                         
         return view('anggota.patroli-index', [
             'patrolGroups' => $patrolGroups,
@@ -95,17 +92,14 @@ class PatroliController extends Controller
         ];
 
         // 6. Ambil checkpoint yang sudah selesai
-        $completedCheckpoints = [];
-        if (!$sudahSubmit) {
-            $completedCheckpoints = Patroli::where('id_pengguna', $user->id_pengguna)
-                                    ->whereDate('tanggal', $tanggal)
-                                    ->where('jenis_patroli', $jenisPatroliTerpilih)
-                                    ->pluck('wilayah')
-                                    ->map(function($value) {
-                                        return strtoupper($value);
-                                    })
-                                    ->toArray();
-        }
+        $completedCheckpoints = Patroli::where('id_pengguna', $user->id_pengguna)
+                                ->whereDate('tanggal', $tanggal)
+                                ->where('jenis_patroli', $jenisPatroliTerpilih)
+                                ->pluck('wilayah')
+                                ->map(function($value) {
+                                    return strtoupper($value); // Pastikan Uppercase
+                                })
+                                ->toArray();
 
         return view('anggota.patroli-create-session', [
             'semuaArea' => $semuaArea,
@@ -141,47 +135,51 @@ class PatroliController extends Controller
      */
     public function storeCheckpoint(Request $request)
     {
-        // 1. Validasi
         $request->validate([
             'foto_base64' => 'required|string',
             'jenis_patroli' => 'required|string',
             'wilayah' => 'required|string',
         ]);
 
-        // 2. Cek duplikat
+        $wilayahUpper = strtoupper($request->wilayah);
+
+        // Cek duplikat
         $sudahAda = Patroli::where('id_pengguna', Auth::id())
                         ->whereDate('tanggal', Carbon::today())
                         ->where('jenis_patroli', $request->jenis_patroli)
-                        ->where('wilayah', $request->wilayah)
+                        ->where('wilayah', $wilayahUpper)
                         ->exists();
 
         if ($sudahAda) {
-            return redirect()->route('anggota.patroli.createSession', [
-                'jenis_patroli' => $request->jenis_patroli
-            ])->with('error', 'Area ' . $request->wilayah . ' sudah difoto!');
+            return response()->json(['status' => 'error', 'message' => 'Area ' . $wilayahUpper . ' sudah difoto!'], 400);
         }
 
-        // 3. Simpan foto
-        $imageData = $request->foto_base64;
-        @list($type, $imageData) = explode(';', $imageData);
-        @list(, $imageData) = explode(',', $imageData);
-        $fileData = base64_decode($imageData);
-        $fileName = 'patroli/' . Auth::id() . '_' . Str::uuid() . '.jpg';
-        Storage::disk('public')->put($fileName, $fileData);
+        try {
+            $imageData = $request->foto_base64;
+            // Bersihkan prefix base64 jika ada
+            if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
+                $imageData = substr($imageData, strpos($imageData, ',') + 1);
+                $imageData = base64_decode($imageData);
+            } else {
+                $imageData = base64_decode($imageData);
+            }
 
-        // 4. Simpan ke database dengan waktu sekarang
-        Patroli::create([
-            'tanggal' => Carbon::today(),
-            'waktu_exact' => now(), // Langsung isi waktu saat foto diambil
-            'jenis_patroli' => $request->jenis_patroli,
-            'wilayah' => $request->wilayah,
-            'foto' => $fileName,
-        ]);
+            $fileName = 'patroli/' . Auth::id() . '_' . Str::uuid() . '.jpg';
+            Storage::disk('public')->put($fileName, $imageData);
 
-        // 5. Redirect ke grid (BUKAN ke submitSession!)
-        return redirect()->route('anggota.patroli.createSession', [
-            'jenis_patroli' => $request->jenis_patroli
-        ])->with('success', 'Checkpoint ' . $request->wilayah . ' disimpan!');
+            Patroli::create([
+                'tanggal' => Carbon::today(),
+                'waktu_exact' => now(), 
+                'jenis_patroli' => $request->jenis_patroli,
+                'wilayah' => $wilayahUpper,
+                'foto' => $fileName,
+            ]);
+
+            return response()->json(['status' => 'success', 'message' => 'Checkpoint disimpan']);
+
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
     }
 
     /**
