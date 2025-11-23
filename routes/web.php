@@ -219,7 +219,23 @@ Route::middleware('auth')->group(function () {
             ->name('unduh');
         Route::post('komandan/laporan/download', [LaporanUnduhController::class, 'download'])
             ->name('laporan.download');
+        Route::get('komandan/laporan/download-single', [LaporanUnduhController::class, 'downloadSatuan'])
+            ->name('laporan.download-single');
     });
+
+    Route::middleware(['auth'])->prefix('komandan')->name('komandan.')->group(function () {
+    
+    // ... route lain ...
+
+    // 1. Route untuk Download Gabungan (POST)
+    Route::post('/laporan/download', [LaporanUnduhController::class, 'downloadGabungan'])
+         ->name('laporan.download');
+
+    // 2. Route untuk Download Satuan (GET) -> INI YANG BIKIN 404 HILANG
+    Route::get('/laporan/download-single', [LaporanUnduhController::class, 'downloadSatuan'])
+         ->name('laporan.download-single');
+
+});
 
     // --- RUTE UNTUK BAU ---
     Route::prefix('bau')->name('bau.')->group(function () {

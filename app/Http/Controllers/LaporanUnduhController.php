@@ -3,101 +3,171 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-// Panggil SEMUA model yang Anda perlukan untuk laporan
+
+// --- IMPORT MODEL YANG BENAR SESUAI DB ---
 use App\Models\Presensi;
 use App\Models\Patroli;
 use App\Models\Shift;
 use App\Models\Tamu;       
-use App\Models\Barang;    
-use App\Models\Kendaraan; 
 use App\Models\GangguanKamtibmas;
-use App\Exports\LaporanGabunganExport;
-use Maatwebsite\Excel\Facades\Excel;  
+
+// Model Barang (Ada 2 Tabel)
+use App\Models\BarangTemuan; 
+use App\Models\BarangTitipan;
+
+// Model Kendaraan (Gunakan Log untuk laporan keluar masuk)
+use App\Models\LogKendaraan; 
+
+use App\Exports\LaporanGabunganExport; 
+use Maatwebsite\Excel\Facades\Excel;
+use PDF; 
 
 class LaporanUnduhController extends Controller
 {
-    /**
-     * Menampilkan halaman 'Unduh Laporan'.
-     */
     public function index()
     {
-        // Hanya menampilkan view
         return view('komandan.unduh');
     }
 
     /**
-     * Memproses permintaan download laporan gabungan.
+     * DOWNLOAD GABUNGAN
      */
     public function download(Request $request)
     {
-        $request->validate([
-            'report_type' => 'required|in:harian,bulanan',
-            'date_from' => 'required|date',
-            'date_to' => 'required|date|after_or_equal:date_from',
-            'laporan' => 'required|array|min:1', // Pastikan minimal 1 checkbox dipilih
-            'format' => 'required|in:pdf,excel', // Menangkap tombol mana yang ditekan
-        ]);
+        $queue = json_decode($request->download_queue, true);
+        $format = $request->format;
 
-        $tanggalMulai = $request->date_from;
-        $tanggalSelesai = $request->date_to;
-        $laporanDiminta = $request->laporan; // Array: ['presensi', 'patroli', ...]
-        $format = $request->input('format');
+        if (!$queue || count($queue) === 0) {
+            return back()->with('error', 'Tidak ada laporan dipilih');
+        }
 
-        // Siapkan array untuk menampung semua data
-        $dataGabungan = [];
-        $dataGabungan['tanggalMulai'] = $tanggalMulai;
-        $dataGabungan['tanggalSelesai'] = $tanggalSelesai;
+        // Setup Data Dasar
+        $dataGabungan = [
+            'tanggalMulai' => $queue[0]['dateStart'] ?? date('Y-m-d'),
+            'tanggalSelesai' => $queue[0]['dateEnd'] ?? date('Y-m-d'),
+        ];
 
-        // Ambil data dari database berdasarkan checkbox yang dipilih
-        foreach ($laporanDiminta as $jenis) {
-            switch ($jenis) {
-                case 'presensi':
-                    $dataGabungan['presensi'] = Presensi::whereBetween('tanggal', [$tanggalMulai, $tanggalSelesai])->get();
-                    break;
-                case 'patroli':
-                    $dataGabungan['patroli'] = Patroli::whereBetween('tanggal', [$tanggalMulai, $tanggalSelesai])->get();
-                    break;
-                case 'tamu':
-                    $dataGabungan['tamu'] = Tamu::whereBetween('tanggal', [$tanggalMulai, $tanggalSelesai])->get();
-                    break;
-                case 'barang':
-                    $dataGabungan['barang'] = Barang::whereBetween('tanggal', [$tanggalMulai, $tanggalSelesai])->get();
-                    break;
-                case 'kendaraan':
-                    $dataGabungan['kendaraan'] = Kendaraan::whereBetween('tanggal', [$tanggalMulai, $tanggalSelesai])->get();
-                    break;
-                case 'gangguan':
-                    $dataGabungan['gangguan'] = GangguanKamtibmas::whereBetween('tanggal', [$tanggalMulai, $tanggalSelesai])->get();
-                    break;
-                case 'shift':
-                    $dataGabungan['shift'] = Shift::whereBetween('tanggal', [$tanggalMulai, $tanggalSelesai])->get();
-                    break;
+        // Loop Antrian
+        foreach ($queue as $item) {
+            // Normalisasi nama: gangguan_kamtibmas -> gangguan, shift_anggota -> shift
+            $jenis = $this->normalizeType($item['value']);
+            
+            $start = $item['dateStart'];
+            $end = $item['dateEnd'];
+
+            // Ambil data dan masukkan ke key yang SESUAI dengan template blade
+            $data = $this->fetchData($jenis, $start, $end);
+            
+            if ($data) {
+                $dataGabungan[$jenis] = $data;
             }
         }
 
-        // --- PENTING: PROSES DOWNLOAD ---
-        // Anda perlu meng-install package untuk ini, contoh: Laravel Excel
-        // Jalankan: composer require maatwebsite/excel
-        
-        // (Contoh logika jika Anda menggunakan Laravel Excel)
-        // (Contoh logika jika Anda menggunakan Laravel Excel)
+        // --- EXPORT ---
+        $timestamp = date('d-m-Y_H-i');
         if ($format == 'excel') {
-            
-            // Hasilkan nama file yang dinamis
-            $fileName = 'Laporan_Gabungan_' . $tanggalMulai . '_sd_' . $tanggalSelesai . '.xlsx';
-
-            // Panggil Export Class, kirim data, dan download
-            return Excel::download(new LaporanGabunganExport($dataGabungan), $fileName);
+            return Excel::download(new LaporanGabunganExport($dataGabungan), "Laporan_Gabungan_{$timestamp}.xlsx");
         }
 
-        // (Contoh logika jika Anda menggunakan Laravel DOMPDF)
         if ($format == 'pdf') {
-            // Anda harus membuat view Blade khusus untuk PDF
-            // $pdf = PDF::loadView('laporan.template_pdf', $dataGabungan);
-            // return $pdf->download('laporan_gabungan.pdf');
+            $pdf = PDF::loadView('laporan.template-gabungan', compact('dataGabungan'));
+            return $pdf->download("Laporan_Gabungan_{$timestamp}.pdf");
+        }
+    }
 
-            // Untuk sekarang, kita kembalikan JSON untuk tes
-            return response()->json($dataGabungan);
+    /**
+     * DOWNLOAD SATUAN
+     */
+    public function downloadSatuan(Request $request)
+    {
+        $rawType = $request->query('type'); 
+        $format = $request->query('format');
+        $start = $request->query('start');
+        $end = $request->query('end');
+
+        // Normalisasi nama
+        $type = $this->normalizeType($rawType);
+        
+        // Ambil Data
+        $data = $this->fetchData($type, $start, $end);
+
+        if (!$data) {
+            return back()->with('error', "Jenis laporan $type tidak ditemukan atau query salah.");
+        }
+
+        // Bungkus data agar struktur array sama dengan gabungan
+        $dataWrapper = [
+            'tanggalMulai' => $start,
+            'tanggalSelesai' => $end,
+            $type => $data 
+        ];
+
+        $fileName = ucfirst($type) . "_{$start}_sd_{$end}";
+
+        if ($format == 'excel') {
+            return Excel::download(new LaporanGabunganExport($dataWrapper), $fileName . '.xlsx');
+        }
+
+        if ($format == 'pdf') {
+            // Gunakan template gabungan sebagai fallback yang aman
+            $pdf = PDF::loadView('laporan.template-gabungan', ['dataGabungan' => $dataWrapper]);
+            return $pdf->download($fileName . '.pdf');
+        }
+    }
+
+    /**
+     * HELPER: Normalisasi Nama Frontend ke Nama Database/Key Template
+     */
+    private function normalizeType($rawValue)
+    {
+        // Hapus prefix umum
+        $clean = str_replace(['laporan_', 'pengelolaan_'], '', $rawValue);
+
+        // Mapping khusus jika nama masih beda
+        // Format: 'nama_dari_frontend' => 'key_di_template_blade'
+        $mapping = [
+            'gangguan_kamtibmas' => 'gangguan',
+            'shift_anggota' => 'shift',
+        ];
+
+        return $mapping[$clean] ?? $clean;
+    }
+
+    /**
+     * HELPER: Query Database Terpusat
+     */
+    private function fetchData($type, $start, $end)
+    {
+        switch ($type) {
+            case 'presensi': 
+                return Presensi::whereBetween('tanggal', [$start, $end])->get();
+            
+            case 'patroli': 
+                return Patroli::whereBetween('tanggal', [$start, $end])->get();
+            
+            case 'tamu': 
+                return Tamu::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])->get();
+            
+            case 'barang': 
+                // GABUNGKAN Barang Temu & Barang Titip
+                $temu = BarangTemuan::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])->get();
+                $titip = BarangTitipan::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])->get();
+                return $temu->merge($titip); 
+
+            case 'kendaraan': 
+                // Gunakan LogKendaraan, bukan Master Kendaraan
+                // Filter berdasarkan waktu_masuk
+                return LogKendaraan::whereBetween('waktu_masuk', [$start . ' 00:00:00', $end . ' 23:59:59'])->get();
+            
+            case 'gangguan': 
+                // Filter berdasarkan waktu_lapor
+                return GangguanKamtibmas::whereBetween('waktu_lapor', [$start . ' 00:00:00', $end . ' 23:59:59'])->get();
+            
+            case 'shift': 
+                return Shift::whereBetween('tanggal', [$start, $end])->get();
+            
+            default: 
+                return null;
         }
     }
 }
