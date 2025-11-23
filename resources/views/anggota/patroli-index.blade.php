@@ -23,32 +23,35 @@
         }
     }">
 
-    {{-- Filter Tanggal --}}
-    <div class="mt-4 p-4 bg-white rounded-lg shadow">
-        <h3 class="text-xs font-semibold text-gray-500 uppercase mb-2">DAFTAR PATROLI :</h3>
-        <form action="{{ route('anggota.patroli.index') }}" method="GET" class="flex items-center justify-end gap-4">
-            <label for="filter-tanggal" class="text-sm font-semibold text-gray-700 whitespace-nowrap">TANGGAL :</label>
+    {{-- Filter Tanggal & Header --}}
+    <div class="bg-white rounded-lg shadow-md p-5 mt-4 mb-6">
+        <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             
-            {{-- Div 'relative' tetap di sini untuk styling ikon --}}
-            <div class="relative">
-                <input 
-                    type="date" 
-                    id="filter-tanggal"
-                    name="tanggal" {{-- PENTING: Tambahkan 'name' agar data terkirim --}}
-                    value="{{ $tanggalTerpilih->format('Y-m-d') }}"
-                    
-                    {{-- PENTING: Ubah 'onchange' untuk submit form ini --}}
-                    onchange="this.form.submit()" 
-                    
-                    class="w-48 appearance-none bg-[#2a4a6f] text-white text-sm font-semibold px-4 py-2 rounded-full shadow-md focus:ring-2 focus:ring-blue-500 cursor-pointer pr-10"
-                    style="color-scheme: dark;">
-                
-                {{-- Ikon SVG tetap sama --}}
-                <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
+            {{-- Bagian Kiri: Judul & Deskripsi --}}
+            <div>
+                <h3 class="text-lg font-bold text-slate-700 uppercase tracking-wide">RIWAYAT PATROLI</h3>
+                <p class="text-xs text-gray-500 mt-1">Pilih tanggal untuk melihat detail catatan patroli.</p>
             </div>
-        </form>
+
+            {{-- Bagian Kanan: Form Filter --}}
+            <form action="{{ route('anggota.patroli.index') }}" method="GET" class="flex items-center gap-3 self-end md:self-auto">
+                <label for="filter-tanggal" class="text-sm font-bold text-slate-600 uppercase hidden sm:block">
+                    TANGGAL :
+                </label>
+                
+                <div class="relative">
+                    <input 
+                        type="date" 
+                        id="filter-tanggal"
+                        name="tanggal" 
+                        value="{{ $tanggalTerpilih->format('Y-m-d') }}"
+                        onchange="this.form.submit()" 
+                        class="bg-[#2a4a6f] text-white text-sm font-bold px-5 py-2.5 rounded-lg shadow-md hover:bg-[#1e3a5a] focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all cursor-pointer"
+                        style="color-scheme: dark;"
+                    >
+                </div>
+            </form>
+        </div>
     </div>
 
     {{-- Tabel Patroli --}}
@@ -57,41 +60,65 @@
             <thead class="bg-[#2a4a6f] text-white">
                 <tr>
                     <th class="w-16 p-3 font-semibold text-center">NO</th>
-                    <th class="w-24 p-3 font-semibold text-center">FOTO</th>
-                    <th class="p-3 font-semibold text-center">WAKTU</th>
+                    <th class="p-3 font-semibold text-center">JENIS PATROLI</th>
                     <th class="p-3 font-semibold text-center">NAMA</th>
+                    <th class="p-3 font-semibold text-center">DETAIL</th>
+                    <th class="p-3 font-semibold text-center">STATUS</th>
                 </tr>
             </thead>
             <tbody class="text-gray-700">
-                @if ($patrolGroups->filter(fn($g) => $g->count() == 17)->isEmpty())
-                    <tr>
-                        <td colspan="4" class="p-6 text-center text-gray-500">
-                            Belum ada data patroli untuk tanggal ini.
+            @if ($patrolGroups->isEmpty())
+                <tr>
+                    <td colspan="5" class="p-6 text-center text-gray-500"> {{-- Colspan disesuaikan jadi 5 --}}
+                        Belum ada data patroli untuk tanggal ini.
+                    </td>
+                </tr>
+            @else
+                @foreach($patrolGroups as $jenisPatroli => $checkpoints)
+                    @php
+                        $jumlahSelesai = $checkpoints->count();
+                        $isSelesai = $jumlahSelesai >= 17;
+                    @endphp
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-3 text-center align-middle">{{ $loop->iteration }}</td>
+                        <td class="p-3 text-center align-middle font-medium">{{ $jenisPatroli }}</td>
+                        <td class="p-3 text-center align-middle font-medium">{{ $checkpoints->first()->nama_lengkap }}</td>
+                        <td class="p-3 text-center align-middle">
+                            <a href="#" 
+                            @click.prevent="
+                                showModal = true;
+                                modalGroup = {{ $checkpoints->values() }}; 
+                                selectedCheckpointIndex = 0;
+                            "
+                            class="text-blue-500 hover:underline font-semibold text-xs">
+                                Buka
+                            </a>
+                        </td>
+                        
+                        {{-- KOLOM STATUS BARU --}}
+                        <td class="p-3 text-center align-middle">
+                            <div class="flex flex-col items-center justify-center gap-1">
+                                {{-- Teks Jumlah --}}
+                                <span class="text-xs font-bold {{ $isSelesai ? 'text-green-600' : 'text-orange-500' }}">
+                                    {{ $jumlahSelesai }} / 17
+                                </span>
+                                
+                                {{-- Badge Status --}}
+                                @if($isSelesai)
+                                    <span class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200">
+                                        SELESAI
+                                    </span>
+                                @else
+                                    <span class="bg-yellow-100 text-yellow-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-yellow-200 whitespace-nowrap">
+                                        BELUM SELESAI
+                                    </span>
+                                @endif
+                            </div>
                         </td>
                     </tr>
-                @else
-                    @foreach($patrolGroups as $jenisPatroli => $checkpoints)
-                        @if($checkpoints->count() >= 17)
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="p-3 text-center align-middle">{{ $loop->iteration }}</td>
-                            <td class="p-3 text-center align-middle">
-                                <a href="#" 
-                                @click.prevent="
-                                    showModal = true;
-                                    modalGroup = {{ $checkpoints->values() }}; 
-                                    selectedCheckpointIndex = 0;
-                                "
-                                class="inline-block bg-blue-600 text-white text-xs font-semibold px-4 py-1 rounded hover:bg-[#2a4a6f]">
-                                    Buka
-                                </a>
-                            </td>
-                            <td class="p-3 text-center align-middle font-medium">{{ $jenisPatroli }}</td>
-                            <td class="p-3 text-center align-middle font-medium">{{ $checkpoints->first()->nama_lengkap }}</td>
-                        </tr>
-                        @endif
-                    @endforeach
-                @endif
-            </tbody>
+                @endforeach
+            @endif
+        </tbody>
         </table>
     </div>
 
