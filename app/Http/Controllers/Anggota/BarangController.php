@@ -81,76 +81,54 @@ class BarangController extends Controller
             'nama_barang' => 'required|string|max:255',
             'nama_pelapor' => 'required|string|max:255',
             'catatan' => 'nullable|string',
-            'foto' => 'nullable|string', // <-- PERUBAHAN 1: Validasi sebagai string (Base64)
+            'lokasi_tujuan' => 'required',
+            'foto_base64' => 'required',// <-- PERUBAHAN 1: Validasi sebagai string (Base64)
             // 'tanggal' => 'nullable|date', // Tambahkan ini jika Anda tetap menggunakan field tanggal
         ]);
 
-        // --- PERUBAHAN 2: Handle Base64 ---
-        $pathFoto = null;
-        // 'foto' adalah nama input hidden dari view
-        if ($request->filled('foto')) { 
-            try {
-                // Pisahkan data Base64
-                list($type, $data) = explode(';', $request->foto);
-                list(, $data)      = explode(',', $data);
-                $imageData = base64_decode($data);
-                
-                // Buat nama file unik
-                $filename = 'foto_barang/' . Str::random(20) . '.jpg';
-                
-                // Simpan file ke disk 'public'
-                Storage::disk('public')->put($filename, $imageData);
-                $pathFoto = $filename; // Simpan path-nya
-
-            } catch (\Exception $e) {
-                // Tangani error jika Base64 tidak valid
-                return back()->with('error', 'Format foto tidak valid. Silakan ambil ulang foto.');
-            }
-        }
-        // --- AKHIR PERUBAHAN 2 ---
-
-        // Logika pemecah (Tetap sama)
-        if ($request->kategori == 'titip') {
+        try {
+            // 1. Decode Foto Base64
+            $image_parts = explode(";base64,", $request->foto_base64);
+            $image_type_aux = explode("image/", $image_parts[0]);
+            $image_type = $image_type_aux[1];
+            $image_base64 = base64_decode($image_parts[1]);
             
-            // Validasi khusus titipan
-            $data = $request->validate([
-                'tujuan' => 'required|string|max:255',
-            ]);
+            // 2. Simpan Foto
+            $fileName = 'barang_' . uniqid() . '.' . $image_type;
+            $path = 'foto_barang/' . $fileName;
+            Storage::disk('public')->put($path, $image_base64);
 
-            // Simpan ke BarangTitipan
-            BarangTitipan::create([
-                'id_pengguna' => Auth::id(),
-                'nama_barang' => $request->nama_barang,
-                'nama_penitip' => $request->nama_pelapor, // 'nama_pelapor' dari form
-                'tujuan' => $data['tujuan'],
-                'foto' => $pathFoto, // Path foto yang sudah disimpan
-                'catatan' => $request->catatan,
-                'waktu_titip' => Carbon::now(), // Gunakan Carbon::now()
-                'status' => 'belum selesai',
-            ]);
+            // 3. Logika Simpan Berdasarkan Kategori
+            if ($request->kategori == 'temuan') {
+                BarangTemuan::create([
+                    'nama_barang' => $request->nama_barang,
+                    'nama_pelapor' => $request->nama_pelapor,
+                    'lokasi_penemuan' => $request->lokasi_tujuan, // Mapping field
+                    'waktu_lapor' => now(), // Atau ambil dari request jika ada input tanggal manual
+                    'foto' => $path,
+                    'catatan' => $request->catatan,
+                    'status' => 'belum selesai', // Sesuaikan dengan struktur DB Anda
+                    'id_pengguna' => Auth::id(), // Jika ada kolom relasi user
+                ]);
+            } else {
+                // Barang Titipan
+                BarangTitipan::create([
+                    'nama_barang' => $request->nama_barang,
+                    'nama_penitip' => $request->nama_pelapor, // Mapping field
+                    'tujuan' => $request->lokasi_tujuan,     // Mapping field
+                    'waktu_titip' => now(),
+                    'foto' => $path,
+                    'catatan' => $request->catatan,
+                    'status' => 'belum selesai',
+                    'id_pengguna' => Auth::id(), // Jika ada kolom relasi user
+                ]);
+            }
 
-        } else { // 'temu'
+            return redirect()->route('anggota.barang.index')->with('success', 'Data barang berhasil ditambahkan.');
 
-            // Validasi khusus temuan
-            $data = $request->validate([
-                'lokasi_penemuan' => 'required|string|max:255',
-            ]);
-
-            // Simpan ke BarangTemuan
-            BarangTemuan::create([
-                'id_pengguna' => Auth::id(),
-                'nama_barang' => $request->nama_barang,
-                'nama_pelapor' => $request->nama_pelapor, // 'nama_pelapor' dari form
-                'lokasi_penemuan' => $data['lokasi_penemuan'],
-                'foto' => $pathFoto, // Path foto yang sudah disimpan
-                'catatan' => $request->catatan,
-                'waktu_lapor' => Carbon::now(), // Gunakan Carbon::now()
-                'status' => 'belum selesai',
-            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal menyimpan: ' . $e->getMessage());
         }
-
-        return redirect()->route('anggota.barang.index')
-                         ->with('success', 'Barang berhasil dicatat.');
     }
 
     /**
@@ -158,28 +136,41 @@ class BarangController extends Controller
      */
     public function selesaiTitipan(Request $request, $id_barang)
     {
-        // PERUBAHAN: Validasi foto base64 dihapus
         $request->validate([
-            'nama_penerima' => 'required|string|max:255',
-            'tanggal_selesai_manual' => 'required|date',
-            'waktu_selesai_jam_manual' => 'required|date_format:H:i',
+            'nama_penerima' => 'required',
+            'foto_penerima_base64' => 'required', // Foto bukti serah terima
+            'tanggal_ambil' => 'required|date',
+            'waktu_ambil' => 'required',
         ]);
 
-        $barang = BarangTitipan::findOrFail($id_barang);
-        
-        // PERUBAHAN: Logika konversi Base64 ke File DIHAPUS
-        
-        $waktu_selesai_gabungan = Carbon::parse($request->tanggal_selesai_manual . ' ' . $request->waktu_selesai_jam_manual);
+        try {
+            // 1. Proses Foto Penerima
+            $image_parts = explode(";base64,", $request->foto_penerima_base64);
+            $image_type_aux = explode("image/", $image_parts[0]);
+            $image_type = $image_type_aux[1];
+            $image_base64 = base64_decode($image_parts[1]);
+            
+            $fileName = 'penerima_titipan_' . uniqid() . '.' . $image_type;
+            $path = 'foto_penerima/' . $fileName;
+            Storage::disk('public')->put($path, $image_base64);
 
-        $barang->update([
-            'status' => 'selesai',
-            'waktu_selesai' => $waktu_selesai_gabungan,
-            'nama_penerima' => $request->nama_penerima,
-            'foto_penerima' => null, // PERUBAHAN: Dibuat null
-        ]);
+            // 2. Gabung Waktu
+            $waktu_selesai = Carbon::parse($request->tanggal_ambil . ' ' . $request->waktu_ambil);
 
-        return redirect()->route('anggota.barang.index')
-                         ->with('success', 'Barang titipan telah ditandai selesai.');
+            // 3. Update Database
+            $barang = BarangTitipan::findOrFail($id_barang);
+            $barang->update([
+                'nama_penerima' => $request->nama_penerima,
+                'foto_penerima' => $path,
+                'waktu_selesai' => $waktu_selesai, // Pastikan kolom ini ada di DB
+                'status' => 'selesai',
+            ]);
+
+            return redirect()->back()->with('success', 'Barang titipan telah diselesaikan.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal update: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -187,27 +178,40 @@ class BarangController extends Controller
      */
     public function selesaiTemuan(Request $request, $id_barang)
     {
-        // PERUBAHAN: Validasi foto base64 dihapus
         $request->validate([
-            'nama_penerima' => 'required|string|max:255',
-            'tanggal_selesai_manual' => 'required|date',
-            'waktu_selesai_jam_manual' => 'required|date_format:H:i',
+            'nama_penerima' => 'required',
+            'foto_penerima_base64' => 'required',
+            'tanggal_ambil' => 'required|date',
+            'waktu_ambil' => 'required',
         ]);
 
-        $barang = BarangTitipan::findOrFail($id_barang);
-        
-        // PERUBAHAN: Logika konversi Base64 ke File DIHAPUS
-        
-        $waktu_selesai_gabungan = Carbon::parse($request->tanggal_selesai_manual . ' ' . $request->waktu_selesai_jam_manual);
+        try {
+            // 1. Proses Foto Penerima
+            $image_parts = explode(";base64,", $request->foto_penerima_base64);
+            $image_type_aux = explode("image/", $image_parts[0]);
+            $image_type = $image_type_aux[1];
+            $image_base64 = base64_decode($image_parts[1]);
+            
+            $fileName = 'penerima_temuan_' . uniqid() . '.' . $image_type;
+            $path = 'foto_penerima/' . $fileName;
+            Storage::disk('public')->put($path, $image_base64);
 
-        $barang->update([
-            'status' => 'selesai',
-            'waktu_selesai' => $waktu_selesai_gabungan,
-            'nama_penerima' => $request->nama_penerima,
-            'foto_penerima' => null, // PERUBAHAN: Dibuat null
-        ]);
+            // 2. Gabung Waktu
+            $waktu_selesai = Carbon::parse($request->tanggal_ambil . ' ' . $request->waktu_ambil);
 
-        return redirect()->route('anggota.barang.index')
-                         ->with('success', 'Barang titipan telah ditandai selesai.');
+            // 3. Update Database
+            $barang = BarangTemuan::findOrFail($id_barang);
+            $barang->update([
+                'nama_penerima' => $request->nama_penerima,
+                'foto_penerima' => $path,
+                'waktu_selesai' => $waktu_selesai,
+                'status' => 'selesai',
+            ]);
+
+            return redirect()->back()->with('success', 'Barang temuan telah diselesaikan.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal update: ' . $e->getMessage());
+        }
     }
 }
