@@ -24,17 +24,22 @@ class KendaraanController extends Controller
         // 2. Filter tanggal riwayat
         // PERBAIKAN: Filter berdasarkan 'waktu_keluar' karena kolom 'tanggal' tidak ada
         $tanggal_riwayat = $request->input('tanggal', Carbon::today()->toDateString());
+        $nopol_filter    = $request->input('nopol');
 
-        // 3. Ambil riwayat kendaraan yang "Keluar"
-        $riwayat_kendaraan = LogKendaraan::where('status', 'Keluar')
-                            ->whereDate('waktu_keluar', $tanggal_riwayat) // <-- Diubah ke waktu_keluar
-                            ->orderBy('waktu_keluar', 'desc')
-                            ->get();
+        $query = LogKendaraan::where('status', 'Keluar')
+                             ->whereDate('waktu_keluar', $tanggal_riwayat);
+        if ($nopol_filter) {
+            // Menggunakan 'like' dengan % agar bisa cari potongan (misal: '123' ketemu 'B 1234 XY')
+            $query->where('nopol', 'like', '%' . $nopol_filter . '%');
+        }
+
+        $riwayat_kendaraan = $query->orderBy('waktu_keluar', 'desc')->get();
 
         return view('anggota.kendaraan-index', [
-            'kendaraan_aktif' => $kendaraan_aktif,
+            'kendaraan_aktif'   => $kendaraan_aktif,
             'riwayat_kendaraan' => $riwayat_kendaraan,
-            'tanggal_terpilih' => $tanggal_riwayat,
+            'tanggal_terpilih'  => $tanggal_riwayat,
+            'nopol_filter'      => $nopol_filter, // Kirim balik agar input tidak hilang setelah submit
         ]);
     }
 
@@ -148,7 +153,7 @@ class KendaraanController extends Controller
             return response()->json([]);
         }
 
-        $kendaraan = Kendaraan::where('nomor_plat', 'LIKE', $searchTerm . '%')
+        $kendaraan = Kendaraan::where('nomor_plat', 'LIKE', '%' . $searchTerm . '%')
                               ->take(5)
                               ->get();
 
