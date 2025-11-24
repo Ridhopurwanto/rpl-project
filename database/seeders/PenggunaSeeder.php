@@ -22,6 +22,7 @@ class PenggunaSeeder extends Seeder
                 'id_pengguna' => 1,
                 'nama_lengkap' => 'Komandan Utama',
                 'username' => 'komandan',
+                'email' => 'komandan@siap.com',
                 'password' => Hash::make('password123'),
                 'peran' => 'komandan',
                 // --- Kolom Baru Ditambahkan ---
@@ -38,6 +39,7 @@ class PenggunaSeeder extends Seeder
                 'id_pengguna' => 2,
                 'nama_lengkap' => 'Anggota Jaga Satu',
                 'username' => 'anggota1',
+                'email' => 'anggota1@siap.com',
                 'password' => Hash::make('password123'),
                 'peran' => 'anggota',
                 // --- Kolom Baru Ditambahkan ---
@@ -54,6 +56,7 @@ class PenggunaSeeder extends Seeder
                 'id_pengguna' => 3,
                 'nama_lengkap' => 'Admin BAU',
                 'username' => 'bau',
+                'email' => 'admin_bau@siap.com',
                 'password' => Hash::make('password123'),
                 'peran' => 'bau',
                 // --- Kolom Baru Ditambahkan ---

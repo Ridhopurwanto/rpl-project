@@ -15,6 +15,7 @@ return new class extends Migration
             $table->bigIncrements('id_pengguna');
             $table->string('nama_lengkap');
             $table->string('username')->unique();
+            $table->string('email')->nullable()->unique();
             $table->string('password');
             $table->enum('peran', ['anggota', 'komandan', 'bau']);
             $table->date('tanggal_lahir')->nullable();

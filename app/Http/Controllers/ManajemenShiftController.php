@@ -7,6 +7,7 @@ use App\Models\Shift;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use App\Notifications\PerubahanShiftNotification;
 
 class ManajemenShiftController extends Controller
 {
@@ -76,7 +77,7 @@ class ManajemenShiftController extends Controller
         ]);
 
         try {
-            Shift::updateOrCreate(
+            $shift= Shift::updateOrCreate(
                 [
                     'id_pengguna' => $request->id_pengguna,
                     'tanggal'     => $request->tanggal,
@@ -85,6 +86,21 @@ class ManajemenShiftController extends Controller
                     'jenis_shift' => $request->jenis_shift,
                 ]
             );
+            
+            // A. Cari penerima notifikasi (Anggota)
+            $anggota = User::find($request->id_pengguna);
+
+            // B. Siapkan pesan
+            // Cek apakah data baru dibuat atau diperbarui (is_was_recently_created)
+            $aksi = $shift->wasRecentlyCreated ? 'dibuatkan' : 'diubah';
+            $pesan = "Jadwal shift Anda tanggal " . $request->tanggal . " telah **{$aksi}** menjadi **{$request->jenis_shift}** oleh Komandan.";
+
+            // C. Panggil Notifikasi (akan mengisi tabel notifications & mengirim email)
+            // Lakukan pengecekan agar notifikasi hanya dikirim jika shift-nya bukan 'Off' 
+            // atau jika shift-nya diubah dari 'Off' ke 'Pagi'/'Malam'.
+            if ($anggota) {
+                $anggota->notify(new PerubahanShiftNotification($pesan, $shift));
+            }
 
             return response()->json([
                 'success' => true,

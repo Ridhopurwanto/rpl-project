@@ -49,6 +49,7 @@ class DatabaseSeeder extends Seeder
             BarangTemuSeeder::class,
             BarangTitipSeeder::class,
             GangguanKamtibmasSeeder::class,
+            NotificationSeeder::class,
         ]);
     }
 }

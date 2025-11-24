@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\PatroliController;
 use App\Http\Controllers\KendaraanController;
@@ -47,6 +48,15 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+// Route untuk menandai satu notifikasi (sesuai tombol di dropdown)
+Route::get('/notifikasi/baca/{id}', [NotificationController::class, 'markAsRead'])
+    ->middleware('auth')
+    ->name('markAsRead');
+
+// Route untuk menandai semua (jika ingin pakai fitur markAllRead)
+Route::get('/notifikasi/baca-semua', [NotificationController::class, 'markAllRead'])
+    ->middleware('auth')
+    ->name('markAllRead');
 
 // Rute untuk yang sudah login
 Route::middleware('auth')->group(function () {
