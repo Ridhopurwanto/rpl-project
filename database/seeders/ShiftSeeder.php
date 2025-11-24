@@ -19,21 +19,21 @@ class ShiftSeeder extends Seeder
             [
                 'id_pengguna' => 1, // Komandan
                 'tanggal' => Carbon::today(),
-                'jenis_shift' => 'Pagi',
+                'jenis_shift' => 1,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
             [
                 'id_pengguna' => 2, // Anggota 1
                 'tanggal' => Carbon::today(),
-                'jenis_shift' => 'Malam',
+                'jenis_shift' => 2,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
             [
                 'id_pengguna' => 3, // BAU
                 'tanggal' => Carbon::today(),
-                'jenis_shift' => 'Off',
+                'jenis_shift' => 3,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],

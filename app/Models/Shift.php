@@ -24,6 +24,13 @@ class Shift extends Model
         'jenis_shift',
     ];
 
+    // Relasi ke ShiftRule
+    public function shiftRule()
+    {
+        // belongsTo(ModelTujuan, 'ForeignKeyDiTabelIni', 'PrimaryKeyDiTabelTujuan')
+        return $this->belongsTo(ShiftRule::class, 'jenis_shift', 'idshift_rule');
+    }
+
     /**
      * Relasi ke model Pengguna (User)
      */
