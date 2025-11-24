@@ -122,6 +122,17 @@
         </table>
     </div>
 
+    <!-- FAB harus di sini -->
+    <a href="{{ route('anggota.patroli.createSession') }}" 
+       :class="showModal ? 'pointer-events-none opacity-50' : ''"
+       x-bind:tabindex="showModal ? -1 : 0"
+       x-bind:aria-disabled="showModal ? 'true' : 'false'"
+       class="fixed z-50 bottom-28 right-6 md:right-[calc((100vw-768px)/2+24px)] bg-[#2a4a6f] p-4 rounded-full text-white shadow-lg transform hover:scale-110 transition-transform">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path>
+        </svg>
+    </a>
+
     {{-- Modal Detail Patroli --}}
     <div 
         x-show="showModal" 
@@ -158,15 +169,5 @@
             </div>
         </div>
     </div>
-
 </div>
 @endsection
-
-@push('fab')
-    <a href="{{ route('anggota.patroli.createSession') }}" 
-       class="fixed z-50 bottom-28 right-6 md:right-[calc((100vw-768px)/2+24px)] bg-[#2a4a6f] p-4 rounded-full text-white shadow-lg transform hover:scale-110 transition-transform">
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path>
-        </svg>
-    </a>
-@endpush

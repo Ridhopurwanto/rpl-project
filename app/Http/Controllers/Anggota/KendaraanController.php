@@ -159,4 +159,6 @@ class KendaraanController extends Controller
 
         return response()->json($kendaraan);
     }
+
+    
 }
