@@ -115,7 +115,7 @@
     >
         <!-- Filter Riwayat -->
         <div class="bg-white rounded-lg shadow-md p-4 mt-2">
-            <form action="{{ route('anggota.kendaraan.index') }}" method="GET">
+            <form action="{{ route('anggota.kendaraan.index') }}" method="GET" id="filterForm">
                 <div class="flex flex-col md:flex-row gap-4 items-end">
                     <div class="flex-1 w-full">
                         <label for="tanggal" class="block text-sm font-bold text-slate-600 uppercase mb-1">TANGGAL :</label>
@@ -124,6 +124,7 @@
                             id="tanggal"
                             name="tanggal"
                             value="{{ $tanggal_terpilih }}"
+                            @change="document.getElementById('filterForm').submit()"
                             class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
                             style="color-scheme: dark;"
                         >
@@ -136,18 +137,14 @@
                             name="nopol"
                             value="{{ $nopol_filter ?? '' }}" 
                             placeholder="Contoh: AB 1234"
+                            @input.debounce.500ms="document.getElementById('filterForm').submit()"
                             class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder-gray-300 uppercase"
                         >
-                    </div>
-                    <div class="w-full md:w-auto">
-                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow transition-colors duration-200 flex items-center justify-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                            FILTER
-                        </button>
                     </div>
                 </div>
             </form>
         </div>
+
         <!-- Tabel Riwayat -->
         <div class="bg-white rounded-lg shadow-md p-4 mt-2 overflow-x-auto">
             <table class="w-full min-w-[600px] text-sm text-left">
