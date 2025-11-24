@@ -1,12 +1,11 @@
 {{-- 
     TEMPLATE EXCEL GABUNGAN (SESUAI DB rpl-projek.sql)
-    Update: Menggunakan strtoupper() agar Header Kapital Aman (Tidak Hilang)
+    Update: Pemisahan Barang Temuan & Titipan + Uppercase Header
 --}}
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <style>
-        /* Style Global */
         table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
         th { background-color: #cccccc; font-weight: bold; border: 1px solid #000000; text-align: center; height: 30px; vertical-align: middle; font-size: 10pt; }
         td { border: 1px solid #000000; padding: 5px; vertical-align: middle; font-size: 10pt; }
@@ -19,7 +18,6 @@
     
     {{-- HEADER --}}
     <div style="text-align: center; margin-bottom: 20px;">
-        {{-- Menggunakan strtoupper untuk Judul Utama juga --}}
         <h1 style="font-size: 18pt; font-weight: bold; margin: 0;">{{ strtoupper('Laporan Gabungan Operasional') }}</h1>
         <p style="margin-top: 5px;">PERIODE: 
             <strong>{{ \Carbon\Carbon::parse($dataGabungan['tanggalMulai'])->isoFormat('D MMMM Y') }}</strong> 
@@ -31,11 +29,10 @@
 
     {{-- 1. LAPORAN PRESENSI --}}
     @if(isset($dataGabungan['presensi']))
-        <h2>{{ strtoupper('Laporan Presensi Anggota') }}</h2>
+        <h2>1. {{ strtoupper('Laporan Presensi Anggota') }}</h2>
         <table>
             <thead>
                 <tr>
-                    {{-- Menggunakan strtoupper() di sini --}}
                     <th width="5">{{ strtoupper('No') }}</th>
                     <th width="15">{{ strtoupper('Tanggal') }}</th>
                     <th width="25">{{ strtoupper('Nama Anggota') }}</th>
@@ -63,7 +60,7 @@
 
     {{-- 2. LAPORAN PATROLI --}}
     @if(isset($dataGabungan['patroli']))
-        <h2>{{ strtoupper('Laporan Patroli Area') }}</h2>
+        <h2>2. {{ strtoupper('Laporan Patroli Area') }}</h2>
         <table>
             <thead>
                 <tr>
@@ -92,53 +89,79 @@
         </table>
     @endif
 
-    {{-- 3. LAPORAN BARANG (Temu & Titip) --}}
-    @if(isset($dataGabungan['barang']))
-        <h2>{{ strtoupper('Laporan Pengelolaan Barang') }}</h2>
+    {{-- 
+        3. LAPORAN BARANG TEMUAN (DIPISAH)
+    --}}
+    @if(isset($dataGabungan['barang_temu']))
+        <h2>3. {{ strtoupper('Laporan Barang Temuan') }}</h2>
         <table>
             <thead>
                 <tr>
                     <th width="5">{{ strtoupper('No') }}</th>
                     <th width="15">{{ strtoupper('Waktu Lapor') }}</th>
-                    <th width="15">{{ strtoupper('Kategori') }}</th> 
                     <th width="25">{{ strtoupper('Nama Barang') }}</th>
-                    <th width="25">{{ strtoupper('Pelapor / Penitip') }}</th>
-                    <th width="25">{{ strtoupper('Lokasi / Tujuan') }}</th>
+                    <th width="25">{{ strtoupper('Pelapor') }}</th>
+                    <th width="25">{{ strtoupper('Lokasi Penemuan') }}</th>
                     <th width="15">{{ strtoupper('Status') }}</th>
                     <th width="25">{{ strtoupper('Catatan') }}</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($dataGabungan['barang'] as $index => $item)
-                    @php
-                        $isTemu = isset($item->lokasi_penemuan); 
-                        $kategori = $isTemu ? 'Barang Temuan' : 'Barang Titipan';
-                        $waktu = $isTemu ? $item->waktu_lapor : ($item->waktu_titip ?? $item->created_at);
-                        $orang = $isTemu ? $item->nama_pelapor : $item->nama_penitip;
-                        $lokasi = $isTemu ? $item->lokasi_penemuan : $item->tujuan;
-                    @endphp
+                @forelse($dataGabungan['barang_temu'] as $index => $item)
                     <tr>
                         <td class="text-center">{{ $index + 1 }}</td>
-                        <td>{{ \Carbon\Carbon::parse($waktu)->format('d/m/Y H:i') }}</td>
-                        <td class="text-center" style="background-color: {{ $isTemu ? '#e3f2fd' : '#fff3e0' }}">
-                            <strong>{{ $kategori }}</strong>
-                        </td>
+                        <td>{{ \Carbon\Carbon::parse($item->waktu_lapor)->format('d/m/Y H:i') }}</td>
                         <td>{{ $item->nama_barang }}</td>
-                        <td>{{ $orang }}</td>
-                        <td>{{ $lokasi }}</td>
+                        <td>{{ $item->nama_pelapor }}</td>
+                        <td>{{ $item->lokasi_penemuan }}</td>
                         <td class="text-center">{{ ucfirst($item->status) }}</td>
                         <td>{{ $item->catatan ?? '-' }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="8" class="empty">Tidak ada data barang.</td></tr>
+                    <tr><td colspan="7" class="empty">Tidak ada data barang temuan.</td></tr>
                 @endforelse
             </tbody>
         </table>
     @endif
 
-    {{-- 4. LAPORAN KENDARAAN --}}
+    {{-- 
+        4. LAPORAN BARANG TITIPAN (DIPISAH)
+    --}}
+    @if(isset($dataGabungan['barang_titip']))
+        <h2>4. {{ strtoupper('Laporan Barang Titipan') }}</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th width="5">{{ strtoupper('No') }}</th>
+                    <th width="15">{{ strtoupper('Waktu Titip') }}</th>
+                    <th width="25">{{ strtoupper('Nama Barang') }}</th>
+                    <th width="25">{{ strtoupper('Nama Penitip') }}</th>
+                    <th width="25">{{ strtoupper('Tujuan') }}</th>
+                    <th width="15">{{ strtoupper('Status') }}</th>
+                    <th width="25">{{ strtoupper('Catatan') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($dataGabungan['barang_titip'] as $index => $item)
+                    <tr>
+                        <td class="text-center">{{ $index + 1 }}</td>
+                        <td>{{ \Carbon\Carbon::parse($item->waktu_titip)->format('d/m/Y H:i') }}</td>
+                        <td>{{ $item->nama_barang }}</td>
+                        <td>{{ $item->nama_penitip }}</td>
+                        <td>{{ $item->tujuan }}</td>
+                        <td class="text-center">{{ ucfirst($item->status) }}</td>
+                        <td>{{ $item->catatan ?? '-' }}</td>
+                    </tr>
+                @empty
+                    <tr><td colspan="7" class="empty">Tidak ada data barang titipan.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    @endif
+
+    {{-- 5. LAPORAN KENDARAAN --}}
     @if(isset($dataGabungan['kendaraan']))
-        <h2>{{ strtoupper('Laporan Log Kendaraan') }}</h2>
+        <h2>5. {{ strtoupper('Laporan Log Kendaraan') }}</h2>
         <table>
             <thead>
                 <tr>
@@ -171,9 +194,9 @@
         </table>
     @endif
 
-    {{-- 5. LAPORAN TAMU --}}
+    {{-- 6. LAPORAN TAMU --}}
     @if(isset($dataGabungan['tamu']))
-        <h2>{{ strtoupper('Laporan Buku Tamu') }}</h2>
+        <h2>6. {{ strtoupper('Laporan Buku Tamu') }}</h2>
         <table>
             <thead>
                 <tr>
@@ -202,9 +225,9 @@
         </table>
     @endif
 
-    {{-- 6. LAPORAN GANGGUAN KAMTIBMAS --}}
+    {{-- 7. LAPORAN GANGGUAN --}}
     @if(isset($dataGabungan['gangguan']))
-        <h2>{{ strtoupper('Laporan Gangguan Kamtibmas') }}</h2>
+        <h2>7. {{ strtoupper('Laporan Gangguan Kamtibmas') }}</h2>
         <table>
             <thead>
                 <tr>
@@ -231,7 +254,7 @@
         </table>
     @endif
 
-    {{-- 7. LAPORAN JADWAL SHIFT (GRID MATRIKS) --}}
+    {{-- 8. LAPORAN SHIFT (MATRIKS) --}}
     @if(isset($dataGabungan['shift']) && count($dataGabungan['shift']) > 0)
         @php
             $start = \Carbon\Carbon::parse($dataGabungan['tanggalMulai']);
@@ -246,7 +269,6 @@
                 $userId = $s->id_pengguna;
                 
                 if (!isset($userDetails[$userId])) {
-                    // Ambil nama_lengkap dan peran dari User
                     $namaLengkap = $s->pengguna->nama_lengkap ?? '-';
                     $peran = $s->pengguna->peran ?? '-';
 
@@ -263,7 +285,7 @@
             }
         @endphp
 
-        <h2>{{ strtoupper('Plotting Personil Keamanan (Shift)') }}</h2>
+        <h2>8. {{ strtoupper('Plotting Personil Keamanan (Shift)') }}</h2>
         
         <div style="margin-bottom: 10px; font-size: 10pt;">
             <strong>Keterangan:</strong> 
@@ -285,7 +307,6 @@
                 </tr>
                 <tr>
                      @foreach($period as $date)
-                        {{-- NAMA HARI SINGKAT (SEN, SEL, RAB) --}}
                         <th style="font-size: 8pt; height: 15px; text-align: center; border: 1px solid #000;">
                             {{ strtoupper(substr($date->isoFormat('dddd'), 0, 3)) }}
                         </th>
@@ -322,7 +343,7 @@
         </table>
     @else
          @if(isset($dataGabungan['shift']))
-            <h2>{{ strtoupper('Laporan Jadwal Shift') }}</h2>
+            <h2>8. {{ strtoupper('Laporan Jadwal Shift') }}</h2>
             <table><tr><td class="empty">Tidak ada data shift pada periode ini.</td></tr></table>
          @endif
     @endif

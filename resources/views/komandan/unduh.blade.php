@@ -12,35 +12,89 @@
          reportType: 'harian',
          dateFrom: '{{ now()->format('Y-m-d') }}',
          dateTo: '{{ now()->format('Y-m-d') }}',
-         selectedChecks: [],  
+         
+         selectedChecks: [], 
+         
+         // --- LOGIKA BARANG ---
+         isBarangActive: false, 
+         barangChecks: [], // Array ['barang_temu', 'barang_titip']
+         // ---------------------
+
          downloadQueue: [],
          baseUrlSingle: '{{ url('/komandan/laporan/download-single') }}', 
 
-         addToQueue() {
-             if (this.selectedChecks.length === 0) return;
-             this.selectedChecks.forEach(checkId => {
-                 this.downloadQueue.push({
-                     id: Date.now() + Math.random(),
-                     value: checkId, 
-                     label: this.formatLabel(checkId),
-                     dateStart: this.dateFrom,
-                     dateEnd: this.dateTo,
-                     periodeDisplay: this.formatDate(this.dateFrom) + ' - ' + this.formatDate(this.dateTo),
-                     tipe: this.reportType
-                 });
-             });
-             this.selectedChecks = [];
+         // 1. Logika Parent (Pengelolaan Barang)
+         toggleBarang() {
+             if (this.isBarangActive) {
+                 // Jika Parent dicentang -> Pilih Semua Anak
+                 this.barangChecks = ['barang_temu', 'barang_titip'];
+             } else {
+                 // Jika Parent di-uncentang -> Kosongkan Anak
+                 this.barangChecks = [];
+             }
          },
 
-         // --- FUNGSI BARU: DOWNLOAD SATUAN DI BACKGROUND ---
+         // 2. Logika Anak (Saat Temuan/Titipan diklik)
+         updateParent() {
+             // Parent hanya nyala jika SEMUA (2 item) anak terpilih
+             if (this.barangChecks.length === 2) {
+                 this.isBarangActive = true;
+             } else {
+                 this.isBarangActive = false;
+             }
+         },
+
+         addToQueue() {
+             // Validasi: Cek checkbox biasa DAN checkbox barang
+             const hasBarang = this.barangChecks.length > 0;
+             
+             if (this.selectedChecks.length === 0 && !hasBarang) {
+                 alert('Pilih minimal satu laporan dulu!');
+                 return;
+             }
+
+             // Masukkan Checkbox Biasa
+             this.selectedChecks.forEach(checkId => {
+                 this.pushItemToQueue(checkId);
+             });
+
+             // Masukkan Pilihan Barang (Langsung dari array, tidak peduli status Parent)
+             this.barangChecks.forEach(barangId => {
+                 this.pushItemToQueue(barangId);
+             });
+
+             // Reset Pilihan
+             this.selectedChecks = [];
+             this.isBarangActive = false;
+             this.barangChecks = [];
+         },
+
+         pushItemToQueue(value) {
+             this.downloadQueue.push({
+                 id: Date.now() + Math.random(),
+                 value: value, 
+                 label: this.formatLabel(value),
+                 dateStart: this.dateFrom,
+                 dateEnd: this.dateTo,
+                 periodeDisplay: this.formatDate(this.dateFrom) + ' - ' + this.formatDate(this.dateTo),
+                 tipe: this.reportType
+             });
+         },
+
          downloadSingle(url) {
-             // Trik: Kita ubah 'src' dari iframe tersembunyi menjadi URL download
-             // Ini akan memicu download tanpa reload halaman atau buka tab baru
-             const iframe = document.getElementsByName('download_frame')[0];
-             iframe.src = url;
+             window.location.href = url;
          },
 
          formatLabel(str) {
+             const map = {
+                 'barang_temu': 'Laporan Barang Temuan',
+                 'barang_titip': 'Laporan Barang Titipan',
+                 'laporan_presensi': 'Laporan Presensi',
+                 'laporan_patroli': 'Laporan Patroli',
+                 'gangguan_kamtibmas': 'Laporan Gangguan Kamtibmas',
+                 'shift_anggota': 'Laporan Shift Anggota'
+             };
+             if (map[str]) return map[str];
              return str.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
          },
 
@@ -53,8 +107,7 @@
 >
     <h2 class="text-2xl font-bold text-slate-800 mb-4">Unduh Laporan Gabungan</h2>
 
-    {{-- Form Gabungan (Tetap menggunakan target iframe) --}}
-    <form action="{{ route('komandan.laporan.download') }}" method="POST" target="download_frame">
+    <form action="{{ route('komandan.laporan.download') }}" method="POST">
         @csrf
         <input type="hidden" name="download_queue" :value="JSON.stringify(downloadQueue)">
 
@@ -84,6 +137,7 @@
             <h3 class="font-bold text-gray-800 mb-3 border-b pb-2">PREVIEW (PILIH LAPORAN)</h3>
             
             <div x-show="reportType === 'harian'" class="space-y-3">
+                
                 <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
                     <input type="checkbox" value="laporan_presensi" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
                     <span class="ml-2 text-gray-700">Laporan Presensi</span>
@@ -92,10 +146,33 @@
                     <input type="checkbox" value="laporan_patroli" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
                     <span class="ml-2 text-gray-700">Laporan Patroli</span>
                 </label>
-                <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
-                    <input type="checkbox" value="pengelolaan_barang" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
-                    <span class="ml-2 text-gray-700">Laporan Pengelolaan Barang</span>
-                </label>
+                
+                {{-- FITUR PENGELOLAAN BARANG --}}
+                <div class="border rounded-lg p-3 bg-slate-50">
+                    {{-- Induk: Pengelolaan Barang --}}
+                    <label class="flex items-center cursor-pointer mb-2">
+                        {{-- @change="toggleBarang()" : Mengatur Select All / None --}}
+                        <input type="checkbox" x-model="isBarangActive" @change="toggleBarang()" class="rounded text-blue-600 w-5 h-5">
+                        <span class="ml-2 font-semibold text-gray-800">Laporan Pengelolaan Barang</span>
+                    </label>
+
+                    {{-- 
+                        Anak: Muncul jika Parent aktif ATAU ada salah satu anak yang dipilih 
+                        (Jadi kalau uncheck satu, menu tidak hilang)
+                    --}}
+                    <div x-show="isBarangActive || barangChecks.length > 0" x-transition class="ml-7 space-y-2 border-l-2 border-blue-200 pl-3">
+                        <label class="flex items-center cursor-pointer">
+                            {{-- @change="updateParent()" : Cek status induk saat anak berubah --}}
+                            <input type="checkbox" value="barang_temu" x-model="barangChecks" @change="updateParent()" class="rounded text-blue-600 w-4 h-4">
+                            <span class="ml-2 text-gray-600 text-sm">Barang Temuan</span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" value="barang_titip" x-model="barangChecks" @change="updateParent()" class="rounded text-blue-600 w-4 h-4">
+                            <span class="ml-2 text-gray-600 text-sm">Barang Titipan</span>
+                        </label>
+                    </div>
+                </div>
+
                 <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
                     <input type="checkbox" value="kendaraan" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
                     <span class="ml-2 text-gray-700">Laporan Kendaraan</span>
@@ -150,18 +227,14 @@
                                 </td>
                                 <td class="px-4 py-3 text-center align-middle">
                                     <div class="flex justify-center gap-2">
-                                        {{-- TOMBOL EXCEL SATUAN --}}
-                                        {{-- Perubahan: Menggunakan @click.prevent dan memanggil fungsi downloadSingle --}}
                                         <button type="button"
                                            @click.prevent="downloadSingle(baseUrlSingle + '?type=' + item.value + '&format=excel&start=' + item.dateStart + '&end=' + item.dateEnd)"
-                                           class="bg-green-100 text-green-700 p-2 rounded hover:bg-green-200 transition border border-green-200 cursor-pointer">
+                                           class="bg-green-100 text-green-700 p-2 rounded hover:bg-green-200 transition border border-green-200 cursor-pointer" title="Download Excel">
                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"/><path d="M3 7l9 6 9-6"/><path d="M14.5 10h.5a2 2 0 0 1 0 4H12v-4h2.5"/></svg>
                                         </button>
-
-                                        {{-- TOMBOL PDF SATUAN --}}
                                         <button type="button"
                                            @click.prevent="downloadSingle(baseUrlSingle + '?type=' + item.value + '&format=pdf&start=' + item.dateStart + '&end=' + item.dateEnd)"
-                                           class="bg-red-100 text-red-700 p-2 rounded hover:bg-red-200 transition border border-red-200 cursor-pointer">
+                                           class="bg-red-100 text-red-700 p-2 rounded hover:bg-red-200 transition border border-red-200 cursor-pointer" title="Download PDF">
                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M10 13H8v5h2c1.2 0 2-.8 2-2v-1c0-1.2-.8-2-2-2z"/><line x1="12" y1="13" x2="12" y2="18"/><path d="M16 13h2c.6 0 1 .4 1 1v2c0 .6-.4 1-1 1h-2v-4z"/></svg>
                                         </button>
                                     </div>
@@ -182,8 +255,5 @@
             </button>
         </div>
     </form>
-
-    {{-- IFRAME TERSEMBUNYI --}}
-    <iframe name="download_frame" style="display:none;"></iframe>
 </div>
 @endsection
