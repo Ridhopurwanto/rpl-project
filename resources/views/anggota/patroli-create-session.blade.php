@@ -187,7 +187,7 @@
     </div>
 
     {{-- 4. INDIKATOR PROGRESS (Pengganti Tombol Submit) --}}
-    <div class="mt-8 fixed bottom-20 left-0 right-0 px-4 md:static">
+    <div class="mt-8 bottom-20 left-0 right-0 px-4 md:static">
         <div 
             class="w-full p-4 rounded-lg shadow-lg font-bold text-lg text-center transition-all duration-500 flex items-center justify-center gap-2 border-2"
             :class="isCompleted 

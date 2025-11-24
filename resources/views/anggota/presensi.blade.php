@@ -95,40 +95,95 @@
         @endforeach
     </div>
 
-    <div class="flex flex-wrap justify-center items-center space-x-4 mt-4 text-xs">
-        <div class="flex items-center space-x-1"><div class="w-3 h-3 bg-yellow-400 rounded-full"></div><span>Shift Pagi</span></div>
-        <div class="flex items-center space-x-1"><div class="w-3 h-3 bg-blue-400 rounded-full"></div><span>Shift Malam</span></div>
-        <div class="flex items-center space-x-1"><div class="w-3 h-3 bg-red-500 rounded-full"></div><span>Off</span></div>
+    {{-- Legenda --}}
+    <div class="flex justify-center space-x-4 md:space-x-8 mt-6 text-xs md:text-sm font-bold text-gray-600 bg-white p-4 rounded-full shadow-sm mx-auto w-fit">
+        <div class="flex items-center"><span class="w-3 h-3 md:w-4 md:h-4 rounded-full bg-yellow-400 mr-2"></span> Shift Pagi</div>
+        <div class="flex items-center"><span class="w-3 h-3 md:w-4 md:h-4 rounded-full bg-blue-500 mr-2"></span> Shift Malam</div>
+        <div class="flex items-center"><span class="w-3 h-3 md:w-4 md:h-4 rounded-full bg-red-500 mr-2"></span> Off</div>
     </div>
 
-    {{-- === 2. FILTER & INFO === --}}
-    <div class="mt-6 p-4 bg-white rounded-lg shadow border-l-4 border-[#2a4a6f]">
-        <h3 class="text-xs font-bold text-slate-600 uppercase mb-3">RIWAYAT & JADWAL :</h3>
-        
-        <div class="flex flex-col space-y-3">
-            <form action="{{ route('anggota.presensi.index') }}" method="GET" class="flex items-center justify-between">
-                <label class="text-sm font-bold text-gray-700">TANGGAL :</label>
-                <div class="relative">
-                    <input type="date" name="tanggal"
-                           value="{{ $tanggalTerpilih->format('Y-m-d') }}" onchange="this.form.submit()"
-                           class="bg-[#2a4a6f] text-white text-sm font-bold px-4 py-2 rounded-lg shadow-md border-none cursor-pointer"
-                           style="color-scheme: dark;">
-                </div>
-            </form>
-            
-            @php
-                $namaShift = 'TIDAK ADA JADWAL'; $classShift = 'bg-gray-400 text-white';
-                if ($shiftHariIni === 'pagi') { $namaShift = 'SHIFT PAGI'; $classShift = 'bg-yellow-400 text-black'; }
-                elseif ($shiftHariIni === 'malam') { $namaShift = 'SHIFT MALAM'; $classShift = 'bg-blue-400 text-white'; }
-                elseif ($shiftHariIni === 'off') { $namaShift = 'OFF'; $classShift = 'bg-red-500 text-white'; }
-            @endphp
-            <div class="flex items-center justify-between">
-                <label class="text-sm font-bold text-gray-700">JENIS SHIFT :</label>
-                <div class="flex items-center justify-center {{ $classShift }} text-xs font-bold px-4 py-2 rounded-full shadow-md w-[150px]">
-                    {{ $namaShift }}
-                </div>
+    {{-- === 2. INFO SHIFT HARI INI (REVISED) === --}}
+    @php
+        // Logika Warna Badge
+        $badgeClass = 'bg-gray-200 text-gray-600'; // Default
+
+        if ($shiftHariIni == 'pagi') { 
+            $badgeClass = 'bg-yellow-400 text-slate-900'; 
+        } elseif ($shiftHariIni == 'malam') { 
+            $badgeClass = 'bg-blue-500 text-white'; 
+        } elseif ($shiftHariIni == 'off') { 
+            $badgeClass = 'bg-red-500 text-white'; 
+        }
+    @endphp
+
+    <div class="mt-6 bg-[#2a4a6f] rounded-lg shadow-md p-4 flex items-center justify-between relative overflow-hidden">
+        {{-- Dekorasi Latar Belakang (Opsional: membuat tekstur halus) --}}
+        <div class="absolute -left-4 -bottom-4 text-white opacity-5">
+            <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"></path></svg>
+        </div>
+
+        {{-- Label Kiri --}}
+        <div class="flex items-center gap-3 z-10">
+            <div class="p-2 bg-white/10 rounded-full text-white">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <div>
+                <p class="text-[10px] text-blue-200 font-bold uppercase tracking-wider">Jadwal Shift</p>
+                <p class="text-white font-bold text-sm">HARI INI</p>
             </div>
         </div>
+
+        {{-- Badge Kanan (Status Shift) --}}
+        <div class="{{ $badgeClass }} px-4 py-1.5 rounded-full shadow-sm flex items-center gap-2 z-10">
+            <span class="text-xs font-bold uppercase tracking-wide">
+                {{ $shiftHariIni ? $shiftHariIni : 'TIDAK ADA' }}
+            </span>
+        </div>
+    </div>
+
+    {{-- === 3. FILTER RIWAYAT (STYLE SERAGAM) === --}}
+    <div class="bg-white rounded-lg shadow-md p-5 mt-4 mb-6">
+        <h3 class="text-sm font-bold text-slate-600 uppercase mb-3">FILTER RIWAYAT :</h3>
+        
+        <form action="{{ route('anggota.presensi.index') }}" method="GET">
+            <div class="flex flex-col md:flex-row md:items-end gap-4">
+                
+                {{-- Input Tanggal Awal --}}
+                <div class="flex-1">
+                    <label for="start_date" class="block text-xs font-bold text-slate-500 mb-1 uppercase">DARI TANGGAL :</label>
+                    <input 
+                        type="date" 
+                        id="start_date"
+                        name="start_date"
+                        value="{{ $startDate }}"
+                        class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        style="color-scheme: dark;"
+                    >
+                </div>
+
+                {{-- Input Tanggal Akhir --}}
+                <div class="flex-1">
+                    <label for="end_date" class="block text-xs font-bold text-slate-500 mb-1 uppercase">SAMPAI TANGGAL :</label>
+                    <input 
+                        type="date" 
+                        id="end_date"
+                        name="end_date"
+                        value="{{ $endDate }}"
+                        class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        style="color-scheme: dark;"
+                    >
+                </div>
+
+                {{-- Tombol Filter --}}
+                <div class="md:mb-[1px]"> 
+                    <button type="submit" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded-lg shadow transition-colors duration-200 flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        FILTER
+                    </button>
+                </div>
+
+            </div>
+        </form>
     </div>
 
     {{-- === 3. TABEL RIWAYAT === --}}
@@ -136,42 +191,57 @@
         <table class="w-full text-sm">
             <thead class="bg-[#2a4a6f] text-white">
                 <tr>
-                    <th class="p-3 text-center">Foto</th>
+                    <th class="p-3 text-center">Tanggal</th>
                     <th class="p-3 text-center">Waktu</th>
+                    <th class="p-3 text-center">Jenis Presensi</th>
                     <th class="p-3 text-center">Status</th>
+                    <th class="p-3 text-center">Foto</th>
                 </tr>
             </thead>
             <tbody class="text-gray-700 divide-y">
-                @if($riwayatHariIni)
-                    {{-- Baris Masuk --}}
-                    <tr class="text-center bg-white">
-                        <td class="p-3">
-                            @if($riwayatHariIni->foto_masuk)
-                                <button @click="showPhotoModal = true; modalPhoto = '{{ asset('storage/' . $riwayatHariIni->foto_masuk) }}'" class="text-blue-600 underline font-bold text-xs">Buka</button>
-                            @else - @endif
+                @forelse($riwayatPresensi as $log)
+                    <tr class="text-center bg-white hover:bg-gray-50">
+                        {{-- Tanggal --}}
+                        <td class="p-3 font-medium text-gray-600">
+                            {{ $log->waktu->format('d/m/y') }}
                         </td>
-                        <td class="p-3">
-                            <div class="font-bold text-gray-800">{{ $riwayatHariIni->waktu_masuk }}</div>
-                            <div class="text-[10px] text-gray-500 font-bold">MASUK</div>
+                        
+                        {{-- Waktu --}}
+                        <td class="p-3 font-bold text-gray-800">
+                            {{ $log->waktu->format('H:i') }}
                         </td>
-                        <td class="p-3"><span class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-1 rounded-full">{{ $riwayatHariIni->status }}</span></td>
+
+                        {{-- Jenis Presensi --}}
+                        <td class="p-3">
+                            <span class="text-[10px] font-bold px-2 py-1 rounded uppercase 
+                                {{ $log->jenis_presensi == 'masuk' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800' }}">
+                                {{ $log->jenis_presensi }}
+                            </span>
+                        </td>
+
+                        {{-- Status --}}
+                        <td class="p-3">
+                            @if($log->status == 'Terlambat')
+                                <span class="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-1 rounded-full">Telat</span>
+                            @elseif($log->status == 'Tepat Waktu' || $log->status == 'Hadir')
+                                <span class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-1 rounded-full">Hadir</span>
+                            @else
+                                <span class="bg-gray-100 text-gray-800 text-[10px] font-bold px-2 py-1 rounded-full">{{ $log->status }}</span>
+                            @endif
+                        </td>
+
+                        {{-- Foto --}}
+                        <td class="p-3">
+                            <button @click="showPhotoModal = true; modalPhoto = '{{ asset('storage/' . $log->foto) }}'" class="text-blue-600 underline font-bold text-xs">Lihat</button>
+                        </td>
                     </tr>
-                    {{-- Baris Pulang --}}
-                    @if($riwayatHariIni->waktu_pulang)
-                        <tr class="text-center bg-white">
-                            <td class="p-3">
-                                <button @click="showPhotoModal = true; modalPhoto = '{{ asset('storage/' . $riwayatHariIni->foto_pulang) }}'" class="text-blue-600 underline font-bold text-xs">Buka</button>
-                            </td>
-                            <td class="p-3">
-                                <div class="font-bold text-gray-800">{{ $riwayatHariIni->waktu_pulang }}</div>
-                                <div class="text-[10px] text-gray-500 font-bold">PULANG</div>
-                            </td>
-                            <td class="p-3"><span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-1 rounded-full">{{ $riwayatHariIni->status }}</span></td>
-                        </tr>
-                    @endif
-                @else
-                    <tr><td colspan="3" class="p-6 text-center text-gray-500">Belum ada presensi hari ini.</td></tr>
-                @endif
+                @empty
+                    <tr>
+                        <td colspan="5" class="p-6 text-center text-gray-500">
+                            Tidak ada data presensi pada rentang tanggal ini.
+                        </td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>

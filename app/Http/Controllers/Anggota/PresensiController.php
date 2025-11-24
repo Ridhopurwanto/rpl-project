@@ -9,6 +9,7 @@ use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Models\Presensi;
+use App\Models\Shift;
 
 class PresensiController extends Controller
 {
@@ -16,17 +17,18 @@ class PresensiController extends Controller
     {
         $user = Auth::user();
         
-        // 1. Tentukan Tanggal Terpilih
-        $tanggalTerpilih = $request->input('tanggal') 
-                            ? Carbon::parse($request->input('tanggal')) 
-                            : Carbon::today();
+        // --- 1. FILTER TANGGAL (RANGE) ---
+        $startDate = $request->input('start_date', Carbon::today()->toDateString());
+        $endDate = $request->input('end_date', Carbon::today()->toDateString());
 
-        // 2. Ambil Data Shift (Untuk Kalender)
-        // Asumsi: Tabel Shift masih menggunakan kolom 'tanggal' atau sejenisnya
-        $bulan = $tanggalTerpilih->month;
-        $tahun = $tanggalTerpilih->year;
+        // --- 2. AMBIL DATA SHIFT (Untuk Kalender) ---
+        // Kita ambil shift bulan dari startDate saja untuk kalender visual
+        $startCarbon = Carbon::parse($startDate);
+        $bulan = $startCarbon->month;
+        $tahun = $startCarbon->year;
         
-        $shiftsDariDB = $user->shifts()
+        $shiftsDariDB = Shift::with('shiftRule')
+                            ->where('id_pengguna', $user->id_pengguna)
                             ->whereMonth('tanggal', $bulan)
                             ->whereYear('tanggal', $tahun)
                             ->get();
@@ -35,58 +37,48 @@ class PresensiController extends Controller
             return Carbon::parse($shift->tanggal)->format('Y-m-d');
         });
 
-        // 3. Generate Kalender (Logika Visual)
-        $tanggalAwal = $tanggalTerpilih->copy()->startOfMonth();
-        $tanggalAkhir = $tanggalTerpilih->copy()->endOfMonth();
-        $period = CarbonPeriod::create($tanggalAwal, $tanggalAkhir);
+        // --- 3. GENERATE KALENDER (Visual Bulan Ini) ---
+        $calStart = $startCarbon->copy()->startOfMonth();
+        $calEnd = $startCarbon->copy()->endOfMonth();
+        $period = CarbonPeriod::create($calStart, $calEnd);
         $dataKalender = [];
 
-        for ($i = 0; $i < $tanggalAwal->dayOfWeek; $i++) {
+        for ($i = 0; $i < $calStart->dayOfWeek; $i++) {
             $dataKalender[] = ['tanggal' => null, 'jenis_shift' => null];
         }
 
         foreach ($period as $date) {
-            $tgl = $date->format('Y-m-d');
-            $shiftData = $shiftMap->get($tgl);
+            $tglStr = $date->format('Y-m-d');
+            $shiftData = $shiftMap->get($tglStr);
+            $namaJenis = $shiftData && $shiftData->shiftRule ? strtolower($shiftData->shiftRule->jenis_shift) : null;
+            
             $dataKalender[] = [
                 'tanggal' => $date->format('d'),
-                'jenis_shift' => $shiftData ? strtolower($shiftData->jenis_shift) : null,
+                'jenis_shift' => $namaJenis,
             ];
         }
 
-        // 4. AMBIL RIWAYAT PRESENSI (LOGIKA BARU: Filter by 'waktu')
-        // Kita ambil semua data presensi user pada tanggal yang dipilih
-        $logsHariIni = Presensi::where('id_pengguna', $user->id_pengguna)
-                        ->whereDate('waktu', $tanggalTerpilih) // <--- UBAH KE 'waktu'
-                        ->get();
+        // --- 4. AMBIL RIWAYAT PRESENSI (Sesuai Rentang Tanggal) ---
+        // Kita ambil semua log presensi dalam rentang tanggal yang dipilih
+        $riwayatPresensi = Presensi::where('id_pengguna', $user->id_pengguna)
+                            ->whereDate('waktu', '>=', $startDate)
+                            ->whereDate('waktu', '<=', $endDate)
+                            ->orderBy('waktu', 'desc') // Urutkan dari terbaru
+                            ->get();
 
-        $presensiMasuk = $logsHariIni->where('jenis_presensi', 'masuk')->first();
-        $presensiPulang = $logsHariIni->where('jenis_presensi', 'pulang')->first();
-
-        // Bentuk objek display untuk View
-        $riwayatHariIni = null;
-        if ($presensiMasuk || $presensiPulang) {
-            $riwayatHariIni = (object) [
-                // Format jam dari kolom 'waktu' (datetime)
-                'waktu_masuk' => $presensiMasuk ? $presensiMasuk->waktu->format('H:i') : '-',
-                'foto_masuk'  => $presensiMasuk ? $presensiMasuk->foto : null,
-                
-                'waktu_pulang'=> $presensiPulang ? $presensiPulang->waktu->format('H:i') : null,
-                'foto_pulang' => $presensiPulang ? $presensiPulang->foto : null,
-                
-                // Ambil status dari salah satu
-                'status'      => $presensiMasuk ? $presensiMasuk->status : ($presensiPulang ? $presensiPulang->status : '-'),
-            ];
-        }
-
-        $shiftHariIniObj = $shiftMap->get($tanggalTerpilih->format('Y-m-d'));
-        $shiftHariIni = $shiftHariIniObj ? strtolower($shiftHariIniObj->jenis_shift) : null;
+        // Info Shift Hari Ini (Opsional, ambil dari hari ini real-time)
+        $todayShiftData = Shift::with('shiftRule')
+                            ->where('id_pengguna', $user->id_pengguna)
+                            ->whereDate('tanggal', Carbon::today())
+                            ->first();
+        $shiftHariIni = $todayShiftData && $todayShiftData->shiftRule ? strtoupper($todayShiftData->shiftRule->jenis_shift) : 'TIDAK ADA JADWAL';
 
         return view('anggota.presensi', [
-            'namaBulan' => $tanggalTerpilih->format('F Y'),
+            'namaBulan' => $startCarbon->format('F Y'),
             'dataKalender' => $dataKalender,
-            'riwayatHariIni' => $riwayatHariIni,
-            'tanggalTerpilih' => $tanggalTerpilih,
+            'riwayatPresensi' => $riwayatPresensi, // Kirim Collection
+            'startDate' => $startDate,
+            'endDate' => $endDate,
             'shiftHariIni' => $shiftHariIni,
         ]);
     }
@@ -101,18 +93,19 @@ class PresensiController extends Controller
         try {
             $user = Auth::user();
             $now = Carbon::now();
+            // $now = Carbon::now()->setTime(15, 0, 0);
 
-            // 1. Cek Duplikasi (Berdasarkan Waktu Hari Ini)
+            // 1. Cek Duplikasi
             $cekDuplikat = Presensi::where('id_pengguna', $user->id_pengguna)
                             ->whereDate('waktu', $now) 
                             ->where('jenis_presensi', $request->jenis_presensi)
                             ->exists();
 
             if ($cekDuplikat) {
-                return redirect()->back()->with('error', 'Anda sudah melakukan presensi ' . $request->jenis_presensi . ' hari ini.');
+                return redirect()->back()->with('error', 'Anda sudah presensi ' . $request->jenis_presensi . ' hari ini.');
             }
 
-            // 2. Proses Foto Base64
+            // 2. Simpan Foto
             $imageData = $request->foto_base64;
             if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
                 $imageData = substr($imageData, strpos($imageData, ',') + 1);
@@ -120,42 +113,55 @@ class PresensiController extends Controller
             } else {
                 $imageData = base64_decode($imageData);
             }
-
-            // Nama file: TIPE_IDUSER_TIMESTAMP.jpg
             $fileName = 'presensi/' . $request->jenis_presensi . '_' . $user->id_pengguna . '_' . time() . '.jpg';
             Storage::disk('public')->put($fileName, $imageData);
 
-            // 3. Cek Shift (Opsional)
-            // Jika tabel shift masih pakai tanggal, gunakan ini. Jika tidak, hapus/sesuaikan.
-            $shiftHariIni = $user->shifts()->whereDate('tanggal', $now)->first();
-            
-            // 4. Susun Data untuk Disimpan
-            $dataToSave = [
+            // 3. LOGIKA HITUNG KETERLAMBATAN (BARU)
+            $status = 'tepat waktu'; // Default
+            $shiftHariIni = Shift::with('shiftRule')
+                            ->where('id_pengguna', $user->id_pengguna)
+                            ->whereDate('tanggal', $now)
+                            ->first();
+
+            // Hanya hitung status jika ini presensi MASUK dan shift ditemukan
+            if ($request->jenis_presensi == 'masuk' && $shiftHariIni && $shiftHariIni->shiftRule) {
+                $rule = $shiftHariIni->shiftRule;
+                
+                // Jika jenis shift 'Off', mungkin statusnya beda (misal: Lembur)
+                // Tapi asumsi di sini kita cek Pagi/Malam dll.
+                if ($rule->jam_masuk) {
+                    $jamMasuk = Carbon::createFromTimeString($rule->jam_masuk);
+                    // Tambah toleransi (menit)
+                    $batasTerlambat = $jamMasuk->copy()->addMinutes($rule->toleransi);
+                    
+                    // Bandingkan waktu sekarang dengan batas toleransi
+                    // Kita hanya ambil jam & menitnya untuk perbandingan yang adil
+                    $waktuSekarang = Carbon::createFromTimeString($now->format('H:i:s'));
+                    
+                    if ($waktuSekarang->gt($batasTerlambat)) {
+                        $status = 'terlambat';
+                    }
+                }
+            } elseif ($request->jenis_presensi == 'pulang') {
+                $status = 'tepat waktu'; // Status default untuk pulang
+            }
+
+            // 4. Simpan Data
+            Presensi::create([
                 'id_pengguna'    => $user->id_pengguna,
+                'id_shift'       => $shiftHariIni ? $shiftHariIni->id_shift : null,
+                'nama_lengkap'   => $user->nama_lengkap ?? $user->nama,
                 'waktu'          => $now,
                 'foto'           => $fileName,
                 'jenis_presensi' => $request->jenis_presensi,
-                'status'         => 'Hadir',
-            ];
-
-            // Tambahkan id_shift HANYA jika shift ditemukan (menghindari error constraint)
-            if ($shiftHariIni) {
-                $dataToSave['id_shift'] = $shiftHariIni->id_shift;
-            }
-
-            // Tambahkan nama_lengkap manual (jika boot model tidak jalan atau kolom wajib)
-            // Pastikan kolom 'nama_lengkap' BENAR-BENAR ADA di tabel presensi Anda
-            $dataToSave['nama_lengkap'] = $user->nama_lengkap ?? $user->nama;
-
-            // 5. Eksekusi Simpan
-            Presensi::create($dataToSave);
+                'status'         => $status, // Hasil perhitungan otomatis
+            ]);
 
             return redirect()->route('anggota.presensi.index')
-                             ->with('success', 'Presensi ' . $request->jenis_presensi . ' berhasil!');
+                             ->with('success', 'Presensi ' . $request->jenis_presensi . ' berhasil! Status: ' . $status);
 
         } catch (\Exception $e) {
-            // Tampilkan pesan error asli untuk debugging (misal: Column not found)
-            return redirect()->back()->with('error', 'Gagal menyimpan: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal: ' . $e->getMessage());
         }
     }
 }
@@ -325,3 +331,85 @@ class PresensiController extends Controller
 //                          ->with('success', 'Presensi berhasil dicatat!');
 //     }
 // }
+
+
+
+// $user = Auth::user();
+//         $tanggalTerpilih = $request->input('tanggal') 
+//                             ? Carbon::parse($request->input('tanggal')) 
+//                             : Carbon::today();
+
+//         // 1. AMBIL DATA SHIFT & RULE (Eager Loading)
+//         $bulan = $tanggalTerpilih->month;
+//         $tahun = $tanggalTerpilih->year;
+        
+//         // Ambil shift user beserta aturan shift-nya (jenis, jam, dll)
+//         $shiftsDariDB = Shift::with('shiftRule') // Eager load relasi shiftRule
+//                             ->where('id_pengguna', $user->id_pengguna)
+//                             ->whereMonth('tanggal', $bulan)
+//                             ->whereYear('tanggal', $tahun)
+//                             ->get();
+
+//         $shiftMap = $shiftsDariDB->keyBy(function ($shift) {
+//             return Carbon::parse($shift->tanggal)->format('Y-m-d');
+//         });
+
+//         // 2. GENERATE KALENDER
+//         $tanggalAwal = $tanggalTerpilih->copy()->startOfMonth();
+//         $tanggalAkhir = $tanggalTerpilih->copy()->endOfMonth();
+//         $period = CarbonPeriod::create($tanggalAwal, $tanggalAkhir);
+//         $dataKalender = [];
+
+//         // Padding hari kosong di awal
+//         for ($i = 0; $i < $tanggalAwal->dayOfWeek; $i++) {
+//             $dataKalender[] = ['tanggal' => null, 'jenis_shift' => null];
+//         }
+
+//         foreach ($period as $date) {
+//             $tglStr = $date->format('Y-m-d');
+//             $shiftData = $shiftMap->get($tglStr);
+            
+//             // Ambil nama jenis shift dari relasi shiftRule (jika ada)
+//             // Contoh: 'Pagi', 'Malam', 'Off'
+//             $namaJenisShift = $shiftData && $shiftData->shiftRule 
+//                                 ? strtolower($shiftData->shiftRule->jenis_shift) 
+//                                 : null;
+
+//             $dataKalender[] = [
+//                 'tanggal' => $date->format('d'),
+//                 'jenis_shift' => $namaJenisShift,
+//             ];
+//         }
+
+//         // 3. RIWAYAT PRESENSI HARI INI
+//         $logsHariIni = Presensi::where('id_pengguna', $user->id_pengguna)
+//                         ->whereDate('waktu', $tanggalTerpilih)
+//                         ->get();
+
+//         $presensiMasuk = $logsHariIni->where('jenis_presensi', 'masuk')->first();
+//         $presensiPulang = $logsHariIni->where('jenis_presensi', 'pulang')->first();
+
+//         $riwayatHariIni = null;
+//         if ($presensiMasuk || $presensiPulang) {
+//             $riwayatHariIni = (object) [
+//                 'waktu_masuk' => $presensiMasuk ? $presensiMasuk->waktu->format('H:i') : '-',
+//                 'foto_masuk'  => $presensiMasuk ? $presensiMasuk->foto : null,
+//                 'waktu_pulang'=> $presensiPulang ? $presensiPulang->waktu->format('H:i') : null,
+//                 'foto_pulang' => $presensiPulang ? $presensiPulang->foto : null,
+//                 'status'      => $presensiMasuk ? $presensiMasuk->status : '-',
+//             ];
+//         }
+
+//         // Ambil info shift untuk header "JENIS SHIFT :"
+//         $shiftHariIniData = $shiftMap->get($tanggalTerpilih->format('Y-m-d'));
+//         $shiftHariIni = $shiftHariIniData && $shiftHariIniData->shiftRule 
+//                             ? strtolower($shiftHariIniData->shiftRule->jenis_shift) 
+//                             : null;
+
+//         return view('anggota.presensi', [
+//             'namaBulan' => $tanggalTerpilih->format('F Y'),
+//             'dataKalender' => $dataKalender,
+//             'riwayatHariIni' => $riwayatHariIni,
+//             'tanggalTerpilih' => $tanggalTerpilih,
+//             'shiftHariIni' => $shiftHariIni,
+//         ]);

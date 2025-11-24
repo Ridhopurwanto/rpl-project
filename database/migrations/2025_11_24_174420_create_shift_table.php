@@ -15,7 +15,7 @@ return new class extends Migration
             $table->bigIncrements('id_shift');
             $table->unsignedBigInteger('id_pengguna')->index('shift_id_pengguna_foreign');
             $table->date('tanggal');
-            $table->enum('jenis_shift', ['Pagi', 'Malam', 'Non Shift', 'Off']);
+            $table->unsignedInteger('jenis_shift')->index('shift_id_shiftrule_foreign_idx');
             $table->timestamps();
         });
     }
