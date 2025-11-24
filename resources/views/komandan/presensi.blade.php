@@ -53,14 +53,15 @@
                     <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">TANGGAL:</label>
                     <input type="date" id="tanggal" name="tanggal" 
                            onchange="this.form.submit()"
-                           class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" 
+                           class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400" 
+                           style="color-scheme: dark;"
                            value="{{ $tanggalTerpilih }}">
                 </div>
                 <div class="flex-1">
                     <label for="shift" class="block text-sm font-medium text-gray-700 mb-1">JENIS SHIFT:</label>
                     <select id="shift" name="shift" 
                             onchange="this.form.submit()"
-                            class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400">
                         <option value="semua" @if($shiftTerpilih == 'semua') selected @endif>Semua Shift</option>
                         <option value="Pagi" @if($shiftTerpilih == 'Pagi') selected @endif>Shift Pagi</option>
                         <option value="Malam" @if($shiftTerpilih == 'Malam') selected @endif>Shift Malam</option>

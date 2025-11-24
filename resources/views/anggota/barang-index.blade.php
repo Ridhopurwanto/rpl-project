@@ -24,12 +24,27 @@
 >
 
     {{-- 1. BAGIAN BARANG TITIPAN (AKTIF) --}}
-    <details open class="mb-4">
-        <summary class="text-lg font-bold text-slate-700 uppercase cursor-pointer list-none flex items-center">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+    <div class="mb-4" x-data="{ isOpen: true }">
+        {{-- Header Accordion --}}
+        <div @click="isOpen = !isOpen" class="text-lg font-bold text-slate-700 uppercase cursor-pointer list-none flex items-center select-none">
+            <svg class="w-5 h-5 mr-2 transition-transform duration-300 ease-in-out" 
+                 :class="isOpen ? 'rotate-0' : '-rotate-90'" 
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
             BARANG TITIPAN :
-        </summary>
-        <div class="bg-white rounded-lg shadow-md p-4 mt-2 overflow-x-auto">
+        </div>
+
+        {{-- Content Accordion --}}
+        <div x-show="isOpen" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform -translate-y-2"
+             x-transition:enter-end="opacity-100 transform translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 transform translate-y-0"
+             x-transition:leave-end="opacity-0 transform -translate-y-2"
+             class="bg-white rounded-lg shadow-md p-4 mt-2 overflow-x-auto">
+             
             <table class="w-full min-w-[700px] text-sm text-left">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                     <tr>
@@ -69,15 +84,30 @@
                 </tbody>
             </table>
         </div>
-    </details>
+    </div>
 
     {{-- 2. BAGIAN BARANG TEMUAN (AKTIF) --}}
-    <details open class="mb-4">
-        <summary class="text-lg font-bold text-slate-700 uppercase cursor-pointer list-none flex items-center">
-             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+    <div class="mb-4" x-data="{ isOpen: true }">
+        {{-- Header Accordion --}}
+        <div @click="isOpen = !isOpen" class="text-lg font-bold text-slate-700 uppercase cursor-pointer list-none flex items-center select-none">
+            <svg class="w-5 h-5 mr-2 transition-transform duration-300 ease-in-out" 
+                 :class="isOpen ? 'rotate-0' : '-rotate-90'" 
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
             BARANG TEMUAN :
-        </summary>
-        <div class="bg-white rounded-lg shadow-md p-4 mt-2 overflow-x-auto">
+        </div>
+
+        {{-- Content Accordion --}}
+        <div x-show="isOpen" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform -translate-y-2"
+             x-transition:enter-end="opacity-100 transform translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 transform translate-y-0"
+             x-transition:leave-end="opacity-0 transform -translate-y-2"
+             class="bg-white rounded-lg shadow-md p-4 mt-2 overflow-x-auto">
+
             <table class="w-full min-w-[700px] text-sm text-left">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                     <tr>
@@ -117,83 +147,133 @@
                 </tbody>
             </table>
         </div>
-    </details>
+    </div>
 
-    {{-- 3. RIWAYAT --}}
-    <details open class="mb-4">
-        <summary class="text-lg font-bold text-slate-700 uppercase cursor-pointer list-none flex items-center">
-             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+    {{-- 3. RIWAYAT (LIVE SEARCH & AUTO FILTER) --}}
+    {{-- Gabungkan logic search query dan animasi isOpen disini --}}
+    <div class="mb-4" x-data="{ isOpen: true, searchQuery: '' }">
+        {{-- Header Accordion --}}
+        <div @click="isOpen = !isOpen" class="text-lg font-bold text-slate-700 uppercase cursor-pointer list-none flex items-center select-none">
+            <svg class="w-5 h-5 mr-2 transition-transform duration-300 ease-in-out" 
+                 :class="isOpen ? 'rotate-0' : '-rotate-90'" 
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
             RIWAYAT :
-        </summary>
-        
-        {{-- Form Filter Riwayat --}}
-        <form action="{{ route('anggota.barang.index') }}" method="GET" class="bg-white p-4 rounded-lg shadow-md mt-2 mb-4">
-            <div class="flex flex-col md:flex-row gap-4 items-end">
-                <div class="flex-1 w-full">
-                    <label class="text-sm font-bold text-slate-600 uppercase">TANGGAL :</label>
-                    <input type="date" name="tanggal" value="{{ $tanggal_terpilih }}" class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg mt-1 shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400">
-                </div>
-                <div class="flex-1 w-full">
-                    <label class="text-sm font-bold text-slate-600 uppercase">KATEGORI :</label>
-                    <select name="kategori_riwayat" class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg mt-1 shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400">
-                        <option value="titip" @if($kategori_terpilih == 'titip') selected @endif>Barang Titipan</option>
-                        <option value="temu" @if($kategori_terpilih == 'temu') selected @endif>Barang Temuan</option>
-                    </select>
-                </div>
-                <button type="submit" class="w-full md:w-auto bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow hover:bg-blue-700">
-                    FILTER
-                </button>
-            </div>
-        </form>
-
-        {{-- Tabel Riwayat --}}
-        <div class="bg-white rounded-lg shadow-md p-4 overflow-x-auto">
-            <table class="w-full min-w-[700px] text-sm text-left">
-                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                    <tr>
-                        <th class="py-3 px-4">No</th>
-                        <th class="py-3 px-4">Foto</th>
-                        <th class="py-3 px-4">Nama Barang</th>
-                        @if($kategori_terpilih == 'titip')
-                            <th class="py-3 px-4">Penitip</th>
-                            <th class="py-3 px-4">Penerima</th>
-                            <th class="py-3 px-4">Tujuan</th>
-                        @else 
-                            <th class="py-3 px-4">Pelapor</th>
-                            <th class="py-3 px-4">Penerima</th>
-                            <th class="py-3 px-4">Lokasi Temuan</th>
-                        @endif
-                        <th class="py-3 px-4">Catatan</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y">
-                    @forelse($riwayat_barang as $barang)
-                    <tr class="bg-white">
-                        <td class="py-3 px-4">{{ $loop->iteration }}.</td>
-                        <td class="py-3 px-4">
-                            @if($barang->foto)
-                            <button @click.prevent="photoModalOpen = true; photoModalImage = '{{ Storage::url($barang->foto) }}'" class="text-blue-600 hover:underline text-xs font-bold">Lihat</button>
-                            @else - @endif
-                        </td>
-                        <td class="py-3 px-4 font-medium">{{ $barang->nama_barang }}</td>
-                        <td class="py-3 px-4">
-                            @if($barang instanceof \App\Models\BarangTitipan) {{ $barang->nama_penitip }}
-                            @else {{ $barang->nama_pelapor }} @endif
-                        </td>
-                        <td class="py-3 px-4 font-medium">{{ $barang->nama_penerima }}</td>
-                        <td class="py-3 px-4">
-                            @if($barang instanceof \App\Models\BarangTitipan) {{ $barang->tujuan }}
-                            @else {{ $barang->lokasi_penemuan}} @endif
-                        </td>
-                        <td class="py-3 px-4 font-medium">{{ $barang->catatan }}</td>
-                    </tr>
-                    @empty
-                    <tr><td colspan="6" class="py-4 px-4 text-center text-gray-500">Tidak ada riwayat.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
         </div>
-    </details>
+        
+        {{-- Content Accordion (Wrapper untuk Form Filter & Tabel) --}}
+        <div x-show="isOpen" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform -translate-y-2"
+             x-transition:enter-end="opacity-100 transform translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 transform translate-y-0"
+             x-transition:leave-end="opacity-0 transform -translate-y-2">
+
+            {{-- Form Filter --}}
+            <form action="{{ route('anggota.barang.index') }}" method="GET" class="bg-white p-4 rounded-lg shadow-md mt-2 mb-4">
+                
+                {{-- Search Bar --}}
+                <div class="mb-4">
+                     <label class="text-sm font-bold text-slate-600 uppercase">PENCARIAN (LIVE) :</label>
+                     <div class="relative mt-1">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-blue-200">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </span>
+                        <input type="text" 
+                               x-model="searchQuery" 
+                               placeholder="Ketik nama barang, pelapor, atau penerima..." 
+                               class="w-full bg-[#2a4a6f] text-white placeholder-blue-200 px-4 py-2 pl-10 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400">
+                     </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-4">
+                    {{-- Tanggal --}}
+                    <div class="flex-1 w-full">
+                        <label class="text-sm font-bold text-slate-600 uppercase">TANGGAL :</label>
+                        <input type="date" 
+                               name="tanggal" 
+                               value="{{ $tanggal_terpilih ?? date('Y-m-d') }}" 
+                               onchange="this.form.submit()"
+                               class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg mt-1 shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400 cursor-pointer"
+                               style="color-scheme: dark;">
+                    </div>
+
+                    {{-- Kategori --}}
+                    <div class="flex-1 w-full">
+                        <label class="text-sm font-bold text-slate-600 uppercase">KATEGORI :</label>
+                        <select name="kategori_riwayat" 
+                                onchange="this.form.submit()"
+                                class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg mt-1 shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400 cursor-pointer">
+                            <option value="titip" @if($kategori_terpilih == 'titip') selected @endif>Barang Titipan</option>
+                            <option value="temu" @if($kategori_terpilih == 'temu') selected @endif>Barang Temuan</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+
+            {{-- Tabel Riwayat --}}
+            <div class="bg-white rounded-lg shadow-md p-4 overflow-x-auto">
+                <table class="w-full min-w-[700px] text-sm text-left">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <tr>
+                            <th class="py-3 px-4">No</th>
+                            <th class="py-3 px-4">Foto</th>
+                            <th class="py-3 px-4">Nama Barang</th>
+                            @if($kategori_terpilih == 'titip')
+                                <th class="py-3 px-4">Penitip</th>
+                                <th class="py-3 px-4">Penerima</th>
+                                <th class="py-3 px-4">Tujuan</th>
+                            @else 
+                                <th class="py-3 px-4">Pelapor</th>
+                                <th class="py-3 px-4">Penerima</th>
+                                <th class="py-3 px-4">Lokasi Temuan</th>
+                            @endif
+                            <th class="py-3 px-4">Catatan</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        @forelse($riwayat_barang as $barang)
+                        <tr class="bg-white hover:bg-slate-50 transition-colors"
+                            x-show="$el.innerText.toLowerCase().includes(searchQuery.toLowerCase())"
+                            x-transition:enter="transition ease-out duration-300"
+                            x-transition:enter-start="opacity-0 transform scale-95"
+                            x-transition:enter-end="opacity-100 transform scale-100">
+                            
+                            <td class="py-3 px-4">{{ $loop->iteration }}.</td>
+                            <td class="py-3 px-4">
+                                @if($barang->foto)
+                                <button @click.prevent="photoModalOpen = true; photoModalImage = '{{ Storage::url($barang->foto) }}'" class="text-blue-600 hover:underline text-xs font-bold">Lihat</button>
+                                @else - @endif
+                            </td>
+                            <td class="py-3 px-4 font-medium">{{ $barang->nama_barang }}</td>
+                            <td class="py-3 px-4">
+                                @if($barang instanceof \App\Models\BarangTitipan) {{ $barang->nama_penitip }}
+                                @else {{ $barang->nama_pelapor }} @endif
+                            </td>
+                            <td class="py-3 px-4 font-medium">{{ $barang->nama_penerima }}</td>
+                            <td class="py-3 px-4">
+                                @if($barang instanceof \App\Models\BarangTitipan) {{ $barang->tujuan }}
+                                @else {{ $barang->lokasi_penemuan}} @endif
+                            </td>
+                            <td class="py-3 px-4 font-medium">{{ $barang->catatan }}</td>
+                        </tr>
+                        @empty
+                        <tr><td colspan="7" class="py-4 px-4 text-center text-gray-500">Tidak ada riwayat.</td></tr>
+                        @endforelse
+                        
+                        {{-- Pesan jika pencarian tidak ditemukan --}}
+                        <tr x-show="searchQuery !== ''" style="display: none;">
+                            <td colspan="7" class="py-4 text-center text-gray-400 text-xs italic">
+                                * Tidak ditemukan hasil untuk pencarian "<span x-text="searchQuery"></span>"
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
     {{-- 4. TOMBOL FAB (CREATE BARANG) --}}
     <button @click.prevent="showCreateModal = true" 

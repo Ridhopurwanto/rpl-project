@@ -204,6 +204,15 @@
             <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
                 <div x-show="showCreateModal" class="relative transform overflow-hidden rounded-xl bg-[#2a4a6f] text-left shadow-2xl transition-all w-full max-w-md p-6">
                     
+                {{-- === [BARU] TOMBOL CLOSE (X) === --}}
+                <button type="button" @click="showCreateModal = false; stopCamera()" 
+                        class="absolute top-4 right-4 text-white/50 hover:text-white transition-colors focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                {{-- ============================== --}}
+                
                     <div class="flex flex-col items-center mb-5 space-y-2">
                         <h3 class="text-white text-xl font-bold uppercase tracking-wide text-center">FORM PRESENSI</h3>
                         <div class="inline-flex items-center gap-2 bg-black/30 border border-white/10 rounded-full px-4 py-1.5 backdrop-blur-sm shadow-sm">
@@ -243,7 +252,6 @@
                                 <button type="button" @click="retakePhoto()" class="bg-slate-500 text-white font-bold py-3 rounded-lg shadow hover:bg-slate-600 transition-colors">ULANG</button>
                                 <button type="submit" class="bg-green-500 text-white font-bold py-3 rounded-lg shadow hover:bg-green-600 transition-colors">SUBMIT</button>
                             </div>
-                            <button type="button" @click="showCreateModal = false; stopCamera()" class="w-full text-blue-200 text-sm hover:text-white mt-2 underline">Batal</button>
                         </div>
                     </form>
                 </div>

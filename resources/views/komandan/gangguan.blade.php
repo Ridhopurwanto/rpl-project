@@ -59,7 +59,8 @@
                     <label for="bulan" class="block text-sm font-medium text-gray-700 mb-1">BULAN:</label>
                     <input type="month" id="bulan" name="bulan" 
                            onchange="this.form.submit()"
-                           class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" 
+                           class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400" 
+                           style="color-scheme: dark;" 
                            value="{{ $bulanTerpilih }}">
                 </div>
 
@@ -68,7 +69,8 @@
                     <label for="kategori" class="block text-sm font-medium text-gray-700 mb-1">KATEGORI:</label>
                     <select id="kategori" name="kategori" 
                             onchange="this.form.submit()"
-                            class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400" 
+                           style="color-scheme: dark;">
                         <option value="semua">Semua Kategori</option>
                         @foreach($kategoriOptions as $kategori)
                             <option value="{{ $kategori }}" {{ $kategoriTerpilih == $kategori ? 'selected' : '' }}>

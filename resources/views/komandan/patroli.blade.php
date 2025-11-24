@@ -42,7 +42,8 @@
                     <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">TANGGAL:</label>
                     <input type="date" id="tanggal" name="tanggal" 
                            onchange="this.form.submit()"
-                           class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" 
+                           class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400" 
+                           style="color-scheme: dark;"
                            value="{{ $tanggalTerpilih }}">
                 </div>
 
@@ -51,7 +52,7 @@
                     <label for="jenis_patroli" class="block text-sm font-medium text-gray-700 mb-1">JENIS PATROLI:</label>
                     <select id="jenis_patroli" name="jenis_patroli" 
                             onchange="this.form.submit()"
-                            class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400">
                         
                         {{-- Opsi "Semua" DIHAPUS sesuai permintaan --}}
                         
