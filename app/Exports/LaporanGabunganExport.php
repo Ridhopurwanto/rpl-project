@@ -2,32 +2,70 @@
 
 namespace App\Exports;
 
-use Illuminate\Contracts\View\View;
-use Maatwebsite\Excel\Concerns\FromView;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-// Kita gunakan FromView agar bisa pakai file Blade
-// Kita gunakan ShouldAutoSize agar kolomnya rapi otomatis
-class LaporanGabunganExport implements FromView, ShouldAutoSize
+class LaporanGabunganExport implements WithMultipleSheets
 {
-    protected $data;
+    protected $dataGabungan;
 
-    /**
-     * 1. Terima data dari controller saat class ini dipanggil
-     */
-    public function __construct(array $data)
+    public function __construct(array $dataGabungan)
     {
-        $this->data = $data;
+        $this->dataGabungan = $dataGabungan;
     }
 
     /**
-     * 2. Render file Blade sebagai template Excel
+     * @return array
      */
-    public function view(): View
+    public function sheets(): array
     {
-        // Kita akan buat file ini di Langkah 4
-        return view('komandan.laporan.template-excel', [
-            'dataGabungan' => $this->data
-        ]);
+        $sheets = [];
+        
+        // Ambil metadata tanggal (untuk judul header di setiap sheet)
+        $metadata = [
+            'tanggalMulai' => $this->dataGabungan['tanggalMulai'],
+            'tanggalSelesai' => $this->dataGabungan['tanggalSelesai']
+        ];
+
+        // 1. Sheet Presensi
+        if (isset($this->dataGabungan['presensi'])) {
+            $sheets[] = new LaporanPerSheet('presensi', $this->dataGabungan['presensi'], $metadata);
+        }
+
+        // 2. Sheet Patroli
+        if (isset($this->dataGabungan['patroli'])) {
+            $sheets[] = new LaporanPerSheet('patroli', $this->dataGabungan['patroli'], $metadata);
+        }
+
+        // 3. Sheet Barang (GABUNGAN Temu & Titip)
+        // Logika: Jika user pilih salah satu atau keduanya, buat 1 sheet 'barang'
+        if (isset($this->dataGabungan['barang_temu']) || isset($this->dataGabungan['barang_titip'])) {
+            $dataBarang = [
+                'temu' => $this->dataGabungan['barang_temu'] ?? collect([]),
+                'titip' => $this->dataGabungan['barang_titip'] ?? collect([])
+            ];
+            $sheets[] = new LaporanPerSheet('barang', $dataBarang, $metadata);
+        }
+
+        // 4. Sheet Kendaraan
+        if (isset($this->dataGabungan['kendaraan'])) {
+            $sheets[] = new LaporanPerSheet('kendaraan', $this->dataGabungan['kendaraan'], $metadata);
+        }
+
+        // 5. Sheet Tamu
+        if (isset($this->dataGabungan['tamu'])) {
+            $sheets[] = new LaporanPerSheet('tamu', $this->dataGabungan['tamu'], $metadata);
+        }
+
+        // 6. Sheet Gangguan
+        if (isset($this->dataGabungan['gangguan'])) {
+            $sheets[] = new LaporanPerSheet('gangguan', $this->dataGabungan['gangguan'], $metadata);
+        }
+
+        // 7. Sheet Shift
+        if (isset($this->dataGabungan['shift'])) {
+            $sheets[] = new LaporanPerSheet('shift', $this->dataGabungan['shift'], $metadata);
+        }
+
+        return $sheets;
     }
 }
