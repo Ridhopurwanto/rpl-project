@@ -120,29 +120,53 @@
     </details>
 
     {{-- 3. RIWAYAT --}}
-    <details open class="mb-4">
+    {{-- 3. RIWAYAT (LIVE SEARCH & AUTO FILTER) --}}
+    <details open class="mb-4" x-data="{ searchQuery: '' }">
         <summary class="text-lg font-bold text-slate-700 uppercase cursor-pointer list-none flex items-center">
              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             RIWAYAT :
         </summary>
         
-        {{-- Form Filter Riwayat --}}
+        {{-- Form Filter --}}
         <form action="{{ route('anggota.barang.index') }}" method="GET" class="bg-white p-4 rounded-lg shadow-md mt-2 mb-4">
-            <div class="flex flex-col md:flex-row gap-4 items-end">
+            
+            {{-- Search Bar (Baru, style menyesuaikan tema) --}}
+            <div class="mb-4">
+                 <label class="text-sm font-bold text-slate-600 uppercase">PENCARIAN (LIVE) :</label>
+                 <div class="relative mt-1">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-blue-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </span>
+                    <input type="text" 
+                           x-model="searchQuery" 
+                           placeholder="Ketik nama barang, pelapor, atau penerima..." 
+                           class="w-full bg-[#2a4a6f] text-white placeholder-blue-200 px-4 py-2 pl-10 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400">
+                 </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-4">
+                {{-- Tanggal (Auto Submit & Default Hari Ini) --}}
                 <div class="flex-1 w-full">
                     <label class="text-sm font-bold text-slate-600 uppercase">TANGGAL :</label>
-                    <input type="date" name="tanggal" value="{{ $tanggal_terpilih }}" class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg mt-1 shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <input type="date" 
+                           name="tanggal" 
+                           {{-- Gunakan $tanggal_terpilih, jika kosong gunakan hari ini --}}
+                           value="{{ $tanggal_terpilih ?? date('Y-m-d') }}" 
+                           onchange="this.form.submit()"
+                           class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg mt-1 shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400 cursor-pointer">
                 </div>
+
+                {{-- Kategori (Auto Submit) --}}
                 <div class="flex-1 w-full">
                     <label class="text-sm font-bold text-slate-600 uppercase">KATEGORI :</label>
-                    <select name="kategori_riwayat" class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg mt-1 shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <select name="kategori_riwayat" 
+                            onchange="this.form.submit()"
+                            class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg mt-1 shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400 cursor-pointer">
                         <option value="titip" @if($kategori_terpilih == 'titip') selected @endif>Barang Titipan</option>
                         <option value="temu" @if($kategori_terpilih == 'temu') selected @endif>Barang Temuan</option>
                     </select>
                 </div>
-                <button type="submit" class="w-full md:w-auto bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow hover:bg-blue-700">
-                    FILTER
-                </button>
+                {{-- Tombol Filter Dihapus (Sesuai request) --}}
             </div>
         </form>
 
@@ -168,7 +192,13 @@
                 </thead>
                 <tbody class="divide-y">
                     @forelse($riwayat_barang as $barang)
-                    <tr class="bg-white">
+                    <tr class="bg-white hover:bg-slate-50 transition-colors"
+                        {{-- Logika Pencarian Live --}}
+                        x-show="$el.innerText.toLowerCase().includes(searchQuery.toLowerCase())"
+                        x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0 transform scale-95"
+                        x-transition:enter-end="opacity-100 transform scale-100">
+                        
                         <td class="py-3 px-4">{{ $loop->iteration }}.</td>
                         <td class="py-3 px-4">
                             @if($barang->foto)
@@ -188,8 +218,15 @@
                         <td class="py-3 px-4 font-medium">{{ $barang->catatan }}</td>
                     </tr>
                     @empty
-                    <tr><td colspan="6" class="py-4 px-4 text-center text-gray-500">Tidak ada riwayat.</td></tr>
+                    <tr><td colspan="7" class="py-4 px-4 text-center text-gray-500">Tidak ada riwayat.</td></tr>
                     @endforelse
+                    
+                    {{-- Pesan jika pencarian tidak ditemukan --}}
+                    <tr x-show="searchQuery !== ''" style="display: none;">
+                        <td colspan="7" class="py-4 text-center text-gray-400 text-xs italic">
+                            * Tidak ditemukan hasil untuk pencarian "<span x-text="searchQuery"></span>"
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>

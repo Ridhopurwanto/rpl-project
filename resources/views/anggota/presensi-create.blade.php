@@ -128,22 +128,22 @@
                 <p class="text-xs text-gray-500">POLITEKNIK STATISTIKA STIS</p>
             </div>
         </div>
-        <div class="w-full bg-[#2a4a6f] text-white rounded-lg p-4 text-center my-4 shadow-lg">
+        <div class="w-3/4 bg-[#2a4a6f] text-white rounded-lg p-4 text-center my-4 shadow-lg mx-auto">
             <p class="text-xs">WAKTU</p>
             <h2 class="text-3xl font-bold" x-text="currentTime + ' WIB'"></h2>
         </div>
         
-        <div class="mt-6 space-y-3">
+        <div class="mt-6 mb-20 space-y-3 flex flex-col items-center">
             
             <button 
                 x-show="state === 'camera'" 
                 type="button" 
                 @click="takeSnapshot()" {{-- Panggil fungsi snapshot --}}
-                class="w-full flex items-center justify-center text-base py-3 px-4 rounded-lg shadow-md font-medium text-white bg-[#2a4a6f] hover:bg-blue-800">
+                class="w-3/4 flex items-center justify-center text-base py-3 px-4 rounded-lg shadow-md font-medium text-white bg-[#2a4a6f] hover:bg-blue-800">
                 AMBIL GAMBAR
             </button>
 
-            <div x-show="state === 'preview'" class="space-y-3" style="display: none;">
+            <div x-show="state === 'preview'" class="w-3/4 space-y-3" style="display: none;">
                 <button 
                     type="button" 
                     @click="retakePhoto()" {{-- Panggil fungsi retake --}}
