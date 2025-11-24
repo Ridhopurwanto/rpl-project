@@ -23,79 +23,100 @@
      }">
 
     {{-- 1. BAGIAN KENDARAAN AKTIF --}}
-    <details open class="mb-4">
-        <summary class="text-lg font-bold text-slate-700 uppercase cursor-pointer list-none flex items-center">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            KENDARAAN (DI DALAM) :
-        </summary>
-        
-        <div class="bg-white rounded-lg shadow-md p-4 mt-2 overflow-x-auto">
-            <table class="w-full min-w-[600px] text-sm text-left">
-                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                    <tr>
-                        <th class="py-3 px-4">No</th>
-                        <th class="py-3 px-4">Nopol</th>
-                        <th class="py-3 px-4">Pemilik</th>
-                        <th class="py-3 px-4">Tipe</th>
-                        <th class="py-3 px-4">Waktu</th>
-                        <th class="py-3 px-4">Ket.</th>
-                        <th class="py-3 px-4 text-center">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y">
-                    @forelse($kendaraan_aktif as $log)
-                    <tr class="bg-white hover:bg-gray-50">
-                        <td class="py-3 px-4 font-medium">{{ $loop->iteration }}.</td>
-                        <td class="py-3 px-4 font-medium uppercase">{{ $log->nopol }}</td>
-                        <td class="py-3 px-4">{{ $log->pemilik }}</td>
-                        <td class="py-3 px-4">{{ $log->tipe }}</td>
-                        <td class="py-3 px-4">{{ $log->waktu_masuk->format('H:i') }}</td>
-                        
-                        {{-- Dropdown Ubah Keterangan --}}
-                        <td class="py-3 px-4">
-                            <form action="{{ route('anggota.kendaraan.updateKeterangan', ['id_kendaraan_log' => $log->id_log]) }}" method="POST">
-                                @csrf @method('PUT')
-                                <select name="keterangan" onchange="this.form.submit()" class="border border-gray-300 rounded px-2 py-1 text-xs focus:outline-blue-500">
-                                    <option value="Tidak Menginap" @if($log->keterangan == 'Tidak Menginap') selected @endif>Tidak Menginap</option>
-                                    <option value="Menginap" @if($log->keterangan == 'Menginap') selected @endif>Menginap</option>
-                                </select>
-                            </form>
-                        </td>
-                        
-                        <td class="py-3 px-4 text-center">
-                            <button 
-                                @click.prevent="
-                                    modalCheckoutOpen = true; 
-                                    selectedVehicleId = '{{ $log->id_log }}';
-                                    selectedVehicleNopol = '{{ $log->nopol }}';
-                                    selectedVehicleStatus = '{{ $log->keterangan }}';
-                                "
-                                class="bg-[#2a4a6f] text-white text-xs font-bold uppercase px-4 py-2 rounded-md shadow hover:bg-blue-700 transition-colors">
-                                Keluar
-                            </button>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr><td colspan="7" class="py-4 px-4 text-center text-gray-500">Tidak ada kendaraan di dalam.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </details>
+    <div class="mb-4" x-data="{ isOpen: true }">
+    <div @click="isOpen = !isOpen" class="text-lg font-bold text-slate-700 uppercase cursor-pointer list-none flex items-center">
+        <svg class="w-5 h-5 mr-2 transition-transform duration-300 ease-in-out" 
+             :class="isOpen ? 'rotate-0' : '-rotate-90'" 
+             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+        KENDARAAN (DI DALAM) :
+    </div>
+    
+    <div x-show="isOpen" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 transform -translate-y-2"
+         x-transition:enter-end="opacity-100 transform translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 transform translate-y-0"
+         x-transition:leave-end="opacity-0 transform -translate-y-2"
+         class="bg-white rounded-lg shadow-md p-4 mt-2 overflow-x-auto">
+        <table class="w-full min-w-[600px] text-sm text-left">
+            <!-- Isi tabel sama seperti sebelumnya -->
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                    <th class="py-3 px-4">No</th>
+                    <th class="py-3 px-4">Nopol</th>
+                    <th class="py-3 px-4">Pemilik</th>
+                    <th class="py-3 px-4">Tipe</th>
+                    <th class="py-3 px-4">Waktu</th>
+                    <th class="py-3 px-4">Ket.</th>
+                    <th class="py-3 px-4 text-center">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y">
+                @forelse($kendaraan_aktif as $log)
+                <tr class="bg-white hover:bg-gray-50">
+                    <td class="py-3 px-4 font-medium">{{ $loop->iteration }}.</td>
+                    <td class="py-3 px-4 font-medium uppercase">{{ $log->nopol }}</td>
+                    <td class="py-3 px-4">{{ $log->pemilik }}</td>
+                    <td class="py-3 px-4">{{ $log->tipe }}</td>
+                    <td class="py-3 px-4">{{ $log->waktu_masuk->format('H:i') }}</td>
+                    
+                    <td class="py-3 px-4">
+                        <form action="{{ route('anggota.kendaraan.updateKeterangan', ['id_kendaraan_log' => $log->id_log]) }}" method="POST">
+                            @csrf @method('PUT')
+                            <select name="keterangan" onchange="this.form.submit()" class="border border-gray-300 rounded px-2 py-1 text-xs focus:outline-blue-500">
+                                <option value="Tidak Menginap" @if($log->keterangan == 'Tidak Menginap') selected @endif>Tidak Menginap</option>
+                                <option value="Menginap" @if($log->keterangan == 'Menginap') selected @endif>Menginap</option>
+                            </select>
+                        </form>
+                    </td>
+                    
+                    <td class="py-3 px-4 text-center">
+                        <button 
+                            @click.prevent="
+                                modalCheckoutOpen = true; 
+                                selectedVehicleId = '{{ $log->id_log }}';
+                                selectedVehicleNopol = '{{ $log->nopol }}';
+                                selectedVehicleStatus = '{{ $log->keterangan }}';
+                            "
+                            class="bg-[#2a4a6f] text-white text-xs font-bold uppercase px-4 py-2 rounded-md shadow hover:bg-blue-700 transition-colors">
+                            Keluar
+                        </button>
+                    </td>
+                </tr>
+                @empty
+                <tr><td colspan="7" class="py-4 px-4 text-center text-gray-500">Tidak ada kendaraan di dalam.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
+
 
     {{-- 2. BAGIAN RIWAYAT KENDARAAN --}}
-    <details open class="mb-4">
-        <summary class="text-lg font-bold text-slate-700 uppercase cursor-pointer list-none flex items-center">
-             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            RIWAYAT :
-        </summary>
-        
-        {{-- Filter Riwayat (Tanggal & Nopol) --}}
+    <div class="mb-4" x-data="{ isOpen: true }">
+    <div @click="isOpen = !isOpen" class="text-lg font-bold text-slate-700 uppercase cursor-pointer flex items-center list-none select-none">
+        <svg class="w-5 h-5 mr-2 transition-transform duration-300 ease-in-out"
+            :class="isOpen ? 'rotate-0' : '-rotate-90'"
+            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+        RIWAYAT :
+    </div>
+    <div x-show="isOpen"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 -translate-y-2"
+        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 -translate-y-2"
+    >
+        <!-- Filter Riwayat -->
         <div class="bg-white rounded-lg shadow-md p-4 mt-2">
             <form action="{{ route('anggota.kendaraan.index') }}" method="GET">
                 <div class="flex flex-col md:flex-row gap-4 items-end">
-                    
-                    {{-- Input Tanggal --}}
                     <div class="flex-1 w-full">
                         <label for="tanggal" class="block text-sm font-bold text-slate-600 uppercase mb-1">TANGGAL :</label>
                         <input 
@@ -107,8 +128,6 @@
                             style="color-scheme: dark;"
                         >
                     </div>
-
-                    {{-- Input Cari Nopol (Baru) --}}
                     <div class="flex-1 w-full">
                         <label for="nopol" class="block text-sm font-bold text-slate-600 uppercase mb-1">CARI NOPOL :</label>
                         <input 
@@ -120,20 +139,16 @@
                             class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder-gray-300 uppercase"
                         >
                     </div>
-
-                    {{-- Tombol Filter --}}
                     <div class="w-full md:w-auto">
                         <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow transition-colors duration-200 flex items-center justify-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                             FILTER
                         </button>
                     </div>
-
                 </div>
             </form>
         </div>
-
-        {{-- Tabel Riwayat --}}
+        <!-- Tabel Riwayat -->
         <div class="bg-white rounded-lg shadow-md p-4 mt-2 overflow-x-auto">
             <table class="w-full min-w-[600px] text-sm text-left">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50">
@@ -166,8 +181,8 @@
                 </tbody>        
             </table>
         </div>
-    </details>
-
+    </div>
+</div>
 
     {{-- 3. TOMBOL FAB (CREATE) --}}
     <button @click.prevent="showCreateModal = true" 

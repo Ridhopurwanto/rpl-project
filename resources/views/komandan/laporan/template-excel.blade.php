@@ -49,7 +49,7 @@
                     <tr>
                         <td class="text-center">{{ $index + 1 }}</td>
                         <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}</td>
-                        <td>{{ $item->nama_lengkap ?? $item->user->nama_lengkap ?? '-' }}</td>
+                        <td>{{ $item->nama_lengkap ?? $item->pengguna->nama_lengkap ?? '-' }}</td>
                         <td class="text-center">{{ \Carbon\Carbon::parse($item->waktu)->format('H:i') }}</td>
                         <td class="text-center">{{ ucfirst($item->status) }}</td>
                         <td class="text-center">{{ ucfirst($item->jenis_presensi) }}</td>
@@ -247,8 +247,8 @@
                 
                 if (!isset($userDetails[$userId])) {
                     // Ambil nama_lengkap dan peran dari User
-                    $namaLengkap = $s->user->nama_lengkap ?? '-';
-                    $peran = $s->user->peran ?? '-';
+                    $namaLengkap = $s->pengguna->nama_lengkap ?? '-';
+                    $peran = $s->pengguna->peran ?? '-';
 
                     $userDetails[$userId] = [
                         'name' => $namaLengkap,
@@ -263,7 +263,7 @@
             }
         @endphp
 
-        <h2>7. {{ strtoupper('Plotting Personil Keamanan (Shift)') }}</h2>
+        <h2>{{ strtoupper('Plotting Personil Keamanan (Shift)') }}</h2>
         
         <div style="margin-bottom: 10px; font-size: 10pt;">
             <strong>Keterangan:</strong> 
