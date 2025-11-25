@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Presensi; // Panggil Model Presensi
 use App\Models\Shift;    // Panggil Model Shift (PENTING)
+use App\Models\ShiftRule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
@@ -28,11 +29,14 @@ class PresensiController extends Controller
         // Query dasar: Gabungkan Presensi dengan Shift
         $query = Presensi::join('shift', 'presensi.id_shift', '=', 'shift.id_shift')
                          ->whereDate('presensi.tanggal', $tanggalFilter)
-                         ->select('presensi.*', 'shift.jenis_shift'); // Pilih kolom
+                         ->select('presensi.*', 'shift.jenis_shift'); // Pilih kolom    
+
+        $shiftId = ShiftRule::where('jenis_shift', $shiftFilter)
+                                  ->first();
 
         // Terapkan filter shift jika bukan 'semua'
         if ($shiftFilter !== 'semua') {
-            $query->where('shift.jenis_shift', $shiftFilter);
+            $query->where('shift.jenis_shift', $shiftId->idshift_rule);
         }
 
         // Clone query dasar untuk memisahkan Masuk dan Pulang

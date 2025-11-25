@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Shift;
+use App\Models\ShiftRule;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -25,7 +26,8 @@ class ManajemenShiftController extends Controller
         $tanggalAkhir = $tanggalAwal->copy()->endOfMonth();
 
         // 2. Ambil data shift dari DB untuk bulan ini saja
-        $shiftsDB = Shift::where('id_pengguna', $id_pengguna)
+        $shiftsDB = Shift::with('shiftRule')
+                         ->where('id_pengguna', $id_pengguna)
                          ->whereBetween('tanggal', [$tanggalAwal->toDateString(), $tanggalAkhir->toDateString()])
                          ->get()
                          ->keyBy('tanggal'); // Supaya mudah diakses array['2025-11-01']
@@ -46,7 +48,7 @@ class ManajemenShiftController extends Controller
             $tglStr = $date->toDateString();
             
             // Cek apakah ada shift di DB, jika tidak default 'Off' (atau kosong)
-            $jenisShift = $shiftsDB[$tglStr]->jenis_shift ?? 'Off'; // Default Off jika belum diisi
+            $jenisShift = $shiftsDB[$tglStr]->shiftRule->jenis_shift ?? 'Off'; // Default Off jika belum diisi
 
             $kalender[] = [
                 'tanggal' => $date->day, // 1, 2, 3...
@@ -77,13 +79,15 @@ class ManajemenShiftController extends Controller
         ]);
 
         try {
+            $shiftRule = ShiftRule::where('jenis_shift', $request->jenis_shift)
+                                  ->first();
             $shift= Shift::updateOrCreate(
                 [
                     'id_pengguna' => $request->id_pengguna,
                     'tanggal'     => $request->tanggal,
                 ],
                 [
-                    'jenis_shift' => $request->jenis_shift,
+                    'jenis_shift' => $shiftRule->idshift_rule,
                 ]
             );
             
