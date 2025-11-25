@@ -102,42 +102,52 @@
         <div class="flex items-center"><span class="w-3 h-3 md:w-4 md:h-4 rounded-full bg-red-500 mr-2"></span> Off</div>
     </div>
 
-    {{-- === 2. INFO SHIFT HARI INI (REVISED) === --}}
+    {{-- === 2. INFO SHIFT HARI INI (BLUE CARD + WAKTU) === --}}
     @php
-        // Logika Warna Badge
-        $badgeClass = 'bg-gray-200 text-gray-600'; // Default
+        // Logika Warna Badge Shift
+        $badgeClass = 'bg-gray-200 text-gray-600'; 
+        // Kita gunakan strtolower agar cocok dengan controller
+        $shiftName = strtolower($shiftHariIni);
 
-        if ($shiftHariIni == 'pagi') { 
-            $badgeClass = 'bg-yellow-400 text-slate-900'; 
-        } elseif ($shiftHariIni == 'malam') { 
-            $badgeClass = 'bg-blue-500 text-white'; 
-        } elseif ($shiftHariIni == 'off') { 
-            $badgeClass = 'bg-red-500 text-white'; 
+        if ($shiftName == 'pagi') { 
+            $badgeClass = 'bg-yellow-400 text-slate-900 border border-yellow-500'; 
+        } elseif ($shiftName == 'malam') { 
+            $badgeClass = 'bg-blue-500 text-white border border-blue-300'; 
+        } elseif ($shiftName == 'off') { 
+            $badgeClass = 'bg-red-500 text-white border border-red-300'; 
         }
     @endphp
 
-    <div class="mt-6 bg-[#2a4a6f] rounded-lg shadow-md p-4 flex items-center justify-between relative overflow-hidden">
-        {{-- Dekorasi Latar Belakang (Opsional: membuat tekstur halus) --}}
-        <div class="absolute -left-4 -bottom-4 text-white opacity-5">
+    <div class="mt-6 bg-[#2a4a6f] rounded-xl shadow-lg p-4 flex items-center justify-between relative overflow-hidden border border-blue-800">
+        {{-- Dekorasi Latar Belakang --}}
+        <div class="absolute -left-4 -bottom-4 text-white opacity-5 pointer-events-none">
             <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"></path></svg>
         </div>
 
         {{-- Label Kiri --}}
         <div class="flex items-center gap-3 z-10">
-            <div class="p-2 bg-white/10 rounded-full text-white">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div class="p-2 bg-white/10 rounded-full text-blue-200 border border-white/10 shadow-inner">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </div>
             <div>
-                <p class="text-[10px] text-blue-200 font-bold uppercase tracking-wider">Jadwal Shift</p>
-                <p class="text-white font-bold text-sm">HARI INI</p>
+                <p class="text-[10px] text-blue-300 font-bold uppercase tracking-wider leading-tight">Jadwal Shift</p>
+                <p class="text-white font-bold text-lg leading-tight">HARI INI</p>
             </div>
         </div>
+        
+        {{-- Bagian Kanan: Badge Shift & Status Waktu --}}
+        <div class="flex flex-col items-end z-10 gap-1">
+            {{-- Badge Shift --}}
+            <div class="{{ $badgeClass }} px-3 py-1 rounded-full shadow-md flex items-center gap-2">
+                <span class="text-xs font-bold uppercase tracking-wide">
+                    {{ $shiftHariIni ? $shiftHariIni : 'TIDAK ADA' }}
+                </span>
+            </div>
 
-        {{-- Badge Kanan (Status Shift) --}}
-        <div class="{{ $badgeClass }} px-4 py-1.5 rounded-full shadow-sm flex items-center gap-2 z-10">
-            <span class="text-xs font-bold uppercase tracking-wide">
-                {{ $shiftHariIni ? $shiftHariIni : 'TIDAK ADA' }}
-            </span>
+            {{-- Info Waktu Terdekat (BARU) --}}
+            <div class="flex items-center gap-1 text-[10px] font-semibold text-blue-100 bg-black/20 px-2 py-0.5 rounded-md mt-1">
+                <span>{{ $jadwalAbsen['info_terdekat'] }}</span>
+            </div>
         </div>
     </div>
 
@@ -246,11 +256,33 @@
         </table>
     </div>
 
-    {{-- === 4. TOMBOL FAB === --}}
-    <button @click="showCreateModal = true; $nextTick(() => startCamera());" 
-            class="fixed z-40 bottom-24 right-6 p-4 bg-[#2a4a6f] rounded-full text-white shadow-lg transform hover:scale-110 transition-transform cursor-pointer">
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-    </button>
+    {{-- === 4. TOMBOL FAB (SMART BUTTON) === --}}
+    <div x-data="{ 
+            canPresensi: {{ $jadwalAbsen['can_presensi'] ? 'true' : 'false' }},
+            pesanError: '{{ $jadwalAbsen['pesan_error'] }}'
+         }">
+        
+        <button 
+            @click="
+                if(!canPresensi) { 
+                    alert(pesanError); 
+                } else { 
+                    showCreateModal = true; 
+                    $nextTick(() => startCamera()); 
+                }
+            " 
+            :class="canPresensi ? 'bg-[#2a4a6f] hover:scale-110 shadow-lg' : 'bg-gray-400 cursor-not-allowed shadow-none opacity-80'"
+            class="fixed z-40 bottom-24 right-6 p-4 rounded-full text-white transition-all duration-300 flex items-center justify-center"
+        >
+            {{-- Ikon Berubah (Plus jika bisa, Gembok jika tidak) --}}
+            <template x-if="canPresensi">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            </template>
+            <template x-if="!canPresensi">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            </template>
+        </button>
+    </div>
 
     {{-- ================= MODAL FOTO & CREATE (SAMA SEPERTI SEBELUMNYA) ================= --}}
     {{-- (Kode Modal Foto & Modal Create Kamera disini sama persis dengan yang di atas, 
@@ -295,23 +327,55 @@
                         @csrf
                         <input type="hidden" name="foto_base64" x-model="imageBase64">
 
-                        <div class="mb-4">
+                        {{-- PILIHAN JENIS PRESENSI (SMART DISABLED) --}}
+                        <div class="mb-4" x-data="{ 
+                            initJenis() {
+                                // Set default jenis sesuai status (jika belum masuk -> masuk, jika sudah -> pulang)
+                                // Data diambil dari controller via $jadwalAbsen
+                                this.jenisPresensi = '{{ $jadwalAbsen['default_jenis'] }}';
+                            }
+                        }" x-init="initJenis()">
+                            
                             <label class="block text-blue-200 text-xs font-bold uppercase mb-2 text-center">PILIH JENIS PRESENSI :</label>
+                            
                             <div class="flex bg-slate-800/50 p-1 rounded-lg border border-white/10">
-                                <label class="flex-1 cursor-pointer">
-                                    <input type="radio" name="jenis_presensi" value="masuk" x-model="jenisPresensi" class="hidden">
-                                    <div class="text-center py-2 rounded-md text-sm font-bold transition-all duration-200" :class="jenisPresensi === 'masuk' ? 'bg-green-600 text-white shadow-md transform scale-105' : 'text-gray-400 hover:text-white'">MASUK</div>
+                                
+                                {{-- TOMBOL MASUK --}}
+                                <label class="flex-1 cursor-pointer relative">
+                                    {{-- Input Radio (Disabled jika sudah masuk) --}}
+                                    <input type="radio" name="jenis_presensi" value="masuk" x-model="jenisPresensi" class="hidden"
+                                        @if($jadwalAbsen['disable_masuk']) disabled @endif>
+                                    
+                                    {{-- Visual Tombol --}}
+                                    <div class="text-center py-2 rounded-md text-sm font-bold transition-all duration-200"
+                                        :class="jenisPresensi === 'masuk' 
+                                            ? 'bg-green-600 text-white shadow-md transform scale-105' 
+                                            : ({{ $jadwalAbsen['disable_masuk'] ? 'true' : 'false' }} ? 'text-gray-600 cursor-not-allowed opacity-50' : 'text-gray-400 hover:text-white')">
+                                        MASUK
+                                    </div>
                                 </label>
-                                <label class="flex-1 cursor-pointer">
-                                    <input type="radio" name="jenis_presensi" value="pulang" x-model="jenisPresensi" class="hidden">
-                                    <div class="text-center py-2 rounded-md text-sm font-bold transition-all duration-200" :class="jenisPresensi === 'pulang' ? 'bg-red-600 text-white shadow-md transform scale-105' : 'text-gray-400 hover:text-white'">PULANG</div>
+
+                                {{-- TOMBOL PULANG --}}
+                                <label class="flex-1 cursor-pointer relative">
+                                    {{-- Input Radio (Disabled jika belum masuk) --}}
+                                    <input type="radio" name="jenis_presensi" value="pulang" x-model="jenisPresensi" class="hidden"
+                                        @if($jadwalAbsen['disable_pulang']) disabled @endif>
+                                    
+                                    {{-- Visual Tombol --}}
+                                    <div class="text-center py-2 rounded-md text-sm font-bold transition-all duration-200"
+                                        :class="jenisPresensi === 'pulang' 
+                                            ? 'bg-red-600 text-white shadow-md transform scale-105' 
+                                            : ({{ $jadwalAbsen['disable_pulang'] ? 'true' : 'false' }} ? 'text-gray-600 cursor-not-allowed opacity-50' : 'text-gray-400 hover:text-white')">
+                                        PULANG
+                                    </div>
                                 </label>
+
                             </div>
                         </div>
 
                         <div class="mb-5 rounded-lg overflow-hidden border-2 border-white/20 bg-black relative aspect-[4/3] shadow-lg">
                             <video x-ref="videoFeed" x-show="cameraState === 'camera'" autoplay playsinline class="w-full h-full object-cover transform scale-x-[-1]"></video>
-                            <img :src="imageBase64" x-show="cameraState === 'preview'" class="w-full h-full object-cover transform scale-x-[-1]" style="display: none;">
+                            <img :src="imageBase64" x-show="cameraState === 'preview'" class="w-full h-full object-cover transform" style="display: none;">
                             <div x-show="cameraState === 'camera' && !stream" class="absolute inset-0 flex items-center justify-center text-white text-xs">Memuat Kamera...</div>
                         </div>
                         <canvas x-ref="canvas" class="hidden"></canvas>
