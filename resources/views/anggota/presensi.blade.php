@@ -162,6 +162,7 @@
                 <div class="flex-1">
                     <label for="start_date" class="block text-xs font-bold text-slate-500 mb-1 uppercase">DARI TANGGAL :</label>
                     <input 
+                        onchange="this.form.submit()"
                         type="date" 
                         id="start_date"
                         name="start_date"
@@ -175,6 +176,7 @@
                 <div class="flex-1">
                     <label for="end_date" class="block text-xs font-bold text-slate-500 mb-1 uppercase">SAMPAI TANGGAL :</label>
                     <input 
+                        onchange="this.form.submit()"
                         type="date" 
                         id="end_date"
                         name="end_date"
@@ -183,15 +185,6 @@
                         style="color-scheme: dark;"
                     >
                 </div>
-
-                {{-- Tombol Filter --}}
-                <div class="md:mb-[1px]"> 
-                    <button type="submit" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded-lg shadow transition-colors duration-200 flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        FILTER
-                    </button>
-                </div>
-
             </div>
         </form>
     </div>

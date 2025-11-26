@@ -27,7 +27,7 @@
                 {{-- Input Bulan --}}
                 <div class="flex-1">
                     <label for="bulan" class="block text-sm font-bold text-slate-600 mb-2 uppercase">PILIH BULAN :</label>
-                    <input type="month" id="bulan" name="bulan" value="{{ $bulan_terpilih }}"
+                    <input type="month" onchange="this.form.submit()" id="bulan" name="bulan" value="{{ $bulan_terpilih }}"
                         class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
                         style="color-scheme: dark;">
                 </div>
@@ -35,7 +35,7 @@
                 <div class="flex-1">
                     <label for="kategori" class="block text-sm font-bold text-slate-600 mb-2 uppercase">KATEGORI :</label>
                     <div class="relative">
-                        <select id="kategori" name="kategori"
+                        <select id="kategori" name="kategori" onchange="this.form.submit()"
                             class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400 appearance-none">
                             <option value="semua" class="bg-white text-gray-900" @if($kategori_terpilih == 'semua') selected @endif>-- Semua Kategori --</option>
                             <option value="Unjuk Rasa" class="bg-white text-gray-900" @if($kategori_terpilih == 'Unjuk Rasa') selected @endif>Unjuk Rasa</option>
@@ -49,13 +49,6 @@
                             <svg class="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                         </div>
                     </div>
-                </div>
-                {{-- Tombol Filter --}}
-                <div class="md:mb-[1px]">
-                    <button type="submit" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded-lg shadow transition-colors duration-200 flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
-                        FILTER
-                    </button>
                 </div>
             </div>
         </form>
