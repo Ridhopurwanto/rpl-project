@@ -13,22 +13,21 @@ class BarangController extends Controller
 {
     /**
      * Menampilkan halaman Laporan Barang (untuk Komandan dan BAU).
-     * [cite: 2360, 2439]
      */
     public function index(Request $request)
     {
-        // Ambil filter dari request
+        // 1. Ambil filter dari request
         $tanggalFilter = $request->input('tanggal', now()->format('Y-m-d'));
         
         // Kategori: 'temuan' atau 'titipan'
         $kategoriFilter = $request->input('kategori', 'temuan'); 
         
-        // Jenis: Filter berdasarkan nama_barang
-        $jenisFilter = $request->input('jenis'); 
+        // Search: Ganti 'jenis' jadi 'search' agar lebih umum
+        $search = $request->input('search'); 
 
         $query = null;
         
-        // Logika untuk membedakan query berdasarkan Kategori
+        // 2. Inisialisasi Query dasar berdasarkan Kategori & Tanggal
         if ($kategoriFilter == 'temuan') {
             $query = BarangTemuan::query()
                         ->whereDate('waktu_lapor', $tanggalFilter)
@@ -40,9 +39,24 @@ class BarangController extends Controller
                         ->orderBy('waktu_titip', 'desc');
         }
 
-        // Terapkan filter Jenis (nama_barang) jika ada
-        if ($jenisFilter) {
-            $query->where('nama_barang', 'like', '%' . $jenisFilter . '%');
+        // 3. Logika LIVE SEARCH Multi-Kolom
+        if ($search) {
+            $query->where(function($q) use ($search, $kategoriFilter) {
+                // Pencarian Umum (Ada di kedua tabel)
+                $q->where('nama_barang', 'LIKE', "%{$search}%")
+                  ->orWhere('catatan', 'LIKE', "%{$search}%");
+
+                // Pencarian Spesifik per Kategori
+                if ($kategoriFilter == 'temuan') {
+                    // Cari Pelapor & Lokasi (khusus Temuan)
+                    $q->orWhere('nama_pelapor', 'LIKE', "%{$search}%")
+                      ->orWhere('lokasi_penemuan', 'LIKE', "%{$search}%");
+                } else {
+                    // Cari Penitip & Tujuan (khusus Titipan)
+                    $q->orWhere('nama_penitip', 'LIKE', "%{$search}%")
+                      ->orWhere('tujuan', 'LIKE', "%{$search}%");
+                }
+            });
         }
 
         $riwayatBarang = $query->get();
@@ -51,10 +65,7 @@ class BarangController extends Controller
             'riwayatBarang' => $riwayatBarang,
             'tanggalTerpilih' => $tanggalFilter,
             'kategoriTerpilih' => $kategoriFilter,
-            'jenisTerpilih' => $jenisFilter,
+            'jenisTerpilih' => $search, // Oper variabel search ke view (bisa dipakai buat value input)
         ]);
     }
-
-    // Fungsi edit/delete tidak ditambahkan sesuai deskripsi UI/UX
-    // yang menyatakan read-only untuk Komandan [cite: 2360, 2363, 2367]
 }

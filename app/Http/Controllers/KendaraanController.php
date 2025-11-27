@@ -17,36 +17,47 @@ class KendaraanController extends Controller
      */
     public function index(Request $request)
     {
-        // --- Filter untuk RIWAYAT ---
+        // 1. Ambil Filter
         $tanggalFilter = $request->input('tanggal', now()->format('Y-m-d'));
-        $tipeFilter = $request->input('tipe'); // 'Roda 2' atau 'Roda 4'
+        $tipeFilter = $request->input('tipe'); 
+        $search = $request->input('search'); // <--- TAMBAHAN: Input Search
 
+        // 2. Query Dasar Riwayat (Filter Tanggal)
         $queryRiwayat = LogKendaraan::with('kendaraan')
             ->where(function($q) use ($tanggalFilter) {
                 $q->whereDate('waktu_masuk', $tanggalFilter)
                   ->orWhereDate('waktu_keluar', $tanggalFilter);
             });
 
+        // 3. Filter Tipe (Jika ada)
         if ($tipeFilter) {
             $queryRiwayat->whereHas('kendaraan', function ($q) use ($tipeFilter) {
                 $q->where('tipe', $tipeFilter);
             });
         }
+
+        // ▼▼▼ 4. LOGIKA LIVE SEARCH (KHUSUS RIWAYAT) ▼▼▼
+        if ($search) {
+            $queryRiwayat->where(function($q) use ($search) {
+                $q->where('nopol', 'LIKE', "%{$search}%")     // Cari Plat (ABCD...)
+                  ->orWhere('pemilik', 'LIKE', "%{$search}%"); // Cari Pemilik
+            });
+        }
         
+        // Eksekusi Query Riwayat
         $riwayat = $queryRiwayat->orderBy('waktu_masuk', 'desc')->get();
 
-        // --- Data untuk KENDARAAN TERDAFTAR ---
+        // --- Data untuk KENDARAAN TERDAFTAR (Tidak kena filter search) ---
         $kendaraanMaster = Kendaraan::orderBy('pemilik', 'asc')->get();
-
         $registeredPlates = $kendaraanMaster->pluck('nomor_plat')->toArray();
 
-        // --- PERBAIKAN: Mengarah ke folder 'komandan' ---
         return view('komandan.kendaraan', [
             'riwayat' => $riwayat,
             'kendaraanMaster' => $kendaraanMaster,
             'tanggalTerpilih' => $tanggalFilter,
             'tipeTerpilih' => $tipeFilter,
-            'registeredPlates' => $registeredPlates, // <-- Kirim data plat ke view
+            'registeredPlates' => $registeredPlates,
+            'search' => $search // <--- Kirim balik agar input tidak hilang
         ]);
     }
 
