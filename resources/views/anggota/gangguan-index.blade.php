@@ -1,18 +1,13 @@
 @extends('layouts.app')
 
 @section('header-left')
-    <a href="{{ route('anggota.gangguan.index') }}" class="bg-[#2a4a6f] text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md">
-        GANGGUAN KAMTIBMAS
+    <a href="{{ route('anggota.gangguan.index') }}" class="bg-[#2a4a6f] text-white text-xs sm:text-sm font-semibold px-4 sm:px-6 py-2 rounded-full shadow-md text-center leading-tight">
+        GANGGUAN<br class="sm:hidden"> KAMTIBMAS
     </a>
 @endsection
 
+
 @section('content')
-{{-- 
-  MAIN ALPINE DATA:
-  1. showCreateModal: Kontrol pop-up form tambah (kamera)
-  2. showPhotoModal: Kontrol pop-up lihat foto riwayat
-  3. photoUrl: URL foto untuk pop-up riwayat
---}}
 <div class="w-full min-h-screen bg-slate-100 p-4 pb-32" 
      x-data="{ 
         showCreateModal: false, 
@@ -54,48 +49,72 @@
         </form>
     </div>
 
-    {{-- TABEL RIWAYAT --}}
-    <div class="bg-white rounded-lg shadow-md p-4 overflow-x-auto">
-        <table class="w-full min-w-[800px] text-sm text-left">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                <tr>
-                    <th class="py-3 px-4">No</th>
-                    <th class="py-3 px-4">Foto</th>
-                    <th class="py-3 px-4">Tanggal</th>
-                    <th class="py-3 px-4">Lokasi</th>
-                    <th class="py-3 px-4">Kategori</th>
-                    <th class="py-3 px-4">Ket</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y">
-                @forelse($laporan_gangguan as $laporan)
-                <tr class="bg-white hover:bg-slate-50 transition-colors">
-                    <td class="py-3 px-4 font-medium">{{ $loop->iteration }}.</td>
-                    <td class="py-3 px-4">
-                        <button @click.prevent="showPhotoModal = true; photoUrl = '{{ Storage::url($laporan->foto) }}'" class="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-semibold transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            Lihat
-                        </button>
-                    </td>
-                    <td class="py-3 px-4 text-gray-600">{{ $laporan->waktu_lapor->format('d/m/Y H:i') }}</td>
-                    <td class="py-3 px-4 text-gray-600">
-                            {{ $laporan->kategori }}
-                    </td>
-                    <td class="py-3 px-4 text-slate-700">{{ $laporan->lokasi }}</td>
-                    <td class="py-3 px-4 text-gray-600">{{ Str::limit($laporan->deskripsi, 50) }}</td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="7" class="py-8 px-4 text-center text-gray-500">
-                        Tidak ada laporan gangguan pada bulan & kategori ini.
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
+    {{-- CARD LAYOUT GANGGUAN KAMTIBMAS --}}
+    <div class="space-y-3">
+        @forelse($laporan_gangguan as $laporan)
+            <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+                {{-- Header Card --}}
+                <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] px-4 py-2.5 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs text-blue-200 font-semibold uppercase">Waktu Lapor</p>
+                        <p class="text-white font-bold text-base">{{ $laporan->waktu_lapor->format('d/m/Y H:i') }}</p>
+                    </div>
+                    
+                    {{-- Badge Kategori dengan Warna Dinamis --}}
+                    <span class="
+                        @if($laporan->kategori == 'Unjuk Rasa') bg-orange-500
+                        @elseif($laporan->kategori == 'Pembakaran Lahan') bg-red-500
+                        @elseif($laporan->kategori == 'Bentrokan Kepolisian') bg-purple-500
+                        @elseif($laporan->kategori == 'Kriminalitas') bg-yellow-500
+                        @elseif($laporan->kategori == 'Kecelakaan') bg-pink-500
+                        @else bg-gray-500
+                        @endif
+                        text-white text-xs font-bold px-3 py-1 rounded-full">
+                        {{ $laporan->kategori }}
+                    </span>
+                </div>
+
+                {{-- Body Card dengan Foto di Kiri --}}
+                <div class="p-4 flex gap-4">
+                    {{-- Foto di Kiri --}}
+                    <div class="flex-shrink-0">
+                        <div @click="showPhotoModal = true; photoUrl = '{{ Storage::url($laporan->foto) }}'" 
+                             class="w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors">
+                            <img src="{{ Storage::url($laporan->foto) }}" 
+                                 alt="Foto Gangguan" 
+                                 class="w-full h-full object-cover">
+                        </div>
+                    </div>
+
+                    {{-- Info di Kanan --}}
+                    <div class="flex-1 space-y-2">
+                        {{-- Lokasi --}}
+                        <div>
+                            <p class="text-xs text-gray-500 font-semibold uppercase">Lokasi</p>
+                            <p class="text-gray-900 font-bold text-base">{{ $laporan->lokasi }}</p>
+                        </div>
+
+                        {{-- Keterangan --}}
+                        <div>
+                            <p class="text-xs text-gray-500 font-semibold uppercase">Keterangan</p>
+                            <p class="text-gray-800 text-sm leading-relaxed">{{ $laporan->deskripsi }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="bg-white rounded-xl shadow-md p-8 text-center">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                </div>
+                <p class="text-gray-500 font-semibold">Tidak ada laporan gangguan pada bulan & kategori ini.</p>
+            </div>
+        @endforelse
     </div>
 
-    {{-- TOMBOL FAB (Trigger Modal Create) --}}
+    {{-- TOMBOL FAB --}}
     <button @click.prevent="showCreateModal = true" 
             class="fixed bottom-24 right-4 bg-[#2a4a6f] text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform z-40 cursor-pointer">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>

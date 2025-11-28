@@ -9,14 +9,8 @@
 @section('content')
 <div class="w-full min-h-screen bg-slate-100 p-4 pb-32" x-data="{ showCreateModal: false }">
 
-    {{-- KOTAK FILTER RENTANG TANGGAL (DENGAN VALIDASI & TOOLTIP) --}}
+    {{-- KOTAK FILTER RENTANG TANGGAL --}}
     <div class="bg-white rounded-lg shadow-md p-5 mb-6">
-        
-        {{-- 
-           x-data Disini:
-           1. Menginisialisasi start & end dengan data dari controller.
-           2. isInvalid: Fungsi pengecekan apakah tanggal mulai > tanggal akhir.
-        --}}
         <form action="{{ route('anggota.tamu.index') }}" method="GET" 
               x-data="{ 
                   start: '{{ $startDate }}', 
@@ -36,10 +30,9 @@
                         type="date" 
                         id="start_date"
                         name="start_date"
-                        x-model="start" {{-- Binding ke Alpine --}}
+                        x-model="start"
                         class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        style="color-scheme: dark;"
-                    >
+                        style="color-scheme: dark;">
                 </div>
 
                 {{-- Input Tanggal Akhir --}}
@@ -50,102 +43,115 @@
                         type="date" 
                         id="end_date"
                         name="end_date"
-                        x-model="end" {{-- Binding ke Alpine --}}
+                        x-model="end"
                         class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        style="color-scheme: dark;"
-                    >
+                        style="color-scheme: dark;">
                 </div>
 
-                {{-- Tombol Filter & Tooltip Wrapper --}}
+                {{-- Tooltip Wrapper --}}
                 <div class="md:mb-[1px] relative"> 
-                    
-                    {{-- TOOLTIP KUNING --}}
-                    {{-- Muncul hanya jika isInvalid bernilai true --}}
                     <div x-show="isInvalid" 
                          x-transition:enter="transition ease-out duration-300"
                          x-transition:enter-start="opacity-0 transform translate-y-2"
                          x-transition:enter-end="opacity-100 transform translate-y-0"
                          class="absolute bottom-full right-0 mb-2 w-48 bg-yellow-100 border border-yellow-400 text-yellow-800 text-xs font-bold px-3 py-2 rounded shadow-lg z-10 text-center">
-                        
                         ⚠️ Tanggal awal tidak boleh melebihi tanggal akhir!
-                        
-                        {{-- Panah kecil tooltip --}}
                         <div class="absolute top-full right-8 -mt-1 w-2 h-2 bg-yellow-100 border-b border-r border-yellow-400 transform rotate-45"></div>
                     </div>
                 </div>
-
             </div>
         </form>
     </div>
 
-    {{-- TABEL RIWAYAT --}}
-    <div class="bg-white rounded-lg shadow-md p-4 overflow-x-auto">
-        <table class="w-full min-w-[600px] text-sm text-left">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                <tr>
-                    <th class="py-3 px-4">No</th>
-                    <th class="py-3 px-4">Nama</th>
-                    <th class="py-3 px-4">Instansi</th>
-                    <th class="py-3 px-4">No. Identitas</th>
-                    <th class="py-3 px-4">Waktu</th>
-                    <th class="py-3 px-4">Tujuan</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y">
-                @forelse($riwayat_tamu as $tamu)
-                <tr class="bg-white hover:bg-slate-50 transition-colors">
-                    <td class="py-3 px-4 font-medium">{{ $loop->iteration }}.</td>
-                    <td class="py-3 px-4 font-medium">{{ $tamu->nama_tamu }}</td>
-                    <td class="py-3 px-4">{{ $tamu->instansi }}</td>
-                    <td class="py-3 px-4 font-medium">{{ !empty($tamu->no_identitas) ? $tamu->no_identitas : '-' }}</td>
-                    <td class="py-3 px-4">
-                        <div class="flex flex-col">
-                            <span class="font-bold">{{ $tamu->waktu_datang->format('H:i') }}</span>
-                            <span class="text-xs text-gray-500">{{ $tamu->waktu_datang->format('d M Y') }}</span>
+    {{-- CARD LAYOUT RIWAYAT TAMU --}}
+    <div class="space-y-3">
+        @forelse($riwayat_tamu as $tamu)
+            <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+                {{-- Header Card dengan Gradient --}}
+                <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] px-4 py-2.5 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs text-blue-200 font-semibold uppercase">Nama Tamu</p>
+                        <p class="text-white font-bold text-base">{{ $tamu->nama_tamu }}</p>
+                    </div>
+                    
+                    {{-- Badge Nomor Urut --}}
+                    <span class="bg-white text-[#2a4a6f] text-sm font-bold px-3 py-1 rounded-full">
+                        {{ $loop->iteration }}
+                    </span>
+                </div>
+
+                {{-- Body Card --}}
+                <div class="p-4 space-y-3">
+                    {{-- Instansi --}}
+                    <div class="flex items-center gap-3 pb-3 border-b border-gray-100">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"></path>
+                            </svg>
                         </div>
-                    </td>
-                    <td class="py-3 px-4">{{ $tamu->tujuan }}</td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="5" class="py-8 px-4 text-center text-gray-500">
-                        <div class="flex flex-col items-center justify-center">
-                            <svg class="w-12 h-12 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                            <p>Tidak ada riwayat tamu pada rentang tanggal ini.</p>
+                        <div class="flex-1">
+                            <p class="text-[10px] text-gray-500 font-semibold uppercase">Instansi</p>
+                            <p class="text-gray-800 font-bold text-base">{{ $tamu->instansi }}</p>
                         </div>
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
+                    </div>
+
+                    {{-- Info Grid 2 Kolom --}}
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                            <p class="text-gray-500 text-xs uppercase mb-1">No. Identitas</p>
+                            <p class="text-gray-800 font-semibold">{{ !empty($tamu->no_identitas) ? $tamu->no_identitas : '-' }}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-xs uppercase mb-1">Waktu Kunjungan</p>
+                            <p class="text-gray-800 font-bold">{{ $tamu->waktu_datang->format('H:i') }}</p>
+                            <p class="text-xs text-gray-500">{{ $tamu->waktu_datang->format('d M Y') }}</p>
+                        </div>
+                    </div>
+
+                    {{-- Tujuan --}}
+                    <div class="pt-2 border-t border-gray-100">
+                        <p class="text-gray-500 text-xs uppercase mb-1">Tujuan Kunjungan</p>
+                        <p class="text-gray-800 text-sm leading-relaxed">{{ $tamu->tujuan }}</p>
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="bg-white rounded-xl shadow-md p-8 text-center">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <p class="text-gray-500 font-semibold">Tidak ada riwayat tamu pada rentang tanggal ini.</p>
+            </div>
+        @endforelse
     </div>
 
-    {{-- Tombol Aksi Tambah (FAB) --}}
-    {{-- MENGGUNAKAN @click untuk membuka modal --}}
+    {{-- Tombol FAB Tambah --}}
     <button @click.prevent="showCreateModal = true" 
             class="fixed bottom-24 right-4 bg-[#2a4a6f] text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform z-40 cursor-pointer">
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
     </button>
 
-    {{-- ================= MODAL CREATE TAMU (PERBAIKAN POSISI X) ================= --}}
+    {{-- MODAL CREATE TAMU --}}
     <div x-show="showCreateModal"
-         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
-         @click.away="showCreateModal = false"
-         style="display: none;"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0">
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
+        @click.away="showCreateModal = false"
+        style="display: none;"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0">
 
-        {{-- Card Modal --}}
         <div class="w-full max-w-md bg-[#2a4a6f] rounded-xl shadow-lg p-6" @click.stop>
             
-            {{-- Header: Tombol Close menggunakan Flexbox agar sejajar dengan input --}}
             <div class="flex justify-end mb-4">
                 <button @click="showCreateModal = false" class="text-gray-300 hover:text-white transition-colors focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
@@ -154,80 +160,107 @@
             <form action="{{ route('anggota.tamu.store') }}" method="POST">
                 @csrf
 
-                {{-- Grid Layout --}}
-                <div class="grid grid-cols-3 gap-x-4 gap-y-5">
+                <div class="space-y-4 sm:space-y-5">
 
-                    <label for="nama_tamu" class="col-span-1 text-gray-300 font-semibold text-sm self-center whitespace-nowrap">NAMA :</label>
-                    <div class="col-span-2">
-                        <input 
-                            type="text" 
-                            id="nama_tamu" 
-                            name="nama_tamu" 
-                            placeholder="Contoh: Pak Habibullah"
-                            class="w-full px-4 py-2 bg-white text-gray-900 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required>
+                    {{-- NAMA --}}
+                    <div class="flex flex-col sm:flex-row gap-1 sm:gap-3">
+                        <label for="nama_tamu" class="text-gray-300 font-semibold text-sm sm:w-40 sm:flex-shrink-0 sm:pt-2">
+                            NAMA :
+                        </label>
+                        <div class="sm:flex-1">
+                            <input 
+                                type="text" 
+                                id="nama_tamu" 
+                                name="nama_tamu" 
+                                placeholder="Contoh: Pak Habibullah"
+                                class="w-full px-4 py-2 bg-white text-gray-900 rounded-md border-none focus:ring-2 focus:ring-blue-500"
+                                required>
+                        </div>
                     </div>
 
-                    <label for="instansi" class="col-span-1 text-gray-300 font-semibold text-sm self-center whitespace-nowrap">INSTANSI :</label>
-                    <div class="col-span-2">
-                        <input 
-                            type="text" 
-                            id="instansi" 
-                            name="instansi" 
-                            placeholder="Contoh: BPS Pusat"
-                            class="w-full px-4 py-2 bg-white text-gray-900 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required>
+                    {{-- INSTANSI --}}
+                    <div class="flex flex-col sm:flex-row gap-1 sm:gap-3">
+                        <label for="instansi" class="text-gray-300 font-semibold text-sm sm:w-40 sm:flex-shrink-0 sm:pt-2">
+                            INSTANSI :
+                        </label>
+                        <div class="sm:flex-1">
+                            <input 
+                                type="text" 
+                                id="instansi" 
+                                name="instansi" 
+                                placeholder="Contoh: BPS Pusat"
+                                class="w-full px-4 py-2 bg-white text-gray-900 rounded-md border-none focus:ring-2 focus:ring-blue-500"
+                                required>
+                        </div>
                     </div>
 
-                    <label for="no_identitas" class="col-span-1 text-gray-300 font-semibold text-sm self-center whitespace-wrap">No. Identitas (NIK, NIP) :</label>
-                    <div class="col-span-2">
-                        <input 
-                            type="text" 
-                            id="no_identitas" 
-                            name="no_identitas" 
-                            placeholder="Contoh: 6402021212120001"
-                            class="w-full px-4 py-2 bg-white text-gray-900 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required>
+                    {{-- NO. IDENTITAS --}}
+                    <div class="flex flex-col sm:flex-row gap-1 sm:gap-3">
+                        <label for="no_identitas" class="text-gray-300 font-semibold text-sm sm:w-40 sm:flex-shrink-0 sm:pt-2 leading-tight">
+                            No. Identitas (NIK, NIP) :
+                        </label>
+                        <div class="sm:flex-1">
+                            <input 
+                                type="text" 
+                                id="no_identitas" 
+                                name="no_identitas" 
+                                placeholder="Contoh: 6402021212120001"
+                                class="w-full px-4 py-2 bg-white text-gray-900 rounded-md border-none focus:ring-2 focus:ring-blue-500"
+                                required>
+                        </div>
                     </div>
                     
-                    <label for="tanggal_kunjungan" class="col-span-1 text-gray-300 font-semibold text-sm self-center whitespace-nowrap">TANGGAL :</label>
-                    <div class="col-span-2">
-                        <div class="relative">
+                    {{-- TANGGAL --}}
+                    <div class="flex flex-col sm:flex-row gap-1 sm:gap-3">
+                        <label for="tanggal_kunjungan" class="text-gray-300 font-semibold text-sm sm:w-40 sm:flex-shrink-0 sm:pt-2">
+                            TANGGAL :
+                        </label>
+                        <div class="sm:flex-1">
                             <input 
                                 type="date" 
                                 id="tanggal_kunjungan" 
                                 name="tanggal_kunjungan" 
                                 value="{{ date('Y-m-d') }}" 
-                                class="w-full px-4 py-2 bg-white text-gray-900 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                required>                        
+                                class="w-full px-4 py-2 bg-white text-gray-900 rounded-md border-none focus:ring-2 focus:ring-blue-500"
+                                required>
                         </div>
                     </div>
 
-                    <label for="jam_kunjungan" class="col-span-1 text-gray-300 font-semibold text-sm self-center whitespace-nowrap">JAM KUNJUNGAN :</label>
-                    <div class="col-span-2">
-                        <input 
-                            type="time" 
-                            id="jam_kunjungan" 
-                            name="jam_kunjungan" 
-                            value="{{ date('H:i') }}" 
-                            class="w-full px-4 py-2 bg-white text-gray-900 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required>
+                    {{-- JAM KUNJUNGAN --}}
+                    <div class="flex flex-col sm:flex-row gap-1 sm:gap-3">
+                        <label for="jam_kunjungan" class="text-gray-300 font-semibold text-sm sm:w-40 sm:flex-shrink-0 sm:pt-2">
+                            JAM KUNJUNGAN :
+                        </label>
+                        <div class="sm:flex-1">
+                            <input 
+                                type="time" 
+                                id="jam_kunjungan" 
+                                name="jam_kunjungan" 
+                                value="{{ date('H:i') }}" 
+                                class="w-full px-4 py-2 bg-white text-gray-900 rounded-md border-none focus:ring-2 focus:ring-blue-500"
+                                required>
+                        </div>
                     </div>
 
-                    <label for="tujuan" class="col-span-1 text-gray-300 font-semibold text-sm self-start whitespace-nowrap">TUJUAN :</label>
-                    <div class="col-span-2">
-                        <textarea 
-                            id="tujuan" 
-                            name="tujuan" 
-                            rows="3"
-                            placeholder="Contoh: Wisuda"
-                            class="w-full px-4 py-2 bg-white text-gray-900 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required></textarea>
+                    {{-- TUJUAN --}}
+                    <div class="flex flex-col sm:flex-row gap-1 sm:gap-3">
+                        <label for="tujuan" class="text-gray-300 font-semibold text-sm sm:w-40 sm:flex-shrink-0 sm:pt-2">
+                            TUJUAN :
+                        </label>
+                        <div class="sm:flex-1">
+                            <textarea 
+                                id="tujuan" 
+                                name="tujuan" 
+                                rows="3"
+                                placeholder="Contoh: Wisuda"
+                                class="w-full px-4 py-2 bg-white text-gray-900 rounded-md border-none focus:ring-2 focus:ring-blue-500"
+                                required></textarea>
+                        </div>
                     </div>
 
                 </div>
 
-                <div class="mt-6">
+                <div class="mt-6 sm:mt-8">
                     <button 
                         type="submit" 
                         class="w-full bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-blue-700 transition-colors duration-300">
@@ -237,6 +270,9 @@
             </form>
         </div>
     </div>
+
+
+
 
 </div>
 @endsection

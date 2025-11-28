@@ -54,91 +54,114 @@
         </div>
     </div>
 
-    {{-- Tabel Patroli --}}
-    <div class="mt-4 mb-32 bg-white rounded-lg shadow overflow-hidden">
-        {{-- TAMBAHKAN WRAPPER INI --}}
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm min-w-[640px]">
-                <thead class="bg-[#2a4a6f] text-white">
-                    <tr>
-                        <th class="w-16 p-3 font-semibold text-center whitespace-nowrap">NO</th>
-                        <th class="p-3 font-semibold text-center whitespace-nowrap">JENIS PATROLI</th>
-                        <th class="p-3 font-semibold text-center whitespace-nowrap">NAMA</th>
-                        <th class="p-3 font-semibold text-center whitespace-nowrap">DETAIL</th>
-                        <th class="p-3 font-semibold text-center whitespace-nowrap">STATUS</th>
-                    </tr>
-                </thead>
-                <tbody class="text-gray-700">
-                @if ($patrolGroups->isEmpty())
-                    <tr>
-                        <td colspan="5" class="p-6 text-center text-gray-500">
-                            Belum ada data patroli untuk tanggal ini.
-                        </td>
-                    </tr>
-                @else
-                    @foreach($patrolGroups as $jenisPatroli => $checkpoints)
-                        @php
-                            $jumlahSelesai = $checkpoints->count();
-                            $isSelesai = $jumlahSelesai >= 17;
-                        @endphp
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="p-3 text-center align-middle whitespace-nowrap">{{ $loop->iteration }}</td>
-                            <td class="p-3 text-center align-middle font-medium whitespace-nowrap">{{ $jenisPatroli }}</td>
-                            <td class="p-3 text-center align-middle font-medium whitespace-nowrap">{{ $checkpoints->first()->nama_lengkap }}</td>
-                            <td class="p-3 text-center align-middle whitespace-nowrap">
-                                <a href="#" 
-                                @click.prevent="
-                                    showModal = true;
-                                    modalGroup = {{ $checkpoints->values() }}; 
-                                    selectedCheckpointIndex = 0;
-                                "
-                                class="text-blue-500 hover:underline font-semibold text-xs">
-                                    Buka
-                                </a>
-                            </td>
-                            
-                            {{-- KOLOM STATUS --}}
-                            <td class="p-3 text-center align-middle whitespace-nowrap">
-                                <div class="flex flex-col items-center justify-center gap-1">
-                                    {{-- Teks Jumlah --}}
-                                    <span class="text-xs font-bold {{ $isSelesai ? 'text-green-600' : 'text-orange-500' }}">
-                                        {{ $jumlahSelesai }} / 17
-                                    </span>
-                                    
-                                    {{-- Badge Status --}}
-                                    @if($isSelesai)
-                                        <span class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200">
-                                            SELESAI
-                                        </span>
-                                    @else
-                                        <span class="bg-yellow-100 text-yellow-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-yellow-200 whitespace-nowrap">
-                                            BELUM SELESAI
-                                        </span>
-                                    @endif
+    {{-- Card Layout Patroli --}}
+    <div class="mt-4 mb-32 space-y-3">
+        @if ($patrolGroups->isEmpty())
+            {{-- Empty State --}}
+            <div class="bg-white rounded-xl shadow-md p-8 text-center">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                </div>
+                <p class="text-gray-500 font-semibold">Belum ada data patroli untuk tanggal ini.</p>
+            </div>
+        @else
+            @foreach($patrolGroups as $jenisPatroli => $checkpoints)
+                @php
+                    $jumlahSelesai = $checkpoints->count();
+                    $isSelesai = $jumlahSelesai >= 17;
+                @endphp
+                
+                <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+                    
+                    {{-- Header: Jenis Patroli & Status --}}
+                    <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] px-4 py-2.5 flex justify-between items-center">
+                        <div>
+                            <p class="text-xs text-blue-200 font-semibold uppercase">Jenis Patroli</p>
+                            <p class="text-white font-bold text-base">{{ $jenisPatroli }}</p>
+                        </div>
+                        
+                        {{-- Badge Status --}}
+                        @if($isSelesai)
+                            <span class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg uppercase flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Selesai
+                            </span>
+                        @else
+                            <span class="bg-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg uppercase">
+                                Proses
+                            </span>
+                        @endif
+                    </div>
+
+                    {{-- Body: Info + Tombol --}}
+                    <div class="p-4 space-y-3">
+                        
+                        {{-- Nama Petugas --}}
+                        <div class="flex items-center gap-3 pb-3 border-b border-gray-100">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-[10px] text-gray-500 font-semibold uppercase">Petugas</p>
+                                <p class="text-gray-800 font-bold text-base">{{ $checkpoints->first()->nama_lengkap }}</p>
+                            </div>
+                        </div>
+
+                        {{-- Progress Bar --}}
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <p class="text-xs text-gray-600 font-semibold">Progress Checkpoint</p>
+                                <span class="text-xs font-bold {{ $isSelesai ? 'text-green-600' : 'text-orange-600' }}">
+                                    {{ $jumlahSelesai }} / 17
+                                </span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                                <div class="h-full rounded-full transition-all {{ $isSelesai ? 'bg-green-500' : 'bg-yellow-500' }}" 
+                                     style="width: {{ ($jumlahSelesai / 17) * 100 }}%">
                                 </div>
-                            </td>
-                        </tr>
-                    @endforeach
-                @endif
-                </tbody>
-            </table>
-        </div>
-        {{-- AKHIR WRAPPER --}}
+                            </div>
+                        </div>
+
+                        {{-- Tombol Detail --}}
+                        <button 
+                            @click.prevent="
+                                showModal = true;
+                                modalGroup = {{ $checkpoints->values() }}; 
+                                selectedCheckpointIndex = 0;
+                            "
+                            class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                            <span class="text-sm">LIHAT DETAIL</span>
+                        </button>
+
+                    </div>
+                </div>
+            @endforeach
+        @endif
     </div>
 
-
-    {{-- Hanya tampilkan tombol jika tanggal yang dipilih adalah HARI INI --}}
+    {{-- Tombol FAB Tambah Patroli --}}
     @if($tanggalTerpilih->isToday())
         <a href="{{ route('anggota.patroli.createSession') }}" 
-           :class="showModal ? 'pointer-events-none opacity-50' : ''"
-           x-bind:tabindex="showModal ? -1 : 0"
-           x-bind:aria-disabled="showModal ? 'true' : 'false'"
-           class="fixed z-50 bottom-28 right-6 md:right-[calc((100vw-768px)/2+24px)] bg-[#2a4a6f] p-4 rounded-full text-white shadow-lg transform hover:scale-110 transition-transform">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path>
+        :class="showModal ? 'pointer-events-none opacity-50' : ''"
+        x-bind:tabindex="showModal ? -1 : 0"
+        x-bind:aria-disabled="showModal ? 'true' : 'false'"
+        class="fixed bottom-24 right-4 bg-[#2a4a6f] text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform z-40 cursor-pointer">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
             </svg>
         </a>
     @endif
+
 
     {{-- Modal Detail Patroli --}}
     <div 

@@ -9,198 +9,259 @@
 @section('content')
 <div class="w-full min-h-screen bg-slate-100 p-4 pb-32" 
      x-data="{ 
-        {{-- State untuk Modal Foto & Selesai --}}
         photoModalOpen: false, 
-        photoModalImage: '',
+        photos: [],
+        currentPhotoIndex: 0,
+        touchStartX: 0,
+        touchEndX: 0,
         selesaiModalOpen: false,
         selesaiFormAction: '',
         namaPenerima: '',
         tanggalSelesai: '{{ now()->format('Y-m-d') }}',
         waktuSelesai: '{{ now()->format('H:i') }}',
-
-        {{-- State untuk Modal Create (Tambah Barang) --}}
         showCreateModal: false,
-     }"
->
+     }">
+
 
     {{-- 1. BAGIAN BARANG TITIPAN (AKTIF) --}}
     <div class="mb-4" x-data="{ isOpen: true }">
-        {{-- Header Accordion --}}
         <div @click="isOpen = !isOpen" class="text-lg font-bold text-slate-700 uppercase cursor-pointer list-none flex items-center select-none">
             <svg class="w-5 h-5 mr-2 transition-transform duration-300 ease-in-out" 
-                 :class="isOpen ? 'rotate-0' : '-rotate-90'" 
-                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                :class="isOpen ? 'rotate-0' : '-rotate-90'" 
+                fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
             BARANG TITIPAN :
         </div>
 
-        {{-- Content Accordion --}}
         <div x-show="isOpen" 
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0 transform -translate-y-2"
-             x-transition:enter-end="opacity-100 transform translate-y-0"
-             x-transition:leave="transition ease-in duration-200"
-             x-transition:leave-start="opacity-100 transform translate-y-0"
-             x-transition:leave-end="opacity-0 transform -translate-y-2"
-             class="bg-white rounded-lg shadow-md p-4 mt-2 overflow-x-auto">
-             
-            <table class="w-full min-w-[700px] text-sm text-left">
-                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                    <tr>
-                        <th class="py-3 px-4">No</th>
-                        <th class="py-3 px-4">Tanggal</th>
-                        <th class="py-3 px-4">Nama Barang</th>
-                        <th class="py-3 px-4">Penitip</th>
-                        <th class="py-3 px-4">Tujuan</th>
-                        <th class="py-3 px-4">Foto</th>
-                        <th class="py-3 px-4 text-center">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y">
-                    @forelse($barang_titipan as $barang)
-                    <tr class="bg-white hover:bg-gray-50">
-                        <td class="py-3 px-4">{{ $loop->iteration }}.</td>
-                        <td class="py-3 px-4">{{ $barang->waktu_titip->format('d/m/y') }}</td>
-                        <td class="py-3 px-4 font-medium">{{ $barang->nama_barang }}</td>
-                        <td class="py-3 px-4">{{ $barang->nama_penitip }}</td>
-                        <td class="py-3 px-4">{{ $barang->tujuan }}</td>
-                        <td class="py-3 px-4">
-                            @if($barang->foto)
-                            <button @click.prevent="photoModalOpen = true; photoModalImage = '{{ Storage::url($barang->foto) }}'" class="text-blue-600 hover:underline text-xs font-bold">Lihat</button>
-                            @else - @endif
-                        </td>
-                        <td class="py-3 px-4 text-center">
-                            <button 
-                                @click.prevent="selesaiModalOpen = true; selesaiFormAction = '{{ route('anggota.barang.selesaiTitipan', $barang->id_barang) }}';"
-                                class="bg-blue-600 text-white text-xs font-bold uppercase px-4 py-2 rounded-md shadow hover:bg-blue-700">
-                                Selesai
-                            </button>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr><td colspan="7" class="py-4 px-4 text-center text-gray-500">Tidak ada barang titipan aktif.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 transform -translate-y-2"
+            x-transition:enter-end="opacity-100 transform translate-y-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 transform translate-y-0"
+            x-transition:leave-end="opacity-0 transform -translate-y-2"
+            class="mt-2 space-y-3">
+            
+            @forelse($barang_titipan as $barang)
+                <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+                    {{-- Header Card --}}
+                    <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] px-4 py-2.5 flex justify-between items-center">
+                        <div>
+                            <p class="text-xs text-blue-200 font-semibold uppercase">Tanggal</p>
+                            <p class="text-white font-bold text-base">{{ $barang->waktu_titip->format('d/m/Y') }}</p>
+                        </div>
+                        <span class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                            TITIPAN
+                        </span>
+                    </div>
+
+                    {{-- Body Card dengan Foto di Kiri & Info Sejajar --}}
+                    <div class="p-4">
+                        <div class="flex gap-4 mb-4">
+                            {{-- Foto Barang di Kiri --}}
+                            <div class="flex-shrink-0">
+                                @if($barang->foto)
+                                    <div @click="photoModalOpen = true; photos = ['{{ Storage::url($barang->foto) }}']; currentPhotoIndex = 0;" 
+                                        class="w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors">
+                                        <img src="{{ Storage::url($barang->foto) }}" 
+                                            alt="Foto Barang" 
+                                            class="w-full h-full object-cover">
+                                    </div>
+                                @else
+                                    <div class="w-24 h-24 rounded-lg bg-gray-100 flex items-center justify-center border-2 border-gray-200">
+                                        <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
+                                @endif
+                            </div>
+
+                            {{-- Info Barang di Kanan (Sejajar dengan Foto) --}}
+                            <div class="flex-1 flex flex-col justify-center space-y-2">
+                                {{-- Nama Barang --}}
+                                <div>
+                                    <p class="text-xs text-gray-500 font-semibold uppercase">Nama Barang</p>
+                                    <p class="text-gray-900 font-bold text-base">{{ $barang->nama_barang }}</p>
+                                </div>
+
+                                {{-- Penitip --}}
+                                <div>
+                                    <p class="text-xs text-gray-500 font-semibold uppercase">Penitip</p>
+                                    <p class="text-gray-800 font-semibold">{{ $barang->nama_penitip }}</p>
+                                </div>
+
+                                {{-- Tujuan --}}
+                                <div>
+                                    <p class="text-xs text-gray-500 font-semibold uppercase">Tujuan</p>
+                                    <p class="text-gray-800 font-semibold">{{ $barang->tujuan }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Tombol Selesai Full Width --}}
+                        <button 
+                            @click.prevent="selesaiModalOpen = true; selesaiFormAction = '{{ route('anggota.barang.selesaiTitipan', $barang->id_barang) }}';"
+                            class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition-all">
+                            SELESAI
+                        </button>
+                    </div>
+                </div>
+            @empty
+                <div class="bg-white rounded-xl shadow-md p-8 text-center">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                        </svg>
+                    </div>
+                    <p class="text-gray-500 font-semibold">Tidak ada barang titipan aktif.</p>
+                </div>
+            @endforelse
         </div>
     </div>
 
     {{-- 2. BAGIAN BARANG TEMUAN (AKTIF) --}}
     <div class="mb-4" x-data="{ isOpen: true }">
-        {{-- Header Accordion --}}
         <div @click="isOpen = !isOpen" class="text-lg font-bold text-slate-700 uppercase cursor-pointer list-none flex items-center select-none">
             <svg class="w-5 h-5 mr-2 transition-transform duration-300 ease-in-out" 
-                 :class="isOpen ? 'rotate-0' : '-rotate-90'" 
-                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                :class="isOpen ? 'rotate-0' : '-rotate-90'" 
+                fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
             BARANG TEMUAN :
         </div>
 
-        {{-- Content Accordion --}}
         <div x-show="isOpen" 
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0 transform -translate-y-2"
-             x-transition:enter-end="opacity-100 transform translate-y-0"
-             x-transition:leave="transition ease-in duration-200"
-             x-transition:leave-start="opacity-100 transform translate-y-0"
-             x-transition:leave-end="opacity-0 transform -translate-y-2"
-             class="bg-white rounded-lg shadow-md p-4 mt-2 overflow-x-auto">
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 transform -translate-y-2"
+            x-transition:enter-end="opacity-100 transform translate-y-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 transform translate-y-0"
+            x-transition:leave-end="opacity-0 transform -translate-y-2"
+            class="mt-2 space-y-3">
 
-            <table class="w-full min-w-[700px] text-sm text-left">
-                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                    <tr>
-                        <th class="py-3 px-4">No</th>
-                        <th class="py-3 px-4">Tanggal</th>
-                        <th class="py-3 px-4">Nama Barang</th>
-                        <th class="py-3 px-4">Pelapor</th>
-                        <th class="py-3 px-4">Lokasi</th>
-                        <th class="py-3 px-4">Foto</th>
-                        <th class="py-3 px-4 text-center">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y">
-                    @forelse($barang_temuan as $barang)
-                    <tr class="bg-white hover:bg-gray-50">
-                        <td class="py-3 px-4">{{ $loop->iteration }}.</td>
-                        <td class="py-3 px-4">{{ $barang->waktu_lapor->format('d/m/y') }}</td>
-                        <td class="py-3 px-4 font-medium">{{ $barang->nama_barang }}</td>
-                        <td class="py-3 px-4">{{ $barang->nama_pelapor }}</td>
-                        <td class="py-3 px-4">{{ $barang->lokasi_penemuan }}</td>
-                        <td class="py-3 px-4">
-                            @if($barang->foto)
-                            <button @click.prevent="photoModalOpen = true; photoModalImage = '{{ Storage::url($barang->foto) }}'" class="text-blue-600 hover:underline text-xs font-bold">Lihat</button>
-                            @else - @endif
-                        </td>
-                        <td class="py-3 px-4 text-center">
-                            <button 
-                                @click.prevent="selesaiModalOpen = true; selesaiFormAction = '{{ route('anggota.barang.selesaiTemuan', $barang->id_barang) }}';"
-                                class="bg-blue-600 text-white text-xs font-bold uppercase px-4 py-2 rounded-md shadow hover:bg-blue-700">
-                                Selesai
-                            </button>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr><td colspan="7" class="py-4 px-4 text-center text-gray-500">Tidak ada barang temuan aktif.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
+            @forelse($barang_temuan as $barang)
+                <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+                    {{-- Header Card --}}
+                    <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] px-4 py-2.5 flex justify-between items-center">
+                        <div>
+                            <p class="text-xs text-blue-200 font-semibold uppercase">Tanggal</p>
+                            <p class="text-white font-bold text-base">{{ $barang->waktu_lapor->format('d/m/Y') }}</p>
+                        </div>
+                        <span class="bg-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                            TEMUAN
+                        </span>
+                    </div>
+
+                    {{-- Body Card dengan Foto di Kiri & Info Sejajar --}}
+                    <div class="p-4">
+                        <div class="flex gap-4 mb-4">
+                            {{-- Foto Barang di Kiri --}}
+                            <div class="flex-shrink-0">
+                                @if($barang->foto)
+                                    <div @click="photoModalOpen = true; photos = ['{{ Storage::url($barang->foto) }}']; currentPhotoIndex = 0;" 
+                                        class="w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors">
+                                        <img src="{{ Storage::url($barang->foto) }}" 
+                                            alt="Foto Barang" 
+                                            class="w-full h-full object-cover">
+                                    </div>
+                                @else
+                                    <div class="w-24 h-24 rounded-lg bg-gray-100 flex items-center justify-center border-2 border-gray-200">
+                                        <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
+                                @endif
+                            </div>
+
+                            {{-- Info Barang di Kanan (Sejajar dengan Foto) --}}
+                            <div class="flex-1 flex flex-col justify-center space-y-2">
+                                {{-- Nama Barang --}}
+                                <div>
+                                    <p class="text-xs text-gray-500 font-semibold uppercase">Nama Barang</p>
+                                    <p class="text-gray-900 font-bold text-base">{{ $barang->nama_barang }}</p>
+                                </div>
+
+                                {{-- Pelapor --}}
+                                <div>
+                                    <p class="text-xs text-gray-500 font-semibold uppercase">Pelapor</p>
+                                    <p class="text-gray-800 font-semibold">{{ $barang->nama_pelapor }}</p>
+                                </div>
+
+                                {{-- Lokasi Penemuan --}}
+                                <div>
+                                    <p class="text-xs text-gray-500 font-semibold uppercase">Lokasi Penemuan</p>
+                                    <p class="text-gray-800 font-semibold">{{ $barang->lokasi_penemuan }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Tombol Selesai Full Width --}}
+                        <button 
+                            @click.prevent="selesaiModalOpen = true; selesaiFormAction = '{{ route('anggota.barang.selesaiTemuan', $barang->id_barang) }}';"
+                            class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition-all">
+                            SELESAI
+                        </button>
+                    </div>
+                </div>
+            @empty
+                <div class="bg-white rounded-xl shadow-md p-8 text-center">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    <p class="text-gray-500 font-semibold">Tidak ada barang temuan aktif.</p>
+                </div>
+            @endforelse
         </div>
     </div>
 
-    {{-- 3. RIWAYAT (LIVE SEARCH & AUTO FILTER) --}}
-    {{-- Gabungkan logic search query dan animasi isOpen disini --}}
+    {{-- 3. RIWAYAT (Layout yang sama) --}}
     <div class="mb-4" x-data="{ isOpen: true, searchQuery: '' }">
-        {{-- Header Accordion --}}
         <div @click="isOpen = !isOpen" class="text-lg font-bold text-slate-700 uppercase cursor-pointer list-none flex items-center select-none">
             <svg class="w-5 h-5 mr-2 transition-transform duration-300 ease-in-out" 
-                 :class="isOpen ? 'rotate-0' : '-rotate-90'" 
-                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                :class="isOpen ? 'rotate-0' : '-rotate-90'" 
+                fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
             RIWAYAT :
         </div>
         
-        {{-- Content Accordion (Wrapper untuk Form Filter & Tabel) --}}
         <div x-show="isOpen" 
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0 transform -translate-y-2"
-             x-transition:enter-end="opacity-100 transform translate-y-0"
-             x-transition:leave="transition ease-in duration-200"
-             x-transition:leave-start="opacity-100 transform translate-y-0"
-             x-transition:leave-end="opacity-0 transform -translate-y-2">
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 transform -translate-y-2"
+            x-transition:enter-end="opacity-100 transform translate-y-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 transform translate-y-0"
+            x-transition:leave-end="opacity-0 transform -translate-y-2">
 
-            {{-- Form Filter --}}
+            {{-- Form Filter (Sama seperti sebelumnya) --}}
             <form action="{{ route('anggota.barang.index') }}" method="GET" class="bg-white p-4 rounded-lg shadow-md mt-2 mb-4">
-                
-                {{-- Search Bar --}}
                 <div class="mb-4">
-                     <label class="text-sm font-bold text-slate-600 uppercase">PENCARIAN (LIVE) :</label>
-                     <div class="relative mt-1">
+                    <label class="text-sm font-bold text-slate-600 uppercase">PENCARIAN (LIVE) :</label>
+                    <div class="relative mt-1">
                         <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-blue-200">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                         </span>
                         <input type="text" 
-                               x-model="searchQuery" 
-                               placeholder="Ketik nama barang, pelapor, atau penerima..." 
-                               class="w-full bg-[#2a4a6f] text-white placeholder-blue-200 px-4 py-2 pl-10 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400">
-                     </div>
+                            x-model="searchQuery" 
+                            placeholder="Ketik nama barang, pelapor, atau penerima..." 
+                            class="w-full bg-[#2a4a6f] text-white placeholder-blue-200 px-4 py-2 pl-10 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    </div>
                 </div>
 
                 <div class="flex flex-col md:flex-row gap-4">
-                    {{-- Tanggal --}}
                     <div class="flex-1 w-full">
                         <label class="text-sm font-bold text-slate-600 uppercase">TANGGAL :</label>
                         <input type="date" 
-                               name="tanggal" 
-                               value="{{ $tanggal_terpilih ?? date('Y-m-d') }}" 
-                               onchange="this.form.submit()"
-                               class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg mt-1 shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400 cursor-pointer"
-                               style="color-scheme: dark;">
+                            name="tanggal" 
+                            value="{{ $tanggal_terpilih ?? date('Y-m-d') }}" 
+                            onchange="this.form.submit()"
+                            class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg mt-1 shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400 cursor-pointer"
+                            style="color-scheme: dark;">
                     </div>
 
-                    {{-- Kategori --}}
                     <div class="flex-1 w-full">
                         <label class="text-sm font-bold text-slate-600 uppercase">KATEGORI :</label>
                         <select name="kategori_riwayat" 
@@ -213,69 +274,112 @@
                 </div>
             </form>
 
-            {{-- Tabel Riwayat --}}
-            <div class="bg-white rounded-lg shadow-md p-4 overflow-x-auto">
-                <table class="w-full min-w-[700px] text-sm text-left">
-                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                        <tr>
-                            <th class="py-3 px-4">No</th>
-                            <th class="py-3 px-4">Foto</th>
-                            <th class="py-3 px-4">Nama Barang</th>
-                            @if($kategori_terpilih == 'titip')
-                                <th class="py-3 px-4">Penitip</th>
-                                <th class="py-3 px-4">Penerima</th>
-                                <th class="py-3 px-4">Tujuan</th>
-                            @else 
-                                <th class="py-3 px-4">Pelapor</th>
-                                <th class="py-3 px-4">Penerima</th>
-                                <th class="py-3 px-4">Lokasi Temuan</th>
-                            @endif
-                            <th class="py-3 px-4">Catatan</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y">
-                        @forelse($riwayat_barang as $barang)
-                        <tr class="bg-white hover:bg-slate-50 transition-colors"
-                            x-show="$el.innerText.toLowerCase().includes(searchQuery.toLowerCase())"
-                            x-transition:enter="transition ease-out duration-300"
-                            x-transition:enter-start="opacity-0 transform scale-95"
-                            x-transition:enter-end="opacity-100 transform scale-100">
-                            
-                            <td class="py-3 px-4">{{ $loop->iteration }}.</td>
-                            <td class="py-3 px-4">
-                                @if($barang->foto)
-                                <button @click.prevent="photoModalOpen = true; photoModalImage = '{{ Storage::url($barang->foto) }}'" class="text-blue-600 hover:underline text-xs font-bold">Lihat</button>
-                                @else - @endif
-                            </td>
-                            <td class="py-3 px-4 font-medium">{{ $barang->nama_barang }}</td>
-                            <td class="py-3 px-4">
-                                @if($barang instanceof \App\Models\BarangTitipan) {{ $barang->nama_penitip }}
-                                @else {{ $barang->nama_pelapor }} @endif
-                            </td>
-                            <td class="py-3 px-4 font-medium">{{ $barang->nama_penerima }}</td>
-                            <td class="py-3 px-4">
-                                @if($barang instanceof \App\Models\BarangTitipan) {{ $barang->tujuan }}
-                                @else {{ $barang->lokasi_penemuan}} @endif
-                            </td>
-                            <td class="py-3 px-4 font-medium">{{ $barang->catatan }}</td>
-                        </tr>
-                        @empty
-                        <tr><td colspan="7" class="py-4 px-4 text-center text-gray-500">Tidak ada riwayat.</td></tr>
-                        @endforelse
+            {{-- Card Riwayat dengan Layout yang Sama --}}
+            <div class="space-y-3">
+                @forelse($riwayat_barang as $barang)
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200"
+                        x-show="$el.innerText.toLowerCase().includes(searchQuery.toLowerCase())"
+                        x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0 transform scale-95"
+                        x-transition:enter-end="opacity-100 transform scale-100">
                         
-                        {{-- Pesan jika pencarian tidak ditemukan --}}
-                        <tr x-show="searchQuery !== ''" style="display: none;">
-                            <td colspan="7" class="py-4 text-center text-gray-400 text-xs italic">
-                                * Tidak ditemukan hasil untuk pencarian "<span x-text="searchQuery"></span>"
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                        {{-- Header Card --}}
+                        <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] px-4 py-2.5 flex justify-between items-center">
+                            <div>
+                                <p class="text-xs text-blue-200 font-semibold uppercase">Nama Barang</p>
+                                <p class="text-white font-bold text-base">{{ $barang->nama_barang }}</p>
+                            </div>
+                            <span class="bg-gray-200 text-gray-700 text-xs font-bold px-3 py-1 rounded-full">
+                                SELESAI
+                            </span>
+                        </div>
+
+                        {{-- Body Card dengan Foto di Kiri & Info Sejajar --}}
+                        <div class="p-4 flex gap-4">
+                            {{-- Foto Barang di Kiri --}}
+                            <div class="flex-shrink-0">
+                                @if($barang->foto)
+                                    <div @click="
+        photoModalOpen = true; 
+        photos = [
+            '{{ Storage::url($barang->foto) }}'
+            @if($barang->foto_penerima)
+            , '{{ Storage::url($barang->foto_penerima) }}'
+            @endif
+        ]; 
+        currentPhotoIndex = 0;
+    " 
+     class="w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors relative">
+    <img src="{{ Storage::url($barang->foto) }}" 
+         alt="Foto Barang" 
+         class="w-full h-full object-cover">
+    
+    {{-- Badge +1 jika ada 2 foto --}}
+    @if($barang->foto_penerima)
+    <div class="absolute bottom-1 right-1 bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+        +1
+    </div>
+    @endif
+</div>
+
+                                @else
+                                    <div class="w-24 h-24 rounded-lg bg-gray-100 flex items-center justify-center border-2 border-gray-200">
+                                        <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
+                                @endif
+                            </div>
+
+                            {{-- Info Barang di Kanan (Sejajar dengan Foto) --}}
+                            <div class="flex-1 flex flex-col justify-center space-y-2">
+                                {{-- Pelapor/Penitip --}}
+                                <div>
+                                    <p class="text-xs text-gray-500 font-semibold uppercase">
+                                        @if($barang instanceof \App\Models\BarangTitipan) Penitip @else Pelapor @endif
+                                    </p>
+                                    <p class="text-gray-800 font-semibold">
+                                        @if($barang instanceof \App\Models\BarangTitipan) {{ $barang->nama_penitip }}
+                                        @else {{ $barang->nama_pelapor }} @endif
+                                    </p>
+                                </div>
+
+                                {{-- Penerima --}}
+                                <div>
+                                    <p class="text-xs text-gray-500 font-semibold uppercase">Penerima</p>
+                                    <p class="text-gray-800 font-semibold">{{ $barang->nama_penerima }}</p>
+                                </div>
+
+                                {{-- Lokasi/Tujuan --}}
+                                <div>
+                                    <p class="text-xs text-gray-500 font-semibold uppercase">
+                                        @if($barang instanceof \App\Models\BarangTitipan) Tujuan @else Lokasi @endif
+                                    </p>
+                                    <p class="text-gray-800 font-semibold text-sm">
+                                        @if($barang instanceof \App\Models\BarangTitipan) {{ $barang->tujuan }}
+                                        @else {{ $barang->lokasi_penemuan}} @endif
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="bg-white rounded-xl shadow-md p-8 text-center">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <p class="text-gray-500 font-semibold">Tidak ada riwayat.</p>
+                    </div>
+                @endforelse
             </div>
         </div>
     </div>
 
-    {{-- 4. TOMBOL FAB (CREATE BARANG) --}}
+
+
+    {{-- 4. TOMBOL FAB --}}
     <button @click.prevent="showCreateModal = true" 
             class="fixed bottom-24 right-4 bg-[#2a4a6f] text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform z-40 cursor-pointer">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
@@ -452,13 +556,72 @@
         </div>
     </div>
 
-    {{-- 6. MODAL LIHAT FOTO (Reuse Logic) --}}
-    <div x-show="photoModalOpen" style="display: none;" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-[60]" x-transition>
-        <div @click.outside="photoModalOpen = false" class="relative max-w-3xl w-full">
-            <button @click="photoModalOpen = false" class="absolute -top-10 right-0 text-white text-xl font-bold">TUTUP [X]</button>
-            <img :src="photoModalImage" class="w-full h-auto max-h-[80vh] object-contain rounded-lg border border-gray-600">
+    {{-- 6. MODAL LIHAT FOTO dengan SLIDER --}}
+    <div x-show="photoModalOpen" 
+        style="display: none;" 
+        class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-[60]" 
+        x-transition
+        @touchstart="touchStartX = $event.changedTouches[0].screenX"
+        @touchend="
+            touchEndX = $event.changedTouches[0].screenX;
+            if (touchStartX - touchEndX > 50 && currentPhotoIndex < photos.length - 1) currentPhotoIndex++;
+            if (touchEndX - touchStartX > 50 && currentPhotoIndex > 0) currentPhotoIndex--;
+        ">
+        
+        <div @click.outside="photoModalOpen = false" class="relative max-w-4xl w-full">
+            
+            {{-- Header Modal --}}
+            <div class="flex justify-between items-center mb-4">
+                <div class="text-white">
+                    <p class="text-sm text-gray-300">Foto <span x-text="currentPhotoIndex + 1"></span> dari <span x-text="photos.length"></span></p>
+                    <p class="text-xs text-gray-400 mt-1" x-text="currentPhotoIndex === 0 ? 'Foto Barang' : 'Foto Penerima'"></p>
+                </div>
+                <button @click="photoModalOpen = false" 
+                        class="text-white hover:text-gray-300 text-2xl font-bold bg-gray-800 hover:bg-gray-700 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                    ×
+                </button>
+            </div>
+
+            {{-- Image Container --}}
+            <div class="relative">
+                <img :src="photos[currentPhotoIndex]" 
+                    class="w-full h-auto max-h-[70vh] object-contain rounded-lg border-4 border-gray-700">
+                
+                {{-- Previous Button --}}
+                <button x-show="currentPhotoIndex > 0" 
+                        @click="currentPhotoIndex--"
+                        class="absolute left-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
+
+                {{-- Next Button --}}
+                <button x-show="currentPhotoIndex < photos.length - 1" 
+                        @click="currentPhotoIndex++"
+                        class="absolute right-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+
+            {{-- Indicator Dots --}}
+            <div class="flex justify-center gap-2 mt-4" x-show="photos.length > 1">
+                <template x-for="(photo, index) in photos" :key="index">
+                    <button @click="currentPhotoIndex = index"
+                            :class="currentPhotoIndex === index ? 'bg-white w-8' : 'bg-gray-500 w-2'"
+                            class="h-2 rounded-full transition-all"></button>
+                </template>
+            </div>
+
+            {{-- Hint --}}
+            <div class="text-center mt-4 text-gray-400 text-xs" x-show="photos.length > 1">
+                Swipe atau gunakan tombol panah untuk navigasi
+            </div>
         </div>
     </div>
+
 
     {{-- 7. MODAL SELESAI (SERAH TERIMA BARANG) --}}
     <div x-show="selesaiModalOpen" 
