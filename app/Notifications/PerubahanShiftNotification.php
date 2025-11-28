@@ -47,7 +47,8 @@ class PerubahanShiftNotification extends Notification
             'message' => $this->pesan, // Isi pesan (Text abu-abu di gambar 1)
             'shift_id' => $this->shiftData->id_shift,
             'type' => 'info', // Bisa untuk warna icon (biru/merah)
-            'icon' => 'fas fa-calendar-alt' // FontAwesome icon
+            'icon' => 'fas fa-calendar-alt', // FontAwesome icon
+            'url' => url('/jadwal')
         ];
     }
 }
