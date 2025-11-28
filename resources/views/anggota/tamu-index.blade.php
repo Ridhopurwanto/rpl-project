@@ -32,6 +32,7 @@
                 <div class="flex-1">
                     <label for="start_date" class="block text-sm font-bold text-slate-600 mb-2 uppercase">Dari Tanggal :</label>
                     <input 
+                        onchange="this.form.submit()"
                         type="date" 
                         id="start_date"
                         name="start_date"
@@ -45,6 +46,7 @@
                 <div class="flex-1">
                     <label for="end_date" class="block text-sm font-bold text-slate-600 mb-2 uppercase">Sampai Tanggal :</label>
                     <input 
+                        onchange="this.form.submit()"
                         type="date" 
                         id="end_date"
                         name="end_date"
@@ -70,16 +72,6 @@
                         {{-- Panah kecil tooltip --}}
                         <div class="absolute top-full right-8 -mt-1 w-2 h-2 bg-yellow-100 border-b border-r border-yellow-400 transform rotate-45"></div>
                     </div>
-
-                    {{-- Tombol Filter --}}
-                    {{-- Disabled jika isInvalid --}}
-                    <button type="submit" 
-                            :disabled="isInvalid"
-                            :class="isInvalid ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'"
-                            class="w-full md:w-auto text-white font-bold py-2 px-8 rounded-lg shadow transition-colors duration-200 flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        FILTER
-                    </button>
                 </div>
 
             </div>
