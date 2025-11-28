@@ -81,6 +81,9 @@
                             <th class="py-3 px-4 text-left w-16">No</th>
                             <th class="py-3 px-4 text-left w-32">Nopol</th>
                             <th class="py-3 px-4 text-left">Pemilik</th>
+                            {{-- ▼▼▼ TAMBAHKAN KOLOM TIPE ▼▼▼ --}}
+                            <th class="py-3 px-4 text-left w-24">Tipe</th>
+                            {{-- ▲▲▲ --}}
                             <th class="py-3 px-4 text-left w-28">Masuk</th>
                             <th class="py-3 px-4 text-left w-28">Keluar</th>
                             <th class="py-3 px-4 text-left w-40">Ket.</th>
@@ -95,6 +98,16 @@
                             <td class="py-2 px-4">{{ $index + 1 }}.</td>
                             <td class="py-2 px-4 font-medium">{{ $log->nopol ?? 'N/A' }}</td>
                             <td class="py-2 px-4">{{ $log->pemilik ?? 'N/A' }}</td>
+                            
+                            {{-- ▼▼▼ TAMPILKAN DATA TIPE ▼▼▼ --}}
+                            <td class="py-2 px-4">
+                                <span class="text-xs font-semibold px-2 py-1 rounded-full 
+                                    {{ $log->tipe == 'Roda 4' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' }}">
+                                    {{ $log->tipe ?? '-' }}
+                                </span>
+                            </td>
+                            {{-- ▲▲▲ --}}
+                            
                             <td class="py-2 px-4 text-gray-700">
                                 @if($log->waktu_masuk && $log->waktu_masuk->format('Y-m-d') == $tanggalTerpilih)
                                     {{ $log->waktu_masuk->format('H:i:s') }}
@@ -127,13 +140,14 @@
                             @endif
                         </tr>
                         @empty
-                        <tr><td colspan="7" class="py-4 px-4 text-center text-gray-500">Data tidak ditemukan.</td></tr>
+                        <tr><td colspan="8" class="py-4 px-4 text-center text-gray-500">Data tidak ditemukan.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+
     {{-- ▲▲▲ End Riwayat Container ▲▲▲ --}}
 
     {{-- Tabel 2: KENDARAAN MASTER (Statik / Tidak ikut search ini) --}}
