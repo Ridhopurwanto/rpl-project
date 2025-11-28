@@ -162,6 +162,7 @@
                 <div class="flex-1">
                     <label for="start_date" class="block text-xs font-bold text-slate-500 mb-1 uppercase">DARI TANGGAL :</label>
                     <input 
+                        onchange="this.form.submit()"
                         type="date" 
                         id="start_date"
                         name="start_date"
@@ -175,6 +176,7 @@
                 <div class="flex-1">
                     <label for="end_date" class="block text-xs font-bold text-slate-500 mb-1 uppercase">SAMPAI TANGGAL :</label>
                     <input 
+                        onchange="this.form.submit()"
                         type="date" 
                         id="end_date"
                         name="end_date"
@@ -183,78 +185,74 @@
                         style="color-scheme: dark;"
                     >
                 </div>
-
-                {{-- Tombol Filter --}}
-                <div class="md:mb-[1px]"> 
-                    <button type="submit" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded-lg shadow transition-colors duration-200 flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        FILTER
-                    </button>
-                </div>
-
             </div>
         </form>
     </div>
 
     {{-- === 3. TABEL RIWAYAT === --}}
     <div class="mt-4 mb-20 bg-white rounded-lg shadow overflow-hidden">
-        <table class="w-full text-sm">
-            <thead class="bg-[#2a4a6f] text-white">
-                <tr>
-                    <th class="p-3 text-center">Tanggal</th>
-                    <th class="p-3 text-center">Waktu</th>
-                    <th class="p-3 text-center">Jenis Presensi</th>
-                    <th class="p-3 text-center">Status</th>
-                    <th class="p-3 text-center">Foto</th>
-                </tr>
-            </thead>
-            <tbody class="text-gray-700 divide-y">
-                @forelse($riwayatPresensi as $log)
-                    <tr class="text-center bg-white hover:bg-gray-50">
-                        {{-- Tanggal --}}
-                        <td class="p-3 font-medium text-gray-600">
-                            {{ $log->waktu->format('d/m/y') }}
-                        </td>
-                        
-                        {{-- Waktu --}}
-                        <td class="p-3 font-bold text-gray-800">
-                            {{ $log->waktu->format('H:i') }}
-                        </td>
-
-                        {{-- Jenis Presensi --}}
-                        <td class="p-3">
-                            <span class="text-[10px] font-bold px-2 py-1 rounded uppercase 
-                                {{ $log->jenis_presensi == 'masuk' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800' }}">
-                                {{ $log->jenis_presensi }}
-                            </span>
-                        </td>
-
-                        {{-- Status --}}
-                        <td class="p-3">
-                            @if($log->status == 'Terlambat')
-                                <span class="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-1 rounded-full">Telat</span>
-                            @elseif($log->status == 'Tepat Waktu' || $log->status == 'Hadir')
-                                <span class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-1 rounded-full">Hadir</span>
-                            @else
-                                <span class="bg-gray-100 text-gray-800 text-[10px] font-bold px-2 py-1 rounded-full">{{ $log->status }}</span>
-                            @endif
-                        </td>
-
-                        {{-- Foto --}}
-                        <td class="p-3">
-                            <button @click="showPhotoModal = true; modalPhoto = '{{ asset('storage/' . $log->foto) }}'" class="text-blue-600 underline font-bold text-xs">Lihat</button>
-                        </td>
-                    </tr>
-                @empty
+        {{-- TAMBAHKAN WRAPPER INI --}}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-[#2a4a6f] text-white">
                     <tr>
-                        <td colspan="5" class="p-6 text-center text-gray-500">
-                            Tidak ada data presensi pada rentang tanggal ini.
-                        </td>
+                        <th class="p-3 text-center whitespace-nowrap">Tanggal</th>
+                        <th class="p-3 text-center whitespace-nowrap">Waktu</th>
+                        <th class="p-3 text-center whitespace-nowrap">Jenis Presensi</th>
+                        <th class="p-3 text-center whitespace-nowrap">Status</th>
+                        <th class="p-3 text-center whitespace-nowrap">Foto</th>
                     </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody class="text-gray-700 divide-y">
+                    @forelse($riwayatPresensi as $log)
+                        <tr class="text-center bg-white hover:bg-gray-50">
+                            {{-- Tanggal --}}
+                            <td class="p-3 font-medium text-gray-600 whitespace-nowrap">
+                                {{ $log->waktu->format('d/m/y') }}
+                            </td>
+                            
+                            {{-- Waktu --}}
+                            <td class="p-3 font-bold text-gray-800 whitespace-nowrap">
+                                {{ $log->waktu->format('H:i') }}
+                            </td>
+
+                            {{-- Jenis Presensi --}}
+                            <td class="p-3 whitespace-nowrap">
+                                <span class="text-[10px] font-bold px-2 py-1 rounded uppercase 
+                                    {{ $log->jenis_presensi == 'masuk' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800' }}">
+                                    {{ $log->jenis_presensi }}
+                                </span>
+                            </td>
+
+                            {{-- Status --}}
+                            <td class="p-3 whitespace-nowrap">
+                                @if($log->status == 'Terlambat')
+                                    <span class="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-1 rounded-full">Telat</span>
+                                @elseif($log->status == 'Tepat Waktu' || $log->status == 'Hadir')
+                                    <span class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-1 rounded-full">Hadir</span>
+                                @else
+                                    <span class="bg-gray-100 text-gray-800 text-[10px] font-bold px-2 py-1 rounded-full">{{ $log->status }}</span>
+                                @endif
+                            </td>
+
+                            {{-- Foto --}}
+                            <td class="p-3 whitespace-nowrap">
+                                <button @click="showPhotoModal = true; modalPhoto = '{{ asset('storage/' . $log->foto) }}'" class="text-blue-600 underline font-bold text-xs">Lihat</button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="p-6 text-center text-gray-500">
+                                Tidak ada data presensi pada rentang tanggal ini.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        {{-- AKHIR WRAPPER --}}
     </div>
+
 
     {{-- === 4. TOMBOL FAB (SMART BUTTON) === --}}
     <div x-data="{ 

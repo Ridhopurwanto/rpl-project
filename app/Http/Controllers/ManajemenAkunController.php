@@ -11,31 +11,33 @@ use Illuminate\Validation\Rules\Password;
 
 class ManajemenAkunController extends Controller
 {
-
+    /**
+     * Menampilkan daftar akun pengguna.
+     */
     public function index()
     {
-        // DIUBAH: Menggunakan model User dan variabel $users
+        // Mengambil semua user diurutkan berdasarkan nama
         $users = User::orderBy('nama_lengkap')->get();
         
-        // Tampilkan view dan kirim data pengguna
         return view('komandan.akun.index', compact('users'));
     }
 
     /**
-     * Menyimpan data akun baru (dari modal "Tambah Akun").
+     * Menyimpan data akun baru.
      */
     public function store(Request $request)
     {
         $request->validate([
             'nama_lengkap' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:pengguna,username',
-            'password' => ['required', 'confirmed', Password::min(8)],
-            'peran' => ['required', Rule::in(['anggota', 'komandan', 'bau'])],
-            'status' => ['required', Rule::in(['Aktif', 'Tidak Aktif'])],
-            'tanggal_lahir' => 'nullable|date',
-            'no_hp' => 'nullable|string|max:20',
-            'alamat' => 'nullable|string',
-            'foto_profil' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            // Pastikan tabel di DB bernama 'users' atau sesuaikan 'unique:users,username'
+            'username'     => 'required|string|max:255|unique:pengguna,username', 
+            'password'     => ['required', 'confirmed', Password::min(8)],
+            'peran'        => ['required', Rule::in(['anggota', 'komandan', 'bau'])],
+            'status'       => ['required', Rule::in(['Aktif', 'Tidak Aktif'])],
+            'tanggal_lahir'=> 'nullable|date',
+            'no_hp'        => 'nullable|string|max:20',
+            'alamat'       => 'nullable|string',
+            'foto_profil'  => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $data = $request->except(['password', 'foto_profil', 'password_confirmation']);
@@ -43,50 +45,50 @@ class ManajemenAkunController extends Controller
         // Hash password
         $data['password'] = Hash::make($request->password);
 
-        // Handle upload foto profil
+        // Upload Foto
         if ($request->hasFile('foto_profil')) {
             $path = $request->file('foto_profil')->store('akun', 'public');
             $data['foto_profil'] = $path;
         }
 
-        User::create($data); // DIUBAH: Menggunakan model User
+        User::create($data);
 
         return redirect()->route('komandan.akun.index')->with('success', 'Akun baru berhasil ditambahkan.');
     }
 
     /**
-     * Memperbarui data akun (dari modal "Edit Akun").
+     * Memperbarui data akun.
      */
     public function update(Request $request, $id_pengguna)
     {
-        $user = User::findOrFail($id_pengguna); // DIUBAH: Menggunakan model User
+        $user = User::findOrFail($id_pengguna);
 
         $request->validate([
             'nama_lengkap' => 'required|string|max:255',
-            'username' => ['required', 'string', 'max:255', Rule::unique('pengguna')->ignore($user->id_pengguna, 'id_pengguna')],
-            'password' => ['nullable', 'confirmed', Password::min(8)], // Password opsional
-            'peran' => ['required', Rule::in(['anggota', 'komandan', 'bau'])],
-            'status' => ['required', Rule::in(['Aktif', 'Tidak Aktif'])],
-            'tanggal_lahir' => 'nullable|date',
-            'no_hp' => 'nullable|string|max:20',
-            'alamat' => 'nullable|string',
-            'foto_profil' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            // Validasi unique mengecualikan ID pengguna saat ini
+            'username'     => ['required', 'string', 'max:255', Rule::unique('pengguna')->ignore($user->id_pengguna, 'id_pengguna')],
+            'password'     => ['nullable', 'confirmed', Password::min(8)],
+            'peran'        => ['required', Rule::in(['anggota', 'komandan', 'bau'])],
+            'status'       => ['required', Rule::in(['Aktif', 'Tidak Aktif'])],
+            'tanggal_lahir'=> 'nullable|date',
+            'no_hp'        => 'nullable|string|max:20',
+            'alamat'       => 'nullable|string',
+            'foto_profil'  => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $data = $request->except(['password', 'foto_profil', 'password_confirmation']);
 
-        // Cek jika password diisi, hash password baru
+        // Update password hanya jika diisi
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
         }
 
-        // Handle upload foto profil baru
+        // Update Foto
         if ($request->hasFile('foto_profil')) {
-            // Hapus foto lama jika ada
+            // Hapus foto lama
             if ($user->foto_profil && Storage::disk('public')->exists($user->foto_profil)) {
                 Storage::disk('public')->delete($user->foto_profil);
             }
-            // Simpan foto baru
             $path = $request->file('foto_profil')->store('akun', 'public');
             $data['foto_profil'] = $path;
         }
@@ -97,13 +99,12 @@ class ManajemenAkunController extends Controller
     }
 
     /**
-     * Menghapus data akun (sesuai diagram aktivitas).
+     * Menghapus akun.
      */
     public function destroy($id_pengguna)
     {
-        $user = User::findOrFail($id_pengguna); // DIUBAH: Menggunakan model User
+        $user = User::findOrFail($id_pengguna);
 
-        // Hapus foto profil dari storage
         if ($user->foto_profil && Storage::disk('public')->exists($user->foto_profil)) {
             Storage::disk('public')->delete($user->foto_profil);
         }
