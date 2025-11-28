@@ -20,6 +20,7 @@ use App\Http\Controllers\Anggota\TamuController as AnggotaTamuController;
 use App\Http\Controllers\Anggota\GangguanKamtibmasController as AnggotaGangguanKamtibmasController;
 use App\Http\Controllers\Anggota\BarangController as AnggotaBarangController;
 use App\Http\Controllers\LaporanUnduhController;
+use App\Http\Controllers\ProfilController;
 
 // Rute untuk tamu (belum login)
 Route::middleware('guest')->group(function () {
@@ -60,6 +61,13 @@ Route::get('/notifikasi/baca-semua', [NotificationController::class, 'markAllRea
 
 // Rute untuk yang sudah login
 Route::middleware('auth')->group(function () {
+
+    Route::middleware(['auth'])->group(function () {
+    Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
+    Route::get('/profil/edit', [ProfilController::class, 'edit'])->name('profil.edit');
+    Route::post('/profil/update', [ProfilController::class, 'update'])->name('profil.update');
+    Route::post('/profil/password', [ProfilController::class, 'updatePassword'])->name('profil.password');
+    });
 
     // --- RUTE UNTUK ANGGOTA ---
     Route::prefix('anggota')->name('anggota.')->group(function () {

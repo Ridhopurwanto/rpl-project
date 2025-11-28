@@ -162,9 +162,10 @@
                                 {{-- Tombol Aksi (Sesuai Permintaan) --}}
                                 <div class="space-y-2">
                                     {{-- 1. INFO PROFIL --}}
-                                    <a href="#" class="block w-full text-center px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                                    <a href="{{ route('profil.index') }}" class="block w-full text-center px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700">
                                         Info Profil
                                     </a>
+
                                     
                                     {{-- 2. PILIH ROLE --}}
                                     {{-- Tampilkan tombol ini HANYA jika rolenya komandan --}}

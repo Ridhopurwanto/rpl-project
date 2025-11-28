@@ -56,71 +56,76 @@
 
     {{-- Tabel Patroli --}}
     <div class="mt-4 mb-32 bg-white rounded-lg shadow overflow-hidden">
-        <table class="w-full text-sm table-fixed">
-            <thead class="bg-[#2a4a6f] text-white">
-                <tr>
-                    <th class="w-16 p-3 font-semibold text-center">NO</th>
-                    <th class="p-3 font-semibold text-center">JENIS PATROLI</th>
-                    <th class="p-3 font-semibold text-center">NAMA</th>
-                    <th class="p-3 font-semibold text-center">DETAIL</th>
-                    <th class="p-3 font-semibold text-center">STATUS</th>
-                </tr>
-            </thead>
-            <tbody class="text-gray-700">
-            @if ($patrolGroups->isEmpty())
-                <tr>
-                    <td colspan="5" class="p-6 text-center text-gray-500"> {{-- Colspan disesuaikan jadi 5 --}}
-                        Belum ada data patroli untuk tanggal ini.
-                    </td>
-                </tr>
-            @else
-                @foreach($patrolGroups as $jenisPatroli => $checkpoints)
-                    @php
-                        $jumlahSelesai = $checkpoints->count();
-                        $isSelesai = $jumlahSelesai >= 17;
-                    @endphp
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="p-3 text-center align-middle">{{ $loop->iteration }}</td>
-                        <td class="p-3 text-center align-middle font-medium">{{ $jenisPatroli }}</td>
-                        <td class="p-3 text-center align-middle font-medium">{{ $checkpoints->first()->nama_lengkap }}</td>
-                        <td class="p-3 text-center align-middle">
-                            <a href="#" 
-                            @click.prevent="
-                                showModal = true;
-                                modalGroup = {{ $checkpoints->values() }}; 
-                                selectedCheckpointIndex = 0;
-                            "
-                            class="text-blue-500 hover:underline font-semibold text-xs">
-                                Buka
-                            </a>
-                        </td>
-                        
-                        {{-- KOLOM STATUS BARU --}}
-                        <td class="p-3 text-center align-middle">
-                            <div class="flex flex-col items-center justify-center gap-1">
-                                {{-- Teks Jumlah --}}
-                                <span class="text-xs font-bold {{ $isSelesai ? 'text-green-600' : 'text-orange-500' }}">
-                                    {{ $jumlahSelesai }} / 17
-                                </span>
-                                
-                                {{-- Badge Status --}}
-                                @if($isSelesai)
-                                    <span class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200">
-                                        SELESAI
-                                    </span>
-                                @else
-                                    <span class="bg-yellow-100 text-yellow-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-yellow-200 whitespace-nowrap">
-                                        BELUM SELESAI
-                                    </span>
-                                @endif
-                            </div>
+        {{-- TAMBAHKAN WRAPPER INI --}}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm min-w-[640px]">
+                <thead class="bg-[#2a4a6f] text-white">
+                    <tr>
+                        <th class="w-16 p-3 font-semibold text-center whitespace-nowrap">NO</th>
+                        <th class="p-3 font-semibold text-center whitespace-nowrap">JENIS PATROLI</th>
+                        <th class="p-3 font-semibold text-center whitespace-nowrap">NAMA</th>
+                        <th class="p-3 font-semibold text-center whitespace-nowrap">DETAIL</th>
+                        <th class="p-3 font-semibold text-center whitespace-nowrap">STATUS</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-700">
+                @if ($patrolGroups->isEmpty())
+                    <tr>
+                        <td colspan="5" class="p-6 text-center text-gray-500">
+                            Belum ada data patroli untuk tanggal ini.
                         </td>
                     </tr>
-                @endforeach
-            @endif
-        </tbody>
-        </table>
+                @else
+                    @foreach($patrolGroups as $jenisPatroli => $checkpoints)
+                        @php
+                            $jumlahSelesai = $checkpoints->count();
+                            $isSelesai = $jumlahSelesai >= 17;
+                        @endphp
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="p-3 text-center align-middle whitespace-nowrap">{{ $loop->iteration }}</td>
+                            <td class="p-3 text-center align-middle font-medium whitespace-nowrap">{{ $jenisPatroli }}</td>
+                            <td class="p-3 text-center align-middle font-medium whitespace-nowrap">{{ $checkpoints->first()->nama_lengkap }}</td>
+                            <td class="p-3 text-center align-middle whitespace-nowrap">
+                                <a href="#" 
+                                @click.prevent="
+                                    showModal = true;
+                                    modalGroup = {{ $checkpoints->values() }}; 
+                                    selectedCheckpointIndex = 0;
+                                "
+                                class="text-blue-500 hover:underline font-semibold text-xs">
+                                    Buka
+                                </a>
+                            </td>
+                            
+                            {{-- KOLOM STATUS --}}
+                            <td class="p-3 text-center align-middle whitespace-nowrap">
+                                <div class="flex flex-col items-center justify-center gap-1">
+                                    {{-- Teks Jumlah --}}
+                                    <span class="text-xs font-bold {{ $isSelesai ? 'text-green-600' : 'text-orange-500' }}">
+                                        {{ $jumlahSelesai }} / 17
+                                    </span>
+                                    
+                                    {{-- Badge Status --}}
+                                    @if($isSelesai)
+                                        <span class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200">
+                                            SELESAI
+                                        </span>
+                                    @else
+                                        <span class="bg-yellow-100 text-yellow-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-yellow-200 whitespace-nowrap">
+                                            BELUM SELESAI
+                                        </span>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                @endif
+                </tbody>
+            </table>
+        </div>
+        {{-- AKHIR WRAPPER --}}
     </div>
+
 
     {{-- Hanya tampilkan tombol jika tanggal yang dipilih adalah HARI INI --}}
     @if($tanggalTerpilih->isToday())
