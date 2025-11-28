@@ -23,6 +23,10 @@ class NotificationController extends Controller
             // (Opsional) Jika kamu ingin redirect ke halaman spesifik 
             // berdasarkan data notifikasi, bisa tambahkan logika di sini.
             // Contoh: return redirect($notification->data['url']);
+            if (isset($notification->data['url'])) {
+                // Jika ada URL di data notifikasi, redirect ke sana
+                return redirect($notification->data['url']);
+            }
         }
 
         // Kembali ke halaman sebelumnya (agar user tidak merasa berpindah halaman)
