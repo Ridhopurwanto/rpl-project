@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Anggota;
 
 use App\Http\Controllers\Controller;
 use App\Models\LogKendaraan;
-use App\Models\Kendaraan; // Pastikan ini di-import
+use App\Models\Kendaraan;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth; // <-- Tetap di sini untuk nanti
+use Illuminate\Support\Facades\Auth;
 
 class KendaraanController extends Controller
 {
@@ -22,15 +22,19 @@ class KendaraanController extends Controller
                             ->get();
 
         // 2. Filter tanggal riwayat
-        // PERBAIKAN: Filter berdasarkan 'waktu_keluar' karena kolom 'tanggal' tidak ada
         $tanggal_riwayat = $request->input('tanggal', Carbon::today()->toDateString());
         $nopol_filter    = $request->input('nopol');
 
         $query = LogKendaraan::where('status', 'Keluar')
                              ->whereDate('waktu_keluar', $tanggal_riwayat);
+        
         if ($nopol_filter) {
-            // Menggunakan 'like' dengan % agar bisa cari potongan (misal: '123' ketemu 'B 1234 XY')
-            $query->where('nopol', 'like', '%' . $nopol_filter . '%');
+            $query->where(function($q) use ($nopol_filter) {
+                $q->where('nopol', 'like', strtoupper($nopol_filter) . '%')
+                  ->orWhereRaw("pemilik REGEXP ?", [
+                      '(^|[[:space:]])' . preg_quote(strtoupper($nopol_filter), '/')
+                  ]);
+            });
         }
 
         $riwayat_kendaraan = $query->orderBy('waktu_keluar', 'desc')->get();
@@ -39,7 +43,7 @@ class KendaraanController extends Controller
             'kendaraan_aktif'   => $kendaraan_aktif,
             'riwayat_kendaraan' => $riwayat_kendaraan,
             'tanggal_terpilih'  => $tanggal_riwayat,
-            'nopol_filter'      => $nopol_filter, // Kirim balik agar input tidak hilang setelah submit
+            'nopol_filter'      => $nopol_filter,
         ]);
     }
 
@@ -52,14 +56,10 @@ class KendaraanController extends Controller
     }
 
     /**
-     * =========================================================
-     * PERBAIKAN FUNGSI STORE
-     * Menghapus 'id_pengguna' dan 'tanggal' agar sesuai DB
-     * =========================================================
+     * Menyimpan kendaraan baru ke log
      */
     public function store(Request $request)
     {
-        // 1. Validasi
         $request->validate([
             'nopol' => 'required|string|max:20',
             'pemilik' => 'required|string|max:100',
@@ -70,28 +70,18 @@ class KendaraanController extends Controller
         ]);
 
         $nopol = strtoupper($request->nopol);
-
-        // 2. LOGIKA BARU:
-        // Cukup CARI kendaraan di tabel master. JANGAN buat baru.
         $kendaraanMaster = Kendaraan::where('nomor_plat', $nopol)->first();
-        
-        // Dapatkan ID-nya jika ada, jika tidak, biarkan NULL
         $idKendaraan = $kendaraanMaster ? $kendaraanMaster->id_kendaraan : null;
-
-        // 3. Gabungkan tanggal dan waktu
         $waktu_masuk = Carbon::parse($request->tanggal . ' ' . $request->waktu);
 
-        // 4. Buat Log Kendaraan
         LogKendaraan::create([
             'id_kendaraan' => $idKendaraan, 
-            // 'id_pengguna' DIHAPUS
             'nopol'        => $nopol, 
             'pemilik'      => $request->pemilik,
             'tipe'         => $request->tipe,
             'keterangan'   => $request->keterangan,
             'waktu_masuk'  => $waktu_masuk,
             'status'       => 'Masuk',
-            // 'tanggal' DIHAPUS
         ]);
 
         return redirect()->route('anggota.kendaraan.index')
@@ -99,7 +89,7 @@ class KendaraanController extends Controller
     }
 
     /**
-     * Meng-update Keterangan (Menginap/Tidak) dari halaman index.
+     * Meng-update Keterangan (Menginap/Tidak)
      */
     public function updateKeterangan(Request $request, $id_kendaraan_log)
     {
@@ -117,9 +107,8 @@ class KendaraanController extends Controller
         return redirect()->route('anggota.kendaraan.index')->with('error', 'Tidak dapat mengubah keterangan kendaraan yang sudah keluar.');
     }
 
-
     /**
-     * Memproses checkout kendaraan (dari modal "Keluar").
+     * Memproses checkout kendaraan
      */
     public function checkout(Request $request, $id_kendaraan_log)
     {
@@ -128,7 +117,6 @@ class KendaraanController extends Controller
         ]);
 
         $log = LogKendaraan::findOrFail($id_kendaraan_log);
-
         $keterangan = $request->menginap == '1' ? 'Menginap' : 'Tidak Menginap';
 
         $log->update([
@@ -142,23 +130,101 @@ class KendaraanController extends Controller
     }
 
     /**
-     * API untuk fitur autocomplete di form create
+     * API UNTUK SUGGESTION AUTOCOMPLETE
+     * Support untuk dropdown suggestion
      */
     public function searchNopol(Request $request)
     {
-        $request->validate(['search' => 'nullable|string|max:20']);
+        $request->validate([
+            'search' => 'nullable|string|max:50',
+            'tanggal' => 'nullable|date',
+        ]);
+
         $searchTerm = $request->input('search');
+        $tanggal = $request->input('tanggal');
 
         if (empty($searchTerm)) {
             return response()->json([]);
         }
 
-        $kendaraan = Kendaraan::where('nomor_plat', 'LIKE', '%' . $searchTerm . '%')
-                              ->take(5)
-                              ->get();
+        $searchTerm = strtoupper(trim($searchTerm));
+
+        // ▼▼▼ UNTUK FILTER RIWAYAT (dengan tanggal) ▼▼▼
+        if ($tanggal) {
+            $results = LogKendaraan::where('status', 'Keluar')
+                                   ->whereDate('waktu_keluar', $tanggal)
+                                   ->where(function($query) use ($searchTerm) {
+                                       $query->where('nopol', 'LIKE', $searchTerm . '%')
+                                             ->orWhereRaw("pemilik REGEXP ?", [
+                                                 '(^|[[:space:]])' . preg_quote($searchTerm, '/')
+                                             ]);
+                                   })
+                                   ->select('nopol', 'pemilik', 'tipe')
+                                   ->groupBy('nopol', 'pemilik', 'tipe')
+                                   ->orderByRaw("CASE 
+                                       WHEN nopol LIKE ? THEN 1
+                                       WHEN pemilik REGEXP ? THEN 2
+                                       ELSE 3
+                                   END", [
+                                       $searchTerm . '%',
+                                       '(^|[[:space:]])' . preg_quote($searchTerm, '/')
+                                   ])
+                                   ->take(10)
+                                   ->get();
+            
+            return response()->json($results);
+        }
+
+        // ▼▼▼ UNTUK FORM CREATE (MODAL) ▼▼▼
+        $kendaraan = Kendaraan::where(function($query) use ($searchTerm) {
+                                    $query->where('nomor_plat', 'LIKE', $searchTerm . '%')
+                                          ->orWhereRaw("pemilik REGEXP ?", [
+                                              '(^|[[:space:]])' . preg_quote($searchTerm, '/')
+                                          ]);
+                                })
+                                ->select('id_kendaraan', 'nomor_plat', 'pemilik', 'tipe')
+                                ->orderByRaw("CASE 
+                                    WHEN nomor_plat LIKE ? THEN 1
+                                    WHEN pemilik REGEXP ? THEN 2
+                                    ELSE 3
+                                END", [
+                                    $searchTerm . '%',
+                                    '(^|[[:space:]])' . preg_quote($searchTerm, '/')
+                                ])
+                                ->take(10)
+                                ->get();
 
         return response()->json($kendaraan);
     }
 
-    
+    /**
+     * ▼▼▼ NEW METHOD: AJAX endpoint untuk live search riwayat ▼▼▼
+     * Return partial HTML untuk update container tanpa reload page
+     */
+    public function getRiwayat(Request $request)
+    {
+        $tanggal_riwayat = $request->input('tanggal', Carbon::today()->toDateString());
+        $nopol_filter    = $request->input('nopol');
+
+        $query = LogKendaraan::where('status', 'Keluar')
+                             ->whereDate('waktu_keluar', $tanggal_riwayat);
+        
+        if ($nopol_filter) {
+            $nopol_filter_upper = strtoupper(trim($nopol_filter));
+            
+            $query->where(function($q) use ($nopol_filter_upper) {
+                $q->where('nopol', 'like', $nopol_filter_upper . '%')
+                  ->orWhereRaw("pemilik REGEXP ?", [
+                      '(^|[[:space:]])' . preg_quote($nopol_filter_upper, '/')
+                  ]);
+            });
+        }
+
+        $riwayat_kendaraan = $query->orderBy('waktu_keluar', 'desc')->get();
+
+        // Return hanya HTML card riwayat (partial view)
+        return view('anggota.kendaraan-riwayat-cards', [
+            'riwayat_kendaraan' => $riwayat_kendaraan
+        ])->render();
+    }
 }

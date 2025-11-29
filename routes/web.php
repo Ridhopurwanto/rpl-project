@@ -63,10 +63,10 @@ Route::get('/notifikasi/baca-semua', [NotificationController::class, 'markAllRea
 Route::middleware('auth')->group(function () {
 
     Route::middleware(['auth'])->group(function () {
-    Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
-    Route::get('/profil/edit', [ProfilController::class, 'edit'])->name('profil.edit');
-    Route::post('/profil/update', [ProfilController::class, 'update'])->name('profil.update');
-    Route::post('/profil/password', [ProfilController::class, 'updatePassword'])->name('profil.password');
+        Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
+        Route::get('/profil/edit', [ProfilController::class, 'edit'])->name('profil.edit');
+        Route::post('/profil/update', [ProfilController::class, 'update'])->name('profil.update');
+        Route::post('/profil/password', [ProfilController::class, 'updatePassword'])->name('profil.password');
     });
 
     // --- RUTE UNTUK ANGGOTA ---
@@ -78,7 +78,7 @@ Route::middleware('auth')->group(function () {
 
         // Presensi Anggota
         Route::get('/presensi', [AnggotaPresensiController::class, 'index'])
-            ->name('presensi.index'); // DIUBAH: Dulu 'anggota.presensi'
+            ->name('presensi.index');
         Route::get('/presensi/create', [AnggotaPresensiController::class, 'create'])
             ->name('presensi.create');
         Route::post('/presensi', [AnggotaPresensiController::class, 'store'])
@@ -99,55 +99,49 @@ Route::middleware('auth')->group(function () {
         // --- RUTE KENDARAAN ANGGOTA ---
         Route::get('/kendaraan', [AnggotaKendaraanController::class, 'index'])
             ->name('kendaraan.index');
-        // Rute untuk tombol + (menampilkan form check-in)
         Route::get('/kendaraan/create', [AnggotaKendaraanController::class, 'create'])
             ->name('kendaraan.create');
-        // Rute untuk menyimpan data check-in
         Route::post('/kendaraan', [AnggotaKendaraanController::class, 'store'])
             ->name('kendaraan.store');
-        // Rute untuk tombol "KELUAR" (memproses check-out)
         Route::put('/kendaraan/checkout/{id}', [AnggotaKendaraanController::class, 'checkout'])
             ->name('kendaraan.checkout');
         Route::put('/kendaraan/{id_kendaraan_log}/update-keterangan', [AnggotaKendaraanController::class, 'updateKeterangan'])
             ->name('kendaraan.updateKeterangan');
+        
+        // API untuk dropdown suggestion
         Route::get('/kendaraan/search-nopol', [AnggotaKendaraanController::class, 'searchNopol'])
-         ->name('kendaraan.searchNopol');
+            ->name('kendaraan.searchNopol');
+        
+        // ▼▼▼ NEW: AJAX endpoint untuk live search riwayat ▼▼▼
+        Route::get('/kendaraan/riwayat', [AnggotaKendaraanController::class, 'getRiwayat'])
+            ->name('kendaraan.getRiwayat');
 
-         // --- RUTE TAMU ---
+        // --- RUTE TAMU ---
         Route::get('/tamu', [AnggotaTamuController::class, 'index'])
             ->name('tamu.index');
-            
         Route::get('/tamu/create', [AnggotaTamuController::class, 'create'])
             ->name('tamu.create');
-            
         Route::post('/tamu', [AnggotaTamuController::class, 'store'])
             ->name('tamu.store');
 
         // --- RUTE GANGGUAN KAMTIBMAS ---
         Route::get('/gangguan-kamtibmas', [AnggotaGangguanKamtibmasController::class, 'index'])
             ->name('gangguan.index');
-            
         Route::get('/gangguan-kamtibmas/create', [AnggotaGangguanKamtibmasController::class, 'create'])
             ->name('gangguan.create');
-            
         Route::post('/gangguan-kamtibmas', [AnggotaGangguanKamtibmasController::class, 'store'])
             ->name('gangguan.store');
 
         // --- RUTE BARANG ---
         Route::get('/barang', [AnggotaBarangController::class, 'index'])
-             ->name('barang.index');
-             
+            ->name('barang.index');
         Route::get('/barang/create', [AnggotaBarangController::class, 'create'])
-             ->name('barang.create');
-             
+            ->name('barang.create');
         Route::post('/barang', [AnggotaBarangController::class, 'store'])
-             ->name('barang.store');
-             
-        // Rute untuk tombol "Selesai"
+            ->name('barang.store');
         Route::put('/barang-titipan/{id_barang}/selesai', [AnggotaBarangController::class, 'selesaiTitipan'])
-         ->name('barang.selesaiTitipan')
-         ->whereNumber('id_barang');
-         
+            ->name('barang.selesaiTitipan')
+            ->whereNumber('id_barang');
         Route::put('/barang-temuan/{id_barang}/selesai', [AnggotaBarangController::class, 'selesaiTemuan'])
             ->name('barang.selesaiTemuan')
             ->whereNumber('id_barang');
@@ -184,11 +178,9 @@ Route::middleware('auth')->group(function () {
             
         Route::resource('akun', ManajemenAkunController::class)->except(['show']);
 
-        // Rute khusus untuk halaman "Manajemen Shift" per pengguna (sesuai UI/UX )
         Route::get('akun/{id_pengguna}/shift', [ManajemenShiftController::class, 'index'])
-             ->name('akun.shift');
+            ->name('akun.shift');
 
-        // Rute untuk menangani perpindahan role oleh Komandan
         Route::post('/set-role', [RoleSwitchController::class, 'setRole'])
             ->name('role.set');
 
@@ -222,38 +214,24 @@ Route::middleware('auth')->group(function () {
         Route::delete('/tamu/{id_tamu}', [TamuController::class, 'destroy'])
             ->name('tamu.destroy');
 
-        //CRUD Gangguan Kamtibmas
+        // CRUD Gangguan Kamtibmas
         Route::put('/gangguan/{id_gangguan}', [GangguanKamtibmasController::class, 'update'])
             ->name('gangguan.update');
         Route::delete('/gangguan/{id_gangguan}', [GangguanKamtibmasController::class, 'destroy'])
             ->name('gangguan.destroy');
 
-        //CRUD Manajemen Akun
+        // CRUD Manajemen Akun
         Route::post('akun/shift/update', [ManajemenShiftController::class, 'update'])
-             ->name('akun.shift.update');
+            ->name('akun.shift.update');
 
-        //CRUD Laporan Unduh
-        Route::get('/komandan/unduh', [LaporanUnduhController::class, 'index'])
+        // CRUD Laporan Unduh
+        Route::get('/unduh', [LaporanUnduhController::class, 'index'])
             ->name('unduh');
-        Route::post('komandan/laporan/download', [LaporanUnduhController::class, 'download'])
+        Route::post('/laporan/download', [LaporanUnduhController::class, 'downloadGabungan'])
             ->name('laporan.download');
-        Route::get('komandan/laporan/download-single', [LaporanUnduhController::class, 'downloadSatuan'])
+        Route::get('/laporan/download-single', [LaporanUnduhController::class, 'downloadSatuan'])
             ->name('laporan.download-single');
     });
-
-    Route::middleware(['auth'])->prefix('komandan')->name('komandan.')->group(function () {
-    
-    // ... route lain ...
-
-    // 1. Route untuk Download Gabungan (POST)
-    Route::post('/laporan/download', [LaporanUnduhController::class, 'downloadGabungan'])
-         ->name('laporan.download');
-
-    // 2. Route untuk Download Satuan (GET) -> INI YANG BIKIN 404 HILANG
-    Route::get('/laporan/download-single', [LaporanUnduhController::class, 'downloadSatuan'])
-         ->name('laporan.download-single');
-
-});
 
     // --- RUTE UNTUK BAU ---
     Route::prefix('bau')->name('bau.')->group(function () {
