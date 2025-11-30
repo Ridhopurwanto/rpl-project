@@ -236,8 +236,10 @@ Route::middleware('auth')->group(function () {
         // CRUD Laporan Unduh
         Route::get('/unduh', [LaporanUnduhController::class, 'index'])
             ->name('unduh');
-        Route::post('/laporan/download', [LaporanUnduhController::class, 'downloadGabungan'])
+
+        Route::post('/laporan/download', [LaporanUnduhController::class, 'download'])
             ->name('laporan.download');
+
         Route::get('/laporan/download-single', [LaporanUnduhController::class, 'downloadSatuan'])
             ->name('laporan.download-single');
     });

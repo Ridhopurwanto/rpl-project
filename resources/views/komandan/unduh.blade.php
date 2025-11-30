@@ -13,28 +13,30 @@
          dateFrom: '{{ now()->format('Y-m-d') }}',
          dateTo: '{{ now()->format('Y-m-d') }}',
          
-         // TAMBAHAN: Variable khusus untuk filter bulan
-         monthFilter: '{{ now()->format('Y-m') }}', 
-         
          selectedChecks: [], 
          
          // --- LOGIKA BARANG ---
          isBarangActive: false, 
-         barangChecks: [], 
+         barangChecks: [], // Array ['barang_temu', 'barang_titip']
          // ---------------------
 
          downloadQueue: [],
          baseUrlSingle: '{{ url('/komandan/laporan/download-single') }}', 
 
+         // 1. Logika Parent (Pengelolaan Barang)
          toggleBarang() {
              if (this.isBarangActive) {
+                 // Jika Parent dicentang -> Pilih Semua Anak
                  this.barangChecks = ['barang_temu', 'barang_titip'];
              } else {
+                 // Jika Parent di-uncentang -> Kosongkan Anak
                  this.barangChecks = [];
              }
          },
 
+         // 2. Logika Anak (Saat Temuan/Titipan diklik)
          updateParent() {
+             // Parent hanya nyala jika SEMUA (2 item) anak terpilih
              if (this.barangChecks.length === 2) {
                  this.isBarangActive = true;
              } else {
@@ -43,6 +45,7 @@
          },
 
          addToQueue() {
+             // Validasi: Cek checkbox biasa DAN checkbox barang
              const hasBarang = this.barangChecks.length > 0;
              
              if (this.selectedChecks.length === 0 && !hasBarang) {
@@ -55,7 +58,7 @@
                  this.pushItemToQueue(checkId);
              });
 
-             // Masukkan Pilihan Barang
+             // Masukkan Pilihan Barang (Langsung dari array, tidak peduli status Parent)
              this.barangChecks.forEach(barangId => {
                  this.pushItemToQueue(barangId);
              });
@@ -66,40 +69,14 @@
              this.barangChecks = [];
          },
 
-         // LOGIKA BARU: Menentukan tanggal start/end berdasarkan tipe laporan
-         getDateRange() {
-             if (this.reportType === 'harian') {
-                 return {
-                     start: this.dateFrom,
-                     end: this.dateTo
-                 };
-             } else {
-                 // Jika Bulanan: Ambil tanggal 1 s/d tanggal terakhir bulan itu
-                 const [year, month] = this.monthFilter.split('-');
-                 // Hack JS: day 0 di bulan berikutnya = hari terakhir bulan sebelumnya
-                 const lastDay = new Date(year, month, 0).getDate(); 
-                 
-                 return {
-                     start: `${this.monthFilter}-01`,
-                     end: `${year}-${month}-${lastDay}`
-                 };
-             }
-         },
-
          pushItemToQueue(value) {
-             // Panggil fungsi helper range tanggal
-             const range = this.getDateRange(); 
-
              this.downloadQueue.push({
                  id: Date.now() + Math.random(),
                  value: value, 
                  label: this.formatLabel(value),
-                 
-                 // Gunakan hasil perhitungan range
-                 dateStart: range.start,
-                 dateEnd: range.end,
-                 periodeDisplay: this.formatDate(range.start) + ' - ' + this.formatDate(range.end),
-                 
+                 dateStart: this.dateFrom,
+                 dateEnd: this.dateTo,
+                 periodeDisplay: this.formatDate(this.dateFrom) + ' - ' + this.formatDate(this.dateTo),
                  tipe: this.reportType
              });
          },
@@ -137,8 +114,6 @@
         {{-- FILTER SECTION --}}
         <div class="bg-white p-4 rounded-lg shadow-md mb-6">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                
-                {{-- 1. PILIH JENIS --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">JENIS LAPORAN:</label>
                     <select x-model="reportType" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
@@ -146,32 +121,14 @@
                         <option value="bulanan">Laporan Bulanan</option>
                     </select>
                 </div>
-
-                {{-- 2. FILTER TANGGAL (LOGIKA IF/ELSE UI) --}}
-                
-                {{-- TAMPILAN JIKA HARIAN (Date Range) --}}
-                <template x-if="reportType === 'harian'">
-                    <div class="contents">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">DARI TANGGAL:</label>
-                            <input type="date" x-model="dateFrom" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">SAMPAI TANGGAL:</label>
-                            <input type="date" x-model="dateTo" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                    </div>
-                </template>
-
-                {{-- TAMPILAN JIKA BULANAN (Month Picker) --}}
-                <template x-if="reportType === 'bulanan'">
-                    <div class="sm:col-span-2"> {{-- Ambil 2 kolom agar lebar --}}
-                        <label class="block text-sm font-medium text-gray-700 mb-1">PILIH BULAN:</label>
-                        {{-- input type="month" hanya memilih Bulan & Tahun --}}
-                        <input type="month" x-model="monthFilter" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-                </template>
-
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">DARI TANGGAL:</label>
+                    <input type="date" x-model="dateFrom" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">SAMPAI TANGGAL:</label>
+                    <input type="date" x-model="dateTo" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
             </div>
         </div>
 
@@ -179,8 +136,8 @@
         <div class="bg-white p-4 rounded-lg shadow-md mb-6">
             <h3 class="font-bold text-gray-800 mb-3 border-b pb-2">PREVIEW (PILIH LAPORAN)</h3>
             
-            {{-- Form Harian --}}
             <div x-show="reportType === 'harian'" class="space-y-3">
+                
                 <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
                     <input type="checkbox" value="laporan_presensi" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
                     <span class="ml-2 text-gray-700">Laporan Presensi</span>
@@ -192,12 +149,20 @@
                 
                 {{-- FITUR PENGELOLAAN BARANG --}}
                 <div class="border rounded-lg p-3 bg-slate-50">
+                    {{-- Induk: Pengelolaan Barang --}}
                     <label class="flex items-center cursor-pointer mb-2">
+                        {{-- @change="toggleBarang()" : Mengatur Select All / None --}}
                         <input type="checkbox" x-model="isBarangActive" @change="toggleBarang()" class="rounded text-blue-600 w-5 h-5">
                         <span class="ml-2 font-semibold text-gray-800">Laporan Pengelolaan Barang</span>
                     </label>
+
+                    {{-- 
+                        Anak: Muncul jika Parent aktif ATAU ada salah satu anak yang dipilih 
+                        (Jadi kalau uncheck satu, menu tidak hilang)
+                    --}}
                     <div x-show="isBarangActive || barangChecks.length > 0" x-transition class="ml-7 space-y-2 border-l-2 border-blue-200 pl-3">
                         <label class="flex items-center cursor-pointer">
+                            {{-- @change="updateParent()" : Cek status induk saat anak berubah --}}
                             <input type="checkbox" value="barang_temu" x-model="barangChecks" @change="updateParent()" class="rounded text-blue-600 w-4 h-4">
                             <span class="ml-2 text-gray-600 text-sm">Barang Temuan</span>
                         </label>
@@ -218,7 +183,6 @@
                 </label>
             </div>
 
-            {{-- Form Bulanan --}}
             <div x-show="reportType === 'bulanan'" class="space-y-3" style="display: none;">
                 <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
                     <input type="checkbox" value="gangguan_kamtibmas" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
@@ -238,7 +202,7 @@
             </div>
         </div>
 
-        {{-- TABEL ANTRIAN (SAMA SEPERTI SEBELUMNYA) --}}
+        {{-- TABEL ANTRIAN --}}
         <div class="bg-white p-4 rounded-lg shadow-md mb-6" x-show="downloadQueue.length > 0">
             <h3 class="font-bold text-[#1e4275] text-sm mb-3">Laporan yang diunduh</h3>
             <div class="overflow-hidden border border-gray-200 rounded-lg">

@@ -17,8 +17,8 @@
         completedList: @js($completedCheckpoints), 
         jenisPatroli: '{{ $jenisPatroliTerpilih }}',
         currentTime: '',
+        statusPatroli: @js($statusPatroli),
 
-        // --- COMPUTED PROPERTIES (Untuk Logika Tampilan) ---
         get isCompleted() {
             return this.completedList.length >= 17;
         },
@@ -27,7 +27,6 @@
             return this.completedList.length + ' / 17 AREA SELESAI';
         },
 
-        // --- INIT WAKTU ---
         init() {
             this.updateTime();
             setInterval(() => { this.updateTime() }, 1000);
@@ -40,7 +39,6 @@
             }).replace(/\./g, ':') + ' WIB';
         },
 
-        // --- FUNGSI MODAL ---
         openModal(area) {
             this.currentArea = area;
             this.showModal = true;
@@ -52,7 +50,6 @@
             this.showModal = false;
         },
 
-        // --- FUNGSI KAMERA ---
         startCamera() {
             this.cameraState = 'camera';
             this.imageBase64 = '';
@@ -94,7 +91,6 @@
             this.startCamera();
         },
 
-        // --- AJAX SUBMIT CHECKPOINT ---
         async submitCheckpoint() {
             try {
                 const response = await fetch(`{{ route('anggota.patroli.storeCheckpoint') }}`, {
@@ -127,7 +123,30 @@
      x-init="init()"
 >
 
-    {{-- 1. PILIH JENIS PATROLI --}}
+    {{-- PESAN ERROR/SUCCESS --}}
+    @if(session('error'))
+        <div class="mb-4 bg-red-100 text-red-700 p-4 rounded-lg shadow-sm flex items-center">
+            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div>
+                <p class="font-bold">Tidak Bisa Patroli Sekarang</p>
+                <p class="text-xs">{{ session('error') }}</p>
+            </div>
+        </div>
+    @endif
+
+    {{-- 1. INFO SHIFT & PILIH JENIS PATROLI --}}
+    <div class="mb-4 bg-white p-4 rounded-lg shadow-sm border-l-4 border-blue-500">
+        <div class="flex items-center justify-between mb-2">
+            <div>
+                <p class="text-xs text-gray-500 uppercase font-bold">Shift Anda</p>
+                <p class="text-lg font-bold text-gray-800 uppercase">Shift {{ $namaShift }}</p>
+            </div>
+            <div class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">
+                AKTIF
+            </div>
+        </div>
+    </div>
+
     <form action="{{ route('anggota.patroli.createSession') }}" method="GET">
         <div class="flex items-center justify-between mt-4 mb-4">
             <label class="text-sm font-bold text-slate-700 uppercase">JENIS PATROLI</label>
@@ -137,14 +156,38 @@
                 @foreach($opsiJenisPatroli as $opsi)
                     <option value="{{ $opsi }}" {{ $opsi == $jenisPatroliTerpilih ? 'selected' : '' }}>
                         {{ $opsi }}
+                        @if($statusPatroli[$opsi] === 'completed')
+                            ✓
+                        @elseif($statusPatroli[$opsi] === 'locked')
+                            🔒
+                        @endif
                     </option>
                 @endforeach
             </select>
         </div>
     </form>
 
+    {{-- JADWAL PATROLI INFO --}}
+    <div class="mb-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-3 rounded-lg">
+        <div class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div class="flex-1">
+                <p class="text-xs font-bold text-blue-900 mb-1">Jadwal {{ $jenisPatroliTerpilih }}</p>
+                <p class="text-sm font-mono font-bold text-blue-700">
+                    {{ $jadwalPatroli[$jenisPatroliTerpilih][0] }} - {{ $jadwalPatroli[$jenisPatroliTerpilih][1] }} WIB
+                </p>
+            </div>
+            @if($statusPatroli[$jenisPatroliTerpilih] === 'available')
+                <span class="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">AKTIF</span>
+            @elseif($statusPatroli[$jenisPatroliTerpilih] === 'locked')
+                <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">TERKUNCI</span>
+            @else
+                <span class="bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-full">SELESAI</span>
+            @endif
+        </div>
+    </div>
+
     {{-- 2. PESAN SUKSES (Muncul jika 17/17) --}}
-    {{-- Menggunakan x-show agar responsif tanpa reload --}}
     <div x-show="isCompleted" 
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 transform scale-90"
@@ -159,7 +202,7 @@
         </div>
     </div>
 
-    {{-- 3. GRID AREA (Tetap Muncul Walau Selesai) --}}
+    {{-- 3. GRID AREA --}}
     <div class="mt-2">
         <h3 class="text-xs font-bold text-gray-500 uppercase mb-3">DAFTAR AREA CHECKPOINT :</h3>
         
@@ -167,7 +210,6 @@
             @foreach($semuaArea as $area)
                 <button 
                     type="button"
-                    {{-- Disable jika sudah ada di completedList --}}
                     :disabled="completedList.includes('{{ strtoupper($area) }}')"
                     @click="openModal('{{ strtoupper($area) }}')"
                     class="p-2 rounded-lg text-xs font-bold shadow transition-all relative h-20 flex items-center justify-center text-center break-words leading-tight border-2"
@@ -177,7 +219,6 @@
                 >
                     {{ $area }}
                     
-                    {{-- Icon Centang --}}
                     <div x-show="completedList.includes('{{ strtoupper($area) }}')" class="absolute -top-2 -right-2 bg-green-500 text-white rounded-full p-1 border-2 border-white shadow-sm">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                     </div>
@@ -186,7 +227,7 @@
         </div>
     </div>
 
-    {{-- 4. INDIKATOR PROGRESS (Pengganti Tombol Submit) --}}
+    {{-- 4. INDIKATOR PROGRESS --}}
     <div class="mt-8 bottom-20 left-0 right-0 px-4 md:static">
         <div 
             class="w-full p-4 rounded-lg shadow-lg font-bold text-lg text-center transition-all duration-500 flex items-center justify-center gap-2 border-2"
@@ -194,7 +235,6 @@
                 ? 'bg-green-600 text-white border-green-700' 
                 : 'bg-white text-slate-600 border-slate-300'"
         >
-            {{-- Ikon berubah sesuai status --}}
             <template x-if="isCompleted">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </template>
@@ -206,7 +246,7 @@
         </div>
     </div>
 
-    {{-- ================= MODAL KAMERA (POP-UP) ================= --}}
+    {{-- MODAL KAMERA --}}
     <div x-show="showModal" class="relative z-50" style="display: none;">
         <div x-show="showModal"
              x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
@@ -216,23 +256,19 @@
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
             <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
                 
-                {{-- Card Modal (Blue Theme) --}}
                 <div x-show="showModal"
                      @click.away="closeModal()"
                      class="relative transform overflow-hidden rounded-xl bg-[#2a4a6f] text-left shadow-2xl transition-all w-full max-w-md p-6">
                     
-                    {{-- Header Modal --}}
                     <div class="flex flex-col items-center mb-5 space-y-2">
                         <h3 class="text-white text-xl font-bold uppercase tracking-wide text-center leading-tight" x-text="currentArea"></h3>
                         
-                        {{-- Jam Digital Badge Style --}}
                         <div class="inline-flex items-center gap-2 bg-black/30 border border-white/10 rounded-full px-4 py-1.5 backdrop-blur-sm shadow-sm">
                             <svg class="w-4 h-4 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             <span class="text-lg font-mono font-bold text-white tracking-widest" x-text="currentTime"></span>
                         </div>
                     </div>
 
-                    {{-- Area Video (4:3 Aspect Ratio) --}}
                     <div class="mb-5 rounded-lg overflow-hidden border-2 border-white/20 bg-black relative aspect-[4/3] shadow-lg">
                         <video x-ref="videoFeed" x-show="cameraState === 'camera'" autoplay playsinline class="w-full h-full object-cover"></video>
                         <img :src="imageBase64" x-show="cameraState === 'preview'" class="w-full h-full object-cover" style="display: none;">
@@ -243,7 +279,6 @@
                     </div>
                     <canvas x-ref="canvas" class="hidden"></canvas>
 
-                    {{-- Tombol Aksi --}}
                     <div class="space-y-3">
                         <button type="button" 
                                 x-show="cameraState === 'camera'" 

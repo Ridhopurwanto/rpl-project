@@ -40,6 +40,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Relasi ke tabel Patroli
+     */
+    public function patroli()
+    {
+        return $this->hasMany(Patroli::class, 'id_pengguna', 'id_pengguna');
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
@@ -56,6 +64,7 @@ class User extends Authenticatable
         'alamat',        
         'status',        
         'foto_profil',
+        'jenis_shift',   // TAMBAHAN UNTUK SHIFT
     ];
 
     /**
@@ -76,5 +85,28 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'jenis_shift' => 'integer',  // CASTING KE INTEGER
     ];
+
+    /**
+     * Accessor untuk mendapatkan nama shift dalam format string
+     * 
+     * @return string
+     */
+    public function getNamaShiftAttribute()
+    {
+        return $this->jenis_shift == 1 ? 'Pagi' : 'Malam';
+    }
+
+    /**
+     * Scope untuk filter user berdasarkan shift
+     * 
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param int $jenisShift
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeShift($query, $jenisShift)
+    {
+        return $query->where('jenis_shift', $jenisShift);
+    }
 }
