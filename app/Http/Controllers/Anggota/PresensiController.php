@@ -208,6 +208,7 @@ class PresensiController extends Controller
         try {
             $user = Auth::user();
             $now = Carbon::now();
+            $tanggal = Carbon::now()->format('Y-m-d');
             // $now = Carbon::now()->setTime(15, 0, 0);
 
             // 1. Cek Duplikasi
@@ -268,9 +269,9 @@ class PresensiController extends Controller
                 'id_shift'       => $shiftHariIni ? $shiftHariIni->id_shift : null,
                 'nama_lengkap'   => $user->nama_lengkap,
                 'waktu'          => $now,
+                'tanggal'        => $tanggal,
                 'foto'           => $fileName,
                 'jenis_presensi' => $request->jenis_presensi,
-                'tanggal'        => Carbon::today(),
                 'status'         => $status, // Hasil perhitungan otomatis
             ]);
 

@@ -26,6 +26,7 @@ class Presensi extends Model
         'foto', // <-- DULU 'foto_masuk'
         'status',
         'jenis_presensi', // <-- PENTING
+        'tanggal',
     ];
 
     /**
@@ -34,6 +35,7 @@ class Presensi extends Model
      */
     protected $casts = [
         'waktu' => 'datetime', // <-- DULU 'waktu_masuk' & 'waktu_pulang'
+        'tanggal' => 'date',
     ];
 
     /**

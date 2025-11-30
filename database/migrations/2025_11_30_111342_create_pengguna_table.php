@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->enum('peran', ['anggota', 'komandan', 'bau']);
+            $table->enum('jenis_jadwal', ['shift', 'non_shift'])->nullable();
             $table->date('tanggal_lahir')->nullable();
             $table->string('no_hp', 20)->nullable();
             $table->text('alamat')->nullable();

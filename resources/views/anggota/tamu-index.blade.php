@@ -206,7 +206,7 @@
                                 name="no_identitas" 
                                 placeholder="Contoh: 6402021212120001"
                                 class="w-full px-4 py-2 bg-white text-gray-900 rounded-md border-none focus:ring-2 focus:ring-blue-500"
-                                required>
+                                >
                         </div>
                     </div>
                     
