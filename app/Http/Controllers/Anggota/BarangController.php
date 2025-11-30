@@ -1,69 +1,101 @@
 <?php
-// app/Http/Controllers/Anggota/BarangController.php
 
 namespace App\Http\Controllers\Anggota;
 
 use App\Http\Controllers\Controller;
-use App\Models\BarangTitipan; // Model baru
-use App\Models\BarangTemuan;  // Model baru
+use App\Models\BarangTitipan;
+use App\Models\BarangTemuan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
-use Illuminate\Support\Str; 
 
 class BarangController extends Controller
 {
     /**
-     * Menampilkan halaman index (3 tabel)
+     * Menampilkan halaman index (barang aktif & riwayat)
      */
     public function index(Request $request)
     {
-        // 1. Barang Titipan Aktif
-        $barang_titipan = BarangTitipan::where('status', 'belum selesai')
-                                ->orderBy('waktu_titip', 'desc')
-                                ->get();
-        
-        // 2. Barang Temuan Aktif
-        $barang_temuan = BarangTemuan::where('status', 'belum selesai')
-                               ->orderBy('waktu_lapor', 'desc')
-                               ->get();
+        // 1. Ambil barang titipan yang belum selesai
+        $barang_titipan = BarangTitipan::where('status', 'Belum Selesai')
+            ->orderBy('waktu_titip', 'desc')
+            ->get();
 
-        // 3. Riwayat (Logika Gabungan)
+        // 2. Ambil barang temuan yang belum selesai
+        $barang_temuan = BarangTemuan::where('status', 'Belum Selesai')
+            ->orderBy('waktu_lapor', 'desc')
+            ->get();
+
+        // 3. Filter riwayat
         $tanggal_riwayat = $request->input('tanggal', Carbon::today()->toDateString());
-        $kategori_riwayat = $request->input('kategori_riwayat', 'semua');
+        $kategori_filter = $request->input('kategori', 'semua'); // semua, titipan, temuan
+        $search_filter = $request->input('search');
 
-        $riwayat_titipan = collect();
-        $riwayat_temuan = collect();
+        // 4. Query riwayat berdasarkan kategori
+        $riwayat_barang = collect();
 
-        if ($kategori_riwayat == 'semua' || $kategori_riwayat == 'titip') {
-            $riwayat_titipan = BarangTitipan::where('status', 'selesai')
-                                ->whereDate('waktu_selesai', $tanggal_riwayat)
-                                ->get();
+        if ($kategori_filter === 'semua' || $kategori_filter === 'titipan') {
+            $titipan = BarangTitipan::where('status', 'Selesai')
+                ->whereDate('waktu_selesai', $tanggal_riwayat);
+
+            if ($search_filter) {
+                $titipan->where(function ($q) use ($search_filter) {
+                    $search_upper = strtoupper($search_filter);
+                    $q->where('nama_barang', 'LIKE', '%' . $search_filter . '%')
+                        ->orWhere('nama_penitip', 'LIKE', '%' . $search_filter . '%')
+                        ->orWhere('nama_penerima', 'LIKE', '%' . $search_filter . '%')
+                        ->orWhere('tujuan', 'LIKE', '%' . $search_filter . '%')
+                        ->orWhereRaw("nama_penitip REGEXP ?", [
+                            '(^|[[:space:]])' . preg_quote($search_upper, '/')
+                        ])
+                        ->orWhereRaw("nama_penerima REGEXP ?", [
+                            '(^|[[:space:]])' . preg_quote($search_upper, '/')
+                        ]);
+                });
+            }
+
+            $riwayat_barang = $riwayat_barang->merge($titipan->get());
         }
 
-        if ($kategori_riwayat == 'semua' || $kategori_riwayat == 'temu') {
-            $riwayat_temuan = BarangTemuan::where('status', 'selesai')
-                                ->whereDate('waktu_selesai', $tanggal_riwayat)
-                                ->get();
+        if ($kategori_filter === 'semua' || $kategori_filter === 'temuan') {
+            $temuan = BarangTemuan::where('status', 'Selesai')
+                ->whereDate('waktu_selesai', $tanggal_riwayat);
+
+            if ($search_filter) {
+                $temuan->where(function ($q) use ($search_filter) {
+                    $search_upper = strtoupper($search_filter);
+                    $q->where('nama_barang', 'LIKE', '%' . $search_filter . '%')
+                        ->orWhere('nama_pelapor', 'LIKE', '%' . $search_filter . '%')
+                        ->orWhere('nama_penerima', 'LIKE', '%' . $search_filter . '%')
+                        ->orWhere('lokasi_penemuan', 'LIKE', '%' . $search_filter . '%')
+                        ->orWhereRaw("nama_pelapor REGEXP ?", [
+                            '(^|[[:space:]])' . preg_quote($search_upper, '/')
+                        ])
+                        ->orWhereRaw("nama_penerima REGEXP ?", [
+                            '(^|[[:space:]])' . preg_quote($search_upper, '/')
+                        ]);
+                });
+            }
+
+            $riwayat_barang = $riwayat_barang->merge($temuan->get());
         }
 
-        // Gabungkan 2 collection dan urutkan
-        $riwayat_barang = $riwayat_titipan
-                            ->merge($riwayat_temuan)
-                            ->sortByDesc('waktu_selesai');
+        // Sort by waktu_selesai descending
+        $riwayat_barang = $riwayat_barang->sortByDesc('waktu_selesai');
 
         return view('anggota.barang-index', [
             'barang_titipan' => $barang_titipan,
             'barang_temuan' => $barang_temuan,
             'riwayat_barang' => $riwayat_barang,
             'tanggal_terpilih' => $tanggal_riwayat,
-            'kategori_terpilih' => $kategori_riwayat,
+            'kategori_terpilih' => $kategori_filter,
+            'search_filter' => $search_filter,
         ]);
     }
 
     /**
-     * Menampilkan form tambah barang
+     * Form create barang
      */
     public function create()
     {
@@ -92,7 +124,7 @@ class BarangController extends Controller
             $image_type_aux = explode("image/", $image_parts[0]);
             $image_type = $image_type_aux[1];
             $image_base64 = base64_decode($image_parts[1]);
-            
+
             // 2. Simpan Foto
             $fileName = 'barang_' . uniqid() . '.' . $image_type;
             $path = 'foto_barang/' . $fileName;
@@ -139,7 +171,7 @@ class BarangController extends Controller
         $request->validate([
             'nama_penerima' => 'required',
             'foto_penerima_base64' => 'required', // Foto bukti serah terima
-            'tanggal_ambil' => 'required|date',
+            'waktu_selesai' => 'required|date',
             'waktu_ambil' => 'required',
         ]);
 
@@ -149,13 +181,13 @@ class BarangController extends Controller
             $image_type_aux = explode("image/", $image_parts[0]);
             $image_type = $image_type_aux[1];
             $image_base64 = base64_decode($image_parts[1]);
-            
+
             $fileName = 'penerima_titipan_' . uniqid() . '.' . $image_type;
             $path = 'foto_penerima/' . $fileName;
             Storage::disk('public')->put($path, $image_base64);
 
             // 2. Gabung Waktu
-            $waktu_selesai = Carbon::parse($request->tanggal_ambil . ' ' . $request->waktu_ambil);
+            $waktu_selesai = Carbon::parse($request->waktu_selesai);
 
             // 3. Update Database
             $barang = BarangTitipan::findOrFail($id_barang);
@@ -181,7 +213,7 @@ class BarangController extends Controller
         $request->validate([
             'nama_penerima' => 'required',
             'foto_penerima_base64' => 'required',
-            'tanggal_ambil' => 'required|date',
+            'waktu_selesai' => 'required|date',
             'waktu_ambil' => 'required',
         ]);
 
@@ -191,13 +223,13 @@ class BarangController extends Controller
             $image_type_aux = explode("image/", $image_parts[0]);
             $image_type = $image_type_aux[1];
             $image_base64 = base64_decode($image_parts[1]);
-            
+
             $fileName = 'penerima_temuan_' . uniqid() . '.' . $image_type;
             $path = 'foto_penerima/' . $fileName;
             Storage::disk('public')->put($path, $image_base64);
 
             // 2. Gabung Waktu
-            $waktu_selesai = Carbon::parse($request->tanggal_ambil . ' ' . $request->waktu_ambil);
+            $waktu_selesai = Carbon::parse($request->waktu_selesai . ' ' . $request->waktu_ambil);
 
             // 3. Update Database
             $barang = BarangTemuan::findOrFail($id_barang);
@@ -213,5 +245,142 @@ class BarangController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal update: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * ▼▼▼ NEW: API untuk dropdown suggestion ▼▼▼
+     */
+    public function searchBarang(Request $request)
+    {
+        $request->validate([
+            'search' => 'nullable|string|max:50',
+            'tanggal' => 'nullable|date',
+            'kategori' => 'nullable|string|in:semua,titipan,temuan',
+        ]);
+
+        $searchTerm = $request->input('search');
+        $tanggal = $request->input('tanggal');
+        $kategori = $request->input('kategori', 'semua');
+
+        if (empty($searchTerm)) {
+            return response()->json([]);
+        }
+
+        $searchTerm = trim($searchTerm);
+        $searchUpper = strtoupper($searchTerm);
+        $results = collect();
+
+        // Search dari riwayat barang yang sudah selesai
+        if ($tanggal) {
+            if ($kategori === 'semua' || $kategori === 'titipan') {
+                $titipan = BarangTitipan::where('status', 'Selesai')
+                    ->whereDate('waktu_selesai', $tanggal)
+                    ->where(function ($q) use ($searchTerm, $searchUpper) {
+                        $q->where('nama_barang', 'LIKE', '%' . $searchTerm . '%')
+                            ->orWhere('nama_penitip', 'LIKE', '%' . $searchTerm . '%')
+                            ->orWhere('nama_penerima', 'LIKE', '%' . $searchTerm . '%')
+                            ->orWhereRaw("nama_penitip REGEXP ?", [
+                                '(^|[[:space:]])' . preg_quote($searchUpper, '/')
+                            ])
+                            ->orWhereRaw("nama_penerima REGEXP ?", [
+                                '(^|[[:space:]])' . preg_quote($searchUpper, '/')
+                            ]);
+                    })
+                    ->select('id_barang', 'nama_barang', 'nama_penitip as nama_pelapor', 'nama_penerima')
+                    ->selectRaw("'titipan' as kategori")
+                    ->take(5)
+                    ->get();
+
+                $results = $results->merge($titipan);
+            }
+
+            if ($kategori === 'semua' || $kategori === 'temuan') {
+                $temuan = BarangTemuan::where('status', 'Selesai')
+                    ->whereDate('waktu_selesai', $tanggal)
+                    ->where(function ($q) use ($searchTerm, $searchUpper) {
+                        $q->where('nama_barang', 'LIKE', '%' . $searchTerm . '%')
+                            ->orWhere('nama_pelapor', 'LIKE', '%' . $searchTerm . '%')
+                            ->orWhere('nama_penerima', 'LIKE', '%' . $searchTerm . '%')
+                            ->orWhereRaw("nama_pelapor REGEXP ?", [
+                                '(^|[[:space:]])' . preg_quote($searchUpper, '/')
+                            ])
+                            ->orWhereRaw("nama_penerima REGEXP ?", [
+                                '(^|[[:space:]])' . preg_quote($searchUpper, '/')
+                            ]);
+                    })
+                    ->select('id_barang', 'nama_barang', 'nama_pelapor', 'nama_penerima')
+                    ->selectRaw("'temuan' as kategori")
+                    ->take(5)
+                    ->get();
+
+                $results = $results->merge($temuan);
+            }
+
+            return response()->json($results->take(10));
+        }
+
+        return response()->json([]);
+    }
+
+    /**
+     * ▼▼▼ NEW: AJAX endpoint untuk live search riwayat ▼▼▼
+     */
+    public function getRiwayat(Request $request)
+    {
+        $tanggal_riwayat = $request->input('tanggal', Carbon::today()->toDateString());
+        $kategori_filter = $request->input('kategori', 'semua');
+        $search_filter = $request->input('search');
+
+        $riwayat_barang = collect();
+
+        if ($kategori_filter === 'semua' || $kategori_filter === 'titipan') {
+            $titipan = BarangTitipan::where('status', 'Selesai')
+                ->whereDate('waktu_selesai', $tanggal_riwayat);
+
+            if ($search_filter) {
+                $titipan->where(function ($q) use ($search_filter) {
+                    $search_upper = strtoupper($search_filter);
+                    $q->where('nama_barang', 'LIKE', '%' . $search_filter . '%')
+                        ->orWhere('nama_penitip', 'LIKE', '%' . $search_filter . '%')
+                        ->orWhere('nama_penerima', 'LIKE', '%' . $search_filter . '%')
+                        ->orWhereRaw("nama_penitip REGEXP ?", [
+                            '(^|[[:space:]])' . preg_quote($search_upper, '/')
+                        ])
+                        ->orWhereRaw("nama_penerima REGEXP ?", [
+                            '(^|[[:space:]])' . preg_quote($search_upper, '/')
+                        ]);
+                });
+            }
+
+            $riwayat_barang = $riwayat_barang->merge($titipan->get());
+        }
+
+        if ($kategori_filter === 'semua' || $kategori_filter === 'temuan') {
+            $temuan = BarangTemuan::where('status', 'Selesai')
+                ->whereDate('waktu_selesai', $tanggal_riwayat);
+
+            if ($search_filter) {
+                $temuan->where(function ($q) use ($search_filter) {
+                    $search_upper = strtoupper($search_filter);
+                    $q->where('nama_barang', 'LIKE', '%' . $search_filter . '%')
+                        ->orWhere('nama_pelapor', 'LIKE', '%' . $search_filter . '%')
+                        ->orWhere('nama_penerima', 'LIKE', '%' . $search_filter . '%')
+                        ->orWhereRaw("nama_pelapor REGEXP ?", [
+                            '(^|[[:space:]])' . preg_quote($search_upper, '/')
+                        ])
+                        ->orWhereRaw("nama_penerima REGEXP ?", [
+                            '(^|[[:space:]])' . preg_quote($search_upper, '/')
+                        ]);
+                });
+            }
+
+            $riwayat_barang = $riwayat_barang->merge($temuan->get());
+        }
+
+        $riwayat_barang = $riwayat_barang->sortByDesc('waktu_selesai');
+
+        return view('anggota.barang-riwayat-cards', [
+            'riwayat_barang' => $riwayat_barang
+        ])->render();
     }
 }
