@@ -68,7 +68,7 @@ class PresensiController extends Controller
                             ->get();
 
         $now = Carbon::now();
-        // $now = Carbon::now()->setTime(18, 56, 0);
+        $now = Carbon::now()->setTime(18, 00, 00);
 
         $todayShiftData = Shift::with('shiftRule')
                             ->where('id_pengguna', $user->id_pengguna)
@@ -82,8 +82,8 @@ class PresensiController extends Controller
                             ->whereDate('waktu', Carbon::today()) 
                             ->get();
 
-        $sudahMasuk = $presensiLog->where('jenis_presensi', 'masuk')->first();
-        $sudahPulang = $presensiLog->where('jenis_presensi', 'pulang')->first();
+        $sudahMasuk = $presensiLog->where('jenis_presensi', 'Masuk')->first();
+        $sudahPulang = $presensiLog->where('jenis_presensi', 'Pulang')->first();
         
         // Default Data Jadwal
         $jadwalAbsen = [
@@ -116,34 +116,17 @@ class PresensiController extends Controller
 
                 // Hitung Waktu Buka (Buffer)
                 $waktuBukaMasuk = $jamMasuk->copy()->subMinutes($menitDibuka);
-                $waktuBukaPulang = $jamKeluar->copy()->subMinutes($menitDibuka);
-
-                // echo($jamMasuk);
-                // echo($jamKeluar);
-
-                // echo($waktuBukaMasuk);
-                // echo($waktuBukaPulang);
-
-                // // Ambil waktu sekarang
-                // // PENTING: Kita pakai Full DateTime ($now) untuk perbandingan lintas hari
-                // // Tapi kita harus set tanggal $jamMasuk/$jamKeluar sesuai hari ini dulu
-                // $jamMasuk->setDate($now->year, $now->month, $now->day);
-                // $waktuBukaMasuk->setDate($now->year, $now->month, $now->day);
-                
-                // // Untuk Jam Keluar, jika tadi ditambah 1 hari, tanggalnya juga harus besoknya relative to hari ini
-                // // Reset tanggal jamKeluar ke hari ini dulu
-                // $jamKeluar->setDate($now->year, $now->month, $now->day);
-                // $waktuBukaPulang->setDate($now->year, $now->month, $now->day);
-                
-                // // Terapkan logika addDay lagi pada object yang sudah diset tanggalnya
-                // if (Carbon::createFromTimeString($rule->jam_keluar)->lt(Carbon::createFromTimeString($rule->jam_masuk))) {
-                //     $jamKeluar->addDay();
-                //     $waktuBukaPulang->addDay();
-                // }
+                $waktuBukaPulang = $jamKeluar->copy();
 
                 // --- LOGIKA TOMBOL ---
-                
-                if (!$sudahMasuk) {
+                if( $jadwalAbsen['nama_shift'] == 'OFF'){
+                    $jadwalAbsen['info_terdekat'] = '-';
+                    $jadwalAbsen['can_presensi'] = false;
+                    $jadwalAbsen['pesan_error'] = 'Tidak sedang bekerja';
+                    $jadwalAbsen['disable_masuk'] = true;
+                    $jadwalAbsen['disable_pulang'] = true;
+                }
+                elseif (!$sudahMasuk) {
                     // KASUS 1: BELUM MASUK
                     $jadwalAbsen['info_terdekat'] = 'MASUK DIBUKA: ' . $waktuBukaMasuk->format('H:i');
                     $jadwalAbsen['disable_masuk'] = false;  // Boleh pilih Masuk
@@ -160,20 +143,12 @@ class PresensiController extends Controller
 
                 } elseif (!$sudahPulang) {
                     // KASUS 2: SUDAH MASUK, BELUM PULANG
-                    $jadwalAbsen['info_terdekat'] = 'PULANG DIBUKA: ' . $waktuBukaPulang->format('H:i');
+                    $jadwalAbsen['info_terdekat'] = 'PULANG PADA PUKUL: ' . $waktuBukaPulang->format('H:i');
                     $jadwalAbsen['disable_masuk'] = true;   // Gaboleh pilih Masuk lagi
                     $jadwalAbsen['disable_pulang'] = false; // Boleh pilih Pulang
                     $jadwalAbsen['default_jenis'] = 'pulang'; // Default ganti ke Pulang
-      
-                    if ($now->gte($waktuBukaPulang)) {
-                        $jadwalAbsen['can_presensi'] = true;
-                        $jadwalAbsen['pesan_error'] = '';
-                    } else {
-                        $jadwalAbsen['can_presensi'] = false;
-                        $jadwalAbsen['pesan_error'] = 'Presensi Pulang belum dibuka. Tunggu ' . $waktuBukaPulang->format('H:i');
-
-                    }
-
+                    $jadwalAbsen['can_presensi'] = true;
+                    $jadwalAbsen['pesan_error'] = '';
                 } else {
                     // KASUS 3: SELESAI
                     $jadwalAbsen['info_terdekat'] = 'PRESENSI SELESAI';
@@ -209,7 +184,6 @@ class PresensiController extends Controller
             $user = Auth::user();
             $now = Carbon::now();
             $tanggal = Carbon::now()->format('Y-m-d');
-            // $now = Carbon::now()->setTime(15, 0, 0);
 
             // 1. Cek Duplikasi
             $cekDuplikat = Presensi::where('id_pengguna', $user->id_pengguna)
@@ -260,7 +234,33 @@ class PresensiController extends Controller
                     }
                 }
             } elseif ($request->jenis_presensi == 'pulang') {
-                $status = 'tepat waktu'; // Status default untuk pulang
+                $rule = $shiftHariIni->shiftRule;
+                
+                // Jika jenis shift 'Off', mungkin statusnya beda (misal: Lembur)
+                // Tapi asumsi di sini kita cek Pagi/Malam dll.
+                if ($rule->jam_keluar) {
+                    $jamMasuk = Carbon::createFromTimeString($rule->jam_masuk);
+                    $jamKeluar = Carbon::createFromTimeString($rule->jam_keluar);
+                    
+                    if ($jamKeluar->lt($jamMasuk)) {
+                        $jamKeluar->addDay(); // Tambah 1 hari
+                    }
+                                
+                    // Tambah toleransi (menit)
+                    $batasAwalPulang = $jamKeluar->copy()->subMinutes($rule->toleransi);
+                    $batasAkhirPulang = $jamKeluar->copy()->addMinutes($rule->toleransi);
+
+                    // Bandingkan waktu sekarang dengan batas toleransi
+                    // Kita hanya ambil jam & menitnya untuk perbandingan yang adil
+                    $waktuSekarang = Carbon::createFromTimeString($now);
+                    
+                    if ($waktuSekarang->lt($batasAwalPulang)) {
+                        $status = 'terlalu cepat';
+                    }
+                    elseif($waktuSekarang->gt($batasAkhirPulang)){
+                        $status = 'terlambat';
+                    }
+                }                
             }
 
             // 4. Simpan Data
