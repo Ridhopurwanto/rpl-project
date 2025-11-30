@@ -283,9 +283,16 @@
                 $dateKey = \Carbon\Carbon::parse($s->tanggal)->format('Y-m-d');
                 $userId = $s->id_pengguna;
                 
+                // Ambil info user jika belum ada
                 if (!isset($userDetails[$userId])) {
-                    $namaLengkap = $s->user->nama_lengkap ?? '-';
-                    $peran = $s->user->peran ?? '-';
+                    // LOGIKA BARU: Cek berbagai kemungkinan nama properti/relasi
+                    // 1. Cek $s->nama_lengkap (jika sudah di-join query builder)
+                    // 2. Cek $s->user->nama_lengkap (relasi standard 'user')
+                    // 3. Cek $s->pengguna->nama_lengkap (relasi nama tabel 'pengguna')
+                    $namaLengkap = $s->nama_lengkap ?? $s->user->nama_lengkap ?? $s->pengguna->nama_lengkap ?? '-';
+                    
+                    // Sama untuk peran/jabatan
+                    $peran = $s->peran ?? $s->user->peran ?? $s->pengguna->peran ?? '-';
 
                     $userDetails[$userId] = [
                         'name' => $namaLengkap,
@@ -293,8 +300,9 @@
                     ];
                 }
 
-                $kode = substr($s->jenis_shift, 0, 1); 
-                if ($s->jenis_shift == 'Non Shift') $kode = 'N';
+                // Ambil jenis shift dari relasi
+                $namaShift = $s->shiftRule->jenis_shift ?? $s->shift_rule->jenis_shift ?? 'Off'; 
+                $kode = strtoupper(substr($namaShift, 0, 1));
                 
                 $shiftMatrix[$userId][$dateKey] = $kode;
             }
