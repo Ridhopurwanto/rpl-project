@@ -225,9 +225,13 @@ Route::middleware('auth')->group(function () {
         Route::delete('/gangguan/{id_gangguan}', [GangguanKamtibmasController::class, 'destroy'])
             ->name('gangguan.destroy');
 
-        // CRUD Manajemen Akun
+        // CRUD Manajemen Akun (Update & Reset Shift)
         Route::post('akun/shift/update', [ManajemenShiftController::class, 'update'])
             ->name('akun.shift.update');
+        
+        // Route untuk Reset Shift
+        Route::post('akun/shift/reset', [ManajemenShiftController::class, 'reset'])
+            ->name('akun.shift.reset');
 
         // CRUD Laporan Unduh
         Route::get('/unduh', [LaporanUnduhController::class, 'index'])

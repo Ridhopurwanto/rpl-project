@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Cache;
+// use Illuminate\Support\Facades\Cache; // Cache dimatikan agar aman di semua laptop
 use App\Notifications\PerubahanShiftNotification;
 
 class ManajemenShiftController extends Controller
@@ -33,13 +33,13 @@ class ManajemenShiftController extends Controller
                          ->get()
                          ->keyBy('tanggal');
 
-        // 3. Ambil Data Libur (Hybrid)
+        // 3. Ambil Data Libur (Google Calendar + Manual)
         $hariLibur = $this->getHariLibur($tanggalAwal->year);
 
         // 4. Render Kalender
         $kalender = [];
         
-        // Padding hari kosong di awal bulan (jika tgl 1 bukan hari Minggu)
+        // Padding hari kosong di awal bulan
         $hariPertama = $tanggalAwal->dayOfWeek; 
         for ($i = 0; $i < $hariPertama; $i++) {
             $kalender[] = null;
@@ -49,8 +49,6 @@ class ManajemenShiftController extends Controller
         foreach ($periode as $date) {
             $tglStr = $date->toDateString();
             
-            // Default shift jika tidak ada di DB adalah 'Off'
-            // Nanti saat di-klik/update, baru logika pola diterapkan
             $jenisShift = $shiftsDB[$tglStr]->shiftRule->jenis_shift ?? 'Off'; 
             $isLibur = in_array($tglStr, $hariLibur);
 
@@ -72,7 +70,7 @@ class ManajemenShiftController extends Controller
     }
 
     /**
-     * Update Shift dengan Logika Smart Auto-Fill Berdasarkan JENIS JADWAL
+     * Update Shift dengan Opsi Overwrite/Timpa Masa Depan
      */
     public function update(Request $request)
     {
@@ -80,6 +78,7 @@ class ManajemenShiftController extends Controller
             'id_pengguna' => 'required|exists:pengguna,id_pengguna',
             'tanggal'     => 'required|date_format:Y-m-d',
             'jenis_shift' => 'required|in:Pagi,Malam,Off',
+            'apply_pattern' => 'boolean'
         ]);
 
         try {
@@ -89,18 +88,25 @@ class ManajemenShiftController extends Controller
             // Loop sampai 6 bulan ke depan agar pola tidak putus
             $endDate = $targetDate->copy()->addMonths(6)->endOfMonth(); 
 
-            // Ambil ID Shift dari DB (Dictionary)
+            // Ambil ID Shift dari DB
             $rules = ShiftRule::whereIn('jenis_shift', ['Pagi', 'Malam', 'Off'])
                               ->get()
                               ->pluck('idshift_rule', 'jenis_shift');
 
             $selectedShiftId = $rules[$request->jenis_shift];
 
-            // 1. Simpan Tanggal Utama (User Click) - Manual Override
+            // 1. Simpan Tanggal Utama
             $shift = Shift::updateOrCreate(
                 ['id_pengguna' => $request->id_pengguna, 'tanggal' => $request->tanggal],
                 ['jenis_shift' => $selectedShiftId]
             );
+
+            // LOGIKA TIMPA / OVERWRITE
+            if ($request->apply_pattern) {
+                Shift::where('id_pengguna', $request->id_pengguna)
+                     ->whereDate('tanggal', '>', $targetDate)
+                     ->delete();
+            }
 
             $affectedDates = []; 
             $currentDate = $targetDate->copy()->addDay();
@@ -109,19 +115,13 @@ class ManajemenShiftController extends Controller
             // Ambil Data Libur
             $hariLibur = $this->getHariLibur($targetDate->year, $endDate->year);
 
-            // Tentukan Jenis Jadwal (Fallback ke default jika null)
-            // Jika peran komandan/bau biasanya non_shift, anggota biasanya shift
+            // Tentukan Jenis Jadwal
             $jadwalType = $user->jenis_jadwal; 
-            
             if (!$jadwalType) {
-                 // Fallback Logic jika kolom jenis_jadwal masih kosong
                  $jadwalType = ($user->peran == 'anggota') ? 'shift' : 'non_shift';
             }
 
-            // ==================================================
-            // LOGIKA 1: TIPE SHIFT (Pola P-P-M-M-O-O)
-            // (Berlaku untuk Anggota Shift)
-            // ==================================================
+            // LOGIKA SHIFT (2-2-2)
             if ($jadwalType == 'shift') {
                 $pattern = [
                     $rules['Pagi'], $rules['Pagi'], 
@@ -129,7 +129,7 @@ class ManajemenShiftController extends Controller
                     $rules['Off'], $rules['Off']
                 ];
 
-                // Deteksi start index berdasarkan shift kemarin
+                // Deteksi start index
                 $startIndex = 0; 
                 if ($request->jenis_shift == 'Pagi') {
                     $yesterday = Shift::where('id_pengguna', $request->id_pengguna)->whereDate('tanggal', $targetDate->copy()->subDay())->first();
@@ -145,7 +145,6 @@ class ManajemenShiftController extends Controller
                 }
 
                 while ($currentDate <= $endDate) {
-                    // Cek apakah sudah ada data manual? (Strict: Jangan timpa manual)
                     $exists = Shift::where('id_pengguna', $request->id_pengguna)
                                    ->whereDate('tanggal', $currentDate)
                                    ->exists();
@@ -166,51 +165,30 @@ class ManajemenShiftController extends Controller
                     $counter++;
                 }
             }
-            // ==================================================
-            // LOGIKA 2: TIPE NON-SHIFT (Senin-Jumat Kerja, Weekend/Libur Off)
-            // (Berlaku untuk Komandan, BAU, atau Anggota Non-Shift)
-            // ==================================================
+            // LOGIKA NON-SHIFT (Senin-Jumat)
             elseif ($jadwalType == 'non_shift') {
                 while ($currentDate <= $endDate) {
                     $tglStr = $currentDate->format('Y-m-d');
-                    
-                    // Cek Kondisi Libur (Sabtu, Minggu, atau Tanggal Merah)
                     $isOffDay = $currentDate->isWeekend() || in_array($tglStr, $hariLibur);
                     
-                    // Ambil data lama (jika ada)
-                    $existingShift = Shift::where('id_pengguna', $request->id_pengguna)
-                                          ->whereDate('tanggal', $currentDate)
-                                          ->first();
+                    $exists = Shift::where('id_pengguna', $request->id_pengguna)
+                                   ->whereDate('tanggal', $currentDate)
+                                   ->exists();
 
-                    if ($isOffDay) {
-                        // JIKA LIBUR: PAKSA JADI OFF 
-                        // Kecuali user memang set manual jadi Pagi/Malam sebelumnya, 
-                        // tapi di sini logikanya kita reset ke Off agar sesuai kalender libur
-                        if (!$existingShift || $existingShift->jenis_shift != $rules['Off']) {
-                            Shift::updateOrCreate(
-                                ['id_pengguna' => $request->id_pengguna, 'tanggal' => $tglStr],
-                                ['jenis_shift' => $rules['Off']]
-                            );
+                    if (!$exists) {
+                        if ($isOffDay) {
+                            Shift::create(['id_pengguna' => $request->id_pengguna, 'tanggal' => $tglStr, 'jenis_shift' => $rules['Off']]);
                             $affectedDates[] = ['date' => $tglStr, 'shift' => 'Off'];
-                        }
-                    } 
-                    else {
-                        // JIKA HARI KERJA (Senin-Jumat): Isi Pagi jika KOSONG
-                        if (!$existingShift) {
-                            Shift::create([
-                                'id_pengguna' => $request->id_pengguna, 
-                                'tanggal' => $tglStr, 
-                                'jenis_shift' => $rules['Pagi']
-                            ]);
+                        } else {
+                            Shift::create(['id_pengguna' => $request->id_pengguna, 'tanggal' => $tglStr, 'jenis_shift' => $rules['Pagi']]);
                             $affectedDates[] = ['date' => $tglStr, 'shift' => 'Pagi'];
                         }
                     }
-                    
                     $currentDate->addDay();
                 }
             }
 
-            // Kirim Notifikasi
+            // Notifikasi
             if ($shift->wasRecentlyCreated || $shift->wasChanged('jenis_shift')) {
                  $aksi = $shift->wasRecentlyCreated ? 'dibuatkan' : 'diubah';
                  $pesan = "Jadwal shift tanggal " . $request->tanggal . " telah {$aksi}.";
@@ -219,7 +197,7 @@ class ManajemenShiftController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Shift tersimpan. Pola ' . strtoupper(str_replace('_', ' ', $jadwalType)) . ' diterapkan!',
+                'message' => $request->apply_pattern ? 'Shift diubah & pola masa depan diperbarui!' : 'Shift berhasil disimpan.',
                 'affected_dates' => $affectedDates
             ]);
 
@@ -229,50 +207,108 @@ class ManajemenShiftController extends Controller
     }
 
     /**
-     * Helper: Ambil Hari Libur (Hybrid: API + Manual Backup)
+     * RESET JADWAL (Hapus Masa Depan)
+     */
+    public function reset(Request $request)
+    {
+        $request->validate(['id_pengguna' => 'required']);
+
+        try {
+            Shift::where('id_pengguna', $request->id_pengguna)
+                 ->where('tanggal', '>', Carbon::today())
+                 ->delete();
+
+            return response()->json(['success' => true, 'message' => 'Jadwal masa depan berhasil dikosongkan.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal reset: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Helper: Ambil Hari Libur (Google Calendar + Manual Backup)
+     * TANPA CACHE agar aman di semua laptop.
+     */
+    /**
+     * Helper: Ambil Hari Libur (Google Calendar + Manual Backup Lengkap)
      */
     private function getHariLibur($tahunAwal, $tahunAkhir = null)
     {
-        $years = [$tahunAwal];
-        if ($tahunAkhir && $tahunAkhir != $tahunAwal) {
-            $years[] = $tahunAkhir;
-        }
-
-        // --- DAFTAR LIBUR MANUAL ---
-        // Digunakan jika API gagal ATAU untuk request khusus
+        // 1. DATA LIBUR MANUAL LENGKAP (2025 & PREDIKSI 2026)
+        // Sumber: SKB 3 Menteri & Kalender Hijriah
         $manualHolidays = [
-            '2025-01-01', '2025-01-27', '2025-01-29', 
-            '2025-03-29', '2025-03-31', '2025-04-01', 
-            '2025-04-18', '2025-04-20', '2025-05-01', 
-            '2025-05-12', '2025-05-29', '2025-06-01', 
-            '2025-06-06', '2025-06-27', '2025-08-17', 
-            '2025-09-05', '2025-12-25',
+            // --- TAHUN 2025 ---
+            '2025-01-01', // Tahun Baru Masehi
+            '2025-01-27', // Isra Mikraj
+            '2025-01-29', // Tahun Baru Imlek
+            '2025-03-29', // Hari Suci Nyepi
+            '2025-03-31', // Idul Fitri 1446 H
+            '2025-04-01', // Idul Fitri 1446 H
+            '2025-04-18', // Wafat Yesus Kristus
+            '2025-04-20', // Paskah (Minggu)
+            '2025-05-01', // Hari Buruh
+            '2025-05-12', // Hari Raya Waisak
+            '2025-05-29', // Kenaikan Yesus Kristus
+            '2025-06-01', // Hari Lahir Pancasila
+            '2025-06-06', // Idul Adha 1446 H
+            '2025-06-27', // Tahun Baru Islam 1447 H
+            '2025-08-17', // HUT RI
+            '2025-09-05', // Maulid Nabi Muhammad SAW
+            '2025-12-25', // Hari Raya Natal
 
-            // --- 2026 (Manual Request) ---
-            '2026-03-18', // Request khusus
-            '2026-03-19', // Nyepi 2026
+            // --- TAHUN 2026 (PREDIKSI) ---
+            '2026-01-01', // Tahun Baru Masehi
+            '2026-01-16', // Isra Mikraj (Estimasi)
+            '2026-02-17', // Tahun Baru Imlek (Estimasi)
+            '2026-03-19', // Hari Suci Nyepi (Estimasi)
+            '2026-03-20', // Idul Fitri 1447 H (Estimasi Hari 1)
+            '2026-03-21', // Idul Fitri 1447 H (Estimasi Hari 2)
+            '2026-04-03', // Wafat Yesus Kristus
+            '2026-04-05', // Paskah
+            '2026-05-01', // Hari Buruh
+            '2026-05-14', // Kenaikan Yesus Kristus
+            '2026-05-27', // Idul Adha 1447 H (Estimasi)
+            '2026-05-31', // Hari Raya Waisak (Estimasi)
+            '2026-06-01', // Hari Lahir Pancasila
+            '2026-06-16', // Tahun Baru Islam 1448 H (Estimasi)
+            '2026-08-17', // HUT RI
+            '2026-08-25', // Maulid Nabi Muhammad SAW (Estimasi)
+            '2026-12-25', // Hari Raya Natal
         ];
 
-        $allHolidays = [];
+        // 2. FETCH DARI GOOGLE CALENDAR (Live Update)
+        // URL ini sering update otomatis jika pemerintah mengubah jadwal
+        $googleCalendarUrl = 'https://calendar.google.com/calendar/ical/en.indonesian%23holiday%40group.v.calendar.google.com/public/basic.ics';
+        
+        $fetchedHolidays = [];
 
-        foreach ($years as $year) {
-            // Gunakan Cache v7 agar data lama ter-reset
-            $liburTahunIni = Cache::remember("holidays_v7_{$year}", 43200, function () use ($year, $manualHolidays) {
-                try {
-                    $response = Http::timeout(2)->get("https://dayoffapi.vercel.app/api?year={$year}");
-                    if ($response->successful()) {
-                        $apiData = $response->json();
-                        $apiDates = array_column($apiData, 'tanggal');
-                        return array_unique(array_merge($apiDates, $manualHolidays));
+        try {
+            // Naikkan timeout jadi 5 detik agar tidak gampang gagal
+            $response = Http::timeout(5)->get($googleCalendarUrl);
+
+            if ($response->successful()) {
+                $icsContent = $response->body();
+                
+                // Regex untuk menangkap tanggal (DTSTART;VALUE=DATE:yyyymmdd)
+                // Kita juga tambahkan regex cadangan untuk format DTSTART:yyyymmdd (tanpa VALUE=DATE)
+                preg_match_all('/DTSTART(?:;VALUE=DATE)?:(\d{8})/', $icsContent, $matches);
+
+                if (!empty($matches[1])) {
+                    foreach ($matches[1] as $dateStr) {
+                        // Ubah 20250101 -> 2025-01-01
+                        $formattedDate = substr($dateStr, 0, 4) . '-' . substr($dateStr, 4, 2) . '-' . substr($dateStr, 6, 2);
+                        $fetchedHolidays[] = $formattedDate;
                     }
-                } catch (\Exception $e) {}
-
-                return $manualHolidays;
-            });
-
-            $allHolidays = array_merge($allHolidays, $liburTahunIni);
+                }
+            }
+        } catch (\Exception $e) {
+            // Jika internet mati atau Google timeout, abaikan error dan pakai manual saja
+            // Log error jika perlu: \Log::error("Gagal fetch libur: " . $e->getMessage());
         }
 
+        // 3. MERGE DATA
+        // Gabungkan manual + hasil fetch, lalu hapus duplikat
+        $allHolidays = array_unique(array_merge($manualHolidays, $fetchedHolidays));
+        
         return $allHolidays;
     }
 }
