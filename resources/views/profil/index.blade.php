@@ -1,362 +1,158 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Info Profil - {{ $pengguna->nama_lengkap }}</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+@extends('layouts.app')
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #4a6fa5 0%, #2c5282 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+@section('content')
+<div class="max-w-5xl mx-auto pb-10">
+    
+    {{-- Header Navigasi Kecil --}}
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">
+            Profil Pengguna
+        </h1>
+        <a href="{{ url()->previous() }}" class="text-sm font-medium text-gray-500 hover:text-[#2a4a6f] transition-colors flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Kembali
+        </a>
+    </div>
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 20px 30px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header h1 {
-            color: #2c3e50;
-            font-size: 28px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 40px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-
-        .profile-header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 30px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-
-        .profile-photo {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 5px solid #4a6fa5;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .profile-photo-placeholder {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #4a6fa5 0%, #2c5282 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 56px;
-            color: white;
-            font-weight: bold;
-            margin: 0 auto 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .profile-name {
-            font-size: 28px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-
-        .profile-username {
-            font-size: 16px;
-            color: #6c757d;
-            margin-bottom: 10px;
-        }
-
-        .profile-role {
-            display: inline-block;
-            padding: 8px 20px;
-            background: #4a6fa5;
-            color: white;
-            border-radius: 25px;
-            font-size: 14px;
-            text-transform: capitalize;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .info-section {
-            margin-bottom: 30px;
-        }
-
-        .section-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .info-item {
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            border-left: 4px solid #4a6fa5;
-            transition: all 0.3s;
-        }
-
-        .info-item:hover {
-            background: #e9ecef;
-            transform: translateX(5px);
-        }
-
-        .info-label {
-            font-size: 12px;
-            color: #6c757d;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .info-value {
-            font-size: 16px;
-            color: #2c3e50;
-            font-weight: 500;
-        }
-
-        .info-item.full-width {
-            grid-column: 1 / -1;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 30px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 14px 35px;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-            font-weight: 600;
-        }
-
-        .btn-primary {
-            background: #4a6fa5;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #3d5a85;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(74, 111, 165, 0.4);
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
-        }
-
-        .btn-back {
-            background: transparent;
-            color: #4a6fa5;
-            border: 2px solid #4a6fa5;
-            padding: 8px 20px;
-            font-size: 14px;
-        }
-
-        .btn-back:hover {
-            background: #4a6fa5;
-            color: white;
-        }
-
-        .alert {
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 500;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border-left: 4px solid #28a745;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .status-aktif {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-tidak-aktif {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        @media (max-width: 768px) {
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .btn-group {
-                flex-direction: column;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-
-            .card {
-                padding: 25px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>👤 Info Profil</h1>
-            <a href="{{ url('/anggota/dashboard') }}" class="btn btn-back">← Kembali</a>
+    {{-- Alert Pesan Sukses --}}
+    @if(session('success'))
+        <div class="mb-4 bg-green-50 border-l-4 border-green-500 p-4 rounded shadow-sm">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-green-700">{{ session('success') }}</p>
+                </div>
+            </div>
         </div>
+    @endif
 
-        @if(session('success'))
-            <div class="alert alert-success">
-                ✓ {{ session('success') }}
-            </div>
-        @endif
+    {{-- KARTU UTAMA --}}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        
+        {{-- Banner Background --}}
+        <div class="h-32 bg-[#2a4a6f]"></div>
 
-        <div class="card">
-            <div class="profile-header">
-                @if($pengguna->foto_profil && file_exists(public_path('uploads/profil/' . $pengguna->foto_profil)))
-                    <img src="{{ asset('uploads/profil/' . $pengguna->foto_profil) }}" alt="Foto Profil" class="profile-photo">
-                @else
-                    <div class="profile-photo-placeholder">
-                        {{ strtoupper(substr($pengguna->nama_lengkap, 0, 1)) }}
-                    </div>
-                @endif
+        <div class="px-6 pb-6">
+            <div class="relative flex flex-col sm:flex-row -mt-12 mb-6 gap-5">
                 
-                <div class="profile-name">{{ $pengguna->nama_lengkap }}</div>
-                <div class="profile-username">{{ '@' . $pengguna->username }}</div>
-                <span class="profile-role">{{ ucfirst($pengguna->peran) }}</span>
-            </div>
+                {{-- Foto Profil --}}
+                <div class="relative flex-shrink-0 mx-auto sm:mx-0">
+                    <div class="w-32 h-32 rounded-xl bg-white p-1 shadow-md ring-1 ring-gray-100">
+                        @php
+                            // LOGIKA BARU: Cek foto di dua lokasi agar kompatibel dengan data lama & baru
+                            $fotoUrl = null;
+                            if ($pengguna->foto_profil) {
+                                // 1. Cek di folder Storage (Standar Laravel / Referensi Komandan)
+                                if (file_exists(public_path('storage/' . $pengguna->foto_profil))) {
+                                    $fotoUrl = asset('storage/' . $pengguna->foto_profil);
+                                } 
+                                // 2. Cek di folder Uploads Custom (Jika ada upload manual lewat controller baru)
+                                elseif (file_exists(public_path('uploads/profil/' . $pengguna->foto_profil))) {
+                                    $fotoUrl = asset('uploads/profil/' . $pengguna->foto_profil);
+                                }
+                            }
+                        @endphp
 
-            <div class="info-section">
-                <div class="section-title">📧 Informasi Kontak</div>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <div class="info-label">Email</div>
-                        <div class="info-value">{{ $pengguna->email }}</div>
+                        @if($fotoUrl)
+                            <img src="{{ $fotoUrl }}" class="w-full h-full object-cover rounded-lg bg-gray-100" alt="Foto Profil">
+                        @else
+                            {{-- Fallback jika tidak ada foto --}}
+                            <div class="w-full h-full bg-gray-100 rounded-lg flex items-center justify-center text-[#2a4a6f] text-4xl font-bold">
+                                {{ strtoupper(substr($pengguna->nama_lengkap ?? $pengguna->username, 0, 1)) }}
+                            </div>
+                        @endif
                     </div>
+                </div>
 
-                    <div class="info-item">
-                        <div class="info-label">No. HP / WhatsApp</div>
-                        <div class="info-value">{{ $pengguna->no_hp ?? '-' }}</div>
+                {{-- Identitas --}}
+                <div class="flex-1 text-center sm:text-left sm:pt-14">
+                    <h2 class="text-2xl font-bold text-gray-900">{{ $pengguna->nama_lengkap }}</h2>
+                    <p class="text-gray-500 font-medium mb-3">{{ '@' . $pengguna->username }}</p>
+                    
+                    <div class="flex flex-wrap gap-2 justify-center sm:justify-start">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-blue-50 text-[#2a4a6f] border border-blue-100 capitalize">
+                            {{ $pengguna->peran }}
+                        </span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium {{ $pengguna->status == 'Aktif' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100' }}">
+                            {{ ucfirst($pengguna->status) }}
+                        </span>
                     </div>
+                </div>
 
-                    <div class="info-item full-width">
-                        <div class="info-label">Alamat</div>
-                        <div class="info-value">{{ $pengguna->alamat ?? 'Belum diisi' }}</div>
-                    </div>
+                {{-- Tombol Aksi --}}
+                <div class="w-full sm:w-auto mt-2 sm:mt-0 sm:pt-14 flex justify-center sm:justify-end">
+                    <a href="{{ route('profil.edit') }}" class="inline-flex items-center px-4 py-2 bg-[#2a4a6f] border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-800 transition shadow-sm h-fit">
+                        <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                        Edit Profil
+                    </a>
                 </div>
             </div>
 
-            <div class="info-section">
-                <div class="section-title">📋 Informasi Pribadi</div>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <div class="info-label">Tanggal Lahir</div>
-                        <div class="info-value">
-                            @if($pengguna->tanggal_lahir)
-                                {{ \Carbon\Carbon::parse($pengguna->tanggal_lahir)->format('d F Y') }}
-                            @else
-                                -
-                            @endif
+            <div class="border-t border-gray-100 my-6"></div>
+
+            {{-- Grid Informasi --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                {{-- KOLOM KIRI: Kontak --}}
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                        Informasi Kontak
+                    </h3>
+                    <div class="bg-gray-50 rounded-xl p-5 border border-gray-100 space-y-4">
+                        <div>
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Alamat Email</p>
+                            <p class="text-gray-900 font-medium mt-1">{{ $pengguna->email }}</p>
                         </div>
-                    </div>
-
-                    <div class="info-item">
-                        <div class="info-label">Status Akun</div>
-                        <div class="info-value">
-                            <span class="status-badge {{ $pengguna->status == 'Aktif' ? 'status-aktif' : 'status-tidak-aktif' }}">
-                                {{ ucfirst($pengguna->status) }}
-                            </span>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">No. WhatsApp / HP</p>
+                            <p class="text-gray-900 font-medium mt-1">{{ $pengguna->no_hp ?? '-' }}</p>
                         </div>
-                    </div>
-
-                    <div class="info-item">
-                        <div class="info-label">Terdaftar Sejak</div>
-                        <div class="info-value">{{ $pengguna->created_at->format('d F Y') }}</div>
-                    </div>
-
-                    <div class="info-item">
-                        <div class="info-label">Terakhir Diperbarui</div>
-                        <div class="info-value">{{ $pengguna->updated_at->format('d F Y') }}</div>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Alamat Domisili</p>
+                            <p class="text-gray-900 font-medium mt-1 leading-relaxed">{{ $pengguna->alamat ?? 'Belum diisi' }}</p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="btn-group">
-                <a href="{{ url('/anggota/dashboard') }}" class="btn btn-secondary">🏠 Kembali ke Dashboard</a>
+                {{-- KOLOM KANAN: Data Personal --}}
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                        Informasi Personal
+                    </h3>
+                    <div class="bg-gray-50 rounded-xl p-5 border border-gray-100 space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Tanggal Lahir</p>
+                                <p class="text-gray-900 font-medium mt-1">
+                                    @if($pengguna->tanggal_lahir)
+                                        {{ \Carbon\Carbon::parse($pengguna->tanggal_lahir)->translatedFormat('d F Y') }}
+                                    @else
+                                        -
+                                    @endif
+                                </p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Bergabung</p>
+                                <p class="text-gray-900 font-medium mt-1">
+                                    {{ $pengguna->created_at->translatedFormat('d M Y') }}
+                                </p>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Terakhir Update</p>
+                            <p class="text-sm text-gray-600 mt-1">
+                                Data profil terakhir diperbarui pada {{ $pengguna->updated_at->diffForHumans() }}.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
-</body>
-</html>
+</div>
+@endsection

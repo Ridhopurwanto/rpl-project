@@ -65,8 +65,8 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['auth'])->group(function () {
         Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
         Route::get('/profil/edit', [ProfilController::class, 'edit'])->name('profil.edit');
-        Route::post('/profil/update', [ProfilController::class, 'update'])->name('profil.update');
-        Route::post('/profil/password', [ProfilController::class, 'updatePassword'])->name('profil.password');
+        Route::patch('/profil/update', [ProfilController::class, 'update'])->name('profil.update');
+        Route::patch('/profil/password', [ProfilController::class, 'updatePassword'])->name('profil.update-password');
     });
 
     // --- RUTE UNTUK ANGGOTA ---

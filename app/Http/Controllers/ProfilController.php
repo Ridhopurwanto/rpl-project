@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
+use Illuminate\Support\Facades\Storage;
+use App\Models\User; // Pastikan Model User diimport
 
 class ProfilController extends Controller
 {
     /**
-     * Tampilkan halaman info profil
+     * Tampilkan halaman info profil (Read Only)
      */
     public function index()
     {
@@ -19,7 +20,7 @@ class ProfilController extends Controller
     }
 
     /**
-     * Tampilkan halaman edit profil
+     * Tampilkan halaman edit profil (Form)
      */
     public function edit()
     {
@@ -28,63 +29,87 @@ class ProfilController extends Controller
     }
 
     /**
-     * Update data profil
+     * Proses Update Data Diri (Foto, Nama, HP, Alamat)
      */
     public function update(Request $request)
     {
-        $pengguna = Auth::user();
+        $pengguna = Auth::user(); // Ambil user yang sedang login
         
+        // 1. Validasi Input
         $request->validate([
-            'nama_lengkap' => 'required|string|max:255',
-            'email' => 'required|email|unique:pengguna,email,' . $pengguna->id_pengguna . ',id_pengguna',
-            'no_hp' => 'nullable|string|max:20',
-            'alamat' => 'nullable|string',
+            'nama_lengkap'  => 'required|string|max:255',
+            'no_hp'         => 'nullable|string|max:20',
+            'alamat'        => 'nullable|string|max:500',
             'tanggal_lahir' => 'nullable|date',
-            'foto_profil' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+            'foto_profil'   => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Max 2MB
+        ], [
+            'nama_lengkap.required' => 'Nama lengkap wajib diisi.',
+            'foto_profil.image'     => 'File harus berupa gambar.',
+            'foto_profil.max'       => 'Ukuran foto maksimal 2MB.',
         ]);
 
-        $data = $request->only(['nama_lengkap', 'email', 'no_hp', 'alamat', 'tanggal_lahir']);
+        // 2. Siapkan data untuk diupdate
+        $dataToUpdate = [
+            'nama_lengkap'  => $request->nama_lengkap,
+            'no_hp'         => $request->no_hp,
+            'alamat'        => $request->alamat,
+            'tanggal_lahir' => $request->tanggal_lahir,
+        ];
 
-        // Handle upload foto profil
+        // 3. Cek apakah ada upload foto baru
         if ($request->hasFile('foto_profil')) {
-            $file = $request->file('foto_profil');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('uploads/profil'), $filename);
-            $data['foto_profil'] = $filename;
             
-            // Hapus foto lama jika ada
+            // Hapus foto lama jika ada (dan bukan placeholder default)
             if ($pengguna->foto_profil && file_exists(public_path('uploads/profil/' . $pengguna->foto_profil))) {
-                unlink(public_path('uploads/profil/' . $pengguna->foto_profil));
+                @unlink(public_path('uploads/profil/' . $pengguna->foto_profil));
             }
+
+            // Simpan foto baru
+            $file = $request->file('foto_profil');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            
+            // Pindahkan ke folder public/uploads/profil
+            $file->move(public_path('uploads/profil'), $filename);
+
+            // Masukkan nama file ke array update
+            $dataToUpdate['foto_profil'] = $filename;
         }
 
-        User::where('id_pengguna', $pengguna->id_pengguna)->update($data);
+        // 4. Update Database
+        // Pastikan pakai ID yang benar. Kalau di tabelmu primary key-nya 'id', ganti 'id_pengguna' jadi 'id'
+        // Asumsi di sini primary key kamu adalah 'id_pengguna' sesuai kode awalmu.
+        User::where('id_pengguna', $pengguna->id_pengguna)->update($dataToUpdate);
 
         return redirect()->route('profil.index')->with('success', 'Profil berhasil diperbarui!');
     }
 
     /**
-     * Update password
+     * Proses Update Password
      */
     public function updatePassword(Request $request)
     {
-        $request->validate([
+        // 1. Validasi Input Password
+        $request->validateWithBag('password_errors', [
             'password_lama' => 'required',
-            'password_baru' => 'required|min:8|confirmed',
+            'password_baru' => 'required|min:8|confirmed', // 'confirmed' otomatis cek password_baru_confirmation
+        ], [
+            'password_lama.required' => 'Password lama harus diisi.',
+            'password_baru.min'      => 'Password baru minimal 8 karakter.',
+            'password_baru.confirmed'=> 'Konfirmasi password tidak cocok.',
         ]);
 
         $pengguna = Auth::user();
 
-        // Cek password lama
+        // 2. Cek apakah password lama benar
         if (!Hash::check($request->password_lama, $pengguna->password)) {
-            return back()->withErrors(['password_lama' => 'Password lama tidak sesuai']);
+            return back()->withErrors(['password_lama' => 'Password lama yang Anda masukkan salah.'])->withInput();
         }
 
-        // Update password baru
+        // 3. Update Password Baru (Hash)
         User::where('id_pengguna', $pengguna->id_pengguna)->update([
             'password' => Hash::make($request->password_baru)
         ]);
 
-        return redirect()->route('profil.index')->with('success', 'Password berhasil diubah!');
+        return back()->with('success', 'Password berhasil diubah!');
     }
 }
