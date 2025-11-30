@@ -26,7 +26,7 @@ class ManajemenShiftController extends Controller
         $tanggalAwal  = Carbon::createFromFormat('Y-m', $bulanRequest)->startOfMonth();
         $tanggalAkhir = $tanggalAwal->copy()->endOfMonth();
 
-        // 2. Ambil Data Shift
+        // 2. Ambil Data Shift dari DB
         $shiftsDB = Shift::with('shiftRule')
                          ->where('id_pengguna', $id_pengguna)
                          ->whereBetween('tanggal', [$tanggalAwal->toDateString(), $tanggalAkhir->toDateString()])
@@ -38,6 +38,8 @@ class ManajemenShiftController extends Controller
 
         // 4. Render Kalender
         $kalender = [];
+        
+        // Padding hari kosong di awal bulan (jika tgl 1 bukan hari Minggu)
         $hariPertama = $tanggalAwal->dayOfWeek; 
         for ($i = 0; $i < $hariPertama; $i++) {
             $kalender[] = null;
@@ -46,6 +48,9 @@ class ManajemenShiftController extends Controller
         $periode = CarbonPeriod::create($tanggalAwal, $tanggalAkhir);
         foreach ($periode as $date) {
             $tglStr = $date->toDateString();
+            
+            // Default shift jika tidak ada di DB adalah 'Off'
+            // Nanti saat di-klik/update, baru logika pola diterapkan
             $jenisShift = $shiftsDB[$tglStr]->shiftRule->jenis_shift ?? 'Off'; 
             $isLibur = in_array($tglStr, $hariLibur);
 
@@ -67,7 +72,7 @@ class ManajemenShiftController extends Controller
     }
 
     /**
-     * Update Shift dengan Logika Smart Auto-Fill & Force Update Libur
+     * Update Shift dengan Logika Smart Auto-Fill Berdasarkan JENIS JADWAL
      */
     public function update(Request $request)
     {
@@ -84,14 +89,14 @@ class ManajemenShiftController extends Controller
             // Loop sampai 6 bulan ke depan agar pola tidak putus
             $endDate = $targetDate->copy()->addMonths(6)->endOfMonth(); 
 
-            // Ambil ID Shift dari DB
+            // Ambil ID Shift dari DB (Dictionary)
             $rules = ShiftRule::whereIn('jenis_shift', ['Pagi', 'Malam', 'Off'])
                               ->get()
                               ->pluck('idshift_rule', 'jenis_shift');
 
             $selectedShiftId = $rules[$request->jenis_shift];
 
-            // 1. Simpan Tanggal Utama (User Click)
+            // 1. Simpan Tanggal Utama (User Click) - Manual Override
             $shift = Shift::updateOrCreate(
                 ['id_pengguna' => $request->id_pengguna, 'tanggal' => $request->tanggal],
                 ['jenis_shift' => $selectedShiftId]
@@ -101,13 +106,23 @@ class ManajemenShiftController extends Controller
             $currentDate = $targetDate->copy()->addDay();
             $counter = 1;
 
-            // Ambil Data Libur (Untuk Komandan)
+            // Ambil Data Libur
             $hariLibur = $this->getHariLibur($targetDate->year, $endDate->year);
 
+            // Tentukan Jenis Jadwal (Fallback ke default jika null)
+            // Jika peran komandan/bau biasanya non_shift, anggota biasanya shift
+            $jadwalType = $user->jenis_jadwal; 
+            
+            if (!$jadwalType) {
+                 // Fallback Logic jika kolom jenis_jadwal masih kosong
+                 $jadwalType = ($user->peran == 'anggota') ? 'shift' : 'non_shift';
+            }
+
             // ==================================================
-            // LOGIKA 1: ANGGOTA (Pola P-P-M-M-O-O)
+            // LOGIKA 1: TIPE SHIFT (Pola P-P-M-M-O-O)
+            // (Berlaku untuk Anggota Shift)
             // ==================================================
-            if (strtolower($user->peran) == 'anggota') {
+            if ($jadwalType == 'shift') {
                 $pattern = [
                     $rules['Pagi'], $rules['Pagi'], 
                     $rules['Malam'], $rules['Malam'], 
@@ -130,10 +145,11 @@ class ManajemenShiftController extends Controller
                 }
 
                 while ($currentDate <= $endDate) {
-                    // Anggota: Hanya isi jika kosong (Strict: Jangan timpa manual)
+                    // Cek apakah sudah ada data manual? (Strict: Jangan timpa manual)
                     $exists = Shift::where('id_pengguna', $request->id_pengguna)
                                    ->whereDate('tanggal', $currentDate)
                                    ->exists();
+                    
                     if (!$exists) {
                         $patternIndex = ($startIndex + $counter) % 6;
                         $newShiftId = $pattern[$patternIndex];
@@ -151,13 +167,14 @@ class ManajemenShiftController extends Controller
                 }
             }
             // ==================================================
-            // LOGIKA 2: KOMANDAN (Force Off saat Libur)
+            // LOGIKA 2: TIPE NON-SHIFT (Senin-Jumat Kerja, Weekend/Libur Off)
+            // (Berlaku untuk Komandan, BAU, atau Anggota Non-Shift)
             // ==================================================
-            elseif (strtolower($user->peran) == 'komandan') {
+            elseif ($jadwalType == 'non_shift') {
                 while ($currentDate <= $endDate) {
                     $tglStr = $currentDate->format('Y-m-d');
                     
-                    // Cek Kondisi Libur
+                    // Cek Kondisi Libur (Sabtu, Minggu, atau Tanggal Merah)
                     $isOffDay = $currentDate->isWeekend() || in_array($tglStr, $hariLibur);
                     
                     // Ambil data lama (jika ada)
@@ -166,7 +183,9 @@ class ManajemenShiftController extends Controller
                                           ->first();
 
                     if ($isOffDay) {
-                        // JIKA LIBUR: PAKSA JADI OFF (Meskipun sudah terisi Pagi)
+                        // JIKA LIBUR: PAKSA JADI OFF 
+                        // Kecuali user memang set manual jadi Pagi/Malam sebelumnya, 
+                        // tapi di sini logikanya kita reset ke Off agar sesuai kalender libur
                         if (!$existingShift || $existingShift->jenis_shift != $rules['Off']) {
                             Shift::updateOrCreate(
                                 ['id_pengguna' => $request->id_pengguna, 'tanggal' => $tglStr],
@@ -176,7 +195,7 @@ class ManajemenShiftController extends Controller
                         }
                     } 
                     else {
-                        // JIKA HARI KERJA: Hanya isi Pagi jika KOSONG
+                        // JIKA HARI KERJA (Senin-Jumat): Isi Pagi jika KOSONG
                         if (!$existingShift) {
                             Shift::create([
                                 'id_pengguna' => $request->id_pengguna, 
@@ -200,7 +219,7 @@ class ManajemenShiftController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Shift tersimpan. Pola & Libur diterapkan!',
+                'message' => 'Shift tersimpan. Pola ' . strtoupper(str_replace('_', ' ', $jadwalType)) . ' diterapkan!',
                 'affected_dates' => $affectedDates
             ]);
 

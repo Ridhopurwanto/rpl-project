@@ -69,6 +69,7 @@ class ManajemenAkunController extends Controller
             'username'     => ['required', 'string', 'max:255', Rule::unique('pengguna')->ignore($user->id_pengguna, 'id_pengguna')],
             'password'     => ['nullable', 'confirmed', Password::min(8)],
             'peran'        => ['required', Rule::in(['anggota', 'komandan', 'bau'])],
+            'jenis_jadwal' => 'nullable|in:shift,non_shift',
             'status'       => ['required', Rule::in(['Aktif', 'Tidak Aktif'])],
             'tanggal_lahir'=> 'nullable|date',
             'no_hp'        => 'nullable|string|max:20',
