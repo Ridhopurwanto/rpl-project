@@ -151,50 +151,43 @@
         </div>
     </div>
 
-    {{-- === 3. FILTER RIWAYAT (STYLE SERAGAM) === --}}
+    {{-- === 3. FILTER RIWAYAT (LIVE SEARCH) === --}}
     <div class="bg-white rounded-lg shadow-md p-5 mt-4 mb-6">
         <h3 class="text-sm font-bold text-slate-600 uppercase mb-3">FILTER RIWAYAT :</h3>
         
-        <form action="{{ route('anggota.presensi.index') }}" method="GET">
-            <div class="flex flex-col md:flex-row md:items-end gap-4">
-                
-                {{-- Input Tanggal Awal --}}
-                <div class="flex-1">
-                    <label for="start_date" class="block text-xs font-bold text-slate-500 mb-1 uppercase">DARI TANGGAL :</label>
-                    <input 
-                        type="date" 
-                        id="start_date"
-                        name="start_date"
-                        value="{{ $startDate }}"
-                        class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        style="color-scheme: dark;"
-                    >
-                </div>
-
-                {{-- Input Tanggal Akhir --}}
-                <div class="flex-1">
-                    <label for="end_date" class="block text-xs font-bold text-slate-500 mb-1 uppercase">SAMPAI TANGGAL :</label>
-                    <input 
-                        type="date" 
-                        id="end_date"
-                        name="end_date"
-                        value="{{ $endDate }}"
-                        class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        style="color-scheme: dark;"
-                    >
-                </div>
-
-                {{-- Tombol Filter --}}
-                <div class="md:mb-[1px]"> 
-                    <button type="submit" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded-lg shadow transition-colors duration-200 flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        FILTER
-                    </button>
-                </div>
-
+        <div class="flex flex-col md:flex-row md:items-end gap-4">
+            
+            {{-- Input Tanggal Awal --}}
+            <div class="flex-1">
+                <label for="start_date" class="block text-xs font-bold text-slate-500 mb-1 uppercase">DARI TANGGAL :</label>
+                <input 
+                    type="date" 
+                    id="start_date"
+                    name="start_date"
+                    value="{{ $startDate }}"
+                    @change="window.location.href = '{{ route('anggota.presensi.index') }}?start_date=' + $event.target.value + '&end_date=' + document.getElementById('end_date').value"
+                    class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    style="color-scheme: dark;"
+                >
             </div>
-        </form>
+
+            {{-- Input Tanggal Akhir --}}
+            <div class="flex-1">
+                <label for="end_date" class="block text-xs font-bold text-slate-500 mb-1 uppercase">SAMPAI TANGGAL :</label>
+                <input 
+                    type="date" 
+                    id="end_date"
+                    name="end_date"
+                    value="{{ $endDate }}"
+                    @change="window.location.href = '{{ route('anggota.presensi.index') }}?start_date=' + document.getElementById('start_date').value + '&end_date=' + $event.target.value"
+                    class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    style="color-scheme: dark;"
+                >
+            </div>
+
+        </div>
     </div>
+
 
     {{-- === 3. RIWAYAT PRESENSI (CARD LAYOUT) === --}}
     <div class="mt-4 mb-20 space-y-3">
