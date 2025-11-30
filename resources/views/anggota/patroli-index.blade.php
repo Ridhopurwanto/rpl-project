@@ -151,15 +151,106 @@
 
     {{-- Tombol FAB Tambah Patroli --}}
     @if($tanggalTerpilih->isToday())
-        <a href="{{ route('anggota.patroli.createSession') }}" 
-        :class="showModal ? 'pointer-events-none opacity-50' : ''"
-        x-bind:tabindex="showModal ? -1 : 0"
-        x-bind:aria-disabled="showModal ? 'true' : 'false'"
-        class="fixed bottom-24 right-4 bg-[#2a4a6f] text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform z-40 cursor-pointer">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-        </a>
+        @php
+            $user = Auth::user();
+            $jenisShift = $user->jenis_shift ?? 1;
+            
+            // Jadwal Patroli
+            $jadwalPatroli = [
+                1 => [ // Shift Pagi
+                    'Patroli 1' => ['07:30', '08:30'],
+                    'Patroli 2' => ['09:30', '10:30'],
+                    'Patroli 3' => ['11:30', '12:30'],
+                    'Patroli 4' => ['13:40', '14:30'],
+                    'Patroli 5' => ['15:30', '16:30'],
+                    'Patroli 6' => ['17:30', '18:40'],
+                ],
+                2 => [ // Shift Malam
+                    'Patroli 1' => ['19:30', '20:20'],
+                    'Patroli 2' => ['21:30', '22:30'],
+                    'Patroli 3' => ['23:30', '00:30'],
+                    'Patroli 4' => ['01:30', '02:30'],
+                    'Patroli 5' => ['03:30', '04:30'],
+                    'Patroli 6' => ['05:30', '06:30'],
+                ]
+            ];
+            
+            // Cek apakah ada patroli yang available
+            $adaPatroliAvailable = false;
+            $semuaSelesai = true;
+            
+            foreach(['Patroli 1', 'Patroli 2', 'Patroli 3', 'Patroli 4', 'Patroli 5', 'Patroli 6'] as $patroli) {
+                // Cek apakah sudah selesai 17 area
+                $jumlah = App\Models\Patroli::where('id_pengguna', $user->id_pengguna)
+                                ->whereDate('tanggal', \Carbon\Carbon::today())
+                                ->where('jenis_patroli', $patroli)
+                                ->count();
+                
+                if ($jumlah < 17) {
+                    $semuaSelesai = false;
+                    
+                    // Cek apakah waktu sekarang valid
+                    $waktuSekarang = \Carbon\Carbon::now();
+                    [$jamMulai, $jamSelesai] = $jadwalPatroli[$jenisShift][$patroli];
+                    
+                    $mulai = \Carbon\Carbon::parse($jamMulai);
+                    $selesai = \Carbon\Carbon::parse($jamSelesai);
+                    
+                    // Handle midnight crossing
+                    if ($selesai->lt($mulai)) {
+                        $selesai->addDay();
+                        if ($waktuSekarang->lt($mulai)) {
+                            $waktuSekarang = $waktuSekarang->copy()->addDay();
+                        }
+                    }
+                    
+                    if ($waktuSekarang->between($mulai, $selesai)) {
+                        $adaPatroliAvailable = true;
+                        break;
+                    }
+                }
+            }
+            
+            $fabDisabled = !$adaPatroliAvailable;
+        @endphp
+        
+        @if($fabDisabled)
+            {{-- FAB Terkunci --}}
+            <div class="fixed bottom-24 right-4 z-40">
+                <div class="bg-gray-400 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg cursor-not-allowed relative group">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                    
+                    {{-- Tooltip --}}
+                    <div class="absolute bottom-20 right-0 bg-gray-800 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
+                        @if($semuaSelesai)
+                            Semua patroli sudah selesai
+                        @else
+                            Belum ada patroli yang aktif
+                        @endif
+                        <div class="absolute top-full right-4 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-gray-800"></div>
+                    </div>
+                </div>
+            </div>
+        @else
+            {{-- FAB Normal (Aktif) --}}
+            <a href="{{ route('anggota.patroli.createSession') }}" 
+            :class="showModal ? 'pointer-events-none opacity-50' : ''"
+            x-bind:tabindex="showModal ? -1 : 0"
+            x-bind:aria-disabled="showModal ? 'true' : 'false'"
+            class="fixed bottom-24 right-4 bg-[#2a4a6f] text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform z-40 cursor-pointer group relative">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                
+                {{-- Tooltip --}}
+                <div class="absolute bottom-20 right-0 bg-green-600 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
+                    Tambah Patroli
+                    <div class="absolute top-full right-4 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-green-600"></div>
+                </div>
+            </a>
+        @endif
     @endif
 
 
