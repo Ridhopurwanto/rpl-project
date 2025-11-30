@@ -58,6 +58,7 @@ class User extends Authenticatable
         'email',
         'password',
         'peran',
+        'jenis_jadwal',
         'tanggal_lahir', 
         'no_hp',         
         'alamat',        

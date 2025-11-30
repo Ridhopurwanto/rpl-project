@@ -161,6 +161,12 @@
                     <div class="flex items-center"><label class="w-1/3 text-sm font-medium text-gray-700">TANGGAL LAHIR</label><div class="w-2/3 bg-[#2a4a6f] text-white text-sm font-semibold rounded-md shadow-sm px-4 py-2.5" x-text="infoUser.tanggal_lahir ? infoUser.tanggal_lahir.substring(0, 10) : '-'"></div></div>
                     <div class="flex items-center"><label class="w-1/3 text-sm font-medium text-gray-700">NO. HP</label><div class="w-2/3 bg-[#2a4a6f] text-white text-sm font-semibold rounded-md shadow-sm px-4 py-2.5" x-text="infoUser.no_hp || '-'"></div></div>
                     <div class="flex items-start"><label class="w-1/3 text-sm font-medium text-gray-700 pt-2.5">ALAMAT</label><div class="w-2/3 bg-[#2a4a6f] text-white text-sm font-semibold rounded-md shadow-sm px-4 py-2.5" x-text="infoUser.alamat || '-'"></div></div>
+                    <div class="flex items-center">
+                        <label class="w-1/3 text-sm font-medium text-gray-700">JENIS JADWAL</label>
+                        <div class="w-2/3 bg-[#2a4a6f] text-white text-sm font-semibold rounded-md shadow-sm px-4 py-2.5" 
+                             x-text="infoUser.jenis_jadwal === 'shift' ? 'Shift' : (infoUser.jenis_jadwal === 'non_shift' ? 'Non-Shift' : '-')">
+                        </div>
+                    </div>
                     <div class="flex items-center"><label class="w-1/3 text-sm font-medium text-gray-700">STATUS</label><div class="w-2/3 bg-[#2a4a6f] text-white text-sm font-semibold rounded-md shadow-sm px-4 py-2.5" x-text="infoUser.status || '-'"></div></div>
                 </div>
             </div>
