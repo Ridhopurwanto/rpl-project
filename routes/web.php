@@ -84,17 +84,17 @@ Route::middleware('auth')->group(function () {
         Route::post('/presensi', [AnggotaPresensiController::class, 'store'])
             ->name('presensi.store');
 
-        // Patroli Anggota
+        // ===== PATROLI ANGGOTA - UPDATED ===== 
         Route::get('/patroli', [AnggotaPatroliController::class, 'index'])
             ->name('patroli.index');
+        
+        // Route untuk halaman create session (dengan pilihan jenis patroli)
         Route::get('/patroli/create-session', [AnggotaPatroliController::class, 'createSession'])
             ->name('patroli.createSession');
-        Route::get('/patroli/create-checkpoint', [AnggotaPatroliController::class, 'createCheckpoint'])
-            ->name('patroli.createCheckpoint');
-        Route::post('/patroli/store-checkpoint', [AnggotaPatroliController::class, 'storeCheckpoint'])
+        
+        // Route untuk menyimpan checkpoint (AJAX)
+        Route::post('/patroli/checkpoint', [AnggotaPatroliController::class, 'storeCheckpoint'])
             ->name('patroli.storeCheckpoint');
-        Route::post('/patroli/submit-session', [AnggotaPatroliController::class, 'submitSession'])
-            ->name('patroli.submitSession');
 
         // --- RUTE KENDARAAN ANGGOTA ---
         Route::get('/kendaraan', [AnggotaKendaraanController::class, 'index'])

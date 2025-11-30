@@ -537,8 +537,8 @@
                                     FOTO</button>
                                 <button type="button" x-show="state === 'preview'" @click="retakePhoto()"
                                     style="display: none;"
-                                    class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 rounded shadow">FOTO
-                                    ULANG</button>
+                                    class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded shadow">FOTO ULANG
+                                </button>
                             </div>
 
                             {{-- PILIHAN KATEGORI (Tab Style) --}}
@@ -789,8 +789,7 @@
                                     FOTO PENERIMA</button>
                                 <button type="button" x-show="state === 'preview'" @click="retakePhoto()"
                                     style="display: none;"
-                                    class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 rounded shadow">FOTO
-                                    ULANG</button>
+                                    class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded shadow">FOTO ULANG</button>
                             </div>
 
                             {{-- FORM FIELDS --}}
