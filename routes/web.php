@@ -71,7 +71,7 @@ Route::middleware('auth')->group(function () {
 
     // --- RUTE UNTUK ANGGOTA ---
     Route::prefix('anggota')->name('anggota.')->group(function () {
-        
+
         Route::get('/dashboard', function () {
             return view('anggota.dashboard');
         })->name('dashboard');
@@ -107,11 +107,11 @@ Route::middleware('auth')->group(function () {
             ->name('kendaraan.checkout');
         Route::put('/kendaraan/{id_kendaraan_log}/update-keterangan', [AnggotaKendaraanController::class, 'updateKeterangan'])
             ->name('kendaraan.updateKeterangan');
-        
+
         // API untuk dropdown suggestion
         Route::get('/kendaraan/search-nopol', [AnggotaKendaraanController::class, 'searchNopol'])
             ->name('kendaraan.searchNopol');
-        
+
         // ▼▼▼ NEW: AJAX endpoint untuk live search riwayat ▼▼▼
         Route::get('/kendaraan/riwayat', [AnggotaKendaraanController::class, 'getRiwayat'])
             ->name('kendaraan.getRiwayat');
@@ -145,11 +145,16 @@ Route::middleware('auth')->group(function () {
         Route::put('/barang-temuan/{id_barang}/selesai', [AnggotaBarangController::class, 'selesaiTemuan'])
             ->name('barang.selesaiTemuan')
             ->whereNumber('id_barang');
+        Route::get('/barang/search', [AnggotaBarangController::class, 'searchBarang'])
+            ->name('barang.search');
+        Route::get('/barang/riwayat', [AnggotaBarangController::class, 'getRiwayat'])
+            ->name('barang.getRiwayat');
+
     });
 
     // --- RUTE UNTUK KOMANDAN (CRUD & Manajemen) ---
     Route::prefix('komandan')->name('komandan.')->group(function () {
-        
+
         Route::get('/pilih-role', function () {
             return view('komandan.pilih-role');
         })->name('pilih-role');
@@ -159,14 +164,14 @@ Route::middleware('auth')->group(function () {
         })->name('dashboard');
 
         Route::get('/presensi', [PresensiController::class, 'index'])
-            ->name('presensi'); 
+            ->name('presensi');
 
         Route::get('/patroli', [PatroliController::class, 'index'])
-            ->name('patroli'); 
+            ->name('patroli');
 
         Route::get('/kendaraan', [KendaraanController::class, 'index'])
             ->name('kendaraan');
-        
+
         Route::get('/tamu', [TamuController::class, 'index'])
             ->name('tamu');
 
@@ -175,7 +180,7 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/gangguan', [GangguanKamtibmasController::class, 'index'])
             ->name('gangguan');
-            
+
         Route::resource('akun', ManajemenAkunController::class)->except(['show']);
 
         Route::get('akun/{id_pengguna}/shift', [ManajemenShiftController::class, 'index'])
@@ -189,13 +194,13 @@ Route::middleware('auth')->group(function () {
             ->name('patroli.update');
         Route::delete('/patroli/{id}', [PatroliController::class, 'destroy'])
             ->name('patroli.destroy');
-        
+
         // CRUD Presensi
         Route::delete('/presensi/{id_presensi}', [PresensiController::class, 'destroy'])
             ->name('presensi.destroy');
         Route::put('/presensi/{id_presensi}', [PresensiController::class, 'update'])
             ->name('presensi.update');
-        
+
         // CRUD Kendaraan
         Route::put('/kendaraan/log/{id_log}/update-keterangan', [KendaraanController::class, 'updateKeterangan'])
             ->name('kendaraan.log.updateKeterangan');
@@ -207,7 +212,7 @@ Route::middleware('auth')->group(function () {
             ->name('kendaraan.master.destroy');
         Route::post('/kendaraan/log/{id_log}/promote', [KendaraanController::class, 'promoteLogToMaster'])
             ->name('kendaraan.log.promote');
-        
+
         // CRUD Tamu
         Route::put('/tamu/{id_tamu}', [TamuController::class, 'update'])
             ->name('tamu.update');
