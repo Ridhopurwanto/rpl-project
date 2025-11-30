@@ -14,7 +14,7 @@ class ShiftRuleSeeder extends Seeder
     public function run(): void
     {
         // Opsional: Kosongkan tabel terlebih dahulu agar tidak duplikat saat di-seed ulang
-        DB::table('shift_rule')->truncate(); 
+        // DB::table('shift_rule')->truncate(); 
 
         DB::table('shift_rule')->insert([
             [
