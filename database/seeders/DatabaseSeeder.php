@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
         //    DIMULAI DARI TABEL ANAK (CHILD) TERLEBIH DAHULU
         //    (Tabel yang punya foreign key)
         DB::table('shift')->truncate();
+        DB::table('shift_rule')->truncate();
         DB::table('presensi')->truncate();
         DB::table('patroli')->truncate();
         DB::table('log_kendaraan')->truncate(); // Anak dari pengguna & kendaraan
