@@ -18,6 +18,7 @@ class ShiftRule extends Model
         'jam_masuk',   // Time
         'jam_keluar',  // Time
         'toleransi',   // Int (Menit)
+        'dibuka',
     ];
 
     // Relasi ke tabel 'shift' (One Rule has Many Shifts)

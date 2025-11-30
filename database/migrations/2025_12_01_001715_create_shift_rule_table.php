@@ -17,6 +17,7 @@ return new class extends Migration
             $table->time('jam_masuk');
             $table->time('jam_keluar');
             $table->integer('toleransi')->default(0);
+            $table->unsignedInteger('dibuka')->nullable();
         });
     }
 

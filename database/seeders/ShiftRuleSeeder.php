@@ -23,6 +23,7 @@ class ShiftRuleSeeder extends Seeder
                 'jam_masuk' => '07:00:00',
                 'jam_keluar' => '19:00:00',
                 'toleransi' => 10,
+                'dibuka' => 120,
             ],
             [
                 'idshift_rule' => 2,
@@ -30,6 +31,7 @@ class ShiftRuleSeeder extends Seeder
                 'jam_masuk' => '19:00:00',
                 'jam_keluar' => '07:00:00', // Besok pagi
                 'toleransi' => 10,
+                'dibuka' => 120,
             ],
             [
                 'idshift_rule' => 3,
@@ -37,6 +39,7 @@ class ShiftRuleSeeder extends Seeder
                 'jam_masuk' => '00:00:00',
                 'jam_keluar' => '00:00:00',
                 'toleransi' => 10,
+                'dibuka' => null,
             ],
             [
                 'idshift_rule' => 4,
@@ -44,6 +47,7 @@ class ShiftRuleSeeder extends Seeder
                 'jam_masuk' => '07:00:00',
                 'jam_keluar' => '17:00:00',
                 'toleransi' => 10,
+                'dibuka' => null,
             ],
         ]);
     }
