@@ -19,15 +19,18 @@ class Presensi extends Model
      * DISESUAIKAN DENGAN DATABASE ANDA (image_a1eb42.png)
      */
     protected $fillable = [
-        'id_pengguna',
-        'id_shift', // <-- PENTING
-        'nama_lengkap',
-        'waktu', // <-- DULU 'waktu_masuk'
-        'foto', // <-- DULU 'foto_masuk'
-        'status',
-        'jenis_presensi', // <-- PENTING
-        'tanggal',
+    'id_pengguna',
+    'id_shift',
+    'nama_lengkap',
+    'waktu',
+    'foto',
+    'status',
+    'jenis_presensi',
+    'tanggal',
+    'latitude',    // Add this
+    'longitude',   // Add this
     ];
+
 
     /**
      * Casting tipe data otomatis.
