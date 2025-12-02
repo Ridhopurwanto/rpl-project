@@ -10,69 +10,195 @@
 
 <div class="w-full min-h-screen bg-slate-100 p-4 pb-32"
      x-data="{ 
-        showPhotoModal: false, 
-        modalPhoto: '',
+    showPhotoModal: false, 
+    modalPhoto: '',
+    showCreateModal: false,
+    cameraState: 'camera', 
+    stream: null,
+    imageBase64: '',
+    currentTime: '',
+    jenisPresensi: 'masuk',
+    userLatitude: null,
+    userLongitude: null,
+    locationError: '',
+    
+    // Koordinat kampus Anda
+    campusLat: -6.2315465,
+    campusLng: 106.8666516,
+    maxDistance: 80,
+
+    init() {
+        this.updateTime();
+        setInterval(() => { this.updateTime() }, 1000);
         
-        showCreateModal: false,
-        cameraState: 'camera', 
-        stream: null,
-        imageBase64: '',
-        currentTime: '',
-        jenisPresensi: 'masuk', 
-
-        init() {
-            this.updateTime();
-            setInterval(() => { this.updateTime() }, 1000);
-        },
-        updateTime() {
-            const now = new Date();
-            this.currentTime = now.toLocaleTimeString('id-ID', { 
-                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
-            }).replace(/\./g, ':') + ' WIB';
-        },
-
-        startCamera() {
-            this.cameraState = 'camera';
-            this.imageBase64 = '';
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
-                .then(stream => {
-                    this.stream = stream;
-                    this.$refs.videoFeed.srcObject = stream;
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert('Gagal akses kamera: ' + err.message);
-                });
-            } else {
-                alert('Browser tidak support kamera');
-            }
-        },
-        stopCamera() {
-            if (this.stream) {
-                this.stream.getTracks().forEach(track => track.stop());
-                this.stream = null;
-            }
-        },
-        takeSnapshot() {
-            const video = this.$refs.videoFeed;
-            const canvas = this.$refs.canvas;
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.translate(canvas.width, 0);
-            ctx.scale(-1, 1);
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            this.imageBase64 = canvas.toDataURL('image/jpeg', 0.8);
-            this.cameraState = 'preview';
-            this.stopCamera();
-        },
-        retakePhoto() {
-            this.startCamera();
+        // ✅ LANGSUNG MINTA IZIN LOKASI SAAT HALAMAN DIBUKA
+        this.requestLocationOnLoad();
+    },
+    
+    updateTime() {
+        const now = new Date();
+        this.currentTime = now.toLocaleTimeString('id-ID', { 
+            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
+        }).replace(/\./g, ':') + ' WIB';
+    },
+    
+    // ✅ FUNGSI BARU: Request lokasi otomatis saat load
+    requestLocationOnLoad() {
+        if (!navigator.geolocation) {
+            console.warn('Browser tidak mendukung geolocation');
+            return;
         }
+        
+        // Langsung request permission
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                this.userLatitude = position.coords.latitude;
+                this.userLongitude = position.coords.longitude;
+                console.log('✅ Lokasi terdeteksi:', this.userLatitude, this.userLongitude);
+                
+                // Cek jarak dari kampus
+                const distance = this.calculateDistance(
+                    this.userLatitude, 
+                    this.userLongitude,
+                    this.campusLat,
+                    this.campusLng
+                );
+                console.log('📍 Jarak dari kampus:', Math.round(distance), 'meter');
+            },
+            (error) => {
+                let errorMsg = 'Tidak dapat mengakses lokasi';
+                if (error.code === 1) {
+                    errorMsg = '⚠️ LOKASI BELUM TERDETEKSI!\n\nMohon tunggu beberapa saat atau aktifkan GPS Anda.';
+                } else if (error.code === 2) {
+                    errorMsg = 'Lokasi tidak tersedia. Pastikan GPS aktif.';
+                } else if (error.code === 3) {
+                    errorMsg = 'Timeout saat mendapatkan lokasi.';
+                }
+                this.locationError = errorMsg;
+                console.error('❌ Error geolocation:', errorMsg);
+            },
+            { 
+                enableHighAccuracy: true, 
+                timeout: 10000, 
+                maximumAge: 0 
+            }
+        );
+    },
+    
+    // Calculate distance between two coordinates (Haversine formula)
+    calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371e3; // Earth radius in meters
+        const φ1 = lat1 * Math.PI / 180;
+        const φ2 = lat2 * Math.PI / 180;
+        const Δφ = (lat2 - lat1) * Math.PI / 180;
+        const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+        const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ/2) * Math.sin(Δλ/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+        return R * c; // Distance in meters
+    },
+    
+    checkLocation() {
+        return new Promise((resolve, reject) => {
+            if (!navigator.geolocation) {
+                reject('Browser tidak mendukung geolocation');
+                return;
+            }
+            
+            // Jika sudah ada koordinat dari requestLocationOnLoad, gunakan itu
+            if (this.userLatitude && this.userLongitude) {
+                const distance = this.calculateDistance(
+                    this.userLatitude, 
+                    this.userLongitude,
+                    this.campusLat,
+                    this.campusLng
+                );
+                
+                if (distance <= this.maxDistance) {
+                    resolve(true);
+                } else {
+                    reject(`Anda berada ${Math.round(distance)}m dari kampus. Harap berada dalam radius ${this.maxDistance}m.`);
+                }
+                return;
+            }
+            
+            // Kalau belum ada, request lagi
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    this.userLatitude = position.coords.latitude;
+                    this.userLongitude = position.coords.longitude;
+                    
+                    const distance = this.calculateDistance(
+                        this.userLatitude, 
+                        this.userLongitude,
+                        this.campusLat,
+                        this.campusLng
+                    );
+                    
+                    if (distance <= this.maxDistance) {
+                        resolve(true);
+                    } else {
+                        reject(`Anda berada ${Math.round(distance)}m dari kampus. Harap berada dalam radius ${this.maxDistance}m.`);
+                    }
+                },
+                (error) => {
+                    let errorMsg = 'Tidak dapat mengakses lokasi';
+                    if (error.code === 1) errorMsg = 'Izin lokasi ditolak';
+                    else if (error.code === 2) errorMsg = 'Lokasi tidak tersedia';
+                    else if (error.code === 3) errorMsg = 'Timeout mendapatkan lokasi';
+                    reject(errorMsg);
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        });
+    },
+
+    startCamera() {
+        this.cameraState = 'camera';
+        this.imageBase64 = '';
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+            .then(stream => {
+                this.stream = stream;
+                this.$refs.videoFeed.srcObject = stream;
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Gagal akses kamera: ' + err.message);
+            });
+        } else {
+            alert('Browser tidak support kamera');
+        }
+    },
+    stopCamera() {
+        if (this.stream) {
+            this.stream.getTracks().forEach(track => track.stop());
+            this.stream = null;
+        }
+    },
+    takeSnapshot() {
+        const video = this.$refs.videoFeed;
+        const canvas = this.$refs.canvas;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        this.imageBase64 = canvas.toDataURL('image/jpeg', 0.8);
+        this.cameraState = 'preview';
+        this.stopCamera();
+    },
+    retakePhoto() {
+        this.startCamera();
+    }
      }"
      x-init="init()"
 >
+
 
     {{-- === 1. KALENDER === --}}
     <div class="text-center text-lg font-bold text-gray-800 mt-4">
@@ -84,15 +210,34 @@
         <div class="text-gray-500">We</div><div class="text-gray-500">Th</div><div class="text-gray-500">Tr</div><div class="text-gray-500">Sa</div>
 
         @foreach($dataKalender as $hari)
-            @php
-                $bgColor = 'bg-gray-100';
-                if ($hari['jenis_shift'] === 'pagi') $bgColor = 'bg-yellow-400';
-                elseif ($hari['jenis_shift'] === 'malam') $bgColor = 'bg-blue-400';
-                elseif ($hari['jenis_shift'] === 'off') $bgColor = 'bg-red-500 text-white';
-                elseif ($hari['tanggal'] === null) $bgColor = 'bg-transparent';
-            @endphp
-            <div class="{{ $bgColor }} rounded-lg p-2">{{ $hari['tanggal'] }}</div>
-        @endforeach
+    @php
+        $bgColor = 'bg-gray-100';
+        if ($hari['jenis_shift'] === 'pagi') $bgColor = 'bg-yellow-400';
+        elseif ($hari['jenis_shift'] === 'malam') $bgColor = 'bg-blue-400';
+        elseif ($hari['jenis_shift'] === 'off') $bgColor = 'bg-red-500 text-white';
+        elseif ($hari['tanggal'] === null) $bgColor = 'bg-transparent';
+        
+        // Check if this is today
+        $isToday = false;
+        if ($hari['tanggal']) {
+            $currentDate = now()->format('d');
+            $currentMonth = now()->month;
+            $currentYear = now()->year;
+            $calendarMonth = Carbon\Carbon::parse($startDate)->month;
+            $calendarYear = Carbon\Carbon::parse($startDate)->year;
+            
+            $isToday = ($hari['tanggal'] == $currentDate) && 
+                       ($currentMonth == $calendarMonth) && 
+                       ($currentYear == $calendarYear);
+        }
+    @endphp
+    <div class="relative {{ $bgColor }} rounded-lg p-2 {{ $isToday ? 'ring-2 ring-black font-extrabold shadow-md' : '' }}">
+        {{ $hari['tanggal'] }}
+        
+    </div>
+@endforeach
+
+
     </div>
 
     {{-- Legenda --}}
@@ -289,32 +434,44 @@
 
 
     {{-- === 4. TOMBOL FAB (SMART BUTTON) === --}}
-    <div x-data="{ 
-            canPresensi: {{ $jadwalAbsen['can_presensi'] ? 'true' : 'false' }},
-            pesanError: '{{ $jadwalAbsen['pesan_error'] }}'
-         }">
-        
-        <button 
-            @click="
-                if(!canPresensi) { 
-                    alert(pesanError); 
-                } else { 
-                    showCreateModal = true; 
-                    $nextTick(() => startCamera()); 
-                }
-            " 
-            :class="canPresensi ? 'bg-[#2a4a6f] hover:scale-110 shadow-lg' : 'bg-gray-400 cursor-not-allowed shadow-none opacity-80'"
-            class="fixed z-40 bottom-24 right-6 p-4 rounded-full text-white transition-all duration-300 flex items-center justify-center"
-        >
-            {{-- Ikon Berubah (Plus jika bisa, Gembok jika tidak) --}}
-            <template x-if="canPresensi">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-            </template>
-            <template x-if="!canPresensi">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-            </template>
-        </button>
-    </div>
+    {{-- === 4. TOMBOL FAB (DENGAN VALIDASI LOKASI) === --}}
+<div x-data="{ 
+        canPresensi: {{ $jadwalAbsen['can_presensi'] ? 'true' : 'false' }},
+        pesanError: '{{ $jadwalAbsen['pesan_error'] }}'
+     }">
+    
+    <button 
+        @click="
+            if(!canPresensi) { 
+                alert(pesanError); 
+            } else {
+                checkLocation()
+                    .then(() => {
+                        showCreateModal = true; 
+                        $nextTick(() => startCamera());
+                    })
+                    .catch((error) => {
+                        alert('⚠️ LOKASI TIDAK VALID!\n\n' + error);
+                    });
+            }
+        " 
+        :class="canPresensi ? 'bg-[#2a4a6f] hover:scale-110 shadow-lg' : 'bg-gray-400 cursor-not-allowed shadow-none opacity-80'"
+        class="fixed bottom-24 right-6 p-4 rounded-full text-white transition-all duration-300 flex items-center justify-center z-40"
+    >
+        {{-- Ikon Berubah (Plus jika bisa, Gembok jika tidak) --}}
+        <template x-if="canPresensi">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+        </template>
+        <template x-if="!canPresensi">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+        </template>
+    </button>
+</div>
+
 
     {{-- ================= MODAL FOTO & CREATE (SAMA SEPERTI SEBELUMNYA) ================= --}}
     {{-- (Kode Modal Foto & Modal Create Kamera disini sama persis dengan yang di atas, 
@@ -332,98 +489,152 @@
         </div>
     </div>
 
-    <div x-show="showCreateModal" class="relative z-50" style="display: none;">
-        <div x-show="showCreateModal" class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" @click="showCreateModal = false; stopCamera()"></div>
-        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-            <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-                <div x-show="showCreateModal" class="relative transform overflow-hidden rounded-xl bg-[#2a4a6f] text-left shadow-2xl transition-all w-full max-w-md p-6">
-                    
-                {{-- === [BARU] TOMBOL CLOSE (X) === --}}
-                <button type="button" @click="showCreateModal = false; stopCamera()" 
-                        class="absolute top-4 right-4 text-white/50 hover:text-white transition-colors focus:outline-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-                {{-- ============================== --}}
+    {{-- MODAL AMBIL FOTO (CREATE PRESENSI) --}}
+<div x-show="showCreateModal" class="relative z-50" style="display: none;">
+    <div x-show="showCreateModal" class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" @click="showCreateModal = false; stopCamera()"></div>
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+            <div x-show="showCreateModal" class="relative transform overflow-hidden rounded-xl bg-[#2a4a6f] text-left shadow-2xl transition-all w-full max-w-md p-6">
                 
-                    <div class="flex flex-col items-center mb-5 space-y-2">
-                        <h3 class="text-white text-xl font-bold uppercase tracking-wide text-center">FORM PRESENSI</h3>
-                        <div class="inline-flex items-center gap-2 bg-black/30 border border-white/10 rounded-full px-4 py-1.5 backdrop-blur-sm shadow-sm">
-                            <svg class="w-4 h-4 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            <span class="text-lg font-mono font-bold text-white tracking-widest" x-text="currentTime"></span>
+            {{-- === TOMBOL CLOSE (X) === --}}
+            <button type="button" @click="showCreateModal = false; stopCamera()" 
+                    class="absolute top-4 right-4 text-white/50 hover:text-white transition-colors focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            
+                <div class="flex flex-col items-center mb-5 space-y-2">
+                    <h3 class="text-white text-xl font-bold uppercase tracking-wide text-center">FORM PRESENSI</h3>
+                    <div class="inline-flex items-center gap-2 bg-black/30 border border-white/10 rounded-full px-4 py-1.5 backdrop-blur-sm shadow-sm">
+                        <svg class="w-4 h-4 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span class="text-lg font-mono font-bold text-white tracking-widest" x-text="currentTime"></span>
+                    </div>
+                </div>
+
+
+                {{-- ========== FORM DENGAN VALIDASI LOKASI ========== --}}
+                <form action="{{ route('anggota.presensi.store') }}" 
+                      method="POST" 
+                      @submit.prevent="
+                          if (!userLatitude || !userLongitude) {
+                              alert('⚠️ LOKASI BELUM TERDETEKSI!\n\nMohon tunggu beberapa saat atau aktifkan GPS Anda.'); 
+                              return false;
+                          }
+                          if (cameraState === 'camera') {
+                              alert('⚠️ HARAP AMBIL FOTO TERLEBIH DAHULU!');
+                              return false;
+                          }
+                          if (!imageBase64) {
+                              alert('⚠️ FOTO BELUM DIAMBIL!');
+                              return false;
+                          }
+                          $el.submit();
+                      ">
+                    @csrf
+                    
+                    {{-- ===== HIDDEN INPUTS (TERMASUK LOKASI) ===== --}}
+                    <input type="hidden" name="foto_base64" x-model="imageBase64">
+                    <input type="hidden" name="latitude" x-model="userLatitude">
+                    <input type="hidden" name="longitude" x-model="userLongitude">
+
+
+                    {{-- ===== INDIKATOR STATUS LOKASI (BARU) ===== --}}
+                    <div class="mb-3 flex items-center justify-center gap-2 bg-black/30 border rounded-lg px-3 py-2"
+                         :class="userLatitude && userLongitude ? 'border-green-500/50' : 'border-red-500/50'">
+                        <svg class="w-5 h-5" 
+                             :class="userLatitude && userLongitude ? 'text-green-400' : 'text-red-400 animate-pulse'" 
+                             fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="text-sm font-semibold" 
+                              :class="userLatitude && userLongitude ? 'text-green-300' : 'text-red-300'">
+                            <span x-show="userLatitude && userLongitude">📍 Lokasi Terdeteksi</span>
+                            <span x-show="!userLatitude || !userLongitude">🔍 Mencari Lokasi...</span>
+                        </span>
+                    </div>
+
+
+                    {{-- ===== PILIHAN JENIS PRESENSI (SMART DISABLED) ===== --}}
+                    <div class="mb-4" x-data="{ 
+                        initJenis() {
+                            this.jenisPresensi = '{{ $jadwalAbsen['default_jenis'] }}';
+                        }
+                    }" x-init="initJenis()">
+                        
+                        <label class="block text-blue-200 text-xs font-bold uppercase mb-2 text-center">PILIH JENIS PRESENSI :</label>
+                        
+                        <div class="flex bg-slate-800/50 p-1 rounded-lg border border-white/10">
+                            
+                            {{-- TOMBOL MASUK --}}
+                            <label class="flex-1 cursor-pointer relative">
+                                <input type="radio" name="jenis_presensi" value="masuk" x-model="jenisPresensi" class="hidden"
+                                    @if($jadwalAbsen['disable_masuk']) disabled @endif>
+                                
+                                <div class="text-center py-2 rounded-md text-sm font-bold transition-all duration-200"
+                                    :class="jenisPresensi === 'masuk' 
+                                        ? 'bg-green-600 text-white shadow-md transform scale-105' 
+                                        : ({{ $jadwalAbsen['disable_masuk'] ? 'true' : 'false' }} ? 'text-gray-600 cursor-not-allowed opacity-50' : 'text-gray-400 hover:text-white')">
+                                    MASUK
+                                </div>
+                            </label>
+
+
+                            {{-- TOMBOL PULANG --}}
+                            <label class="flex-1 cursor-pointer relative">
+                                <input type="radio" name="jenis_presensi" value="pulang" x-model="jenisPresensi" class="hidden"
+                                    @if($jadwalAbsen['disable_pulang']) disabled @endif>
+                                
+                                <div class="text-center py-2 rounded-md text-sm font-bold transition-all duration-200"
+                                    :class="jenisPresensi === 'pulang' 
+                                        ? 'bg-red-600 text-white shadow-md transform scale-105' 
+                                        : ({{ $jadwalAbsen['disable_pulang'] ? 'true' : 'false' }} ? 'text-gray-600 cursor-not-allowed opacity-50' : 'text-gray-400 hover:text-white')">
+                                    PULANG
+                                </div>
+                            </label>
+
                         </div>
                     </div>
 
-                    <form action="{{ route('anggota.presensi.store') }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="foto_base64" x-model="imageBase64">
 
-                        {{-- PILIHAN JENIS PRESENSI (SMART DISABLED) --}}
-                        <div class="mb-4" x-data="{ 
-                            initJenis() {
-                                // Set default jenis sesuai status (jika belum masuk -> masuk, jika sudah -> pulang)
-                                // Data diambil dari controller via $jadwalAbsen
-                                this.jenisPresensi = '{{ $jadwalAbsen['default_jenis'] }}';
-                            }
-                        }" x-init="initJenis()">
-                            
-                            <label class="block text-blue-200 text-xs font-bold uppercase mb-2 text-center">PILIH JENIS PRESENSI :</label>
-                            
-                            <div class="flex bg-slate-800/50 p-1 rounded-lg border border-white/10">
-                                
-                                {{-- TOMBOL MASUK --}}
-                                <label class="flex-1 cursor-pointer relative">
-                                    {{-- Input Radio (Disabled jika sudah masuk) --}}
-                                    <input type="radio" name="jenis_presensi" value="masuk" x-model="jenisPresensi" class="hidden"
-                                        @if($jadwalAbsen['disable_masuk']) disabled @endif>
-                                    
-                                    {{-- Visual Tombol --}}
-                                    <div class="text-center py-2 rounded-md text-sm font-bold transition-all duration-200"
-                                        :class="jenisPresensi === 'masuk' 
-                                            ? 'bg-green-600 text-white shadow-md transform scale-105' 
-                                            : ({{ $jadwalAbsen['disable_masuk'] ? 'true' : 'false' }} ? 'text-gray-600 cursor-not-allowed opacity-50' : 'text-gray-400 hover:text-white')">
-                                        MASUK
-                                    </div>
-                                </label>
+                    {{-- ===== AREA KAMERA / PREVIEW ===== --}}
+                    <div class="mb-5 rounded-lg overflow-hidden border-2 border-white/20 bg-black relative aspect-[4/3] shadow-lg">
+                        <video x-ref="videoFeed" x-show="cameraState === 'camera'" autoplay playsinline class="w-full h-full object-cover transform scale-x-[-1]"></video>
+                        <img :src="imageBase64" x-show="cameraState === 'preview'" class="w-full h-full object-cover transform" style="display: none;">
+                        <div x-show="cameraState === 'camera' && !stream" class="absolute inset-0 flex items-center justify-center text-white text-xs">Memuat Kamera...</div>
+                    </div>
+                    <canvas x-ref="canvas" class="hidden"></canvas>
 
-                                {{-- TOMBOL PULANG --}}
-                                <label class="flex-1 cursor-pointer relative">
-                                    {{-- Input Radio (Disabled jika belum masuk) --}}
-                                    <input type="radio" name="jenis_presensi" value="pulang" x-model="jenisPresensi" class="hidden"
-                                        @if($jadwalAbsen['disable_pulang']) disabled @endif>
-                                    
-                                    {{-- Visual Tombol --}}
-                                    <div class="text-center py-2 rounded-md text-sm font-bold transition-all duration-200"
-                                        :class="jenisPresensi === 'pulang' 
-                                            ? 'bg-red-600 text-white shadow-md transform scale-105' 
-                                            : ({{ $jadwalAbsen['disable_pulang'] ? 'true' : 'false' }} ? 'text-gray-600 cursor-not-allowed opacity-50' : 'text-gray-400 hover:text-white')">
-                                        PULANG
-                                    </div>
-                                </label>
 
-                            </div>
+                    {{-- ===== TOMBOL AKSI ===== --}}
+                    <div class="space-y-3">
+                        <button type="button" 
+                                x-show="cameraState === 'camera'" 
+                                @click="takeSnapshot()" 
+                                class="w-full bg-white text-[#2a4a6f] font-bold py-3 rounded-lg shadow hover:bg-gray-100 transition-colors">
+                            AMBIL FOTO
+                        </button>
+                        
+                        <div x-show="cameraState === 'preview'" class="grid grid-cols-2 gap-3" style="display: none;">
+                            <button type="button" 
+                                    @click="retakePhoto()" 
+                                    class="bg-slate-500 text-white font-bold py-3 rounded-lg shadow hover:bg-slate-600 transition-colors">
+                                ULANG
+                            </button>
+                            <button type="submit" 
+                                    class="bg-green-500 text-white font-bold py-3 rounded-lg shadow hover:bg-green-600 transition-colors">
+                                SUBMIT
+                            </button>
                         </div>
+                    </div>
+                </form>
+                {{-- ========== END FORM ========== --}}
 
-                        <div class="mb-5 rounded-lg overflow-hidden border-2 border-white/20 bg-black relative aspect-[4/3] shadow-lg">
-                            <video x-ref="videoFeed" x-show="cameraState === 'camera'" autoplay playsinline class="w-full h-full object-cover transform scale-x-[-1]"></video>
-                            <img :src="imageBase64" x-show="cameraState === 'preview'" class="w-full h-full object-cover transform" style="display: none;">
-                            <div x-show="cameraState === 'camera' && !stream" class="absolute inset-0 flex items-center justify-center text-white text-xs">Memuat Kamera...</div>
-                        </div>
-                        <canvas x-ref="canvas" class="hidden"></canvas>
-
-                        <div class="space-y-3">
-                            <button type="button" x-show="cameraState === 'camera'" @click="takeSnapshot()" class="w-full bg-white text-[#2a4a6f] font-bold py-3 rounded-lg shadow hover:bg-gray-100 transition-colors">AMBIL FOTO</button>
-                            <div x-show="cameraState === 'preview'" class="grid grid-cols-2 gap-3" style="display: none;">
-                                <button type="button" @click="retakePhoto()" class="bg-slate-500 text-white font-bold py-3 rounded-lg shadow hover:bg-slate-600 transition-colors">ULANG</button>
-                                <button type="submit" class="bg-green-500 text-white font-bold py-3 rounded-lg shadow hover:bg-green-600 transition-colors">SUBMIT</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
             </div>
         </div>
     </div>
+</div>
+
 
 </div>
 @endsection
