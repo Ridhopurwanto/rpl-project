@@ -161,7 +161,7 @@
                     'Patroli 1' => ['07:30', '08:30'],
                     'Patroli 2' => ['09:30', '10:30'],
                     'Patroli 3' => ['11:30', '12:30'],
-                    'Patroli 4' => ['13:40', '14:30'],
+                    'Patroli 4' => ['13:40', '15:30'],
                     'Patroli 5' => ['15:30', '16:30'],
                     'Patroli 6' => ['17:30', '18:40'],
                 ],
@@ -239,7 +239,7 @@
             :class="showModal ? 'pointer-events-none opacity-50' : ''"
             x-bind:tabindex="showModal ? -1 : 0"
             x-bind:aria-disabled="showModal ? 'true' : 'false'"
-            class="fixed bottom-24 right-4 bg-[#2a4a6f] text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform z-40 cursor-pointer group relative">
+            class="fixed bottom-24 right-4 bg-[#2a4a6f] text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform z-40 cursor-pointer">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>

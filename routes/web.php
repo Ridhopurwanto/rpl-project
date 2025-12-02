@@ -62,12 +62,11 @@ Route::get('/notifikasi/baca-semua', [NotificationController::class, 'markAllRea
 // Rute untuk yang sudah login
 Route::middleware('auth')->group(function () {
 
-    Route::middleware(['auth'])->group(function () {
-        Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
-        Route::get('/profil/edit', [ProfilController::class, 'edit'])->name('profil.edit');
-        Route::patch('/profil/update', [ProfilController::class, 'update'])->name('profil.update');
-        Route::patch('/profil/password', [ProfilController::class, 'updatePassword'])->name('profil.update-password');
-    });
+    // Profil
+    Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
+    Route::get('/profil/edit', [ProfilController::class, 'edit'])->name('profil.edit');
+    Route::patch('/profil/update', [ProfilController::class, 'update'])->name('profil.update');
+    Route::patch('/profil/password', [ProfilController::class, 'updatePassword'])->name('profil.update-password');
 
     // --- RUTE UNTUK ANGGOTA ---
     Route::prefix('anggota')->name('anggota.')->group(function () {
@@ -84,17 +83,26 @@ Route::middleware('auth')->group(function () {
         Route::post('/presensi', [AnggotaPresensiController::class, 'store'])
             ->name('presensi.store');
 
-        // ===== PATROLI ANGGOTA - UPDATED ===== 
+        // ===== PATROLI ANGGOTA - PERBAIKAN ===== 
+        // Route untuk melihat daftar patroli (index)
         Route::get('/patroli', [AnggotaPatroliController::class, 'index'])
             ->name('patroli.index');
         
-        // Route untuk halaman create session (dengan pilihan jenis patroli)
+        // Route untuk halaman grid 17 area (create session)
         Route::get('/patroli/create-session', [AnggotaPatroliController::class, 'createSession'])
             ->name('patroli.createSession');
         
-        // Route untuk menyimpan checkpoint (AJAX)
+        // Route untuk cek status area (live update)
+        Route::get('/patroli/check-area', [AnggotaPatroliController::class, 'checkArea'])
+            ->name('patroli.checkArea');
+        
+        // Route untuk menyimpan checkpoint (AJAX dari modal kamera)
         Route::post('/patroli/checkpoint', [AnggotaPatroliController::class, 'storeCheckpoint'])
             ->name('patroli.storeCheckpoint');
+        
+        // Route untuk submit patroli (setelah 17 area selesai)
+        Route::post('/patroli/submit', [AnggotaPatroliController::class, 'submitSession'])
+            ->name('patroli.submitSession');
 
         // --- RUTE KENDARAAN ANGGOTA ---
         Route::get('/kendaraan', [AnggotaKendaraanController::class, 'index'])
@@ -112,7 +120,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/kendaraan/search-nopol', [AnggotaKendaraanController::class, 'searchNopol'])
             ->name('kendaraan.searchNopol');
 
-        // ▼▼▼ NEW: AJAX endpoint untuk live search riwayat ▼▼▼
+        // AJAX endpoint untuk live search riwayat
         Route::get('/kendaraan/riwayat', [AnggotaKendaraanController::class, 'getRiwayat'])
             ->name('kendaraan.getRiwayat');
 
@@ -149,7 +157,6 @@ Route::middleware('auth')->group(function () {
             ->name('barang.search');
         Route::get('/barang/riwayat', [AnggotaBarangController::class, 'getRiwayat'])
             ->name('barang.getRiwayat');
-
     });
 
     // --- RUTE UNTUK KOMANDAN (CRUD & Manajemen) ---
