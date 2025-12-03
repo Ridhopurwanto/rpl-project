@@ -29,6 +29,34 @@
     campusLng: 106.8666516, 
     maxDistance: 80,
 
+    requiresGeotag: {{ $wajibGeotag ? 'true' : 'false' }},
+
+    // TAMBAHAN 2: Fungsi Submit Baru
+    submitPresensi() {
+        // 1. Cek Foto (Wajib untuk semua)
+        if (this.cameraState === 'camera' || !this.imageBase64) {
+            alert('⚠️ HARAP AMBIL FOTO TERLEBIH DAHULU!');
+            return;
+        }
+
+        // 2. Cek Lokasi (Hanya jika Wajib Geotag)
+        if (this.requiresGeotag) {
+            if (!this.userLatitude || !this.userLongitude) {
+                // Tampilkan alert lokasi
+                this.showLocationAlert = true;
+                
+                // Opsional: Coba request lokasi lagi
+                this.requestLocationOnLoad();
+                
+                // Scroll ke atas agar alert terlihat (jika tertutup)
+                return; // Stop proses
+            }
+        }
+
+        // 3. Jika lolos, submit form manual via JS
+        this.$refs.formPresensi.submit();
+    },
+
     init() {
         this.updateTime();
         setInterval(() => { this.updateTime() }, 1000);
@@ -119,6 +147,12 @@
     
     checkLocation() {
         return new Promise((resolve, reject) => {
+            // Jika tidak wajib, langsung lolos (bypass)
+            if (!this.requiresGeotag) {
+                resolve(true); 
+                return;
+            }
+
             if (!navigator.geolocation) {
                 reject('Browser tidak mendukung geolocation');
                 return;
@@ -632,34 +666,22 @@
                 </div>
 
 
-                {{-- ========== FORM DENGAN VALIDASI LOKASI ========== --}}
+                {{-- ========== FORM DENGAN VALIDASI YANG DIPERBAIKI ========== --}}
+                {{-- Tambahkan x-ref="formPresensi" agar bisa disubmit dari fungsi Alpine --}}
                 <form action="{{ route('anggota.presensi.store') }}" 
-                      method="POST" 
-                      @submit.prevent="
-                          if (!userLatitude || !userLongitude) {
-                              showLocationAlert = true; 
-                              return false;
-                          }
-                          if (cameraState === 'camera') {
-                              alert('⚠️ HARAP AMBIL FOTO TERLEBIH DAHULU!');
-                              return false;
-                          }
-                          if (!imageBase64) {
-                              alert('⚠️ FOTO BELUM DIAMBIL!');
-                              return false;
-                          }
-                          $el.submit();
-                      ">
+                    method="POST" 
+                    x-ref="formPresensi">
                     @csrf
                     
-                    {{-- ===== HIDDEN INPUTS (TERMASUK LOKASI) ===== --}}
                     <input type="hidden" name="foto_base64" x-model="imageBase64">
+                    
+                    {{-- Kirim lokasi hanya jika ada, controller akan handle null --}}
                     <input type="hidden" name="latitude" x-model="userLatitude">
                     <input type="hidden" name="longitude" x-model="userLongitude">
-
+                    
 
                     {{-- ===== INDIKATOR STATUS LOKASI ===== --}}
-                    <div class="mb-3">
+                    <div class="mb-3" x-show="requiresGeotag">
                         <div class="flex items-center justify-center gap-2 bg-black/30 border rounded-lg px-3 py-2 mb-1"
                              :class="userLatitude && userLongitude ? 'border-green-500/50' : 'border-red-500/50'">
                             <svg class="w-5 h-5" 
@@ -679,6 +701,13 @@
                             <span x-show="userLatitude && userLongitude">📍 Dalam radius presensi</span>
                             <span x-show="!userLatitude || !userLongitude">⚠️ Aktifkan GPS/Lokasi</span>
                         </div>
+                    </div>
+
+                    {{-- Pesan Alternatif jika Geotag Off (Opsional) --}}
+                    <div class="mb-3 text-center" x-show="!requiresGeotag">
+                        <span class="text-xs text-green-600 bg-green-100 px-2 py-1 rounded font-bold">
+                            📍 GEOTAG DINONAKTIFKAN
+                        </span>
                     </div>
 
 
@@ -738,12 +767,13 @@
                     <canvas x-ref="canvas" class="hidden"></canvas>
 
 
-                    {{-- ===== TOMBOL AKSI ===== --}}
+                    {{-- ===== TOMBOL AKSI (DIPERBAIKI) ===== --}}
                     <div class="space-y-3">
+                        {{-- Tombol Ambil Foto --}}
                         <button type="button" 
                                 x-show="cameraState === 'camera'" 
                                 @click="takeSnapshot()" 
-                                class="w-full bg-gradient-to-r from-white to-gray-100 text-[#2a4a6f] font-bold py-3 rounded-lg shadow-lg hover:from-gray-100 hover:to-white hover:shadow-xl transition-all duration-200">
+                                class="w-full bg-gradient-to-r from-white to-gray-100 text-[#2a4a6f] font-bold py-3 rounded-lg shadow-lg hover:from-gray-100 hover:to-white transition-all duration-200">
                             AMBIL FOTO
                         </button>
                         
@@ -753,14 +783,16 @@
                                     class="bg-gradient-to-r from-slate-500 to-slate-600 text-white font-bold py-3 rounded-lg shadow hover:from-slate-600 hover:to-slate-700 transition-all duration-200">
                                 ULANG
                             </button>
-                            <button type="submit" 
+                            
+                            {{-- TOMBOL SUBMIT: Panggil fungsi submitPresensi() --}}
+                            <button type="button" 
+                                    @click="submitPresensi()"
                                     class="bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-3 rounded-lg shadow hover:from-green-600 hover:to-green-700 transition-all duration-200">
                                 SUBMIT
                             </button>
                         </div>
                     </div>
                 </form>
-                {{-- ========== END FORM ========== --}}
 
             </div>
         </div>

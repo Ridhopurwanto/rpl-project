@@ -176,6 +176,8 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/presensi', [PresensiController::class, 'index'])
             ->name('presensi');
+        Route::put('/presensi/update-rules', [PresensiController::class, 'updateRules'])
+            ->name('presensi.updateRules');
 
         Route::get('/patroli', [PatroliController::class, 'index'])
             ->name('patroli');
