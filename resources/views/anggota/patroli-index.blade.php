@@ -56,7 +56,7 @@
 
     {{-- Card Layout Patroli --}}
     <div class="mt-4 mb-32 space-y-3">
-        @if ($patrolGroups->isEmpty())
+        @if ($displayData->isEmpty())
             {{-- Empty State --}}
             <div class="bg-white rounded-xl shadow-md p-8 text-center">
                 <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -67,10 +67,10 @@
                 <p class="text-gray-500 font-semibold">Belum ada data patroli untuk tanggal ini.</p>
             </div>
         @else
-            @foreach($patrolGroups as $jenisPatroli => $checkpoints)
+            @foreach($displayData as $item)
                 @php
-                    $jumlahSelesai = $checkpoints->count();
-                    $isSelesai = $jumlahSelesai >= 17;
+                    $isSelesai = $item['is_completed'];
+                    $hasCheckpoints = $item['has_checkpoints'];
                 @endphp
                 
                 <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
@@ -79,7 +79,7 @@
                     <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] px-4 py-2.5 flex justify-between items-center">
                         <div>
                             <p class="text-xs text-blue-200 font-semibold uppercase">Jenis Patroli</p>
-                            <p class="text-white font-bold text-base">{{ $jenisPatroli }}</p>
+                            <p class="text-white font-bold text-base">{{ $item['jenis_patroli'] }}</p>
                         </div>
                         
                         {{-- Badge Status --}}
@@ -109,7 +109,7 @@
                             </div>
                             <div class="flex-1">
                                 <p class="text-[10px] text-gray-500 font-semibold uppercase">Petugas</p>
-                                <p class="text-gray-800 font-bold text-base">{{ $checkpoints->first()->nama_lengkap }}</p>
+                                <p class="text-gray-800 font-bold text-base">{{ $item['nama_petugas'] }}</p>
                             </div>
                         </div>
 
@@ -118,30 +118,40 @@
                             <div class="flex justify-between items-center mb-2">
                                 <p class="text-xs text-gray-600 font-semibold">Progress Checkpoint</p>
                                 <span class="text-xs font-bold {{ $isSelesai ? 'text-green-600' : 'text-orange-600' }}">
-                                    {{ $jumlahSelesai }} / 17
+                                    {{ $item['progress'] }} / 17
                                 </span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
                                 <div class="h-full rounded-full transition-all {{ $isSelesai ? 'bg-green-500' : 'bg-yellow-500' }}" 
-                                     style="width: {{ ($jumlahSelesai / 17) * 100 }}%">
+                                     style="width: {{ ($item['progress'] / 17) * 100 }}%">
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Tombol Detail --}}
-                        <button 
-                            @click.prevent="
-                                showModal = true;
-                                modalGroup = {{ $checkpoints->values() }}; 
-                                selectedCheckpointIndex = 0;
-                            "
-                            class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                            <span class="text-sm">LIHAT DETAIL</span>
-                        </button>
+                        {{-- Tombol Detail (hanya tampil jika ada checkpoint) --}}
+                        @if($hasCheckpoints)
+                            <button 
+                                @click.prevent="
+                                    showModal = true;
+                                    modalGroup = {{ $item['checkpoints']->values() }}; 
+                                    selectedCheckpointIndex = 0;
+                                "
+                                class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                                <span class="text-sm">LIHAT DETAIL</span>
+                            </button>
+                        @else
+                            {{-- Info jika belum ada checkpoint --}}
+                            <div class="w-full bg-gray-100 text-gray-500 font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="text-sm">Patroli sedang berlangsung</span>
+                            </div>
+                        @endif
 
                     </div>
                 </div>
@@ -149,86 +159,27 @@
         @endif
     </div>
 
-    {{-- Tombol FAB Tambah Patroli --}}
+    {{-- Tombol FAB Tambah Patroli (DIPERBARUI: TIDAK PAKAI VALIDASI WAKTU) --}}
     @if($tanggalTerpilih->isToday())
         @php
-            $user = Auth::user();
-            $jenisShift = $user->jenis_shift ?? 1;
-            
-            // Jadwal Patroli
-            $jadwalPatroli = [
-                1 => [ // Shift Pagi
-                    'Patroli 1' => ['07:30', '08:30'],
-                    'Patroli 2' => ['09:30', '10:30'],
-                    'Patroli 3' => ['11:30', '12:30'],
-                    'Patroli 4' => ['13:40', '15:30'],
-                    'Patroli 5' => ['15:30', '16:30'],
-                    'Patroli 6' => ['17:30', '18:40'],
-                ],
-                2 => [ // Shift Malam
-                    'Patroli 1' => ['19:30', '20:20'],
-                    'Patroli 2' => ['21:30', '22:30'],
-                    'Patroli 3' => ['23:30', '00:30'],
-                    'Patroli 4' => ['01:30', '02:30'],
-                    'Patroli 5' => ['03:30', '04:30'],
-                    'Patroli 6' => ['05:30', '06:30'],
-                ]
-            ];
-            
-            // Cek apakah ada patroli yang available
-            $adaPatroliAvailable = false;
-            $semuaSelesai = true;
-            
-            foreach(['Patroli 1', 'Patroli 2', 'Patroli 3', 'Patroli 4', 'Patroli 5', 'Patroli 6'] as $patroli) {
-                // Cek apakah sudah selesai 17 area
-                $jumlah = App\Models\Patroli::where('id_pengguna', $user->id_pengguna)
-                                ->whereDate('tanggal', \Carbon\Carbon::today())
-                                ->where('jenis_patroli', $patroli)
-                                ->count();
-                
-                if ($jumlah < 17) {
-                    $semuaSelesai = false;
-                    
-                    // Cek apakah waktu sekarang valid
-                    $waktuSekarang = \Carbon\Carbon::now();
-                    [$jamMulai, $jamSelesai] = $jadwalPatroli[$jenisShift][$patroli];
-                    
-                    $mulai = \Carbon\Carbon::parse($jamMulai);
-                    $selesai = \Carbon\Carbon::parse($jamSelesai);
-                    
-                    // Handle midnight crossing
-                    if ($selesai->lt($mulai)) {
-                        $selesai->addDay();
-                        if ($waktuSekarang->lt($mulai)) {
-                            $waktuSekarang = $waktuSekarang->copy()->addDay();
-                        }
-                    }
-                    
-                    if ($waktuSekarang->between($mulai, $selesai)) {
-                        $adaPatroliAvailable = true;
-                        break;
-                    }
-                }
-            }
-            
-            $fabDisabled = !$adaPatroliAvailable;
+            // Cek apakah semua patroli sudah selesai (6 patroli x 17 area = 102 checkpoint)
+            // ATAU bisa cek berdasarkan jumlah patroli yang selesai
+            $semuaPatroliSelesai = $displayData->filter(function($item) {
+                return $item['is_completed'];
+            })->count() >= 6; // Semua 6 patroli sudah selesai
         @endphp
         
-        @if($fabDisabled)
-            {{-- FAB Terkunci --}}
+        @if($semuaPatroliSelesai)
+            {{-- FAB Terkunci (Semua Patroli Selesai) --}}
             <div class="fixed bottom-24 right-4 z-40">
                 <div class="bg-gray-400 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg cursor-not-allowed relative group">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                     
                     {{-- Tooltip --}}
                     <div class="absolute bottom-20 right-0 bg-gray-800 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
-                        @if($semuaSelesai)
-                            Semua patroli sudah selesai
-                        @else
-                            Belum ada patroli yang aktif
-                        @endif
+                        Semua patroli hari ini sudah selesai
                         <div class="absolute top-full right-4 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-gray-800"></div>
                     </div>
                 </div>
@@ -239,7 +190,7 @@
             :class="showModal ? 'pointer-events-none opacity-50' : ''"
             x-bind:tabindex="showModal ? -1 : 0"
             x-bind:aria-disabled="showModal ? 'true' : 'false'"
-            class="fixed bottom-24 right-4 bg-[#2a4a6f] text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform z-40 cursor-pointer">
+            class="fixed bottom-24 right-4 bg-[#2a4a6f] text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform z-40 cursor-pointer group">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>

@@ -96,6 +96,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/patroli/check-area', [AnggotaPatroliController::class, 'checkArea'])
             ->name('patroli.checkArea');
         
+        // Route untuk claim patroli
+        Route::post('/patroli/claim', [AnggotaPatroliController::class, 'claimPatroli'])
+            ->name('patroli.claim');
+
         // Route untuk menyimpan checkpoint (AJAX dari modal kamera)
         Route::post('/patroli/checkpoint', [AnggotaPatroliController::class, 'storeCheckpoint'])
             ->name('patroli.storeCheckpoint');
