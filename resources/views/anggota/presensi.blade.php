@@ -26,7 +26,7 @@
     
     // Koordinat kampus Anda
     campusLat: -6.2315465,
-    campusLng: 106.8666516,
+    campusLng: 106.8666516, 
     maxDistance: 80,
 
     init() {

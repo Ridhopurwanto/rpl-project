@@ -67,7 +67,6 @@ class PresensiController extends Controller
                             ->get();
 
         $now = Carbon::now();
-        $now = Carbon::now()->setTime(18, 00, 00);
 
         $todayShiftData = Shift::with('shiftRule')
                             ->where('id_pengguna', $user->id_pengguna)
@@ -81,8 +80,8 @@ class PresensiController extends Controller
                             ->get();
 
         // GANTI DARI 'Masuk'/'Pulang' JADI 'masuk'/'pulang' (lowercase)
-        $sudahMasuk = $presensiLog->where('jenis_presensi', 'masuk')->first();   // ← PERBAIKI
-        $sudahPulang = $presensiLog->where('jenis_presensi', 'pulang')->first();  // ← PERBAIKI
+        $sudahMasuk = $presensiLog->where('jenis_presensi', 'Masuk')->first();   // ← PERBAIKI
+        $sudahPulang = $presensiLog->where('jenis_presensi', 'Pulang')->first();  // ← PERBAIKI
 
         
         // Default Data Jadwal
