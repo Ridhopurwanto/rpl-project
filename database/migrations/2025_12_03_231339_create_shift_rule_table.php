@@ -16,8 +16,9 @@ return new class extends Migration
             $table->enum('jenis_shift', ['Pagi', 'Malam', 'Non Shift', 'Off']);
             $table->time('jam_masuk');
             $table->time('jam_keluar');
-            $table->integer('toleransi')->default(0);
+            $table->integer('toleransi')->default(0)->nullable();
             $table->unsignedInteger('dibuka')->nullable();
+            $table->boolean('is_geotag_enabled')->nullable()->default(true);
         });
     }
 
