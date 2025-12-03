@@ -37,19 +37,27 @@
         $userId = $s->id_pengguna;
         
         if (!isset($userDetails[$userId])) {
-            $namaLengkap = $s->user->nama_lengkap ?? '-';
-            $peran = $s->user->peran ?? '-';
+            $namaLengkap = $s->pengguna->nama_lengkap ?? '-';
+            $peran = $s->pengguna->peran ?? '-';
             $userDetails[$userId] = [
                 'name' => $namaLengkap,
                 'role' => ucfirst($peran) 
             ];
         }
 
-        $kode = substr($s->jenis_shift, 0, 1); 
-        if ($s->jenis_shift == 'Non Shift') $kode = 'N';
+        // 1. Ambil object rule dari relasi
+        $rule = $s->shiftRule; 
+        
+        // 2. Ambil teks jenisnya (Pagi, Malam, Off)
+        $namaShift = $rule ? $rule->jenis_shift : '-'; 
+
+        // 3. Ambil Kode Huruf Depan (P, M, O, N)
+        $kode = substr($namaShift, 0, 1); 
+        if ($namaShift == 'Non Shift') $kode = 'N';
         
         $shiftMatrix[$userId][$dateKey] = $kode;
     }
+    
 @endphp
 
 <table style="border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 9pt;">
