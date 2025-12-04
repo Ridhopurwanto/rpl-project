@@ -13,42 +13,44 @@ class PerubahanShiftNotification extends Notification
     protected $pesan;
     protected $shiftData;
 
-    // Kita terima data pesan dan detail shift saat notifikasi dipanggil
-    public function __construct($pesan, $shiftData)
+    public function __construct($pesan, $shiftData = null)
     {
         $this->pesan = $pesan;
         $this->shiftData = $shiftData;
     }
 
-    // Tentukan jalur pengiriman: Database (untuk icon lonceng) DAN Mail (email)
+    // Kirim via database DAN email
     public function via($notifiable)
     {
         return ['database', 'mail'];
     }
 
-    // 1. Konfigurasi tampilan Email
+    // Konfigurasi Email
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->subject('Pemberitahuan Perubahan Jadwal Shift')
-                    ->greeting('Halo, ' . $notifiable->nama_lengkap)
-                    ->line($this->pesan)
-                    ->line('Tanggal: ' . $this->shiftData->tanggal)
-                    ->line('Shift Baru: ' . $this->shiftData->jenis_shift)
-                    ->action('Cek Jadwal', url('/jadwal')) // Ganti link sesuai route kamu
-                    ->line('Terima kasih telah menggunakan aplikasi SIAP.');
+            ->subject('Pemberitahuan Perubahan Jadwal Shift')
+            ->view('emails.perubahan-shift', [
+                'pesan' => $this->pesan,
+                'shiftData' => $this->shiftData,
+                'notifiable' => $notifiable,
+            ]);
     }
 
-    // 2. Konfigurasi tampilan di Website (Database)
+    // Konfigurasi Database (untuk lonceng)
     public function toArray($notifiable)
     {
+        $jenisShift = 'Tidak Diketahui';
+        if ($this->shiftData && $this->shiftData->shiftRule) {
+            $jenisShift = $this->shiftData->shiftRule->jenis_shift;
+        }
+
         return [
-            'title' => 'Perubahan Shift Presensi', // Judul (Bold di gambar 1)
-            'message' => $this->pesan, // Isi pesan (Text abu-abu di gambar 1)
-            'shift_id' => $this->shiftData->id_shift,
-            'type' => 'info', // Bisa untuk warna icon (biru/merah)
-            'icon' => 'fas fa-calendar-alt', // FontAwesome icon
-            'url' => url('/jadwal')
+            'title' => 'Perubahan Shift',
+            'message' => $this->pesan,
+            'shift_id' => $this->shiftData->id_shift ?? null,
+            'tanggal' => $this->shiftData->tanggal ?? null,
+            'jenis_shift' => $jenisShift,
         ];
     }
 }

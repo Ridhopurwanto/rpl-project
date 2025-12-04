@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 // use Illuminate\Support\Facades\Cache; // Cache dimatikan agar aman di semua laptop
 use App\Notifications\PerubahanShiftNotification;
 
@@ -191,8 +192,15 @@ class ManajemenShiftController extends Controller
             // Notifikasi
             if ($shift->wasRecentlyCreated || $shift->wasChanged('jenis_shift')) {
                  $aksi = $shift->wasRecentlyCreated ? 'dibuatkan' : 'diubah';
-                 $pesan = "Jadwal shift tanggal " . $request->tanggal . " telah {$aksi}.";
-                 if ($user) $user->notify(new PerubahanShiftNotification($pesan, $shift));
+                 $pesan = "Jadwal shift Anda pada tanggal {$request->tanggal} telah {$aksi} menjadi {$request->jenis_shift}.";
+                 
+                 $shift->load('shiftRule'); 
+
+                 try {
+                    $user->notify(new PerubahanShiftNotification($pesan, $shift));
+                 } catch (\Exception $e) {
+                    Log::error('Gagal kirim notifikasi shift: ' . $e->getMessage());
+                 }
             }
 
             return response()->json([
