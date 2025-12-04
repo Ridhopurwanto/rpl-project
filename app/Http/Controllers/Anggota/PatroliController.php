@@ -22,7 +22,7 @@ class PatroliController extends Controller
         return [
             1 => [ // Shift Pagi
                 'Patroli 1' => ['07:30', '08:30'],
-                'Patroli 2' => ['09:30', '10:30'],
+                'Patroli 2' => ['08:30', '10:30'],
                 'Patroli 3' => ['11:30', '12:30'],
                 'Patroli 4' => ['13:40', '15:30'],
                 'Patroli 5' => ['15:30', '17:30'],
@@ -123,7 +123,7 @@ class PatroliController extends Controller
 
         foreach ($allClaims as $claim) {
             $jenisPatroli = $claim->jenis_patroli;
-            
+
             // Hitung progress checkpoint untuk patroli ini
             $progressCount = Patroli::whereDate('tanggal', $tanggalTerpilih)
                 ->where('jenis_patroli', $jenisPatroli)
@@ -144,9 +144,9 @@ class PatroliController extends Controller
         }
 
         // Sorting berdasarkan jenis patroli
-        $displayData = $displayData->sortBy(function($item) {
+        $displayData = $displayData->sortBy(function ($item) {
             preg_match('/\d+/', $item['jenis_patroli'], $matches);
-            return (int)($matches[0] ?? 0);
+            return (int) ($matches[0] ?? 0);
         });
 
         return view('anggota.patroli-index', [
@@ -182,20 +182,41 @@ class PatroliController extends Controller
         }
 
         // 3. Tentukan patroli yang dipilih
-        $jenisPatroliTerpilih = $request->input('jenis_patroli');
+        $jenisPatroliTerpilih = $request->input('jenis_patroli'); // dari dropdown, kalau ada
+
+        $jadwalPatroli = $this->getJadwalPatroli()[$jenisShift];
 
         if (!$jenisPatroliTerpilih) {
-            // Cari patroli pertama yang available
-            foreach ($opsiJenisPatroli as $opsi) {
-                if ($statusPatroli[$opsi] === 'available') {
-                    $jenisPatroliTerpilih = $opsi;
+            // Kalau datang dari tombol "+" (tidak bawa query jenis_patroli),
+            // pilih patroli yang sesuai jam sekarang.
+            $now = Carbon::now();
+            $jenisPatroliTerpilih = 'Patroli 1'; // default fallback
+
+            foreach ($jadwalPatroli as $namaPatroli => [$jamMulai, $jamSelesai]) {
+                $start = Carbon::parse($jamMulai);
+                $end = Carbon::parse($jamSelesai);
+                $nowCompare = $now->copy();
+
+                // Handle jadwal yang melewati tengah malam
+                if ($end->lt($start)) {
+                    $end->addDay();
+                    if ($nowCompare->lt($start)) {
+                        $nowCompare->addDay();
+                    }
+                }
+
+                // Jika sekarang berada di dalam rentang patroli ini → pilih ini
+                if ($nowCompare->between($start, $end)) {
+                    $jenisPatroliTerpilih = $namaPatroli;
                     break;
                 }
-            }
 
-            // Jika tidak ada yang available, pilih yang pertama
-            if (!$jenisPatroliTerpilih) {
-                $jenisPatroliTerpilih = 'Patroli 1';
+                // Jika belum masuk jam mulai patroli ini dan belum ada yang kepilih,
+                // jadikan patroli ini sebagai kandidat berikutnya.
+                if ($nowCompare->lt($start)) {
+                    $jenisPatroliTerpilih = $namaPatroli;
+                    break;
+                }
             }
         }
 
