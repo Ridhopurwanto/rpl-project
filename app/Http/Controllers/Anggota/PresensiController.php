@@ -150,6 +150,12 @@ class PresensiController extends Controller
 
         $shiftHariIni = $todayShiftData && $todayShiftData->shiftRule ? strtoupper($todayShiftData->shiftRule->jenis_shift) : 'TIDAK ADA JADWAL';
 
+        // Default True (Wajib) jika data tidak ditemukan
+        $wajibGeotag = true; 
+        if ($todayShiftData && $todayShiftData->shiftRule) {
+            $wajibGeotag = (bool) $todayShiftData->shiftRule->is_geotag_enabled;
+        }
+
         return view('anggota.presensi', [
             'namaBulan' => $startCarbon->format('F Y'),
             'dataKalender' => $dataKalender,
@@ -158,6 +164,7 @@ class PresensiController extends Controller
             'endDate' => $endDate,
             'shiftHariIni' => $shiftHariIni,
             'jadwalAbsen' => $jadwalAbsen,
+            'wajibGeotag' => $wajibGeotag,
         ]);
     }
 
@@ -169,29 +176,55 @@ class PresensiController extends Controller
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
         ]);
+        
+        $user = Auth::user();
+        $now = Carbon::now();
+        $status = 'tepat waktu';
+        $shiftHariIni = Shift::with('shiftRule')
+                        ->where('id_pengguna', $user->id_pengguna)
+                        ->whereDate('tanggal', $now)
+                        ->first();
+
+        $isGeotagEnabled = true; // Default nyala
+        if ($shiftHariIni && $shiftHariIni->shiftRule) {
+            $isGeotagEnabled = $shiftHariIni->shiftRule->is_geotag_enabled;
+        }
+
+        // 2. Validasi Input
+        $rules = [
+            'foto_base64' => 'required|string',
+            'jenis_presensi' => 'required|in:masuk,pulang',
+        ];
+
+        // Hanya validasi lat/long jika fitur dinyalakan
+        if ($isGeotagEnabled) {
+            $rules['latitude'] = 'required|numeric';
+            $rules['longitude'] = 'required|numeric';
+        }
+
+        $request->validate($rules);
 
         try {
-            $user = Auth::user();
-            $now = Carbon::now();
-
-            // Koordinat kampus/kantor Anda
-            $campusLat = -6.2315465;
-            $campusLng = 106.8666516;
-            $maxDistance = 80; // meter
-            
-            // Calculate distance
-            $distance = $this->calculateDistance(
-                $request->latitude,
-                $request->longitude,
-                $campusLat,
-                $campusLng
-            );
-            
-            if ($distance > $maxDistance) {
-                return redirect()->back()->with('error', 
-                    'Lokasi Anda ' . round($distance) . 'm dari titik presensi. Presensi hanya dapat dilakukan dalam radius ' . $maxDistance . 'm.');
+            // 3. Cek Jarak (HANYA JIKA ENABLED)
+            $distance = 0; // Default
+            if ($isGeotagEnabled) {
+                $campusLat = -6.2315465;
+                $campusLng = 106.8666516;
+                $maxDistance = 80;
+                
+                $distance = $this->calculateDistance(
+                    $request->latitude,
+                    $request->longitude,
+                    $campusLat,
+                    $campusLng
+                );
+                
+                if ($distance > $maxDistance) {
+                    return redirect()->back()->with('error', 
+                        'Lokasi Anda ' . round($distance) . 'm dari titik presensi. Maksimal ' . $maxDistance . 'm.');
+                }
             }
-
+                  
             // 1. Cek Duplikasi
             $cekDuplikat = Presensi::where('id_pengguna', $user->id_pengguna)
                             ->whereDate('waktu', $now) 
@@ -266,8 +299,8 @@ class PresensiController extends Controller
                 'foto'           => $fileName,
                 'jenis_presensi' => $request->jenis_presensi,
                 'status'         => $status,
-                'latitude'       => $request->latitude,    // ← BARU
-                'longitude'      => $request->longitude,   // ← BARU
+                'latitude'       => $isGeotagEnabled ? $request->latitude : null,
+                'longitude'      => $isGeotagEnabled ? $request->longitude : null,
             ]);
 
             return redirect()->route('anggota.presensi.index')

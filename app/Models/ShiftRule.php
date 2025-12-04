@@ -19,6 +19,7 @@ class ShiftRule extends Model
         'jam_keluar',  // Time
         'toleransi',   // Int (Menit)
         'dibuka',
+        'is_geotag_enabled',
     ];
 
     // Relasi ke tabel 'shift' (One Rule has Many Shifts)

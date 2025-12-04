@@ -54,12 +54,22 @@ class PresensiController extends Controller
                                  ->orderBy('presensi.waktu', 'asc')
                                  ->get();
 
+        // --- TAMBAHAN BARU: Ambil Data Shift Rule ---
+        // Kita ambil data rule untuk Pagi, Malam, dan Non Shift agar bisa ditampilkan di modal
+        $rules = ShiftRule::whereIn('jenis_shift', ['Pagi', 'Malam', 'Non Shift'])->get();
+        
+        // Ambil nilai toleransi & dibuka dari salah satu (misal Pagi) karena nilainya seragam
+        $globalRule = $rules->firstWhere('jenis_shift', 'Pagi');
+
         // Kirim data ke view
         return view('komandan.presensi', [
             'dataMasuk' => $dataMasuk,
             'dataPulang' => $dataPulang,
             'tanggalTerpilih' => $tanggalFilter,
             'shiftTerpilih' => $shiftFilter, // Ganti nama variabel agar sesuai view
+            'rules' => $rules,
+            'globalToleransi' => $globalRule ? $globalRule->toleransi : 0,
+            'globalDibuka' => $globalRule ? $globalRule->dibuka : 0,
         ]);
     }
 
@@ -256,6 +266,63 @@ class PresensiController extends Controller
         } catch (\Exception $e) {
             Storage::disk('public')->delete($path);
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    public function updateRules(Request $request)
+    {
+        if (Auth::user()->peran !== 'komandan') {
+            return redirect()->back()->with('error', 'Akses ditolak.');
+        }
+
+        $request->validate([
+            'masuk_pagi' => 'required',
+            'keluar_pagi' => 'required',
+            'masuk_malam' => 'required',
+            'keluar_malam' => 'required',
+            'masuk_non' => 'required',
+            'keluar_non' => 'required',
+            'toleransi' => 'required|numeric|min:0',
+            'dibuka' => 'required|numeric|min:0',
+        ]);
+
+        $geoStatus = $request->input('is_geotag_enabled', 0);
+
+        try {
+            // 1. Update Shift Pagi
+            ShiftRule::where('jenis_shift', 'Pagi')->update([
+                'jam_masuk' => $request->masuk_pagi,
+                'jam_keluar' => $request->keluar_pagi,
+                'toleransi' => $request->toleransi,
+                'dibuka' => $request->dibuka,
+                'is_geotag_enabled' => $geoStatus,
+            ]);
+
+            // 2. Update Shift Malam
+            ShiftRule::where('jenis_shift', 'Malam')->update([
+                'jam_masuk' => $request->masuk_malam,
+                'jam_keluar' => $request->keluar_malam,
+                'toleransi' => $request->toleransi,
+                'dibuka' => $request->dibuka,
+                'is_geotag_enabled' => $geoStatus,
+            ]);
+
+            // 3. Update Non Shift
+            ShiftRule::where('jenis_shift', 'Non Shift')->update([
+                'jam_masuk' => $request->masuk_non,
+                'jam_keluar' => $request->keluar_non,
+                'toleransi' => $request->toleransi,
+                'dibuka' => $request->dibuka,
+                'is_geotag_enabled' => $geoStatus,
+            ]);
+            
+
+            // Catatan: Shift 'Off' tidak diupdate karena toleransi/dibuka null (sesuai gambar)
+
+            return redirect()->back()->with('success', 'Pengaturan Shift Rule berhasil diperbarui.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal update rule: ' . $e->getMessage());
         }
     }
 }
