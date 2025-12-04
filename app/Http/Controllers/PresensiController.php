@@ -128,12 +128,32 @@ class PresensiController extends Controller
         try {
             $presensi = Presensi::findOrFail($id_presensi);
             
+            // Cek apakah status berubah
+            $oldStatus = $presensi->status;
+            
             $presensi->update([
                 'waktu' => $request->waktu,
                 'status' => $request->status,
                 'jenis_presensi' => $request->jenis_presensi,
                 'tanggal' => Carbon::parse($request->waktu)->format('Y-m-d'), // Update tanggal
             ]);
+
+            // Kirim Notifikasi jika status berubah
+            if ($oldStatus != $request->status) {
+                $user = \App\Models\User::find($presensi->id_pengguna);
+                if ($user) {
+                    // Format waktu presensi agar lebih enak dibaca (Hari, Tanggal Jam)
+                    $waktuFormatted = \Carbon\Carbon::parse($presensi->waktu)->translatedFormat('l, d F Y H:i');
+                    $pesan = "Status presensi Anda pada {$waktuFormatted} telah diubah oleh Komandan dari '{$oldStatus}' menjadi '{$request->status}'.";
+                    
+                    try {
+                        $user->notify(new \App\Notifications\PerubahanStatusPresensiNotification($pesan, $presensi));
+                    } catch (\Exception $e) {
+                         // Log error notification but don't stop process
+                         \Illuminate\Support\Facades\Log::error('Gagal kirim notifikasi status presensi: ' . $e->getMessage());
+                    }
+                }
+            }
 
             return redirect()->back()->with('success', 'Data presensi berhasil diperbarui.');
 
