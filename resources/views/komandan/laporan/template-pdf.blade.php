@@ -152,14 +152,14 @@
                 <p style="margin-bottom: 100px;"><strong>DIBUAT OLEH,</strong></p>
                 <div style="display: inline-block; text-align: center;">
                     <div style="border-top: 1px solid #000; width: 150px; margin-bottom: 3px;"></div>
-                    <div style="margin: 0; padding: 0; line-height: 1.5;">Petugas</div>
+                    <div style="margin: 0; padding: 0; line-height: 1.5;">KEPALA KEAMANAN</div>
                 </div>
             </td>
             <td style="width: 34%; text-align: center; vertical-align: top; border: none;">
-                <p style="margin-bottom: 100px;"><strong>MENGETAHUI,</strong></p>
+                <p style="margin-bottom: 100px;"><strong>DIKETAHUI OLEH,</strong></p>
                 <div style="display: inline-block; text-align: center;">
-                    <div style="border-top: 1px solid #000; width: 150px; margin-bottom: 3px;"></div>
-                    <div style="margin: 0; padding: 0; line-height: 1.5;">Kepala Keamanan</div>
+                    <div style="border-top: 1px solid #000; width: 200px; margin-bottom: 3px;"></div>
+                    <div style="margin: 0; padding: 0; line-height: 1.5;">PANCA KHARISMA UTAMA</div>
                 </div>
             </td>
         </tr>
