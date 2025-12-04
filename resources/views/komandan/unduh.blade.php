@@ -92,7 +92,9 @@
                  'laporan_presensi': 'Laporan Presensi',
                  'laporan_patroli': 'Laporan Patroli',
                  'gangguan_kamtibmas': 'Laporan Gangguan Kamtibmas',
-                 'shift_anggota': 'Laporan Shift Anggota'
+                 'shift_anggota': 'Laporan Shift Anggota',
+                 'laporan_anggota': 'Tabel Anggota',
+                 'laporan_kendaraan_terdaftar': 'Tabel Kendaraan Terdaftar'
              };
              if (map[str]) return map[str];
              return str.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -113,21 +115,26 @@
 
         {{-- FILTER SECTION --}}
         <div class="bg-white p-4 rounded-lg shadow-md mb-6">
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
+            <div class="flex flex-col sm:flex-row sm:items-end sm:space-x-4 space-y-4 sm:space-y-0">
+                <div class="flex-1">
                     <label class="block text-sm font-medium text-gray-700 mb-1">JENIS LAPORAN:</label>
-                    <select x-model="reportType" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <select x-model="reportType" class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400">
                         <option value="harian">Laporan Harian</option>
                         <option value="bulanan">Laporan Bulanan</option>
+                        <option value="administrasi">Data Administrasi</option>
                     </select>
                 </div>
-                <div>
+                <div class="flex-1">
                     <label class="block text-sm font-medium text-gray-700 mb-1">DARI TANGGAL:</label>
-                    <input type="date" x-model="dateFrom" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <input type="date" x-model="dateFrom" 
+                           class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400" 
+                           style="color-scheme: dark;">
                 </div>
-                <div>
+                <div class="flex-1">
                     <label class="block text-sm font-medium text-gray-700 mb-1">SAMPAI TANGGAL:</label>
-                    <input type="date" x-model="dateTo" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <input type="date" x-model="dateTo" 
+                           class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400" 
+                           style="color-scheme: dark;">
                 </div>
             </div>
         </div>
@@ -191,6 +198,17 @@
                 <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
                     <input type="checkbox" value="shift_anggota" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
                     <span class="ml-2 text-gray-700">Laporan Shift Anggota</span>
+                </label>
+            </div>
+
+            <div x-show="reportType === 'administrasi'" class="space-y-3" style="display: none;">
+                <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
+                    <input type="checkbox" value="laporan_anggota" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
+                    <span class="ml-2 text-gray-700">Tabel Anggota</span>
+                </label>
+                <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
+                    <input type="checkbox" value="laporan_kendaraan_terdaftar" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
+                    <span class="ml-2 text-gray-700">Tabel Kendaraan Terdaftar</span>
                 </label>
             </div>
 

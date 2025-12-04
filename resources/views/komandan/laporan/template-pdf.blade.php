@@ -143,6 +143,22 @@
     {{-- SHIFT --}}
     @if(isset($shift) && count($shift) > 0)
         @include('komandan.laporan.parts.pdf-shift')
+        @if((isset($anggota) && count($anggota) > 0) || (isset($kendaraan_terdaftar) && count($kendaraan_terdaftar) > 0))
+            <div class="page-break"></div>
+        @endif
+    @endif
+
+    {{-- ANGGOTA --}}
+    @if(isset($anggota) && count($anggota) > 0)
+        @include('komandan.laporan.parts.pdf-anggota')
+        @if(isset($kendaraan_terdaftar) && count($kendaraan_terdaftar) > 0)
+            <div class="page-break"></div>
+        @endif
+    @endif
+
+    {{-- KENDARAAN TERDAFTAR --}}
+    @if(isset($kendaraan_terdaftar) && count($kendaraan_terdaftar) > 0)
+        @include('komandan.laporan.parts.pdf-kendaraan-terdaftar')
     @endif
 
     {{-- FOOTER SIGNATURE --}}
