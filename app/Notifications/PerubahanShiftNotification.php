@@ -12,11 +12,13 @@ class PerubahanShiftNotification extends Notification
 
     protected $pesan;
     protected $shiftData;
+    protected $type; // 'assignment' or 'change'
 
-    public function __construct($pesan, $shiftData = null)
+    public function __construct($pesan, $shiftData = null, $type = 'change')
     {
         $this->pesan = $pesan;
         $this->shiftData = $shiftData;
+        $this->type = $type;
     }
 
     // Kirim via database DAN email
@@ -28,12 +30,17 @@ class PerubahanShiftNotification extends Notification
     // Konfigurasi Email
     public function toMail($notifiable)
     {
+        $subject = ($this->type == 'assignment') 
+            ? 'Pemberitahuan Penentuan Jadwal Shift' 
+            : 'Pemberitahuan Perubahan Jadwal Shift';
+
         return (new MailMessage)
-            ->subject('Pemberitahuan Perubahan Jadwal Shift')
+            ->subject($subject)
             ->view('emails.perubahan-shift', [
                 'pesan' => $this->pesan,
                 'shiftData' => $this->shiftData,
                 'notifiable' => $notifiable,
+                'type' => $this->type,
             ]);
     }
 

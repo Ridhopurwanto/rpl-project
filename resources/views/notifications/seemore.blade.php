@@ -1,4 +1,12 @@
-<div x-data="{ notifOpen: false }" class="relative">
+<div x-data="{ 
+    notifOpen: false, 
+    unreadCount: {{ Auth::user()->unreadNotifications->count() }},
+    decrementCount() {
+        if (this.unreadCount > 0) this.unreadCount--;
+    }
+}" 
+@decrement-count="decrementCount()"
+class="relative">
     {{-- Tombol Lonceng --}}
     <button @click="notifOpen = !notifOpen" class="bg-white p-2 rounded-full shadow text-gray-500 focus:outline-none relative" title="Notifikasi">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -6,11 +14,7 @@
         </svg>
 
         {{-- Badge Merah Jumlah Notifikasi --}}
-        @if(Auth::user()->unreadNotifications->count() > 0)
-        <span class="absolute top-0 right-0 block h-4 w-4 transform -translate-y-1/4 translate-x-1/4 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center font-bold">
-            {{ Auth::user()->unreadNotifications->count() }}
-        </span>
-        @endif
+        <span x-show="unreadCount > 0" x-text="unreadCount" class="absolute top-0 right-0 block h-4 w-4 transform -translate-y-1/4 translate-x-1/4 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center font-bold"></span>
     </button>
 
     {{-- Dropdown Menu Notifikasi --}}
@@ -23,7 +27,7 @@
         {{-- Header Dropdown --}}
         <div class="px-4 py-2 bg-gray-50 border-b border-gray-200 font-semibold text-gray-700 flex justify-between items-center">
             <span>Notifikasi</span>
-            <span class="text-xs bg-gray-200 px-2 py-1 rounded-full">{{ Auth::user()->unreadNotifications->count() }} Baru</span>
+            <span class="text-xs bg-gray-200 px-2 py-1 rounded-full"><span x-text="unreadCount"></span> Baru</span>
         </div>
 
         {{-- List Notifikasi --}}
@@ -32,22 +36,32 @@
             {{-- Kita perlu menyimpan pesan asli ke variabel lokal $fullMessage --}}
             @php
                 $fullMessage = $notification->data['message'] ?? '';
-                $limit = 60; // Batasan karakter (Bisa disesuaikan, saya pakai 60 agar sesuai tampilan)
+                $limit = 60; // Batasan karakter
                 $isTruncated = strlen($fullMessage) > $limit;
                 $markAsReadUrl = route('markAsRead',$notification->id);
+                $isRead = !is_null($notification->read_at);
             @endphp
 
             {{-- BARU: Tambahkan x-data untuk mengontrol tampilan --}}
-            <div x-data="{ isExpanded: false, markAsReadUrl: '{{ $markAsReadUrl }}' }"
-                class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100 {{ $notification->read_at ? '' : 'bg-blue-50' }}">
+            <div x-data="{ 
+                    isExpanded: false, 
+                    isRead: {{ $isRead ? 'true' : 'false' }},
+                    markAsRead() {
+                        if (!this.isRead) {
+                            this.isRead = true;
+                            fetch('{{ $markAsReadUrl }}'); // Kirim request di background
+                            $dispatch('decrement-count'); // Panggil event parent
+                        }
+                    }
+                }"
+                class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100 transition-colors duration-200"
+                :class="{ 'bg-blue-50': !isRead, 'bg-white': isRead }">
 
                 <div class="flex items-start">
                     <div class="flex-1">
                         <p class="text-sm font-bold text-gray-800 flex justify-between">
                             {{ $notification->data['title'] ?? 'Pemberitahuan' }}
-                            @if(is_null($notification->read_at))
-                                <span class="w-2 h-2 bg-blue-500 rounded-full mt-1"></span>
-                            @endif
+                            <span x-show="!isRead" class="w-2 h-2 bg-blue-500 rounded-full mt-1"></span>
                         </p>
                         
                         {{-- BARU: Konten Pesan Notifikasi --}}
@@ -64,7 +78,7 @@
                         {{-- BARU: Link "Lihat Selengkapnya..." di pojok kanan --}}
                         @if ($isTruncated)
                             <div class="mt-1 flex justify-end">
-                                <button type="button" @click.prevent="isExpanded = !isExpanded" 
+                                <button type="button" @click.prevent="isExpanded = !isExpanded; markAsRead()" 
                                         class="text-xs font-semibold text-blue-600 hover:text-blue-800">
                                     <span x-show="!isExpanded">Lihat Selengkapnya...</span>
                                     <span x-show="isExpanded">Tutup</span>
@@ -73,7 +87,7 @@
                         @endif
                         
                         {{-- Tetap gunakan link markAsRead untuk waktu notifikasi (agar notif ditandai saat diklik) --}}
-                        <a :href="markAsReadUrl" class="text-xs text-gray-400 mt-1 flex items-center">
+                        <a href="{{ $markAsReadUrl }}" @click.prevent="markAsRead(); window.location.href='{{ $markAsReadUrl }}'" class="text-xs text-gray-400 mt-1 flex items-center">
                             <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             {{ $notification->created_at->diffForHumans() }}
                         </a>

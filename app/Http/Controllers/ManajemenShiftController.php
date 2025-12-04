@@ -192,12 +192,18 @@ class ManajemenShiftController extends Controller
             // Notifikasi
             if ($shift->wasRecentlyCreated || $shift->wasChanged('jenis_shift')) {
                  $aksi = $shift->wasRecentlyCreated ? 'dibuatkan' : 'diubah';
-                 $pesan = "Jadwal shift Anda pada tanggal {$request->tanggal} telah {$aksi} menjadi {$request->jenis_shift}.";
+                 
+                 if ($shift->wasRecentlyCreated) {
+                     $pesan = "Jadwal shift Anda telah diatur oleh Komandan sampai periode tertentu.";
+                 } else {
+                     $pesan = "Jadwal shift Anda pada tanggal {$request->tanggal} telah diubah menjadi {$request->jenis_shift}.";
+                 }
                  
                  $shift->load('shiftRule'); 
 
                  try {
-                    $user->notify(new PerubahanShiftNotification($pesan, $shift));
+                    $type = $shift->wasRecentlyCreated ? 'assignment' : 'change';
+                    $user->notify(new PerubahanShiftNotification($pesan, $shift, $type));
                  } catch (\Exception $e) {
                     Log::error('Gagal kirim notifikasi shift: ' . $e->getMessage());
                  }
