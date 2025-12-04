@@ -1,8 +1,8 @@
-<h2 style="margin-top: 20px; color: #1a1a1a; font-size: 13pt; border-bottom: 2px solid #333; padding-bottom: 5px;">
+<h2 style="margin: 20px 10px; color: #1a1a1a; font-size: 13pt; border-bottom: 2px solid #333; padding-bottom: 5px;">
     LAPORAN KENDARAAN
 </h2>
 
-<table style="border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 9pt;">
+<table style="border-collapse: collapse; width: 95%; margin: 10px 10px; font-size: 9pt;">
     <thead>
         <tr style="background-color: #cccccc;">
             <th style="border: 1px solid #000; padding: 5px; text-align: center; width: 3%">NO</th>
@@ -11,7 +11,6 @@
             <th style="border: 1px solid #000; padding: 5px; text-align: center; width: 10%">NOPOL</th>
             <th style="border: 1px solid #000; padding: 5px; text-align: left; width: 14%">PEMILIK</th>
             <th style="border: 1px solid #000; padding: 5px; text-align: center; width: 11%">TIPE</th>
-            <th style="border: 1px solid #000; padding: 5px; text-align: center; width: 11%">STATUS</th>
             <th style="border: 1px solid #000; padding: 5px; text-align: left; width: 14%">KETERANGAN</th>
         </tr>
     </thead>
@@ -30,7 +29,6 @@
                 </td>
                 <td style="border: 1px solid #000; padding: 5px;">{{ $item->pemilik ?? '-' }}</td>
                 <td style="border: 1px solid #000; padding: 5px; text-align: center;">{{ $item->tipe ?? '-' }}</td>
-                <td style="border: 1px solid #000; padding: 5px; text-align: center;">{{ ucfirst($item->status ?? '-') }}</td>
                 <td style="border: 1px solid #000; padding: 5px;">{{ $item->keterangan ?? '-' }}</td>
             </tr>
         @empty

@@ -1,4 +1,4 @@
-<h2 style="margin-top: 20px; color: #1a1a1a; font-size: 13pt; border-bottom: 2px solid #333; padding-bottom: 5px;">
+<h2 style="margin: 20px 10px; color: #1a1a1a; font-size: 13pt; border-bottom: 2px solid #333; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;">
     LAPORAN SHIFT ANGGOTA
 </h2>
 
@@ -60,20 +60,28 @@
     
 @endphp
 
-<table style="border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 9pt;">
+<table style="border-collapse: collapse; width: 95%; margin: 10px auto; font-size: 7pt;">
     <thead>
         <tr style="background-color: #cccccc;">
-            <th rowspan="2" style="border: 1px solid #000; padding: 6px; text-align: center; width: 3%">NO</th>
-            <th rowspan="2" style="border: 1px solid #000; padding: 6px; text-align: left; width: 20%">NAMA PERSONIL</th>
-            <th rowspan="2" style="border: 1px solid #000; padding: 6px; text-align: center; width: 12%">JABATAN</th>
+            <th rowspan="2" style="border: 1px solid #000; padding: 3px; text-align: center; width: 3%">NO</th>
+            <th rowspan="2" style="border: 1px solid #000; padding: 3px; text-align: left; width: 15%">NAMA PERSONIL</th>
+            <th rowspan="2" style="border: 1px solid #000; padding: 3px; text-align: center; width: 10%">JABATAN</th>
             @foreach($period as $date)
-                <th style="border: 1px solid #000; padding: 4px; text-align: center; width: 2.5%">{{ $date->format('d') }}</th>
+                <th style="border: 1px solid #000; padding: 2px; text-align: center; font-size: 7pt;">{{ $date->format('d') }}</th>
             @endforeach
         </tr>
         <tr style="background-color: #cccccc;">
             @foreach($period as $date)
-                <th style="border: 1px solid #000; padding: 2px; text-align: center; font-size: 8pt;">
-                    {{ strtoupper(substr($date->isoFormat('dddd'), 0, 3)) }}
+                @php
+                    $dayMap = [
+                        'Mon' => 'SEN', 'Tue' => 'SEL', 'Wed' => 'RAB', 
+                        'Thu' => 'KAM', 'Fri' => 'JUM', 'Sat' => 'SAB', 'Sun' => 'MIN'
+                    ];
+                    $dayEng = $date->format('D');
+                    $dayInd = $dayMap[$dayEng] ?? $dayEng;
+                @endphp
+                <th style="border: 1px solid #000; padding: 1px; text-align: center; font-size: 6pt;">
+                    {{ $dayInd }}
                 </th>
             @endforeach
         </tr>
@@ -82,9 +90,9 @@
         @php $no = 1; @endphp
         @foreach($userDetails as $userId => $info)
             <tr>
-                <td style="border: 1px solid #000; padding: 6px; text-align: center;">{{ $no++ }}</td>
-                <td style="border: 1px solid #000; padding: 6px;">{{ $info['name'] }}</td>
-                <td style="border: 1px solid #000; padding: 6px; text-align: center;">{{ $info['role'] }}</td>
+                <td style="border: 1px solid #000; padding: 3px; text-align: center;">{{ $no++ }}</td>
+                <td style="border: 1px solid #000; padding: 3px; font-size: 7pt;">{{ $info['name'] }}</td>
+                <td style="border: 1px solid #000; padding: 3px; text-align: center; font-size: 7pt;">{{ $info['role'] }}</td>
                 
                 @foreach($period as $date)
                     @php
@@ -98,7 +106,7 @@
                         elseif($kode == 'N') $bgColor = '#e0e0e0';
                     @endphp
 
-                    <td style="border: 1px solid #000; padding: 4px; text-align: center; background-color: {{ $bgColor }}; font-weight: bold;">
+                    <td style="border: 1px solid #000; padding: 2px; text-align: center; background-color: {{ $bgColor }}; font-weight: bold; font-size: 7pt;">
                         {{ $kode }}
                     </td>
                 @endforeach

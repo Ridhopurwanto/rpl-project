@@ -65,6 +65,7 @@ class LaporanUnduhController extends Controller
                 ->setOption('isHtml5ParserEnabled', true)
                 ->setOption('isRemoteEnabled', true);
 
+            // return $pdf->stream("Laporan_Gabungan_{$timestamp}.pdf");
             return $pdf->download("Laporan_Gabungan_{$timestamp}.pdf");
         }
 
@@ -107,6 +108,7 @@ class LaporanUnduhController extends Controller
                 ->setOption('isHtml5ParserEnabled', true)
                 ->setOption('isRemoteEnabled', true);
 
+            // return $pdf->stream($fileName . '.pdf');
             return $pdf->download($fileName . '.pdf');
         }
 
