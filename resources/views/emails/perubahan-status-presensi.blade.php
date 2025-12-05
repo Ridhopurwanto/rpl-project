@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perubahan Jadwal Shift</title>
+    <title>Perubahan Status Presensi</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
@@ -19,7 +19,7 @@
             max-width: 600px;
             margin: 40px auto;
             background-color: #ffffff;
-            border-radius: 16px; /* Lebih bulat */
+            border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
@@ -74,33 +74,6 @@
             margin-bottom: 32px;
             border-left: 5px solid #1e3a8a;
         }
-        .detail-row {
-            display: flex;
-            align-items: flex-start; /* Align top if text wraps */
-            margin-bottom: 16px; /* Lebih renggang */
-        }
-        .detail-row:last-child {
-            margin-bottom: 0;
-        }
-        .detail-label {
-            flex: 0 0 100px; /* Fixed width for label */
-            font-size: 14px;
-            color: #6b7280;
-            font-weight: 500;
-        }
-        .detail-separator {
-            flex: 0 0 20px;
-            font-size: 14px;
-            color: #6b7280;
-            text-align: center;
-        }
-        .detail-value {
-            flex: 1;
-            font-size: 14px;
-            color: #111827;
-            font-weight: 600;
-            text-align: left; /* Rata kiri agar rapi dengan titik dua */
-        }
         .cta-button-container {
             text-align: center;
             margin-top: 10px;
@@ -108,7 +81,7 @@
         .cta-button {
             display: inline-block;
             background-color: #1e3a8a;
-            color: #ffffff !important; /* Force white */
+            color: #ffffff !important;
             font-size: 15px;
             font-weight: 600;
             padding: 14px 36px;
@@ -135,13 +108,7 @@
     <div class="email-wrapper">
         <!-- Header -->
         <div class="email-header">
-            <h1>
-                @if(isset($type) && $type == 'assignment')
-                    Penentuan Jadwal Shift
-                @else
-                    Perubahan Jadwal Shift
-                @endif
-            </h1>
+            <h1>Perubahan Status Presensi</h1>
             <p>Sistem Informasi Keamanan (SIAP)</p>
         </div>
 
@@ -157,46 +124,30 @@
                 {{ $pesan }}
             </div>
 
-            @if(isset($shiftData))
+            @if(isset($presensiData))
             <div class="shift-details-card">
                 <table style="width: 100%; border-collapse: collapse;">
                     <tr>
                         <td style="width: 120px; padding-bottom: 12px; color: #6b7280; font-weight: 500; vertical-align: top;">Tanggal</td>
                         <td style="width: 20px; padding-bottom: 12px; color: #6b7280; text-align: center; vertical-align: top;">:</td>
-                        <td style="padding-bottom: 12px; color: #111827; font-weight: 600; vertical-align: top;">{{ \Carbon\Carbon::parse($shiftData->tanggal)->translatedFormat('l, d F Y') }}</td>
+                        <td style="padding-bottom: 12px; color: #111827; font-weight: 600; vertical-align: top;">{{ \Carbon\Carbon::parse($presensiData->tanggal)->translatedFormat('l, d F Y') }}</td>
                     </tr>
-                    
-                    @if(!isset($type) || $type != 'assignment')
                     <tr>
-                        <td style="width: 120px; padding-bottom: 12px; color: #6b7280; font-weight: 500; vertical-align: top;">Shift Baru</td>
+                        <td style="width: 120px; padding-bottom: 12px; color: #6b7280; font-weight: 500; vertical-align: top;">Jenis</td>
                         <td style="width: 20px; padding-bottom: 12px; color: #6b7280; text-align: center; vertical-align: top;">:</td>
-                        <td style="padding-bottom: 12px; color: #1e3a8a; font-weight: 600; vertical-align: top;">{{ $shiftData->shiftRule->jenis_shift ?? '-' }}</td>
+                        <td style="padding-bottom: 12px; color: #111827; font-weight: 600; vertical-align: top;">{{ $presensiData->jenis_presensi }}</td>
                     </tr>
-                    @endif
-
                     <tr>
-                        <td style="width: 120px; color: #6b7280; font-weight: 500; vertical-align: top;">
-                            @if(isset($type) && $type == 'assignment')
-                                Status Shift
-                            @else
-                                Status
-                            @endif
-                        </td>
+                        <td style="width: 120px; color: #6b7280; font-weight: 500; vertical-align: top;">Status Baru</td>
                         <td style="width: 20px; color: #6b7280; text-align: center; vertical-align: top;">:</td>
-                        <td style="color: #111827; font-weight: 600; vertical-align: top;">
-                            @if(isset($type) && $type == 'assignment')
-                                Baru
-                            @else
-                                Diubah
-                            @endif
-                        </td>
+                        <td style="color: #1e3a8a; font-weight: 600; vertical-align: top;">{{ ucwords($presensiData->status) }}</td>
                     </tr>
                 </table>
             </div>
             @endif
 
             <div class="cta-button-container">
-                <a href="{{ route('anggota.presensi.index', ['start_date' => $shiftData->tanggal]) }}" class="cta-button">Lihat Jadwal Lengkap</a>
+                <a href="{{ route('anggota.presensi.index', ['start_date' => $presensiData->tanggal]) }}" class="cta-button">Lihat Riwayat Presensi</a>
             </div>
         </div>
 

@@ -95,57 +95,91 @@
     {{-- PRESENSI --}}
     @if(isset($presensi) && count($presensi) > 0)
         @include('komandan.laporan.parts.pdf-presensi')
-        <div class="page-break"></div>
+        @if((isset($patroli) && count($patroli) > 0) || (isset($barang_temu) && count($barang_temu) > 0) || (isset($barang_titip) && count($barang_titip) > 0) || (isset($kendaraan) && count($kendaraan) > 0) || (isset($tamu) && count($tamu) > 0) || (isset($gangguan) && count($gangguan) > 0) || (isset($shift) && count($shift) > 0))
+            <div class="page-break"></div>
+        @endif
     @endif
 
     {{-- PATROLI --}}
     @if(isset($patroli) && count($patroli) > 0)
         @include('komandan.laporan.parts.pdf-patroli')
-        <div class="page-break"></div>
+        @if((isset($barang_temu) && count($barang_temu) > 0) || (isset($barang_titip) && count($barang_titip) > 0) || (isset($kendaraan) && count($kendaraan) > 0) || (isset($tamu) && count($tamu) > 0) || (isset($gangguan) && count($gangguan) > 0) || (isset($shift) && count($shift) > 0))
+            <div class="page-break"></div>
+        @endif
     @endif
 
     {{-- BARANG --}}
     @if((isset($barang_temu) && count($barang_temu) > 0) || (isset($barang_titip) && count($barang_titip) > 0))
         @include('komandan.laporan.parts.pdf-barang')
-        <div class="page-break"></div>
+        @if((isset($kendaraan) && count($kendaraan) > 0) || (isset($tamu) && count($tamu) > 0) || (isset($gangguan) && count($gangguan) > 0) || (isset($shift) && count($shift) > 0))
+            <div class="page-break"></div>
+        @endif
     @endif
 
     {{-- KENDARAAN --}}
     @if(isset($kendaraan) && count($kendaraan) > 0)
         @include('komandan.laporan.parts.pdf-kendaraan')
-        <div class="page-break"></div>
+        @if((isset($tamu) && count($tamu) > 0) || (isset($gangguan) && count($gangguan) > 0) || (isset($shift) && count($shift) > 0))
+            <div class="page-break"></div>
+        @endif
     @endif
 
     {{-- TAMU --}}
     @if(isset($tamu) && count($tamu) > 0)
         @include('komandan.laporan.parts.pdf-tamu')
-        <div class="page-break"></div>
+        @if((isset($gangguan) && count($gangguan) > 0) || (isset($shift) && count($shift) > 0))
+            <div class="page-break"></div>
+        @endif
     @endif
 
     {{-- GANGGUAN --}}
     @if(isset($gangguan) && count($gangguan) > 0)
         @include('komandan.laporan.parts.pdf-gangguan')
-        <div class="page-break"></div>
+        @if(isset($shift) && count($shift) > 0)
+            <div class="page-break"></div>
+        @endif
     @endif
 
     {{-- SHIFT --}}
     @if(isset($shift) && count($shift) > 0)
         @include('komandan.laporan.parts.pdf-shift')
+        @if((isset($anggota) && count($anggota) > 0) || (isset($kendaraan_terdaftar) && count($kendaraan_terdaftar) > 0))
+            <div class="page-break"></div>
+        @endif
+    @endif
+
+    {{-- ANGGOTA --}}
+    @if(isset($anggota) && count($anggota) > 0)
+        @include('komandan.laporan.parts.pdf-anggota')
+        @if(isset($kendaraan_terdaftar) && count($kendaraan_terdaftar) > 0)
+            <div class="page-break"></div>
+        @endif
+    @endif
+
+    {{-- KENDARAAN TERDAFTAR --}}
+    @if(isset($kendaraan_terdaftar) && count($kendaraan_terdaftar) > 0)
+        @include('komandan.laporan.parts.pdf-kendaraan-terdaftar')
     @endif
 
     {{-- FOOTER SIGNATURE --}}
-    <div class="footer" style="margin-top: 60px;">
-        <div class="footer-col">
-            <p><strong>DIBUAT OLEH,</strong></p>
-            <div class="signature-line" style="height: 50px;"></div>
-            <p style="margin-top: 20px;">Petugas</p>
-        </div>
-        <div class="footer-col">
-            <p><strong>MENGETAHUI,</strong></p>
-            <div class="signature-line" style="height: 50px;"></div>
-            <p style="margin-top: 20px;">Kepala Keamanan</p>
-        </div>
-    </div>
+    <table style="width: 95%; margin-top: 60px; border: none;">
+        <tr style="border: none;">
+            <td style="width: 33%; text-align: center; vertical-align: top; border: none;">
+                <p style="margin-bottom: 100px;"><strong>DIBUAT OLEH,</strong></p>
+                <div style="display: inline-block; text-align: center;">
+                    <div style="border-top: 1px solid #000; width: 150px; margin-bottom: 3px;"></div>
+                    <div style="margin: 0; padding: 0; line-height: 1.5;">KEPALA KEAMANAN</div>
+                </div>
+            </td>
+            <td style="width: 34%; text-align: center; vertical-align: top; border: none;">
+                <p style="margin-bottom: 100px;"><strong>DIKETAHUI OLEH,</strong></p>
+                <div style="display: inline-block; text-align: center;">
+                    <div style="border-top: 1px solid #000; width: 200px; margin-bottom: 3px;"></div>
+                    <div style="margin: 0; padding: 0; line-height: 1.5;">PANCA KHARISMA UTAMA</div>
+                </div>
+            </td>
+        </tr>
+    </table>
 
 </body>
 </html>
