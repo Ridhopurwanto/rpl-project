@@ -3,14 +3,14 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <style>
         table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
-        th { background-color: #cccccc; font-weight: bold; border: 1px solid #000000; text-align: center; height: 30px; vertical-align: middle; font-size: 10pt; }
-        td { border: 1px solid #000000; padding: 5px; vertical-align: middle; font-size: 10pt; }
-        h2 { margin-top: 20px; color: #2a4a6f; font-size: 14pt; margin-bottom: 10px; }
-        .text-center { text-align: center; }
-        .empty { text-align: center; font-style: italic; color: #666; padding: 10px; }
+        th { background-color: #cccccc; font-weight: bold; border: 1px solid #000000 !important; text-align: center; height: 30px; vertical-align: middle; font-size: 10pt; }
+        td { border: 1px solid #000000 !important; padding: 5px; vertical-align: middle; font-size: 10pt; word-wrap: break-word; white-space: normal; }
+        h2, h3 { margin-top: 20px; color: #2a4a6f; font-size: 14pt; margin-bottom: 10px; }
+        .text-center { text-align: center; vertical-align: middle; }
+        .empty { text-align: center; font-style: italic; color: #666; padding: 10px; vertical-align: middle; border: 1px solid #000000 !important; }
         
         /* CSS Shift */
-        .shift-cell { text-align: center; width: 30px; font-weight: bold; border: 1px solid #000; }
+        .shift-cell { text-align: center; width: 30px; font-weight: bold; border: 1px solid #000000 !important; vertical-align: middle; }
         .shift-P { background-color: #ffff00; color: #000000; } 
         .shift-M { background-color: #4fc3f7; color: #000000; } 
         .shift-O { background-color: #ff5252; color: #ffffff; } 
@@ -19,46 +19,132 @@
 </head>
 <body>
     
-    {{-- HEADER (Muncul di setiap sheet) --}}
-    <div style="text-align: center; margin-bottom: 20px;">
-        <h1 style="font-size: 18pt; font-weight: bold; margin: 0;">
-            {{ strtoupper('Laporan ' . str_replace('_', ' ', $sheetType)) }}
-        </h1>
-        <p style="margin-top: 5px;">PERIODE: 
-            <strong>{{ \Carbon\Carbon::parse($meta['tanggalMulai'])->isoFormat('D MMMM Y') }}</strong> 
-            S/D 
-            <strong>{{ \Carbon\Carbon::parse($meta['tanggalSelesai'])->isoFormat('D MMMM Y') }}</strong>
-        </p>
-    </div>
-    <hr>
+    @php
+        $colspans = [
+            'presensi' => 6,
+            'patroli' => 7,
+            'barang' => 8,
+            'kendaraan' => 8,
+            'tamu' => 6,
+            'gangguan' => 5,
+            'shift' => 3 + \Carbon\Carbon::parse($meta['tanggalMulai'])->diffInDays(\Carbon\Carbon::parse($meta['tanggalSelesai'])) + 1
+        ];
+        $cp = $colspans[$sheetType] ?? 6;
+        
+        $centerColspan = max(1, $cp - 2);
+    @endphp
+
+    {{-- HEADER --}}
+    <table style="margin-bottom: 20px; border: none; width: 100%;">
+        <tr>
+            {{-- LOGO KIRI --}}
+            <td style="text-align: center; vertical-align: middle; border: none; height: 100px;">
+                <img src="{{ public_path('images/stis-logo.png') }}" height="70" width="auto">
+            </td>
+
+            {{-- TEXT TENGAH --}}
+            <td colspan="{{ $centerColspan }}" style="text-align: center; vertical-align: middle; border: none;">
+                <strong style="font-size: 14pt;">LAPORAN BULANAN KEGIATAN SECURITY</strong><br>
+                <span style="font-size: 12pt;">PT. PANCA KHARISMA UTAMA</span><br>
+                <span style="font-size: 11pt;">OBYEK PENGAMANAN: POLITEKNIK STATISTIKA STIS JAKARTA</span><br>
+                <strong style="font-size: 12pt;">
+                    PERIODE: {{ \Carbon\Carbon::parse($meta['tanggalMulai'])->isoFormat('D MMMM Y') }} 
+                    S/D 
+                    {{ \Carbon\Carbon::parse($meta['tanggalSelesai'])->isoFormat('D MMMM Y') }}
+                </strong>
+            </td>
+
+            {{-- LOGO KANAN --}}
+            <td style="text-align: center; vertical-align: middle; border: none; height: 100px;">
+                <img src="{{ public_path('images/pku-logo.png') }}" height="70" width="auto">
+            </td>
+        </tr>
+    </table>
+    
+    {{-- Spacer Row --}}
+    <table><tr><td colspan="{{ $cp }}" style="border: none; height: 20px;"></td></tr></table>
 
     {{-- ============================================================ --}}
     {{-- SHEET 1: PRESENSI --}}
     {{-- ============================================================ --}}
     @if($sheetType == 'presensi')
-        <table>
+        @php
+            $presensiMasuk = $data->filter(function($item) {
+                return strtolower($item->jenis_presensi) == 'masuk';
+            });
+            $presensiPulang = $data->filter(function($item) {
+                return strtolower($item->jenis_presensi) == 'pulang';
+            });
+        @endphp
+
+        {{-- TABEL MASUK --}}
+        <h3>LAPORAN PRESENSI MASUK</h3>
+        <table border="1">
             <thead>
                 <tr>
                     <th width="5">NO</th>
+                    <th width="15">FOTO</th>
                     <th width="15">TANGGAL</th>
                     <th width="25">NAMA ANGGOTA</th>
                     <th width="15">WAKTU ABSEN</th>
                     <th width="15">STATUS</th>
-                    <th width="15">JENIS</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($data as $index => $item)
+                @forelse($presensiMasuk as $index => $item)
                     <tr>
-                        <td class="text-center">{{ $index + 1 }}</td>
+                        <td class="text-center">{{ $loop->iteration }}</td>
+                        <td class="text-center" height="60">
+                            @if(isset($item->foto) && $item->foto)
+                                <img src="{{ public_path('storage/' . $item->foto) }}" height="50" width="auto">
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}</td>
                         <td>{{ $item->nama_lengkap ?? $item->user->nama_lengkap ?? '-' }}</td>
                         <td class="text-center">{{ \Carbon\Carbon::parse($item->waktu)->format('H:i') }}</td>
                         <td class="text-center">{{ ucfirst($item->status) }}</td>
-                        <td class="text-center">{{ ucfirst($item->jenis_presensi) }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="empty">Tidak ada data presensi.</td></tr>
+                    <tr><td colspan="6" class="empty">Tidak ada data presensi masuk.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+        
+        <br>
+
+        {{-- TABEL PULANG --}}
+        <h3>LAPORAN PRESENSI PULANG</h3>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th width="5">NO</th>
+                    <th width="15">FOTO</th>
+                    <th width="15">TANGGAL</th>
+                    <th width="25">NAMA ANGGOTA</th>
+                    <th width="15">WAKTU ABSEN</th>
+                    <th width="15">STATUS</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($presensiPulang as $index => $item)
+                    <tr>
+                        <td class="text-center">{{ $loop->iteration }}</td>
+                        <td class="text-center" height="60">
+                            @if(isset($item->foto) && $item->foto)
+                                <img src="{{ public_path('storage/' . $item->foto) }}" height="50" width="auto">
+                            @else
+                                -
+                            @endif
+                        </td>
+                        <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}</td>
+                        <td>{{ $item->nama_lengkap ?? $item->user->nama_lengkap ?? '-' }}</td>
+                        <td class="text-center">{{ \Carbon\Carbon::parse($item->waktu)->format('H:i') }}</td>
+                        <td class="text-center">{{ ucfirst($item->status) }}</td>
+                    </tr>
+                @empty
+                    <tr><td colspan="6" class="empty">Tidak ada data presensi pulang.</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -68,21 +154,29 @@
     {{-- SHEET 2: PATROLI --}}
     {{-- ============================================================ --}}
     @if($sheetType == 'patroli')
-        <table>
+        <table border="1">
             <thead>
                 <tr>
                     <th width="5">NO</th>
+                    <th width="15">FOTO</th>
                     <th width="15">TANGGAL</th>
-                    <th width="25">PETUGAS</th>
-                    <th width="15">WAKTU TEPAT</th>
-                    <th width="30">WILAYAH / LOKASI</th>
-                    <th width="20">JENIS PATROLI</th>
+                    <th width="20">PETUGAS</th>
+                    <th width="10">WAKTU</th>
+                    <th width="25">WILAYAH / LOKASI</th>
+                    <th width="15">JENIS PATROLI</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($data as $index => $item)
                     <tr>
                         <td class="text-center">{{ $index + 1 }}</td>
+                        <td class="text-center" height="60">
+                            @if(isset($item->foto) && $item->foto)
+                                <img src="{{ public_path('storage/' . $item->foto) }}" height="50" width="auto">
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}</td>
                         <td>{{ $item->nama_lengkap }}</td>
                         <td class="text-center">{{ \Carbon\Carbon::parse($item->waktu_exact)->format('H:i') }}</td>
@@ -90,7 +184,7 @@
                         <td class="text-center">{{ $item->jenis_patroli }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="empty">Tidak ada data patroli.</td></tr>
+                    <tr><td colspan="7" class="empty">Tidak ada data patroli.</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -104,22 +198,40 @@
         {{-- Bagian A: Barang Temuan (Jika ada datanya) --}}
         @if(isset($data['temu']) && count($data['temu']) > 0)
             <h2>BARANG TEMUAN</h2>
-            <table>
+            <table border="1">
                 <thead>
                     <tr>
                         <th width="5">NO</th>
+                        <th width="15">FOTO</th>
                         <th width="15">WAKTU LAPOR</th>
-                        <th width="25">NAMA BARANG</th>
-                        <th width="25">PELAPOR</th>
-                        <th width="25">LOKASI PENEMUAN</th>
-                        <th width="15">STATUS</th>
-                        <th width="25">CATATAN</th>
+                        <th width="20">NAMA BARANG</th>
+                        <th width="15">PELAPOR</th>
+                        <th width="15">LOKASI</th>
+                        <th width="10">STATUS</th>
+                        <th width="20">CATATAN</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($data['temu'] as $index => $item)
                         <tr>
                             <td class="text-center">{{ $index + 1 }}</td>
+                            <td class="text-center" height="60">
+                                @if(isset($item->foto) && $item->foto)
+                                    <div style="margin-bottom: 5px;">
+                                        <strong>Barang:</strong><br>
+                                        <img src="{{ public_path('storage/' . $item->foto) }}" height="50" width="auto">
+                                    </div>
+                                @endif
+                                @if(isset($item->foto_penerima) && $item->foto_penerima && strtolower($item->status ?? '') === 'selesai')
+                                    <div style="margin-top: 5px;">
+                                        <strong>Penerima:</strong><br>
+                                        <img src="{{ public_path('storage/' . $item->foto_penerima) }}" height="50" width="auto">
+                                    </div>
+                                @endif
+                                @if((!isset($item->foto) || !$item->foto) && (!isset($item->foto_penerima) || !$item->foto_penerima))
+                                    -
+                                @endif
+                            </td>
                             <td>{{ \Carbon\Carbon::parse($item->waktu_lapor)->format('d/m/Y H:i') }}</td>
                             <td>{{ $item->nama_barang }}</td>
                             <td>{{ $item->nama_pelapor }}</td>
@@ -136,22 +248,40 @@
         {{-- Bagian B: Barang Titipan (Jika ada datanya) --}}
         @if(isset($data['titip']) && count($data['titip']) > 0)
             <h2>BARANG TITIPAN</h2>
-            <table>
+            <table border="1">
                 <thead>
                     <tr>
                         <th width="5">NO</th>
+                        <th width="15">FOTO</th>
                         <th width="15">WAKTU TITIP</th>
-                        <th width="25">NAMA BARANG</th>
-                        <th width="25">PENITIP</th>
-                        <th width="25">TUJUAN</th>
-                        <th width="15">STATUS</th>
-                        <th width="25">CATATAN</th>
+                        <th width="20">NAMA BARANG</th>
+                        <th width="15">PENITIP</th>
+                        <th width="15">PENERIMA</th>
+                        <th width="10">STATUS</th>
+                        <th width="20">CATATAN</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($data['titip'] as $index => $item)
                         <tr>
                             <td class="text-center">{{ $index + 1 }}</td>
+                            <td class="text-center" height="60">
+                                @if(isset($item->foto) && $item->foto)
+                                    <div style="margin-bottom: 5px;">
+                                        <strong>Barang:</strong><br>
+                                        <img src="{{ public_path('storage/' . $item->foto) }}" height="50" width="auto">
+                                    </div>
+                                @endif
+                                @if(isset($item->foto_penerima) && $item->foto_penerima && strtolower($item->status ?? '') === 'selesai')
+                                    <div style="margin-top: 5px;">
+                                        <strong>Penerima:</strong><br>
+                                        <img src="{{ public_path('storage/' . $item->foto_penerima) }}" height="50" width="auto">
+                                    </div>
+                                @endif
+                                @if((!isset($item->foto) || !$item->foto) && (!isset($item->foto_penerima) || !$item->foto_penerima))
+                                    -
+                                @endif
+                            </td>
                             <td>{{ \Carbon\Carbon::parse($item->waktu_titip)->format('d/m/Y H:i') }}</td>
                             <td>{{ $item->nama_barang }}</td>
                             <td>{{ $item->nama_penitip }}</td>
@@ -173,7 +303,7 @@
     {{-- SHEET 4: KENDARAAN --}}
     {{-- ============================================================ --}}
     @if($sheetType == 'kendaraan')
-        <table>
+        <table border="1">
             <thead>
                 <tr>
                     <th width="5">NO</th>
@@ -209,7 +339,7 @@
     {{-- SHEET 5: TAMU --}}
     {{-- ============================================================ --}}
     @if($sheetType == 'tamu')
-        <table>
+        <table border="1">
             <thead>
                 <tr>
                     <th width="5">NO</th>
@@ -241,7 +371,7 @@
     {{-- SHEET 6: GANGGUAN --}}
     {{-- ============================================================ --}}
     @if($sheetType == 'gangguan')
-        <table>
+        <table border="1">
             <thead>
                 <tr>
                     <th width="5">NO</th>
@@ -316,7 +446,7 @@
             <span style="background-color: #e0e0e0; padding: 2px 5px; border: 1px solid #000;">N: NON SHIFT</span>
         </div>
 
-        <table>
+        <table border="1">
             <thead>
                 <tr>
                     <th width="5" rowspan="2">NO</th>
