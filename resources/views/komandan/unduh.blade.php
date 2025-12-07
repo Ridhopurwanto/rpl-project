@@ -166,11 +166,11 @@
             <div x-show="reportType === 'harian'" class="space-y-3">
                 
                 <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
-                    <input type="checkbox" value="laporan_presensi" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
+                    <input type="checkbox" value="laporan_presensi" x-model="selectedChecks" class="rounded text-[#1a2847] w-5 h-5 focus:ring-[#1a2847] accent-[#365c82]">
                     <span class="ml-2 text-gray-700">Laporan Presensi</span>
                 </label>
                 <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
-                    <input type="checkbox" value="laporan_patroli" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
+                    <input type="checkbox" value="laporan_patroli" x-model="selectedChecks" class="rounded text-[#1a2847] w-5 h-5 focus:ring-[#1a2847] accent-[#365c82]">
                     <span class="ml-2 text-gray-700">Laporan Patroli</span>
                 </label>
                 
@@ -180,7 +180,7 @@
                     <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded transition">
                         {{-- Checkbox Induk --}}
                         <input type="checkbox" x-model="isBarangActive" @change="toggleBarang()" 
-                               class="rounded text-blue-600 w-5 h-5 border-gray-300 focus:ring-blue-500">
+                               class="rounded text-[#1a2847] w-5 h-5 border-gray-300 focus:ring-[#1a2847] accent-[#365c82]">
                         
                         <span class="ml-2 text-gray-700">Laporan Pengelolaan Barang</span>
                         
@@ -202,46 +202,46 @@
                         
                         <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
                             <input type="checkbox" value="barang_temu" x-model="barangChecks" @change="updateParent()" 
-                                   class="rounded text-blue-600 w-4 h-4 border-gray-300 focus:ring-blue-500">
+                                   class="rounded text-[#1a2847] w-4 h-4 border-gray-300 focus:ring-[#1a2847] accent-[#365c82]">
                             <span class="ml-2 text-gray-600 text-sm">Barang Temuan</span>
                         </label>
                         
                         <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
                             <input type="checkbox" value="barang_titip" x-model="barangChecks" @change="updateParent()" 
-                                   class="rounded text-blue-600 w-4 h-4 border-gray-300 focus:ring-blue-500">
+                                   class="rounded text-[#1a2847] w-4 h-4 border-gray-300 focus:ring-[#1a2847] accent-[#365c82]">
                             <span class="ml-2 text-gray-600 text-sm">Barang Titipan</span>
                         </label>
                     </div>
                 </div>
                 
                 <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
-                    <input type="checkbox" value="kendaraan" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
+                    <input type="checkbox" value="kendaraan" x-model="selectedChecks" class="rounded text-[#1a2847] w-5 h-5 focus:ring-[#1a2847] accent-[#365c82]">
                     <span class="ml-2 text-gray-700">Laporan Kendaraan</span>
                 </label>
                 <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
-                    <input type="checkbox" value="tamu" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
+                    <input type="checkbox" value="tamu" x-model="selectedChecks" class="rounded text-[#1a2847] w-5 h-5 focus:ring-[#1a2847] accent-[#365c82]">
                     <span class="ml-2 text-gray-700">Laporan Tamu</span>
                 </label>
             </div>
 
             <div x-show="reportType === 'bulanan'" class="space-y-3" style="display: none;">
                 <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
-                    <input type="checkbox" value="gangguan_kamtibmas" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
+                    <input type="checkbox" value="gangguan_kamtibmas" x-model="selectedChecks" class="rounded text-[#1a2847] w-5 h-5 focus:ring-[#1a2847] accent-[#365c82]">
                     <span class="ml-2 text-gray-700">Laporan Gangguan Kamtibmas</span>
                 </label>
                 <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
-                    <input type="checkbox" value="shift_anggota" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
+                    <input type="checkbox" value="shift_anggota" x-model="selectedChecks" class="rounded text-[#1a2847] w-5 h-5 focus:ring-[#1a2847] accent-[#365c82]">
                     <span class="ml-2 text-gray-700">Laporan Shift Anggota</span>
                 </label>
             </div>
 
             <div x-show="reportType === 'administrasi'" class="space-y-3" style="display: none;">
                 <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
-                    <input type="checkbox" value="laporan_anggota" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
+                    <input type="checkbox" value="laporan_anggota" x-model="selectedChecks" class="rounded text-[#1a2847] w-5 h-5 focus:ring-[#1a2847] accent-[#365c82]">
                     <span class="ml-2 text-gray-700">Tabel Anggota</span>
                 </label>
                 <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
-                    <input type="checkbox" value="laporan_kendaraan_terdaftar" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
+                    <input type="checkbox" value="laporan_kendaraan_terdaftar" x-model="selectedChecks" class="rounded text-[#1a2847] w-5 h-5 focus:ring-[#1a2847] accent-[#365c82]">
                     <span class="ml-2 text-gray-700">Tabel Kendaraan Terdaftar</span>
                 </label>
             </div>
