@@ -94,7 +94,7 @@
 
                     <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
                         {{-- Header: Jenis Patroli & Status --}}
-                        <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] px-4 py-2.5 flex justify-between items-center">
+                        <div class="bg-gradient-to-b from-[#243a5e] via-[#2a4a6f] to-[#365c82] px-4 py-2.5 flex justify-between items-center">
                             <div>
                                 <p class="text-xs text-blue-200 font-semibold uppercase">Jenis Patroli</p>
                                 <p class="text-white font-bold text-base">{{ $item['jenis_patroli'] }}</p>

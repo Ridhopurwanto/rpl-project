@@ -174,17 +174,23 @@
         @endif
 
         {{-- INFO SHIFT --}}
-        <div class="mb-4 bg-white p-4 rounded-lg shadow-sm border-l-4 border-blue-500">
-            <div class="flex items-center justify-between mb-2">
-                <div>
-                    <p class="text-xs text-gray-500 uppercase font-bold">Shift Anda</p>
-                    <p class="text-lg font-bold text-gray-800 uppercase">Shift {{ $namaShift }}</p>
-                </div>
-                <div class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">
+        {{-- INFO SHIFT --}}
+<div class="mb-4 bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+    <div class="bg-gradient-to-b from-[#243a5e] via-[#2a4a6f] to-[#365c82] px-4 py-3">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-blue-100 text-xs font-semibold uppercase mb-1">Shift Anda</p>
+                <p class="text-white text-xl font-bold uppercase">Shift {{ $namaShift }}</p>
+            </div>
+            <div class="bg-white/20 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/30">
+                <p class="text-white text-xs font-bold uppercase">
                     AKTIF
-                </div>
+                </p>
             </div>
         </div>
+    </div>
+</div>
+
 
         {{-- PILIH JENIS PATROLI --}}
         <form action="{{ route('anggota.patroli.createSession') }}" method="GET">
@@ -250,7 +256,7 @@
              }" x-init="initCountdown()">
 
             {{-- Header --}}
-            <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-5 py-4">
+            <div class="bg-gradient-to-b from-[#243a5e] via-[#2a4a6f] to-[#365c82] px-5 py-4">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-blue-100 text-xs font-semibold uppercase mb-1">Shift {{ $namaShift }}</p>
