@@ -176,6 +176,87 @@
                         </div>
                     </div>
                 @endforeach
+
+                {{-- Tampilkan Patroli yang Terlewat (belum dilaksanakan) --}}
+                @if($tanggalTerpilih->isToday() && !$isShiftOff)
+                    @php
+                        $jadwalPatroli = [
+                            1 => ['Patroli 1', 'Patroli 2', 'Patroli 3', 'Patroli 4', 'Patroli 5', 'Patroli 6'],
+                            2 => ['Patroli 1', 'Patroli 2', 'Patroli 3', 'Patroli 4', 'Patroli 5', 'Patroli 6']
+                        ];
+                        
+                        $claimedPatrolis = $displayData->pluck('jenis_patroli')->toArray();
+                        $jenisShiftUser = Auth::user()->jenis_shift ?? 1;
+                        $semuaPatroli = $jadwalPatroli[$jenisShiftUser];
+                        
+                        $patroliTerlewat = collect($semuaPatroli)->filter(function($patroli) use ($claimedPatrolis) {
+                            return !in_array($patroli, $claimedPatrolis);
+                        });
+                    @endphp
+                    
+                    @foreach($patroliTerlewat as $patroli)
+                        @php
+                            // Cek apakah patroli ini sudah terlewat
+                            $jadwal = [
+                                1 => [
+                                    'Patroli 1' => ['07:30', '08:30'],
+                                    'Patroli 2' => ['08:30', '10:30'],
+                                    'Patroli 3' => ['11:30', '12:30'],
+                                    'Patroli 4' => ['13:40', '15:30'],
+                                    'Patroli 5' => ['15:30', '17:30'],
+                                    'Patroli 6' => ['17:30', '18:40'],
+                                ],
+                                2 => [
+                                    'Patroli 1' => ['19:30', '20:20'],
+                                    'Patroli 2' => ['21:30', '22:30'],
+                                    'Patroli 3' => ['23:30', '00:30'],
+                                    'Patroli 4' => ['01:30', '02:30'],
+                                    'Patroli 5' => ['03:30', '04:30'],
+                                    'Patroli 6' => ['05:30', '06:30'],
+                                ]
+                            ];
+                            
+                            $jamSelesai = $jadwal[$jenisShiftUser][$patroli][1];
+                            $waktuSelesai = \Carbon\Carbon::parse($jamSelesai);
+                            $waktuSekarang = \Carbon\Carbon::now();
+                            
+                            $sudahTerlewat = $waktuSekarang->gt($waktuSelesai);
+                        @endphp
+                        
+                        @if($sudahTerlewat)
+                            <div class="bg-white rounded-xl shadow-md overflow-hidden border-2 border-red-300">
+                                <div class="bg-gradient-to-r from-red-500 to-red-600 px-4 py-2.5 flex justify-between items-center">
+                                    <div>
+                                        <p class="text-xs text-red-100 font-semibold uppercase">Jenis Patroli</p>
+                                        <p class="text-white font-bold text-base">{{ $patroli }}</p>
+                                    </div>
+                                    
+                                    <span class="bg-red-700 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg uppercase flex items-center gap-1">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Terlewat
+                                    </span>
+                                </div>
+                                
+                                <div class="p-4 bg-red-50">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-red-200 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-sm font-bold text-red-800">Patroli Belum Dilaksanakan</p>
+                                            <p class="text-xs text-red-600">Waktu patroli sudah terlewat ({{ $jamSelesai }})</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    @endforeach
+                @endif
+
             @endif
         </div>
 

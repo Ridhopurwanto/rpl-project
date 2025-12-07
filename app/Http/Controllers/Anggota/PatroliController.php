@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\Patroli;
 use App\Models\PatroliClaim;
+use App\Models\PatroliRule;  // ← TAMBAHKAN INI
 use App\Models\Shift;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -15,29 +16,50 @@ use Illuminate\Support\Str;
 class PatroliController extends Controller
 {
     /**
-     * Jadwal Patroli berdasarkan Shift
-     * jenis_shift: 1 = Pagi, 2 = Malam
+     * Jadwal Patroli dari DATABASE (bukan hardcode)
+     * Ambil dari tabel patroli_rules
      */
     private function getJadwalPatroli()
     {
-        return [
-            1 => [ // Shift Pagi
-                'Patroli 1' => ['07:30', '08:30'],
-                'Patroli 2' => ['08:30', '10:30'],
-                'Patroli 3' => ['11:30', '12:30'],
-                'Patroli 4' => ['13:40', '15:30'],
-                'Patroli 5' => ['15:30', '17:30'],
-                'Patroli 6' => ['17:30', '18:40'],
-            ],
-            2 => [ // Shift Malam
-                'Patroli 1' => ['19:30', '20:20'],
-                'Patroli 2' => ['21:30', '22:30'],
-                'Patroli 3' => ['23:30', '00:30'],
-                'Patroli 4' => ['01:30', '02:30'],
-                'Patroli 5' => ['03:30', '04:30'],
-                'Patroli 6' => ['05:30', '06:30'],
-            ]
+        // Ambil semua data dari database
+        $rules = PatroliRule::all();
+        
+        $jadwal = [
+            1 => [], // Shift Pagi
+            2 => []  // Shift Malam
         ];
+        
+        foreach ($rules as $rule) {
+            $jenisShiftKey = $rule->jenis_shift === 'Pagi' ? 1 : 2;
+            $jadwal[$jenisShiftKey][$rule->jenis_patroli] = [
+                Carbon::parse($rule->jam_mulai)->format('H:i'),
+                Carbon::parse($rule->jam_selesai)->format('H:i')
+            ];
+        }
+        
+        // Jika belum ada data di database, pakai default
+        if (empty($jadwal[1]) && empty($jadwal[2])) {
+            return [
+                1 => [ // Shift Pagi
+                    'Patroli 1' => ['07:30', '08:30'],
+                    'Patroli 2' => ['08:30', '10:30'],
+                    'Patroli 3' => ['11:30', '12:30'],
+                    'Patroli 4' => ['13:40', '15:30'],
+                    'Patroli 5' => ['15:30', '17:30'],
+                    'Patroli 6' => ['17:30', '18:40'],
+                ],
+                2 => [ // Shift Malam
+                    'Patroli 1' => ['19:30', '20:20'],
+                    'Patroli 2' => ['21:30', '22:30'],
+                    'Patroli 3' => ['23:30', '00:30'],
+                    'Patroli 4' => ['01:30', '02:30'],
+                    'Patroli 5' => ['03:30', '04:30'],
+                    'Patroli 6' => ['05:30', '06:30'],
+                ]
+            ];
+        }
+        
+        return $jadwal;
     }
 
     /**
@@ -50,8 +72,6 @@ class PatroliController extends Controller
 
     /**
      * Cek apakah waktu sekarang valid untuk patroli tertentu
-     * @param string $jenisPatroli - Nama patroli (Patroli 1, Patroli 2, dst)
-     * @param int $jenisShift - 1 = Pagi, 2 = Malam
      */
     private function isWaktuPatroliValid($jenisPatroli, $jenisShift)
     {
@@ -81,8 +101,44 @@ class PatroliController extends Controller
     }
 
     /**
-     * Get status patroli (available, locked, completed)
-     * @param int $jenisShift - 1 = Pagi, 2 = Malam
+     * Cek apakah patroli sudah terlewat (jam selesai sudah lewat)
+     */
+    private function isPatroliTerlewat($jenisPatroli, $jenisShift)
+    {
+        $jadwal = $this->getJadwalPatroli();
+        
+        if (!isset($jadwal[$jenisShift][$jenisPatroli])) {
+            return true;
+        }
+        
+        $waktuSekarang = Carbon::now();
+        [$jamMulai, $jamSelesai] = $jadwal[$jenisShift][$jenisPatroli];
+        
+        $selesai = Carbon::parse($jamSelesai);
+        $mulai = Carbon::parse($jamMulai);
+        
+        // Handle midnight crossing untuk shift malam
+        if ($selesai->lt($mulai)) {
+            // Jika waktu sekarang sudah lewat jam selesai hari berikutnya
+            $selesaiNextDay = $selesai->copy()->addDay();
+            if ($waktuSekarang->gt($selesaiNextDay)) {
+                return true;
+            }
+            
+            // Jika waktu sekarang sudah lewat jam mulai hari ini
+            if ($waktuSekarang->gt($mulai)) {
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // Patroli normal: cek apakah waktu sekarang > jam selesai
+        return $waktuSekarang->gt($selesai);
+    }
+
+    /**
+     * Get status patroli (available, locked, completed, expired)
      */
     private function getStatusPatroli($jenisPatroli, $jenisShift, $userId, $tanggal)
     {
@@ -96,23 +152,26 @@ class PatroliController extends Controller
             return 'completed';
         }
 
+        // Cek apakah patroli sudah terlewat (hanya untuk hari ini)
+        if (Carbon::parse($tanggal)->isToday() && $this->isPatroliTerlewat($jenisPatroli, $jenisShift)) {
+            return 'expired';
+        }
+
         // Semua patroli selalu available (claim system yang mengontrol)
         return 'available';
     }
 
     /**
-     * Cek status shift user berdasarkan presensi (SAMA SEPERTI DI HALAMAN PRESENSI)
+     * Cek status shift user berdasarkan presensi
      */
     private function checkShiftStatus($userId, $tanggal)
     {
-        // Ambil data shift hari ini dari tabel SHIFT (sama seperti PresensiController)
         $todayShiftData = Shift::with('shiftRule')
             ->where('id_pengguna', $userId)
             ->whereDate('tanggal', $tanggal)
             ->first();
 
         if (!$todayShiftData || !$todayShiftData->shiftRule) {
-            // Tidak ada jadwal shift
             return [
                 'is_off' => true,
                 'nama_shift' => 'OFF',
@@ -122,9 +181,7 @@ class PatroliController extends Controller
 
         $shiftRule = $todayShiftData->shiftRule;
 
-        // Cek jenis_shift di shift_rule
         if ($shiftRule->jenis_shift === 'Off') {
-            // Shift OFF/LIBUR
             return [
                 'is_off' => true,
                 'nama_shift' => 'OFF',
@@ -132,7 +189,6 @@ class PatroliController extends Controller
             ];
         }
 
-        // Shift AKTIF (Pagi, Malam, atau Non Shift)
         $namaShift = strtoupper($shiftRule->jenis_shift);
 
         return [
@@ -142,7 +198,9 @@ class PatroliController extends Controller
         ];
     }
 
-    /*** Menampilkan daftar patroli (Halaman Index)*/
+    /**
+     * Menampilkan daftar patroli (Halaman Index)
+     */
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -150,7 +208,6 @@ class PatroliController extends Controller
             ? Carbon::parse($request->input('tanggal'))
             : Carbon::today();
 
-        // Ambil semua checkpoint yang sudah ada
         $allPatrols = Patroli::whereDate('tanggal', $tanggalTerpilih)
             ->orderBy('jenis_patroli', 'asc')
             ->get();
@@ -186,19 +243,33 @@ class PatroliController extends Controller
             return (int) ($matches[0] ?? 0);
         });
 
-        // ===== PERBAIKAN: CEK SHIFT DARI checkShiftStatus() =====
         $isToday = $tanggalTerpilih->isToday();
         $isShiftOff = false;
         $namaShift = null;
         $statusShift = null;
 
         if ($isToday) {
-            // Gunakan method checkShiftStatus() yang sudah benar
             $shiftStatus = $this->checkShiftStatus($user->id_pengguna, $tanggalTerpilih);
 
             $isShiftOff = $shiftStatus['is_off'];
             $namaShift = $shiftStatus['nama_shift'];
             $statusShift = $shiftStatus['status'];
+        }
+
+        $patroliTerlewat = [];
+        if ($isToday && !$isShiftOff) {
+            $jenisShift = $user->jenis_shift ?? 1;
+            $jadwalPatroli = $this->getJadwalPatroli()[$jenisShift];
+            $claimedPatrolis = $displayData->pluck('jenis_patroli')->toArray();
+
+            foreach ($jadwalPatroli as $namaPatroli => $waktu) {
+                if (!in_array($namaPatroli, $claimedPatrolis) && $this->isPatroliTerlewat($namaPatroli, $jenisShift)) {
+                    $patroliTerlewat[] = [
+                        'jenis_patroli' => $namaPatroli,
+                        'jam_selesai' => $waktu[1]
+                    ];
+                }
+            }
         }
 
         return view('anggota.patroli-index', [
@@ -207,8 +278,10 @@ class PatroliController extends Controller
             'isShiftOff' => $isShiftOff,
             'namaShift' => $namaShift,
             'statusShift' => $statusShift,
+            'patroliTerlewat' => $patroliTerlewat,
         ]);
     }
+
     /**
      * Halaman Grid 17 Area (Create Session)
      */
@@ -247,7 +320,6 @@ class PatroliController extends Controller
 
         // 3. Tentukan patroli yang dipilih
         $jenisPatroliTerpilih = $request->input('jenis_patroli'); // dari dropdown, kalau ada
-
         $jadwalPatroli = $this->getJadwalPatroli()[$jenisShift];
 
         if (!$jenisPatroliTerpilih) {
@@ -257,6 +329,11 @@ class PatroliController extends Controller
             $jenisPatroliTerpilih = 'Patroli 1'; // default fallback
 
             foreach ($jadwalPatroli as $namaPatroli => [$jamMulai, $jamSelesai]) {
+                // Skip jika sudah expired
+                if ($statusPatroli[$namaPatroli] === 'expired') {
+                    continue;
+                }
+
                 $start = Carbon::parse($jamMulai);
                 $end = Carbon::parse($jamSelesai);
                 $nowCompare = $now->copy();
@@ -282,6 +359,51 @@ class PatroliController extends Controller
                     break;
                 }
             }
+        }
+
+        // ===== DATA PATROLI TERLEWAT (untuk ditampilkan di card) =====
+        $patroliTerlewat = [];
+        $jadwalPatroliAll = $this->getJadwalPatroli()[$jenisShift];
+
+        foreach ($jadwalPatroliAll as $namaPatroli => $waktu) {
+            // Skip patroli yang sedang dipilih/aktif
+            if ($namaPatroli === $jenisPatroliTerpilih) {
+                continue;
+            }
+            
+            // Skip jika sudah completed
+            if ($statusPatroli[$namaPatroli] === 'completed') {
+                continue;
+            }
+            
+            // Jika terlewat, masukkan ke array
+            if ($this->isPatroliTerlewat($namaPatroli, $jenisShift)) {
+                $patroliTerlewat[] = [
+                    'jenis_patroli' => $namaPatroli,
+                    'jam_selesai' => $waktu[1]
+                ];
+            }
+        }
+
+        // ===== VALIDASI: CEK APAKAH PATROLI TERPILIH SUDAH EXPIRED =====
+        if ($statusPatroli[$jenisPatroliTerpilih] === 'expired') {
+            return view('anggota.patroli-create-session', [
+                'semuaArea' => [],
+                'opsiJenisPatroli' => $opsiJenisPatroli,
+                'jenisPatroliTerpilih' => $jenisPatroliTerpilih,
+                'completedCheckpoints' => [],
+                'totalCompleted' => 0,
+                'statusPatroli' => $statusPatroli,
+                'jenisShift' => $jenisShift,
+                'namaShift' => $namaShift,
+                'jadwalPatroli' => $this->getJadwalPatroli()[$jenisShift],
+                'isClaimed' => false,
+                'isOwner' => false,
+                'claimedBy' => null,
+                'patroliExpired' => true,
+                'expiredMessage' => $jenisPatroliTerpilih . ' sudah terlewat. Silakan melakukan laporan ke Komandan.',
+                'patroliTerlewat' => $patroliTerlewat, // Tambahkan data patroli terlewat
+            ]);
         }
 
         // 4. Daftar 17 Area
@@ -333,6 +455,7 @@ class PatroliController extends Controller
             'isClaimed' => $claimStatus['is_claimed'],
             'isOwner' => $claimStatus['is_owner'],
             'claimedBy' => $claimStatus['claimed_by'] ?? null,
+            'patroliTerlewat' => $patroliTerlewat, // Tambahkan data patroli terlewat
         ]);
     }
 
@@ -377,6 +500,14 @@ class PatroliController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Anda tidak dapat melakukan patroli karena sedang OFF/LIBUR!'
+            ], 403);
+        }
+
+        // ===== VALIDASI PATROLI SUDAH TERLEWAT =====
+        if ($this->isPatroliTerlewat($request->jenis_patroli, $jenisShift)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $request->jenis_patroli . ' sudah terlewat dan tidak dapat diakses lagi!'
             ], 403);
         }
 
@@ -455,6 +586,7 @@ class PatroliController extends Controller
         $user = Auth::user();
         $tanggal = Carbon::today();
         $jenisPatroli = $request->jenis_patroli;
+        $jenisShift = $user->jenis_shift ?? 1;
 
         // ===== VALIDASI SHIFT STATUS =====
         $shiftStatus = $this->checkShiftStatus($user->id_pengguna, $tanggal);
@@ -462,6 +594,12 @@ class PatroliController extends Controller
         if ($shiftStatus['is_off']) {
             return redirect()->back()
                 ->with('error', 'Anda tidak dapat melakukan patroli karena sedang OFF/LIBUR');
+        }
+
+        // ===== VALIDASI PATROLI SUDAH TERLEWAT =====
+        if ($this->isPatroliTerlewat($jenisPatroli, $jenisShift)) {
+            return redirect()->back()
+                ->with('error', $jenisPatroli . ' sudah terlewat dan tidak dapat disubmit.');
         }
 
         // ===== CEK JUMLAH SECARA GLOBAL =====
@@ -479,7 +617,7 @@ class PatroliController extends Controller
     }
 
     /**
-     * ===== METHOD: CEK STATUS AREA (UNTUK LIVE UPDATE) =====
+     * METHOD: CEK STATUS AREA (UNTUK LIVE UPDATE)
      */
     public function checkArea(Request $request)
     {
@@ -517,6 +655,7 @@ class PatroliController extends Controller
         $user = Auth::user();
         $tanggal = Carbon::today();
         $jenisPatroli = $request->jenis_patroli;
+        $jenisShift = $user->jenis_shift ?? 1;
 
         // ===== VALIDASI SHIFT STATUS =====
         $shiftStatus = $this->checkShiftStatus($user->id_pengguna, $tanggal);
@@ -524,6 +663,12 @@ class PatroliController extends Controller
         if ($shiftStatus['is_off']) {
             return redirect()->back()
                 ->with('error', 'Anda tidak dapat claim patroli karena sedang OFF/LIBUR');
+        }
+
+        // ===== VALIDASI PATROLI SUDAH TERLEWAT =====
+        if ($this->isPatroliTerlewat($jenisPatroli, $jenisShift)) {
+            return redirect()->back()
+                ->with('error', $jenisPatroli . ' sudah terlewat dan tidak dapat di-claim lagi.');
         }
 
         // Cek apakah sudah ada yang claim patroli ini hari ini

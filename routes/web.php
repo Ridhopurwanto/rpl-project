@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\PatroliController;
+use App\Http\Controllers\PatroliRuleController;
 use App\Http\Controllers\KendaraanController;
 use App\Http\Controllers\TamuController;
 use App\Http\Controllers\BarangController;
@@ -83,7 +84,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/presensi', [AnggotaPresensiController::class, 'store'])
             ->name('presensi.store');
 
-        // ===== PATROLI ANGGOTA - PERBAIKAN ===== 
+        // ===== PATROLI ANGGOTA ===== 
         // Route untuk melihat daftar patroli (index)
         Route::get('/patroli', [AnggotaPatroliController::class, 'index'])
             ->name('patroli.index');
@@ -174,47 +175,31 @@ Route::middleware('auth')->group(function () {
             return view('komandan.dashboard');
         })->name('dashboard');
 
+        // Presensi
         Route::get('/presensi', [PresensiController::class, 'index'])
             ->name('presensi');
         Route::put('/presensi/update-rules', [PresensiController::class, 'updateRules'])
             ->name('presensi.updateRules');
-
-        Route::get('/patroli', [PatroliController::class, 'index'])
-            ->name('patroli');
-
-        Route::get('/kendaraan', [KendaraanController::class, 'index'])
-            ->name('kendaraan');
-
-        Route::get('/tamu', [TamuController::class, 'index'])
-            ->name('tamu');
-
-        Route::get('/barang', [BarangController::class, 'index'])
-            ->name('barang');
-
-        Route::get('/gangguan', [GangguanKamtibmasController::class, 'index'])
-            ->name('gangguan');
-
-        Route::resource('akun', ManajemenAkunController::class)->except(['show']);
-
-        Route::get('akun/{id_pengguna}/shift', [ManajemenShiftController::class, 'index'])
-            ->name('akun.shift');
-
-        Route::post('/set-role', [RoleSwitchController::class, 'setRole'])
-            ->name('role.set');
-
-        // CRUD Patroli
-        Route::put('/patroli/{id}', [PatroliController::class, 'update'])
-            ->name('patroli.update');
-        Route::delete('/patroli/{id}', [PatroliController::class, 'destroy'])
-            ->name('patroli.destroy');
-
-        // CRUD Presensi
         Route::delete('/presensi/{id_presensi}', [PresensiController::class, 'destroy'])
             ->name('presensi.destroy');
         Route::put('/presensi/{id_presensi}', [PresensiController::class, 'update'])
             ->name('presensi.update');
 
-        // CRUD Kendaraan
+        // Patroli
+        Route::get('/patroli', [PatroliController::class, 'index'])
+            ->name('patroli');
+        Route::put('/patroli/{id}', [PatroliController::class, 'update'])
+            ->name('patroli.update');
+        Route::delete('/patroli/{id}', [PatroliController::class, 'destroy'])
+            ->name('patroli.destroy');
+        
+        // Route baru untuk update patroli rules
+        Route::post('/patroli/update-rules', [PatroliRuleController::class, 'updateRules'])
+            ->name('patroli.updateRules');
+
+        // Kendaraan
+        Route::get('/kendaraan', [KendaraanController::class, 'index'])
+            ->name('kendaraan');
         Route::put('/kendaraan/log/{id_log}/update-keterangan', [KendaraanController::class, 'updateKeterangan'])
             ->name('kendaraan.log.updateKeterangan');
         Route::get('/kendaraan/master/{id_kendaraan}/edit', [KendaraanController::class, 'editMaster'])
@@ -226,17 +211,34 @@ Route::middleware('auth')->group(function () {
         Route::post('/kendaraan/log/{id_log}/promote', [KendaraanController::class, 'promoteLogToMaster'])
             ->name('kendaraan.log.promote');
 
-        // CRUD Tamu
+        // Tamu
+        Route::get('/tamu', [TamuController::class, 'index'])
+            ->name('tamu');
         Route::put('/tamu/{id_tamu}', [TamuController::class, 'update'])
             ->name('tamu.update');
         Route::delete('/tamu/{id_tamu}', [TamuController::class, 'destroy'])
             ->name('tamu.destroy');
 
-        // CRUD Gangguan Kamtibmas
+        // Barang
+        Route::get('/barang', [BarangController::class, 'index'])
+            ->name('barang');
+
+        // Gangguan Kamtibmas
+        Route::get('/gangguan', [GangguanKamtibmasController::class, 'index'])
+            ->name('gangguan');
         Route::put('/gangguan/{id_gangguan}', [GangguanKamtibmasController::class, 'update'])
             ->name('gangguan.update');
         Route::delete('/gangguan/{id_gangguan}', [GangguanKamtibmasController::class, 'destroy'])
             ->name('gangguan.destroy');
+
+        // Manajemen Akun
+        Route::resource('akun', ManajemenAkunController::class)->except(['show']);
+
+        Route::get('akun/{id_pengguna}/shift', [ManajemenShiftController::class, 'index'])
+            ->name('akun.shift');
+
+        Route::post('/set-role', [RoleSwitchController::class, 'setRole'])
+            ->name('role.set');
 
         // CRUD Manajemen Akun (Update & Reset Shift)
         Route::post('akun/shift/update', [ManajemenShiftController::class, 'update'])
