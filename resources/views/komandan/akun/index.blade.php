@@ -45,75 +45,118 @@
         @endif
 
         {{-- Daftar Kartu Akun --}}
-        <div class="space-y-3">
+        {{-- Daftar Kartu Akun (Style Dashboard: Double Layer Pill) --}}
+        <div class="space-y-4">
             @foreach ($users as $user) 
 
                 @php
                     $isLocked = in_array(strtolower($user->peran), ['komandan', 'bau']);
                     $isShiftLocked = (strtolower($user->peran) == 'bau');
+                    
+                    // Logic Warna Inner (Dalam)
+                    // Jika aktif: Biru Dashboard (#243a5e)
+                    // Jika mati: Abu gelap
+                    $innerBg = $user->status == 'Tidak Aktif' ? 'bg-gray-500' : 'bg-[#243a5e]';
                 @endphp
-            {{-- 
-                LOGIKA WARNA:
-                Jika status 'Tidak Aktif' -> Pakai warna abu-abu (bg-gray-500)
-                Jika status 'Aktif'      -> Pakai warna biru tua standar (bg-[#2a4a6f])
-            --}}
-                <div class="{{ $user->status == 'Tidak Aktif' ? 'bg-gray-500' : 'bg-[#2a4a6f]' }} rounded-xl shadow-md p-5 flex flex-col md:flex-row items-center justify-between gap-4 transition-colors duration-300">                    <div class="flex items-center space-x-3">
-                        <div class="bg-gray-600 rounded-full p-2 flex-shrink-0">
-                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                        </div>
-                        <div>
-                            <h5 class="text-base font-semibold text-white uppercase">{{ $user->peran }}</h5>
-                            <p class="text-sm text-gray-300">{{ $user->nama_lengkap }}</p>
-                        </div>
-                    </div>
 
-                    <div class="flex flex-shrink-0 space-x-1.5">
-                        @if($isShiftLocked)
-                            <button disabled class="px-2 py-1 bg-gray-400 rounded-md shadow-sm cursor-not-allowed opacity-70" title="Shift Tidak Tersedia untuk BAU">
-                                <span class="text-white text-xs font-semibold">Shift</span>
-                            </button>
-                        @else
-                            <a href="{{ route('komandan.akun.shift', $user->id_pengguna) }}" class="px-2 py-1 bg-blue-500 rounded-md shadow-sm hover:bg-blue-600 transition" title="Atur Shift">
-                                <span class="text-white text-xs font-semibold">Shift</span>
-                            </a>
-                        @endif
+                {{-- 
+                   WRAPPER LUAR (ABU-ABU) 
+                   Persis seperti: <div class="bg-gray-300 rounded-full p-1 shadow-inner"> 
+                   Tapi radius kita besarkan karena ini kartu besar.
+                --}}
+                <div class="bg-gray-300 rounded-[2.5rem] p-2 shadow-inner hover:scale-[1.01] transition-transform duration-300">
+                    
+                    {{-- 
+                       WRAPPER DALAM (BIRU) 
+                       Ini adalah konten utamanya.
+                    --}}
+                    <div class="relative {{ $innerBg }} rounded-[2.2rem] p-4 pr-14 shadow-lg flex items-center min-h-[100px]">
                         
-                        {{-- Tombol INFO --}}
-                        <button @click="openInfoModal = true; infoUser = {{ json_encode($user) }};" 
-                                class="px-2 py-1 bg-green-500 rounded-md shadow-sm" title="Info">
-                            <span class="text-white text-xs font-semibold">Info</span>
-                        </button>
-                        
-                        {{-- 
-                           Tombol EDIT (PERBAIKAN)
-                           Selain membuka modal, kita kirim event 'set-edit-data' 
-                           dengan data user agar form partial menangkapnya.
-                        --}}
-                        <button @click="
+                        {{-- 1. AVATAR (Kiri) --}}
+                        <div class="flex-shrink-0 mr-4">
+                            <div class="bg-white rounded-full h-16 w-16 flex items-center justify-center overflow-hidden border-2 border-white/50 shadow-sm">
+                                @if($user->foto_profil)
+                                    <img src="{{ asset('storage/' . $user->foto_profil) }}" class="h-full w-full object-cover">
+                                @else
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-[#243a5e]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- 2. INFO & ACTIONS (Tengah) --}}
+                        <div class="flex-1 min-w-0 flex flex-col justify-center">
+                            {{-- Role & Nama --}}
+                            <div class="mb-2">
+                                <p class="text-white/80 text-[10px] font-bold uppercase tracking-wider leading-tight">
+                                    {{ $user->peran }}
+                                </p>
+                                <h3 class="text-white text-lg font-bold truncate leading-tight tracking-wide">
+                                    {{ $user->nama_lengkap }}
+                                </h3>
+                            </div>
+
+                            {{-- Tombol Actions --}}
+                            <div class="flex flex-wrap gap-2">
+                                {{-- Shift --}}
+                                @if($isShiftLocked)
+                                    <button disabled class="bg-gray-400 text-white text-[10px] font-bold px-3 py-1 rounded shadow cursor-not-allowed opacity-60">Shift</button>
+                                @else
+                                    <a href="{{ route('komandan.akun.shift', $user->id_pengguna) }}" class="bg-green-600 hover:bg-green-500 text-white text-[10px] font-bold px-3 py-1 rounded shadow transition">Shift</a>
+                                @endif
+
+                                {{-- Edit --}}
+                                <button @click="
                                     openEditModal = true; 
                                     editUser = {{ json_encode($user) }}; 
                                     editFormAction = '{{ route('komandan.akun.update', $user->id_pengguna) }}';
                                     $dispatch('set-edit-data', {{ json_encode($user) }});
-                                " 
-                                class="px-2 py-1 bg-yellow-500 rounded-md shadow-sm" title="Edit">
-                            <span class="text-white text-xs font-semibold">Edit</span>
-                        </button>
-                        
-                        {{-- Tombol HAPUS --}}
-                        @if($isLocked)
-                            <button disabled class="px-2 py-1 bg-gray-400 rounded-md shadow-sm cursor-not-allowed opacity-70" title="Terkunci">
-                                <span class="text-white text-xs font-semibold">Delete</span>
+                                " class="bg-yellow-600 hover:bg-yellow-500 text-white text-[10px] font-bold px-3 py-1 rounded shadow transition">Edit</button>
+
+                                {{-- Delete --}}
+                                @if($isLocked)
+                                    <button disabled class="bg-gray-400 text-white text-[10px] font-bold px-3 py-1 rounded shadow cursor-not-allowed opacity-60">Delete</button>
+                                @else
+                                    <button @click="openHapusModal = true; hapusUserName = '{{ $user->nama_lengkap }}'; hapusFormAction = '{{ route('komandan.akun.destroy', $user->id_pengguna) }}';" 
+                                        class="bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded shadow transition">Delete</button>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- 3. TOMBOL INFO (Kanan Absolute) --}}
+                        <div class="absolute right-4 top-1/2 transform -translate-y-1/2">
+                            <button @click="openInfoModal = true; infoUser = {{ json_encode($user) }};" 
+                                    class="bg-white/20 hover:bg-white/30 text-white rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm transition border border-white/30" title="Lihat Detail">
+                                <span class="font-serif italic font-bold text-lg">i</span>
                             </button>
-                        @else
-                            <button @click="openHapusModal = true; hapusUserName = '{{ $user->nama_lengkap }}'; hapusFormAction = '{{ route('komandan.akun.destroy', $user->id_pengguna) }}';" 
-                                    class="px-2 py-1 bg-red-600 rounded-md shadow-sm hover:bg-red-700 transition" title="Delete">
-                                <span class="text-white text-xs font-semibold">Delete</span>
-                            </button>
-                        @endif
+                        </div>
+
                     </div>
                 </div>
+
             @endforeach
         </div>
+    </div>
+
+    <div 
+        x-show="!openCreateModal && !openInfoModal && !openEditModal && !openHapusModal" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 scale-90"
+        x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-90"
+        class="fixed bottom-8 right-6 z-40"
+    >
+        <button 
+            @click="openCreateModal = true"
+            class="bg-[#1e3a5f] hover:bg-[#2a4a6f] text-white rounded-full h-16 w-16 shadow-2xl flex items-center justify-center transition-transform hover:scale-110"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+        </button>
     </div>
 
     {{-- 
@@ -143,35 +186,113 @@
         </div>
     </div>
 
-    {{-- MODAL INFO (TETAP SAMA) --}}
-    <div x-show="openInfoModal" class="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-gray-900 bg-opacity-50" style="display: none;">
-        <div class="relative w-full max-w-md p-4 mx-4 bg-white rounded-lg shadow-xl" @click.away="openInfoModal = false">
-            <div class="flex justify-between items-center pb-3 mb-3 border-b">
-                <h5 class="text-xl font-semibold text-gray-800 uppercase">Detail Profil</h5>
-                <button type="button" @click="openInfoModal = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-            </div>
-            <div class="modal-body max-h-[70vh] overflow-y-auto p-2">
-                <div class="w-full bg-gray-200 rounded-lg p-4 text-center mb-4">
-                    <img :src="infoUser.foto_profil ? `/storage/${infoUser.foto_profil}` : defaultFoto" alt="Foto Profil" 
-                         class="w-32 h-32 mx-auto rounded-full object-cover border-4 border-white shadow-md">
+    {{-- MODAL INFO (UPDATED: Clean Style) --}}
+    <div x-show="openInfoModal" class="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-gray-900 bg-opacity-70 backdrop-blur-sm" style="display: none;">
+        <div class="relative w-full max-w-md p-4 mx-4 bg-white rounded-2xl shadow-2xl" @click.away="openInfoModal = false">
+            
+            {{-- Header Modal --}}
+            <div class="flex justify-between items-start pb-4 border-b border-gray-100 mb-4">
+                <div>
+                    <h5 class="text-xl font-bold text-[#1e3a5f]">DETAIL PROFIL</h5>
+                    <p class="text-xs text-gray-400 mt-1">Informasi lengkap akun anggota</p>
                 </div>
-                <div class="space-y-3">
-                    {{-- Detail Fields (Readonly) --}}
-                    <div class="flex items-center"><label class="w-1/3 text-sm font-medium text-gray-700">NAMA</label><div class="w-2/3 bg-[#2a4a6f] text-white text-sm font-semibold rounded-md shadow-sm px-4 py-2.5" x-text="infoUser.nama_lengkap || '-'"></div></div>
-                    <div class="flex items-center"><label class="w-1/3 text-sm font-medium text-gray-700">TANGGAL LAHIR</label><div class="w-2/3 bg-[#2a4a6f] text-white text-sm font-semibold rounded-md shadow-sm px-4 py-2.5" x-text="infoUser.tanggal_lahir ? infoUser.tanggal_lahir.substring(0, 10) : '-'"></div></div>
-                    <div class="flex items-center"><label class="w-1/3 text-sm font-medium text-gray-700">NO. HP</label><div class="w-2/3 bg-[#2a4a6f] text-white text-sm font-semibold rounded-md shadow-sm px-4 py-2.5" x-text="infoUser.no_hp || '-'"></div></div>
-                    <div class="flex items-start"><label class="w-1/3 text-sm font-medium text-gray-700 pt-2.5">ALAMAT</label><div class="w-2/3 bg-[#2a4a6f] text-white text-sm font-semibold rounded-md shadow-sm px-4 py-2.5" x-text="infoUser.alamat || '-'"></div></div>
-                    <div class="flex items-center">
-                        <label class="w-1/3 text-sm font-medium text-gray-700">JENIS JADWAL</label>
-                        <div class="w-2/3 bg-[#2a4a6f] text-white text-sm font-semibold rounded-md shadow-sm px-4 py-2.5" 
-                             x-text="infoUser.jenis_jadwal === 'shift' ? 'Shift' : (infoUser.jenis_jadwal === 'non_shift' ? 'Non-Shift' : '-')">
+                <button type="button" @click="openInfoModal = false" class="text-gray-400 hover:text-gray-600 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="modal-body max-h-[65vh] overflow-y-auto pr-1">
+                
+                {{-- Foto Profil Besar --}}
+                <div class="flex flex-col items-center justify-center mb-6">
+                    <div class="relative">
+                        <div class="p-1 bg-white rounded-full border-2 border-dashed border-gray-300 shadow-sm">
+                            <img :src="infoUser.foto_profil ? `/storage/${infoUser.foto_profil}` : defaultFoto" 
+                                 alt="Foto Profil" 
+                                 class="w-28 h-28 rounded-full object-cover">
+                        </div>
+                        {{-- Badge Role --}}
+                        <div class="absolute bottom-0 right-0 bg-[#1e3a5f] text-white text-[10px] font-bold px-3 py-1 rounded-full border-2 border-white uppercase tracking-wider shadow-sm"
+                             x-text="infoUser.peran">
                         </div>
                     </div>
-                    <div class="flex items-center"><label class="w-1/3 text-sm font-medium text-gray-700">STATUS</label><div class="w-2/3 bg-[#2a4a6f] text-white text-sm font-semibold rounded-md shadow-sm px-4 py-2.5" x-text="infoUser.status || '-'"></div></div>
+                </div>
+
+                {{-- Grid Informasi --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    {{-- Nama Lengkap (Full Width) --}}
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Nama Lengkap</label>
+                        <div class="flex items-center bg-gray-50 p-3 rounded-xl border border-gray-100">
+                            <svg class="w-5 h-5 text-[#1e3a5f] mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                            <span class="text-sm font-bold text-gray-800" x-text="infoUser.nama_lengkap || '-'"></span>
+                        </div>
+                    </div>
+
+                    {{-- Username --}}
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Username</label>
+                        <div class="flex items-center bg-gray-50 p-3 rounded-xl border border-gray-100">
+                            <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span class="text-sm font-semibold text-gray-700" x-text="infoUser.username || '-'"></span>
+                        </div>
+                    </div>
+
+                    {{-- No HP --}}
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">No. Handphone</label>
+                        <div class="flex items-center bg-gray-50 p-3 rounded-xl border border-gray-100">
+                            <svg class="w-5 h-5 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                            <span class="text-sm font-semibold text-gray-700" x-text="infoUser.no_hp || '-'"></span>
+                        </div>
+                    </div>
+
+                    {{-- Tanggal Lahir --}}
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Tanggal Lahir</label>
+                        <div class="flex items-center bg-gray-50 p-3 rounded-xl border border-gray-100">
+                            <svg class="w-5 h-5 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <span class="text-sm font-semibold text-gray-700" x-text="infoUser.tanggal_lahir ? infoUser.tanggal_lahir.substring(0, 10) : '-'"></span>
+                        </div>
+                    </div>
+
+                    {{-- Jenis Jadwal --}}
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Jenis Jadwal</label>
+                        <div class="flex items-center bg-gray-50 p-3 rounded-xl border border-gray-100">
+                            <svg class="w-5 h-5 text-blue-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span class="text-sm font-bold text-[#1e3a5f]" 
+                                  x-text="infoUser.jenis_jadwal === 'shift' ? 'SHIFT' : (infoUser.jenis_jadwal === 'non_shift' ? 'NON-SHIFT' : '-')"></span>
+                        </div>
+                    </div>
+
+                    {{-- Alamat (Full Width) --}}
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Alamat Domisili</label>
+                        <div class="flex items-start bg-gray-50 p-3 rounded-xl border border-gray-100">
+                            <svg class="w-5 h-5 text-orange-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <span class="text-sm font-medium text-gray-600 leading-relaxed" x-text="infoUser.alamat || '-'"></span>
+                        </div>
+                    </div>
+
+                    {{-- Status --}}
+                    <div class="md:col-span-2 mt-2">
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Status Akun</label>
+                        <div :class="infoUser.status === 'Aktif' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200'" 
+                             class="flex justify-center items-center p-2 rounded-lg border font-bold text-sm">
+                            <span x-text="infoUser.status"></span>
+                        </div>
+                    </div>
+
                 </div>
             </div>
-            <div class="modal-footer flex justify-end pt-3 mt-3 border-t">
-                <button type="button" @click="openInfoModal = false" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">Tutup</button>
+
+            {{-- Footer --}}
+            <div class="modal-footer pt-4 mt-4 border-t border-gray-100">
+                <button type="button" @click="openInfoModal = false" class="w-full py-3 text-[#1e3a5f] bg-gray-100 hover:bg-gray-200 rounded-xl font-bold transition">
+                    Tutup
+                </button>
             </div>
         </div>
     </div>
@@ -195,7 +316,7 @@
                     @include('komandan.akun.partials.form-fields', ['isEdit' => true])
                 </div>
                 <div class="modal-footer pt-3 mt-3 border-t">
-                    <button type="submit" class="w-full px-4 py-2.5 text-white bg-[#2a4a6f] rounded-lg hover:bg-opacity-90">APPLY</button>
+                    <button type="submit" class="w-full px-4 py-2.5 text-white bg-[#2a4a6f] rounded-lg hover:bg-opacity-90">TERAPKAN</button>
                 </div>
             </form>
         </div>
@@ -226,18 +347,7 @@
 
 </div>
 
-{{-- Tombol FAB --}}
-@push('fab')
-<div x-data class="absolute bottom-16 right-4 z-50">
-    {{-- 
-       Saat diklik, tombol ini mengirim sinyal 'open-create-modal' ke window.
-       Sinyal ini akan ditangkap oleh listener di x-data utama di atas.
-    --}}
-    <button @click="$dispatch('open-create-modal')" 
-            class="bg-[#2a4a6f] hover:bg-[#2a4a6f] text-white font-bold w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform transform hover:scale-110">
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-    </button>
+
 </div>
-@endpush
 
 @endsection
