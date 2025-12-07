@@ -7,14 +7,14 @@
     @php
         // --- STYLE SETUP ---
         // Header: Abu-abu, Bold, Center, Border Hitam, Wrap Text
-        $thStyle = 'border: 1px solid #000000; background-color: #cccccc; font-weight: bold; text-align: center; vertical-align: middle; white-space: normal; word-wrap: break-word;';
+        $thStyle = 'font-size: 10pt; border: 1px solid #000000; background-color: #cccccc; font-weight: bold; text-align: center; vertical-align: middle; white-space: normal; word-wrap: break-word;';        
         
         // Body: Align Top (biar rapi kalo teks panjang), Wrap Text, Border Hitam
-        $tdStyle = 'border: 1px solid #000000; vertical-align: top; white-space: normal; word-wrap: break-word;';
+        $tdStyle = 'font-size: 10pt; border: 1px solid #000000; vertical-align: top; white-space: normal; word-wrap: break-word;';
         
         // Body Center: Khusus kolom yang isinya pendek/tengah
-        $tdCenterStyle = 'border: 1px solid #000000; vertical-align: top; text-align: center; white-space: normal; word-wrap: break-word;';
-
+        $tdCenterStyle = 'font-size: 10pt; border: 1px solid #000000; vertical-align: top; text-align: center; white-space: normal; word-wrap: break-word;';
+        
         // Hitung jumlah kolom (colspan) berdasarkan tipe sheet agar Header pas lebarnya
         $colspans = [
             'presensi' => 6,
@@ -23,7 +23,9 @@
             'kendaraan' => 7,
             'tamu' => 6,
             'gangguan' => 6,
-            'shift' => 3 + \Carbon\Carbon::parse($meta['tanggalMulai'])->diffInDays(\Carbon\Carbon::parse($meta['tanggalSelesai'])) + 1
+            'shift' => 3 + \Carbon\Carbon::parse($meta['tanggalMulai'])->diffInDays(\Carbon\Carbon::parse($meta['tanggalSelesai'])) + 1,
+            'anggota' => 9, 
+            'kendaraan_terdaftar' => 4 
         ];
         $cp = $colspans[$sheetType] ?? 6;
         
@@ -71,7 +73,6 @@
             $presensiPulang = $data->filter(fn($i) => strtolower($i->jenis_presensi) == 'pulang');
         @endphp
 
-        {{-- Total Width Target ~85 --}}
         <h3>LAPORAN PRESENSI MASUK</h3>
         <table border="1" style="border-collapse: collapse; width: 100%;">
             <thead>
@@ -456,6 +457,84 @@
                         @endforeach
                     </tr>
                 @endforeach
+            </tbody>
+        </table>
+    @endif
+
+    {{-- ============================================================ --}}
+    {{-- SHEET 8: ANGGOTA --}}
+    {{-- ============================================================ --}}
+    @if($sheetType == 'anggota')
+        <h3>DAFTAR ANGGOTA</h3>
+        <table border="1" style="border-collapse: collapse; width: 100%;">
+            <thead>
+                <tr>
+                    <th style="{{ $thStyle }}" width="4">NO</th>
+                    <th style="{{ $thStyle }}" width="7">FOTO</th>
+                    <th style="{{ $thStyle }}" width="18">NAMA LENGKAP</th>
+                    <th style="{{ $thStyle }}" width="8">PERAN</th>
+                    <th style="{{ $thStyle }}" width="8">JADWAL</th>
+                    <th style="{{ $thStyle }}" width="11">TGL LAHIR</th>
+                    <th style="{{ $thStyle }}" width="22">ALAMAT</th>
+                    <th style="{{ $thStyle }}" width="18">EMAIL</th>
+                    <th style="{{ $thStyle }}" width="11">NO. HP</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($data as $index => $user)
+                    <tr>
+                        <td style="{{ $tdCenterStyle }}">{{ $index + 1 }}</td>
+                        <td style="{{ $tdCenterStyle }}">
+                            @if($user->foto_profil)
+                                <img src="{{ public_path('storage/' . $user->foto_profil) }}" height="50" width="auto">
+                            @else - @endif
+                        </td>
+                        <td style="{{ $tdStyle }}">{{ $user->nama_lengkap }}</td>
+                        <td style="{{ $tdCenterStyle }}">{{ ucfirst($user->peran) }}</td>
+                        <td style="{{ $tdCenterStyle }}">{{ $user->jenis_jadwal ?? '-' }}</td>
+                        <td style="{{ $tdCenterStyle }}">
+                            {{ $user->tanggal_lahir ? \Carbon\Carbon::parse($user->tanggal_lahir)->format('d-m-Y') : '-' }}
+                        </td>
+                        <td style="{{ $tdStyle }}">{{ $user->alamat ?? '-' }}</td>
+                        <td style="{{ $tdStyle }}">{{ $user->email }}</td>
+                        <td style="{{ $tdCenterStyle }}">{{ $user->no_hp ?? '-' }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="9" style="{{ $tdCenterStyle }}">Tidak ada data anggota.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    @endif
+
+    {{-- ============================================================ --}}
+    {{-- SHEET 9: KENDARAAN TERDAFTAR --}}
+    {{-- ============================================================ --}}
+    @if($sheetType == 'kendaraan_terdaftar')
+        <h3>DAFTAR KENDARAAN TERDAFTAR</h3>
+        <table border="1" style="border-collapse: collapse; width: 100%;">
+            <thead>
+                <tr>
+                    <th style="{{ $thStyle }}" width="5">NO</th>
+                    <th style="{{ $thStyle }}" width="20">NOMOR PLAT</th>
+                    <th style="{{ $thStyle }}" width="35">PEMILIK</th>
+                    <th style="{{ $thStyle }}" width="15">TIPE</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($data as $index => $v)
+                    <tr>
+                        <td style="{{ $tdCenterStyle }}">{{ $index + 1 }}</td>
+                        <td style="{{ $tdCenterStyle }}">{{ $v->nomor_plat }}</td>
+                        <td style="{{ $tdStyle }}">{{ $v->pemilik }}</td>
+                        <td style="{{ $tdCenterStyle }}">{{ ucfirst($v->tipe) }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" style="{{ $tdCenterStyle }}">Tidak ada data kendaraan terdaftar.</td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     @endif

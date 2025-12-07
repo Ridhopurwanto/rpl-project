@@ -66,6 +66,16 @@ class LaporanGabunganExport implements WithMultipleSheets
             $sheets[] = new LaporanPerSheet('shift', $this->dataGabungan['shift'], $metadata);
         }
 
+        // 8. Sheet Anggota
+        if (isset($this->dataGabungan['anggota'])) {
+            $sheets[] = new LaporanPerSheet('anggota', $this->dataGabungan['anggota'], $metadata);
+        }
+
+        // 9. Sheet Kendaraan Terdaftar
+        if (isset($this->dataGabungan['kendaraan_terdaftar'])) {
+            $sheets[] = new LaporanPerSheet('kendaraan_terdaftar', $this->dataGabungan['kendaraan_terdaftar'], $metadata);
+        }
+        
         return $sheets;
     }
 }
