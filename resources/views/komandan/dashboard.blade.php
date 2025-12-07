@@ -7,7 +7,7 @@
     {{-- Ini akan otomatis menampilkan nama username Komandan --}}
     <div 
         {{-- WARNA DIUBAH DI BARIS INI --}}
-        class="bg-gradient-to-b from-[#2a4a6f] via-[#365c82] to-[#476c94] text-white rounded-2xl shadow-lg p-4 my-4 flex justify-between items-start"
+        class="bg-gradient-to-b from-[#243a5e] via-[#2a4a6f] to-[#365c82] text-white rounded-2xl shadow-lg p-4 my-4 flex justify-between items-start"
         
         {{-- 1. Inisialisasi komponen Alpine dipindahkan ke sini --}}
         x-data="{ 
@@ -66,7 +66,7 @@
             
             // Tombol dalam (biru)
             // WARNA DIUBAH DI BARIS INI
-            echo '<a href="' . $href . '" class="w-full flex items-center justify-between text-left p-4 bg-[#2a4a6f] text-white rounded-full shadow-lg hover:bg-[#365c82] transition duration-300">';
+            echo '<a href="' . $href . '" class="w-full flex items-center justify-between text-left p-4 bg-[#243a5e] text-white rounded-full shadow-lg hover:bg-[#2a4a6f] transition duration-300">';
             echo '<span class="text-lg font-bold tracking-wider">' . $text . '</span>';
             echo '<span class="bg-white/30 p-1 rounded-full">';
             echo '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>';

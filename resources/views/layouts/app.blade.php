@@ -44,7 +44,11 @@
                             PERBAIKAN 1: Tombol HOME
                             href-nya sekarang dinamis berdasarkan peran
                         --}}
-                        <a href="{{ route($homeRoute) }}" class="bg-[#2a4a6f] text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md">
+                        <!-- <a href="{{ route($homeRoute) }}" class="bg-[#1a2847] text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md">
+                            HOME
+                        </a> -->
+
+                        <a class="inline-block border-2 border-[#1a2847] text-[#1a2847] text-sm font-bold px-4 py-1 rounded-full mb-4">
                             HOME
                         </a>
                     @show
@@ -131,7 +135,7 @@
                 @yield('content')
             </main>
 
-            <footer class="mt-auto w-full text-center py-3 text-white bg-[#2a4a6f] rounded-t-2xl">
+            <footer class="mt-auto w-full text-center py-3 text-white bg-[#243a5e] rounded-t-2xl">
                 Siap v 1.0.0
             </footer>
             
