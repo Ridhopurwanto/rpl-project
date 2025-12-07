@@ -79,7 +79,7 @@
                     <div class="mb-6" x-data="{ showPassword: false }">
                         {{-- Label password --}}
                         <label for="password" class="block text-sm font-semibold text-gray-800 mb-2 text-center tracking-wide">
-                            Password
+                            PASSWORD
                         </label>
                         
                         <div class="relative">
@@ -105,50 +105,6 @@
                         @error('password')
                             <span class="block text-red-500 text-sm mt-2 text-center">{{ $message }}</span>
                         @enderror
-                    </div>
-
-                    {{-- BARIS: REMEMBER ME & LUPA PASSWORD --}}
-                    <div class="flex items-center justify-between mb-8 px-2">
-                        
-                        {{-- Ingat Saya + Tooltip --}}
-                        <div class="flex items-center" x-data="{ showTooltip: false }">
-                            <input id="remember_me" type="checkbox" name="remember" class="w-4 h-4 text-[#1a2847] border-gray-300 rounded focus:ring-[#1a2847]">
-                            <label for="remember_me" class="ml-2 text-sm text-gray-600 cursor-pointer select-none">
-                                Ingat saya
-                            </label>
-
-                            {{-- Ikon Tanya --}}
-                            <div class="ml-1 cursor-help text-gray-400 hover:text-[#1a2847] relative"
-                                 @mouseenter="showTooltip = true"
-                                 @mouseleave="showTooltip = false"
-                                 @click="showTooltip = !showTooltip">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                
-                                {{-- Tooltip Box --}}
-                                <div x-show="showTooltip" style="display: none;" 
-                                     class="absolute bottom-full left-0 mb-2 w-64 bg-white border border-gray-200 shadow-xl rounded-lg p-3 z-50 text-left">
-                                    <div class="bg-yellow-50 border border-yellow-100 rounded p-2 flex gap-2 items-start">
-                                        <svg class="h-4 w-4 text-yellow-600 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
-                                        <p class="text-xs text-yellow-800 leading-snug font-normal">
-                                            <strong>Tidak disarankan</strong> jika menggunakan perangkat umum (Lab/Warnet).
-                                        </p>
-                                    </div>
-                                    {{-- Panah Tooltip --}}
-                                    <div class="absolute top-full left-2 -mt-px border-8 border-transparent border-t-white"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Link Lupa Password --}}
-                        @if (Route::has('password.request'))
-                            <a class="text-sm font-bold text-[#1a2847] hover:text-[#2a4a6f] hover:underline" href="{{ route('password.request') }}">
-                                Lupa Password?
-                            </a>
-                        @else
-                            <a class="text-sm font-bold text-[#1a2847] hover:text-[#2a4a6f] hover:underline" href="#">
-                                Lupa Password?
-                            </a>
-                        @endif
                     </div>
 
                     <div class="mt-8 flex justify-center">
