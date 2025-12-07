@@ -5,7 +5,7 @@
 @section('desktop_width', 'lg:max-w-full')
 
 @section('header-left')
-    <a class="bg-slate-800 text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md hover:bg-slate-700 transition">
+    <a class="inline-block border-2 border-[#1a2847] text-[#1a2847] text-sm font-bold px-4 py-1 rounded-full mb-4">
         GANGGUAN KAMTIBMAS
     </a>
 @endsection

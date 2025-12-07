@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('header-left')
-    <a href="{{ route('anggota.gangguan.index') }}" class="bg-[#2a4a6f] text-white text-xs sm:text-sm font-semibold px-4 sm:px-6 py-2 rounded-full shadow-md text-center leading-tight">
+    <a class="inline-block border-2 border-[#1a2847] text-[#1a2847] text-sm font-bold px-4 py-1 rounded-full mb-4">
         GANGGUAN<br class="sm:hidden"> KAMTIBMAS
     </a>
 @endsection
