@@ -5,7 +5,7 @@
 <div class="w-full px-4 py-8">
     
     {{-- Header (Logo, Judul) - Meniru style gambar & kode Anda --}}
-    <div class="bg-slate-800 text-center p-8 rounded-xl shadow-lg mb-6">
+    <div class="bg-[#1a2847] text-center p-8 rounded-xl shadow-lg mb-6">
         
         {{-- Ganti path logo ini sesuai dengan lokasi logo Anda di folder /public --}}
         <img src="{{ asset('images/logo-siap.png') }}" alt="Logo SIAP" class="w-24 h-24 mx-auto mb-4">

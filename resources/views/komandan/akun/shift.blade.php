@@ -1,8 +1,13 @@
 @extends('layouts.app')
 
 @section('header-left')
-    <a href="{{ route('komandan.akun.index') }}" class="bg-[#2a4a6f] text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md hover:bg-[#1e3a5c] transition">
-        <i class="fas fa-arrow-left mr-2"></i> MANAJEMEN SHIFT
+    <a href="{{ route('komandan.akun.index') }}" 
+       class="inline-flex items-center justify-center w-10 h-10 bg-white text-[#1a2847] rounded-full shadow-md hover:bg-gray-100 transition-colors mb-4"
+       title="Kembali">
+        {{-- Ikon Panah Kiri (SVG) --}}
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
     </a>
 @endsection
 
@@ -50,10 +55,10 @@
     </div>
 
     {{-- 2. Navigasi Bulan (CUSTOM DROPDOWN - EYE CATCHING) --}}
-    <div class="flex items-center justify-end mb-6">
+    <div class="flex flex-col-reverse md:flex-row items-end md:justify-end gap-3 mb-6">
         
         {{-- KOTAK 1: Navigation Controls (Today, Prev, Next) --}}
-        <div class="flex items-center gap-1 bg-white p-1 rounded-full shadow-sm border border-gray-200">
+        <div class="flex items-center justify-center gap-1 bg-white p-1 rounded-full shadow-sm border border-gray-200 w-auto md:w-auto">
             {{-- Tombol Today --}}
             <a href="{{ route('komandan.akun.shift', ['id_pengguna' => $user->id_pengguna, 'bulan' => \Carbon\Carbon::now()->format('Y-m')]) }}" 
                class="px-4 py-1.5 text-sm font-semibold text-gray-700 rounded-full hover:bg-gray-100 transition border border-transparent hover:border-gray-300">
@@ -76,7 +81,7 @@
         </div>
 
         {{-- KOTAK 2: Custom Dropdown Bulan & Tahun --}}
-        <div class="flex items-center gap-1 bg-white p-1 rounded-full shadow-sm border border-gray-200 ml-2 md:ml-4 relative">
+        <div class="flex items-center justify-center gap-1 bg-white p-1 rounded-full shadow-sm border border-gray-200 md:ml-4 relative w-auto md:w-auto z-20">
             
             {{-- 1. CUSTOM DROPDOWN BULAN --}}
             <div x-data="{ open: false }" class="relative">
@@ -91,10 +96,7 @@
                      x-transition:enter="transition ease-out duration-200"
                      x-transition:enter-start="opacity-0 scale-95"
                      x-transition:enter-end="opacity-100 scale-100"
-                     x-transition:leave="transition ease-in duration-75"
-                     x-transition:leave-start="opacity-100 scale-100"
-                     x-transition:leave-end="opacity-0 scale-95"
-                     class="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
+                     class="absolute top-full right-0 mt-2 w-32 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
                     
                     <div class="max-h-64 overflow-y-auto py-2 custom-scrollbar">
                         @php

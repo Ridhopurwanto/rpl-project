@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('header-left')
-    <a href="{{ url()->previous() }}" class="bg-slate-800 text-white text-sm font-semibold px-6 py-2 rounded-full shadow-md hover:bg-slate-700 transition">
+    <a class="inline-block border-2 border-[#1a2847] text-[#1a2847] text-sm font-bold px-4 py-1 rounded-full mb-4">
         UNDUH
     </a>
 @endsection
@@ -114,28 +114,48 @@
         <input type="hidden" name="download_queue" :value="JSON.stringify(downloadQueue)">
 
         {{-- FILTER SECTION --}}
-        <div class="bg-white p-4 rounded-lg shadow-md mb-6">
-            <div class="flex flex-col sm:flex-row sm:items-end sm:space-x-4 space-y-4 sm:space-y-0">
-                <div class="flex-1">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">JENIS LAPORAN:</label>
-                    <select x-model="reportType" class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400">
-                        <option value="harian">Laporan Harian</option>
-                        <option value="bulanan">Laporan Bulanan</option>
-                        <option value="administrasi">Data Administrasi</option>
-                    </select>
+        <div class="bg-white px-6 py-4 rounded-xl shadow-sm mb-6 border border-gray-100">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                
+                {{-- 1. JENIS LAPORAN --}}
+                <div class="w-full">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
+                        JENIS LAPORAN:
+                    </label>
+                    <div class="relative">
+                        <select x-model="reportType" 
+                                class="block w-full py-1 px-0 text-gray-900 bg-transparent border-0 border-b border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer cursor-pointer">
+                            <option value="harian">Laporan Harian</option>
+                            <option value="bulanan">Laporan Bulanan</option>
+                            <option value="administrasi">Data Administrasi</option>
+                        </select>
+                        {{-- Panah Dropdown --}}
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <svg class="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex-1">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">DARI TANGGAL:</label>
+
+                {{-- 2. DARI TANGGAL --}}
+                <div class="w-full">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
+                        DARI TANGGAL:
+                    </label>
                     <input type="date" x-model="dateFrom" 
-                           class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400" 
-                           style="color-scheme: dark;">
+                           class="block w-full py-1 px-0 text-gray-900 bg-transparent border-0 border-b border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                           placeholder=" ">
                 </div>
-                <div class="flex-1">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">SAMPAI TANGGAL:</label>
+
+                {{-- 3. SAMPAI TANGGAL --}}
+                <div class="w-full">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
+                        SAMPAI TANGGAL:
+                    </label>
                     <input type="date" x-model="dateTo" 
-                           class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400" 
-                           style="color-scheme: dark;">
+                           class="block w-full py-1 px-0 text-gray-900 bg-transparent border-0 border-b border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                           placeholder=" ">
                 </div>
+
             </div>
         </div>
 
@@ -146,68 +166,82 @@
             <div x-show="reportType === 'harian'" class="space-y-3">
                 
                 <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
-                    <input type="checkbox" value="laporan_presensi" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
+                    <input type="checkbox" value="laporan_presensi" x-model="selectedChecks" class="rounded text-[#1a2847] w-5 h-5 focus:ring-[#1a2847] accent-[#365c82]">
                     <span class="ml-2 text-gray-700">Laporan Presensi</span>
                 </label>
                 <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
-                    <input type="checkbox" value="laporan_patroli" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
+                    <input type="checkbox" value="laporan_patroli" x-model="selectedChecks" class="rounded text-[#1a2847] w-5 h-5 focus:ring-[#1a2847] accent-[#365c82]">
                     <span class="ml-2 text-gray-700">Laporan Patroli</span>
                 </label>
                 
-                {{-- FITUR PENGELOLAAN BARANG --}}
-                <div class="border rounded-lg p-3 bg-slate-50">
-                    {{-- Induk: Pengelolaan Barang --}}
-                    <label class="flex items-center cursor-pointer mb-2">
-                        {{-- @change="toggleBarang()" : Mengatur Select All / None --}}
-                        <input type="checkbox" x-model="isBarangActive" @change="toggleBarang()" class="rounded text-blue-600 w-5 h-5">
-                        <span class="ml-2 font-semibold text-gray-800">Laporan Pengelolaan Barang</span>
+                {{-- FITUR PENGELOLAAN BARANG (REVISI: SEJAJAR) --}}
+                <div class="group">
+                    {{-- 1. Induk: Tampilannya kita samakan persis dengan checkbox lain --}}
+                    <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded transition">
+                        {{-- Checkbox Induk --}}
+                        <input type="checkbox" x-model="isBarangActive" @change="toggleBarang()" 
+                               class="rounded text-[#1a2847] w-5 h-5 border-gray-300 focus:ring-[#1a2847] accent-[#365c82]">
+                        
+                        <span class="ml-2 text-gray-700">Laporan Pengelolaan Barang</span>
+                        
+                        {{-- Opsional: Ikon panah kecil biar user tau ada isi di dalamnya --}}
+                        <svg class="w-4 h-4 text-gray-400 ml-auto transform transition-transform duration-200" 
+                             :class="isBarangActive || barangChecks.length > 0 ? 'rotate-180' : ''"
+                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
                     </label>
 
                     {{-- 
-                        Anak: Muncul jika Parent aktif ATAU ada salah satu anak yang dipilih 
-                        (Jadi kalau uncheck satu, menu tidak hilang)
+                        2. Anak: Muncul di bawahnya, tanpa kotak, cuma digeser kanan (ml-7)
+                        Pakai x-collapse (kalau ada alpine plugin) atau x-transition biar mulus
                     --}}
-                    <div x-show="isBarangActive || barangChecks.length > 0" x-transition class="ml-7 space-y-2 border-l-2 border-blue-200 pl-3">
-                        <label class="flex items-center cursor-pointer">
-                            {{-- @change="updateParent()" : Cek status induk saat anak berubah --}}
-                            <input type="checkbox" value="barang_temu" x-model="barangChecks" @change="updateParent()" class="rounded text-blue-600 w-4 h-4">
+                    <div x-show="isBarangActive || barangChecks.length > 0" 
+                         x-transition.origin.top.duration.300ms
+                         class="ml-7 mt-1 space-y-1 border-l-2 border-gray-200 pl-3">
+                        
+                        <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
+                            <input type="checkbox" value="barang_temu" x-model="barangChecks" @change="updateParent()" 
+                                   class="rounded text-[#1a2847] w-4 h-4 border-gray-300 focus:ring-[#1a2847] accent-[#365c82]">
                             <span class="ml-2 text-gray-600 text-sm">Barang Temuan</span>
                         </label>
-                        <label class="flex items-center cursor-pointer">
-                            <input type="checkbox" value="barang_titip" x-model="barangChecks" @change="updateParent()" class="rounded text-blue-600 w-4 h-4">
+                        
+                        <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
+                            <input type="checkbox" value="barang_titip" x-model="barangChecks" @change="updateParent()" 
+                                   class="rounded text-[#1a2847] w-4 h-4 border-gray-300 focus:ring-[#1a2847] accent-[#365c82]">
                             <span class="ml-2 text-gray-600 text-sm">Barang Titipan</span>
                         </label>
                     </div>
                 </div>
-
+                
                 <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
-                    <input type="checkbox" value="kendaraan" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
+                    <input type="checkbox" value="kendaraan" x-model="selectedChecks" class="rounded text-[#1a2847] w-5 h-5 focus:ring-[#1a2847] accent-[#365c82]">
                     <span class="ml-2 text-gray-700">Laporan Kendaraan</span>
                 </label>
                 <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
-                    <input type="checkbox" value="tamu" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
+                    <input type="checkbox" value="tamu" x-model="selectedChecks" class="rounded text-[#1a2847] w-5 h-5 focus:ring-[#1a2847] accent-[#365c82]">
                     <span class="ml-2 text-gray-700">Laporan Tamu</span>
                 </label>
             </div>
 
             <div x-show="reportType === 'bulanan'" class="space-y-3" style="display: none;">
                 <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
-                    <input type="checkbox" value="gangguan_kamtibmas" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
+                    <input type="checkbox" value="gangguan_kamtibmas" x-model="selectedChecks" class="rounded text-[#1a2847] w-5 h-5 focus:ring-[#1a2847] accent-[#365c82]">
                     <span class="ml-2 text-gray-700">Laporan Gangguan Kamtibmas</span>
                 </label>
                 <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
-                    <input type="checkbox" value="shift_anggota" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
+                    <input type="checkbox" value="shift_anggota" x-model="selectedChecks" class="rounded text-[#1a2847] w-5 h-5 focus:ring-[#1a2847] accent-[#365c82]">
                     <span class="ml-2 text-gray-700">Laporan Shift Anggota</span>
                 </label>
             </div>
 
             <div x-show="reportType === 'administrasi'" class="space-y-3" style="display: none;">
                 <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
-                    <input type="checkbox" value="laporan_anggota" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
+                    <input type="checkbox" value="laporan_anggota" x-model="selectedChecks" class="rounded text-[#1a2847] w-5 h-5 focus:ring-[#1a2847] accent-[#365c82]">
                     <span class="ml-2 text-gray-700">Tabel Anggota</span>
                 </label>
                 <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded">
-                    <input type="checkbox" value="laporan_kendaraan_terdaftar" x-model="selectedChecks" class="rounded text-blue-600 w-5 h-5">
+                    <input type="checkbox" value="laporan_kendaraan_terdaftar" x-model="selectedChecks" class="rounded text-[#1a2847] w-5 h-5 focus:ring-[#1a2847] accent-[#365c82]">
                     <span class="ml-2 text-gray-700">Tabel Kendaraan Terdaftar</span>
                 </label>
             </div>
