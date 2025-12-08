@@ -46,7 +46,7 @@
         @endif
 
         {{-- Filter Tanggal & Header --}}
-        <div class="bg-white rounded-lg shadow-md p-5 mt-4 mb-6">
+        <div class="bg-white px-6 py-5 rounded-xl shadow-sm mt-4 mb-6 border border-gray-200" x-data="{}">
             <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                 {{-- Bagian Kiri: Judul & Deskripsi --}}
                 <div>
@@ -55,16 +55,16 @@
                 </div>
 
                 {{-- Bagian Kanan: Form Filter --}}
-                <form action="{{ route('anggota.patroli.index') }}" method="GET"
-                    class="flex items-center gap-3 self-end md:self-auto">
-                    <label for="filter-tanggal" class="text-sm font-bold text-slate-600 uppercase hidden sm:block">
-                        TANGGAL :
-                    </label>
-                    <div class="relative">
-                        <input type="date" id="filter-tanggal" name="tanggal"
-                            value="{{ $tanggalTerpilih->format('Y-m-d') }}" onchange="this.form.submit()"
-                            class="bg-[#2a4a6f] text-white text-sm font-bold px-5 py-2.5 rounded-lg shadow-md hover:bg-[#1e3a5a] focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all cursor-pointer"
-                            style="color-scheme: dark;">
+                <form action="{{ route('anggota.patroli.index') }}" method="GET" class="w-full md:w-auto">
+                    <div class="w-full md:w-64">
+                        <label for="filter-tanggal" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                            Tanggal
+                        </label>
+                        <div class="cursor-pointer" @click="$refs.dateInput.showPicker()">
+                            <input type="date" id="filter-tanggal" name="tanggal" x-ref="dateInput"
+                                value="{{ $tanggalTerpilih->format('Y-m-d') }}" onchange="this.form.submit()"
+                                class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
+                        </div>
                     </div>
                 </form>
             </div>

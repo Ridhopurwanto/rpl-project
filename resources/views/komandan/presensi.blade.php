@@ -22,7 +22,19 @@
          showRuleModal: false
      }">
     
-    <h2 class="text-2xl font-bold text-slate-800 mb-4">Laporan Presensi Anggota</h2>
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold text-slate-800">Laporan Presensi Anggota</h2>
+        <button @click="showRuleModal = true" 
+                class="bg-[#2a4a6f] text-white p-2.5 rounded-lg shadow-md hover:bg-[#1e3a5f] transition" 
+                title="Pengaturan Shift Rule">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+        </button>
+    </div>
 
     {{-- Tampilkan Notifikasi --}}
     @if(session('success'))
@@ -47,28 +59,45 @@
     @endif
 
     {{-- Form Filter --}}
-    <form action="{{ route('komandan.presensi') }}" method="GET">
-        <div class="bg-white p-4 rounded-lg shadow-md mb-6">
-            <div class="flex flex-col sm:flex-row sm:items-end sm:space-x-4 space-y-4 sm:space-y-0">
-                <div class="flex-1">
-                    <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">TANGGAL:</label>
-                    <input type="date" id="tanggal" name="tanggal" 
-                           onchange="this.form.submit()"
-                           class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400" 
-                           style="color-scheme: dark;"
-                           value="{{ $tanggalTerpilih }}">
+    <form action="{{ route('komandan.presensi') }}" method="GET" x-data="{}">
+        <div class="bg-white px-6 py-5 rounded-xl shadow-sm mb-6 border border-gray-200">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                {{-- Filter Tanggal --}}
+                <div class="w-full">
+                    <label for="tanggal" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Tanggal
+                    </label>
+                    <div class="cursor-pointer" @click="$refs.dateInput.showPicker()">
+                        <input type="date" id="tanggal" name="tanggal" x-ref="dateInput"
+                               onchange="this.form.submit()"
+                               class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
+                               value="{{ $tanggalTerpilih }}">
+                    </div>
                 </div>
-                <div class="flex-1">
-                    <label for="shift" class="block text-sm font-medium text-gray-700 mb-1">JENIS SHIFT:</label>
-                    <select id="shift" name="shift" 
-                            onchange="this.form.submit()"
-                            class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400">
-                        <option value="semua" @if($shiftTerpilih == 'semua') selected @endif>Semua Shift</option>
-                        <option value="Pagi" @if($shiftTerpilih == 'Pagi') selected @endif>Shift Pagi</option>
-                        <option value="Malam" @if($shiftTerpilih == 'Malam') selected @endif>Shift Malam</option>
-                        <option value="Non Shift" @if($shiftTerpilih == 'Non Shift') selected @endif>Non Shift</option>
-                        <option value="Off" @if($shiftTerpilih == 'Off') selected @endif>Off</option>
-                    </select>
+
+                {{-- Filter Jenis Shift --}}
+                <div class="w-full">
+                    <label for="shift" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Jenis Shift
+                    </label>
+                    <div class="relative">
+                        <select id="shift" name="shift" 
+                                onchange="this.form.submit()"
+                                class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                            <option value="semua" @if($shiftTerpilih == 'semua') selected @endif>Semua Shift</option>
+                            <option value="Pagi" @if($shiftTerpilih == 'Pagi') selected @endif>Shift Pagi</option>
+                            <option value="Malam" @if($shiftTerpilih == 'Malam') selected @endif>Shift Malam</option>
+                            <option value="Non Shift" @if($shiftTerpilih == 'Non Shift') selected @endif>Non Shift</option>
+                            <option value="Off" @if($shiftTerpilih == 'Off') selected @endif>Off</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -352,15 +381,6 @@
         </div>
     </div>
 
-    {{-- TOMBOL PENGATURAN SHIFT RULE --}}
-    <div class="flex justify-end mb-8">
-        <button @click="showRuleModal = true" 
-                class="flex items-center gap-2 bg-slate-700 text-white px-5 py-2.5 rounded-lg shadow hover:bg-slate-800 transition transform active:scale-95">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-            <span>PENGATURAN SHIFT RULE</span>
-        </button>
-    </div>
-
     {{-- MODAL PENGATURAN RULE --}}
     <div x-show="showRuleModal"
          class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
@@ -368,12 +388,14 @@
          style="display: none;">
         
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden relative" @click.stop>
-            <div class="bg-slate-800 p-4 flex justify-between items-center">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+            <div class="bg-[#1e3a5f] py-4 px-6 border-b border-[#1e3a5f] flex justify-between items-center">
+                <h3 class="text-lg font-bold text-white flex items-center tracking-wide">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
                     PENGATURAN JAM SHIFT
                 </h3>
-                <button @click="showRuleModal = false" class="text-gray-300 hover:text-white text-2xl font-bold">&times;</button>
+                <button @click="showRuleModal = false" class="text-white/70 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
 
             <form action="{{ route('komandan.presensi.updateRules') }}" method="POST" class="p-6">
@@ -478,12 +500,12 @@
                     </div>
                 </div>
 
-                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
-                    <button type="button" @click="showRuleModal = false" class="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-bold transition">
+                <div class="flex justify-end gap-3 pt-4 border-t bg-gray-50 p-4">
+                    <button type="button" @click="showRuleModal = false" class="px-6 py-2.5 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 font-semibold transition">
                         Batal
                     </button>
-                    <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold shadow-md transition transform hover:scale-105">
-                        Simpan Perubahan
+                    <button type="submit" class="px-6 py-2.5 bg-[#1e3a5f] text-white rounded-xl hover:bg-[#2a4a6f] font-bold shadow-lg transition transform hover:-translate-y-0.5">
+                        SIMPAN PERUBAHAN
                     </button>
                 </div>
             </form>
@@ -511,40 +533,83 @@
          class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
          @click.away="showEditModal = false"
          style="display: none;">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-4 relative" @click.stop>
-            <div class="flex justify-between items-center pb-3 border-b">
-                <h3 class="text-xl font-bold text-gray-800">EDIT PRESENSI</h3>
-                <button @click="showEditModal = false" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full relative overflow-hidden" @click.stop>
+            {{-- Header Biru --}}
+            <div class="bg-[#1e3a5f] py-4 px-6 border-b border-[#1e3a5f] flex justify-between items-center">
+                <h3 class="text-lg font-bold text-white flex items-center tracking-wide">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    EDIT PRESENSI
+                </h3>
+                <button @click="showEditModal = false" class="text-white/70 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
-            <form :action="editAction" method="POST" class="mt-4">
+            
+            <form :action="editAction" method="POST">
                 @csrf
                 @method('PUT')
-                <div class="space-y-4">
-                    <div>
-                        <label for="waktu" class="block text-sm font-medium text-gray-700 mb-1">Waktu:</label>
-                        <input type="datetime-local" id="waktu" name="waktu" x-model="editWaktu"
-                               class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <div class="modal-body max-h-[70vh] overflow-y-auto p-6">
+                    <div class="space-y-5">
+                        
+                        {{-- GROUP: Informasi Presensi --}}
+                        <div class="p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+                            <h4 class="text-sm font-bold text-[#1e3a5f] mb-3 flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-[#1e3a5f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                INFORMASI PRESENSI
+                            </h4>
+                            
+                            <div class="space-y-4">
+                                {{-- Waktu --}}
+                                <div>
+                                    <label for="waktu" class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">Waktu <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        </div>
+                                        <input type="datetime-local" id="waktu" name="waktu" x-model="editWaktu" required
+                                               class="pl-10 w-full bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5">
+                                    </div>
+                                </div>
+                                
+                                {{-- Status --}}
+                                <div>
+                                    <label for="status" class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">Status <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        </div>
+                                        <select id="status" name="status" x-model="editStatus" required
+                                                class="pl-10 w-full bg-white border border-gray-300 text-[#1e3a5f] text-sm font-bold rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5 cursor-pointer">
+                                            <option value="tepat waktu">Tepat Waktu</option>
+                                            <option value="terlambat">Terlambat</option>
+                                            <option value="terlalu cepat">Terlalu Cepat</option>
+                                            <option value="izin">Izin</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {{-- Jenis Presensi --}}
+                                <div>
+                                    <label for="jenis_presensi" class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">Jenis Presensi <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+                                        </div>
+                                        <select id="jenis_presensi" name="jenis_presensi" x-model="editJenisPresensi" required
+                                                class="pl-10 w-full bg-white border border-gray-300 text-[#1e3a5f] text-sm font-bold rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5 cursor-pointer">
+                                            <option value="Masuk">Masuk</option>
+                                            <option value="Pulang">Pulang</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status:</label>
-                        <select id="status" name="status" x-model="editStatus"
-                                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <option value="tepat waktu">Tepat Waktu</option>
-                            <option value="terlambat">Terlambat</option>
-                            <option value="terlalu cepat">Terlalu Cepat</option>
-                            <option value="izin">Izin</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="jenis_presensi" class="block text-sm font-medium text-gray-700 mb-1">Jenis Presensi:</label>
-                        <select id="jenis_presensi" name="jenis_presensi" x-model="editJenisPresensi"
-                                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <option value="Masuk">Masuk</option>
-                            <option value="Pulang">Pulang</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg shadow hover:bg-green-600 transition">
-                        SUBMIT
+                </div>
+
+                <div class="modal-footer p-4 border-t bg-gray-50">
+                    <button type="submit" class="w-full px-4 py-3 text-white font-bold bg-[#1e3a5f] rounded-xl hover:bg-[#2a4a6f] shadow-lg transition transform hover:-translate-y-0.5">
+                        SIMPAN PERUBAHAN
                     </button>
                 </div>
             </form>

@@ -114,46 +114,46 @@
         <input type="hidden" name="download_queue" :value="JSON.stringify(downloadQueue)">
 
         {{-- FILTER SECTION --}}
-        <div class="bg-white px-6 py-4 rounded-xl shadow-sm mb-6 border border-gray-100">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+        <div class="bg-white px-6 py-5 rounded-xl shadow-sm mb-6 border border-gray-200">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
                 {{-- 1. JENIS LAPORAN --}}
                 <div class="w-full">
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
-                        JENIS LAPORAN:
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Jenis Laporan
                     </label>
                     <div class="relative">
                         <select x-model="reportType" 
-                                class="block w-full py-1 px-0 text-gray-900 bg-transparent border-0 border-b border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer cursor-pointer">
+                                class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
                             <option value="harian">Laporan Harian</option>
                             <option value="bulanan">Laporan Bulanan</option>
                             <option value="administrasi">Data Administrasi</option>
                         </select>
-                        {{-- Panah Dropdown --}}
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                            <svg class="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
                         </div>
                     </div>
                 </div>
 
-                {{-- 2. DARI TANGGAL --}}
+                {{-- 2. DATE RANGE PICKER --}}
                 <div class="w-full">
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
-                        DARI TANGGAL:
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Periode Tanggal
                     </label>
-                    <input type="date" x-model="dateFrom" 
-                           class="block w-full py-1 px-0 text-gray-900 bg-transparent border-0 border-b border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                           placeholder=" ">
-                </div>
-
-                {{-- 3. SAMPAI TANGGAL --}}
-                <div class="w-full">
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
-                        SAMPAI TANGGAL:
-                    </label>
-                    <input type="date" x-model="dateTo" 
-                           class="block w-full py-1 px-0 text-gray-900 bg-transparent border-0 border-b border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                           placeholder=" ">
+                    <div class="flex items-stretch gap-3">
+                        <div class="flex-1 cursor-pointer" @click="$refs.dateStart.showPicker()">
+                            <input type="date" x-model="dateFrom" x-ref="dateStart"
+                                   class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
+                        </div>
+                        <span class="text-gray-500 text-sm font-medium self-center">to</span>
+                        <div class="flex-1 cursor-pointer" @click="$refs.dateEnd.showPicker()">
+                            <input type="date" x-model="dateTo" x-ref="dateEnd"
+                                   class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
+                        </div>
+                    </div>
                 </div>
 
             </div>

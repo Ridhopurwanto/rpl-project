@@ -37,8 +37,15 @@ class GangguanKamtibmasController extends Controller
         $riwayatGangguan = $query->orderBy('waktu_lapor', 'desc')->get();
 
         // Ambil daftar Kategori dari ENUM di database
-        //
-        $kategoriOptions = ['Unjuk Rasa', 'Pembakaran Lahan', 'Bentrokan Kepolisian', 'Kriminalitas', 'Kecelakaan', 'Lainnya'];
+        try {
+            $result = \DB::select("SHOW COLUMNS FROM gangguan_kamtibmas WHERE Field = 'kategori'");
+            $enumStr = $result[0]->Type;
+            preg_match("/^enum\((.+)\)$/", $enumStr, $matches);
+            $kategoriOptions = str_getcsv($matches[1], ',', "'");
+        } catch (\Exception $e) {
+            // Fallback jika query gagal
+            $kategoriOptions = ['Curat', 'Curas', 'Curanmor', 'Narkoba', 'Laka Lantas', 'Pembunuhan', 'Perkelahian', 'Mabok', 'Unjuk Rasa', 'Penyerobotan Tanah', 'Kenakalan Remaja', 'Kebakaran', 'Bencana Alam'];
+        }
 
         return view('komandan.gangguan', [
             'riwayatGangguan' => $riwayatGangguan,
@@ -58,10 +65,20 @@ class GangguanKamtibmasController extends Controller
             return redirect()->route('komandan.gangguan')->with('error', 'Anda tidak memiliki hak akses.');
         }
 
+        // Ambil kategori dari ENUM untuk validasi
+        try {
+            $result = \DB::select("SHOW COLUMNS FROM gangguan_kamtibmas WHERE Field = 'kategori'");
+            $enumStr = $result[0]->Type;
+            preg_match("/^enum\((.+)\)$/", $enumStr, $matches);
+            $kategoriOptions = str_getcsv($matches[1], ',', "'");
+        } catch (\Exception $e) {
+            $kategoriOptions = ['Curat', 'Curas', 'Curanmor', 'Narkoba', 'Laka Lantas', 'Pembunuhan', 'Perkelahian', 'Mabok', 'Unjuk Rasa', 'Penyerobotan Tanah', 'Kenakalan Remaja', 'Kebakaran', 'Bencana Alam'];
+        }
+
         $request->validate([
             'waktu_lapor' => 'required|date',
             'lokasi' => 'required|string|max:255',
-            'kategori' => 'required|string',
+            'kategori' => 'required|in:' . implode(',', $kategoriOptions),
             'deskripsi' => 'required|string',
         ]);
 

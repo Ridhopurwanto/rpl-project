@@ -16,38 +16,57 @@
      }">
 
     {{-- KOTAK FILTER --}}
-    <div class="bg-white rounded-lg shadow-md p-5 mb-6">
-        <form action="{{ route('anggota.gangguan.index') }}" method="GET">
-            <div class="flex flex-col md:flex-row md:items-end gap-4">
-                {{-- Input Bulan --}}
-                <div class="flex-1">
-                    <label for="bulan" class="block text-sm font-bold text-slate-600 mb-2 uppercase">PILIH BULAN :</label>
-                    <input type="month" onchange="this.form.submit()" id="bulan" name="bulan" value="{{ $bulan_terpilih }}"
-                        class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        style="color-scheme: dark;">
+    <form action="{{ route('anggota.gangguan.index') }}" method="GET" x-data="{}">
+        <div class="bg-white px-6 py-5 rounded-xl shadow-sm mb-6 border border-gray-200">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                {{-- Filter Bulan --}}
+                <div class="w-full">
+                    <label for="bulan" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Pilih Bulan
+                    </label>
+                    <div class="cursor-pointer" @click="$refs.monthInput.showPicker()">
+                        <input type="month" id="bulan" name="bulan" x-ref="monthInput"
+                               onchange="this.form.submit()"
+                               class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
+                               value="{{ $bulan_terpilih }}">
+                    </div>
                 </div>
-                {{-- Input Kategori --}}
-                <div class="flex-1">
-                    <label for="kategori" class="block text-sm font-bold text-slate-600 mb-2 uppercase">KATEGORI :</label>
+
+                {{-- Filter Kategori --}}
+                <div class="w-full">
+                    <label for="kategori" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Kategori
+                    </label>
                     <div class="relative">
-                        <select id="kategori" name="kategori" onchange="this.form.submit()"
-                            class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400 appearance-none">
-                            <option value="semua" class="bg-white text-gray-900" @if($kategori_terpilih == 'semua') selected @endif>-- Semua Kategori --</option>
-                            <option value="Unjuk Rasa" class="bg-white text-gray-900" @if($kategori_terpilih == 'Unjuk Rasa') selected @endif>Unjuk Rasa</option>
-                            <option value="Pembakaran Lahan" class="bg-white text-gray-900" @if($kategori_terpilih == 'Pembakaran Lahan') selected @endif>Pembakaran Lahan</option>
-                            <option value="Bentrokan Kepolisian" class="bg-white text-gray-900" @if($kategori_terpilih == 'Bentrokan Kepolisian') selected @endif>Bentrokan Kepolisian</option>
-                            <option value="Kriminalitas" class="bg-white text-gray-900" @if($kategori_terpilih == 'Kriminalitas') selected @endif>Kriminalitas</option>
-                            <option value="Kecelakaan" class="bg-white text-gray-900" @if($kategori_terpilih == 'Kecelakaan') selected @endif>Kecelakaan</option>
-                            <option value="Lainnya" class="bg-white text-gray-900" @if($kategori_terpilih == 'Lainnya') selected @endif>Lainnya</option>
+                        <select id="kategori" name="kategori" 
+                                onchange="this.form.submit()"
+                                class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                            <option value="semua" @if($kategori_terpilih == 'semua') selected @endif>Semua Kategori</option>
+                            <option value="Curat" @if($kategori_terpilih == 'Curat') selected @endif>Curat</option>
+                            <option value="Curas" @if($kategori_terpilih == 'Curas') selected @endif>Curas</option>
+                            <option value="Curanmor" @if($kategori_terpilih == 'Curanmor') selected @endif>Curanmor</option>
+                            <option value="Narkoba" @if($kategori_terpilih == 'Narkoba') selected @endif>Narkoba</option>
+                            <option value="Laka Lantas" @if($kategori_terpilih == 'Laka Lantas') selected @endif>Laka Lantas</option>
+                            <option value="Pembunuhan" @if($kategori_terpilih == 'Pembunuhan') selected @endif>Pembunuhan</option>
+                            <option value="Perkelahian" @if($kategori_terpilih == 'Perkelahian') selected @endif>Perkelahian</option>
+                            <option value="Mabok" @if($kategori_terpilih == 'Mabok') selected @endif>Mabok</option>
+                            <option value="Unjuk Rasa" @if($kategori_terpilih == 'Unjuk Rasa') selected @endif>Unjuk Rasa</option>
+                            <option value="Penyerobotan Tanah" @if($kategori_terpilih == 'Penyerobotan Tanah') selected @endif>Penyerobotan Tanah</option>
+                            <option value="Kenakalan Remaja" @if($kategori_terpilih == 'Kenakalan Remaja') selected @endif>Kenakalan Remaja</option>
+                            <option value="Kebakaran" @if($kategori_terpilih == 'Kebakaran') selected @endif>Kebakaran</option>
+                            <option value="Bencana Alam" @if($kategori_terpilih == 'Bencana Alam') selected @endif>Bencana Alam</option>
                         </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-white">
-                            <svg class="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
                         </div>
                     </div>
                 </div>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
 
     {{-- CARD LAYOUT GANGGUAN KAMTIBMAS --}}
     <div class="space-y-3">
@@ -62,11 +81,19 @@
                     
                     {{-- Badge Kategori dengan Warna Dinamis --}}
                     <span class="
-                        @if($laporan->kategori == 'Unjuk Rasa') bg-orange-500
-                        @elseif($laporan->kategori == 'Pembakaran Lahan') bg-red-500
-                        @elseif($laporan->kategori == 'Bentrokan Kepolisian') bg-purple-500
-                        @elseif($laporan->kategori == 'Kriminalitas') bg-yellow-500
-                        @elseif($laporan->kategori == 'Kecelakaan') bg-pink-500
+                        @if($laporan->kategori == 'Curat') bg-red-500
+                        @elseif($laporan->kategori == 'Curas') bg-orange-500
+                        @elseif($laporan->kategori == 'Curanmor') bg-yellow-500
+                        @elseif($laporan->kategori == 'Narkoba') bg-purple-500
+                        @elseif($laporan->kategori == 'Laka Lantas') bg-pink-500
+                        @elseif($laporan->kategori == 'Pembunuhan') bg-red-700
+                        @elseif($laporan->kategori == 'Perkelahian') bg-orange-600
+                        @elseif($laporan->kategori == 'Mabok') bg-indigo-500
+                        @elseif($laporan->kategori == 'Unjuk Rasa') bg-blue-500
+                        @elseif($laporan->kategori == 'Penyerobotan Tanah') bg-green-600
+                        @elseif($laporan->kategori == 'Kenakalan Remaja') bg-teal-500
+                        @elseif($laporan->kategori == 'Kebakaran') bg-red-600
+                        @elseif($laporan->kategori == 'Bencana Alam') bg-gray-600
                         @else bg-gray-500
                         @endif
                         text-white text-xs font-bold px-3 py-1 rounded-full">
@@ -248,12 +275,19 @@
                             <label class="col-span-1 text-gray-300 font-semibold text-sm self-center">KATEGORI :</label>
                             <div class="col-span-2">
                                 <select name="kategori" class="w-full px-4 py-2 bg-white text-gray-900 rounded-md border-none focus:ring-2 focus:ring-blue-500" required>
+                                    <option value="Curat">Curat</option>
+                                    <option value="Curas">Curas</option>
+                                    <option value="Curanmor">Curanmor</option>
+                                    <option value="Narkoba">Narkoba</option>
+                                    <option value="Laka Lantas">Laka Lantas</option>
+                                    <option value="Pembunuhan">Pembunuhan</option>
+                                    <option value="Perkelahian">Perkelahian</option>
+                                    <option value="Mabok">Mabok</option>
                                     <option value="Unjuk Rasa">Unjuk Rasa</option>
-                                    <option value="Pembakaran Lahan">Pembakaran Lahan</option>
-                                    <option value="Bentrokan Kepolisian">Bentrokan Kepolisian</option>
-                                    <option value="Kriminalitas">Kriminalitas</option>
-                                    <option value="Kecelakaan">Kecelakaan</option>
-                                    <option value="Lainnya">Lainnya</option>
+                                    <option value="Penyerobotan Tanah">Penyerobotan Tanah</option>
+                                    <option value="Kenakalan Remaja">Kenakalan Remaja</option>
+                                    <option value="Kebakaran">Kebakaran</option>
+                                    <option value="Bencana Alam">Bencana Alam</option>
                                 </select>
                             </div>
 
