@@ -88,7 +88,9 @@
         <div class="bg-gray-100 p-3 border-b border-gray-200">
             <h3 class="font-bold text-gray-800">RIWAYAT GANGGUAN</h3>
         </div>
-        <div class="overflow-x-auto">
+        
+        {{-- TABEL (Desktop) --}}
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full min-w-max">
                 <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                     <tr>
@@ -108,7 +110,6 @@
                     <tr>
                         <td class="py-2 px-4">{{ $index + 1 }}.</td>
                         <td class="py-2 px-4 text-center">
-                            {{-- Tombol Buka Foto --}}
                             <button @click="showPhotoModal = true; photoUrl = '{{ asset('storage/' . $gangguan->foto) }}'" 
                                     class="text-blue-500 hover:underline">
                                 Buka
@@ -121,7 +122,6 @@
                         @if(Auth::user()->peran == 'komandan')
                         <td class="py-2 px-4">
                             <div class="flex justify-center space-x-3">
-                                {{-- Tombol Edit --}}
                                 <button @click="
                                     showEditModal = true; 
                                     editAction = '{{ route('komandan.gangguan.update', $gangguan->id_gangguan) }}';
@@ -132,8 +132,6 @@
                                 " class="text-blue-500 hover:text-blue-700" title="Edit">
                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
                                 </button>
-                                
-                                {{-- Tombol Hapus --}}
                                 <button @click.prevent="
                                     showDeleteModal = true; 
                                     deleteAction = '{{ route('komandan.gangguan.destroy', $gangguan->id_gangguan) }}'
@@ -143,11 +141,10 @@
                             </div>
                         </td>
                         @endif
-                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="py-4 px-4 text-center text-gray-500">
+                        <td colspan="{{ Auth::user()->peran == 'komandan' ? '7' : '6' }}" class="py-4 px-4 text-center text-gray-500">
                             Tidak ada data gangguan kamtibmas pada bulan ini.
                         </td>
                     </tr>
@@ -155,11 +152,108 @@
                 </tbody>
             </table>
         </div>
+
+        {{-- CARD LAYOUT (Mobile) - HEADER SAMA PERSIS DENGAN PRESENSI --}}
+        <div class="md:hidden space-y-3 p-3">
+            @forelse($riwayatGangguan as $index => $gangguan)
+                <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+                    
+                    {{-- Header: SAMA PERSIS DENGAN PRESENSI --}}
+                    <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] px-4 py-2.5 flex justify-between items-center">
+                        <div>
+                            <p class="text-xs text-blue-200 font-semibold uppercase">Lokasi</p>
+                            <p class="text-white font-bold text-base">{{ $gangguan->lokasi }}</p>
+                        </div>
+
+                        {{-- Badge Kategori --}}
+                        <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg uppercase">
+                            {{ $gangguan->kategori }}
+                        </span>
+                    </div>
+
+                    {{-- Body: Foto Thumbnail (Kiri) + Info Detail (Kanan) --}}
+                    <div class="p-4 flex gap-4">
+
+                        {{-- Foto Thumbnail (Kiri) --}}
+                        <div class="flex-shrink-0">
+                            <img src="{{ asset('storage/' . $gangguan->foto) }}" 
+                                 alt="Foto Gangguan"
+                                 class="w-20 h-20 object-cover rounded-lg shadow-md cursor-pointer hover:opacity-80 transition-opacity"
+                                 @click="showPhotoModal = true; photoUrl = '{{ asset('storage/' . $gangguan->foto) }}'">
+                        </div>
+
+                        {{-- Info Detail (Kanan) --}}
+                        <div class="flex-1 space-y-3">
+                            
+                            {{-- Tanggal & Waktu --}}
+                            <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <div>
+                                        <p class="text-[10px] text-gray-500 font-semibold uppercase">Waktu Lapor</p>
+                                        <p class="text-gray-800 font-bold text-base">{{ $gangguan->waktu_lapor->format('d/m/Y H:i') }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Deskripsi --}}
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <div>
+                                        <p class="text-[10px] text-gray-500 font-semibold uppercase">Deskripsi</p>
+                                        <p class="text-gray-800 font-bold text-base">{{ Str::limit($gangguan->deskripsi, 30) }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Tombol Aksi (Full Width di Bawah) - Hanya untuk Komandan --}}
+                    @if(Auth::user()->peran == 'komandan')
+                        <div class="px-4 pb-4 flex gap-2">
+                            {{-- Tombol Edit --}}
+                            <button @click="
+                                showEditModal = true; 
+                                editAction = '{{ route('komandan.gangguan.update', $gangguan->id_gangguan) }}';
+                                editWaktu = '{{ $gangguan->waktu_lapor->format('Y-m-d\TH:i') }}';
+                                editLokasi = '{{ $gangguan->lokasi }}';
+                                editKategori = '{{ $gangguan->kategori }}';
+                                editDeskripsi = '{{ $gangguan->deskripsi }}';
+                            " class="flex-1 bg-blue-500 text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition flex items-center justify-center gap-1">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
+                                <span class="text-xs">Edit</span>
+                            </button>
+
+                            {{-- Tombol Hapus --}}
+                            <button @click.prevent="
+                                showDeleteModal = true; 
+                                deleteAction = '{{ route('komandan.gangguan.destroy', $gangguan->id_gangguan) }}'
+                            " class="flex-1 bg-red-500 text-white font-bold py-2 rounded-lg hover:bg-red-600 transition flex items-center justify-center gap-1">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                                <span class="text-xs">Hapus</span>
+                            </button>
+                        </div>
+                    @endif
+                </div>
+            @empty
+                <div class="bg-white rounded-xl shadow-md p-8 text-center">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <p class="text-gray-500 font-semibold">Tidak ada data gangguan kamtibmas pada bulan ini.</p>
+                </div>
+            @endforelse
+        </div>
     </div>
 
-    {{-- === MODAL POP-UP (Foto, Edit, Hapus) === --}}
-
-    {{-- 1. Modal Tampil Foto --}}
+    {{-- Modal Tampil Foto (Zoom) --}}
     <div x-show="showPhotoModal" 
          class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
          @click.away="showPhotoModal = false"
@@ -169,13 +263,13 @@
                 <h3 class="text-xl font-bold text-gray-800">FOTO GANGGUAN</h3>
                 <button @click="showPhotoModal = false" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
             </div>
-            <div class="mt-4">
-                <img :src="photoUrl" alt="Foto Gangguan" class="w-full h-auto rounded">
+            <div class="mt-4 flex justify-center bg-gray-100 rounded p-2">
+                <img :src="photoUrl" alt="Foto Gangguan" class="max-w-full max-h-[70vh] rounded object-contain">
             </div>
         </div>
     </div>
 
-    {{-- 2. Modal Edit Gangguan --}}
+    {{-- Modal Edit Gangguan --}}
     <div x-show="showEditModal"
          class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
          @click.away="showEditModal = false"
@@ -227,7 +321,7 @@
         </div>
     </div>
 
-    {{-- 3. Modal Hapus --}}
+    {{-- Modal Hapus --}}
     <div x-show="showDeleteModal"
          class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
          @click.away="showDeleteModal = false"

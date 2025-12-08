@@ -55,7 +55,7 @@
                     </select>
                 </div>
 
-                {{-- ▼▼▼ LIVE SEARCH INPUT (KHUSUS RIWAYAT) ▼▼▼ --}}
+                {{-- LIVE SEARCH INPUT --}}
                 <div class="sm:col-span-2">
                     <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-1">CARI:</label>
                     <input type="text" id="searchInput" name="search" 
@@ -68,22 +68,22 @@
         </div>
     </form>
 
-    {{-- ▼▼▼ ID Container Khusus Tabel Riwayat ▼▼▼ --}}
+    {{-- TABEL 1: RIWAYAT KELUAR/MASUK --}}
     <div id="riwayat-container" class="transition-opacity duration-200">
         <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
             <div class="bg-gray-100 p-3 border-b border-gray-200">
                 <h3 class="font-bold text-gray-800">RIWAYAT KELUAR/MASUK</h3>
             </div>
-            <div class="overflow-x-auto">
+            
+            {{-- TABEL (Desktop) --}}
+            <div class="hidden md:block overflow-x-auto">
                 <table class="w-full min-w-max">
                     <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                         <tr>
                             <th class="py-3 px-4 text-left w-16">No</th>
                             <th class="py-3 px-4 text-left w-32">Nopol</th>
                             <th class="py-3 px-4 text-left">Pemilik</th>
-                            {{-- ▼▼▼ TAMBAHKAN KOLOM TIPE ▼▼▼ --}}
                             <th class="py-3 px-4 text-left w-24">Tipe</th>
-                            {{-- ▲▲▲ --}}
                             <th class="py-3 px-4 text-left w-28">Masuk</th>
                             <th class="py-3 px-4 text-left w-28">Keluar</th>
                             <th class="py-3 px-4 text-left w-40">Ket.</th>
@@ -98,16 +98,12 @@
                             <td class="py-2 px-4">{{ $index + 1 }}.</td>
                             <td class="py-2 px-4 font-medium">{{ $log->nopol ?? 'N/A' }}</td>
                             <td class="py-2 px-4">{{ $log->pemilik ?? 'N/A' }}</td>
-                            
-                            {{-- ▼▼▼ TAMPILKAN DATA TIPE ▼▼▼ --}}
                             <td class="py-2 px-4">
                                 <span class="text-xs font-semibold px-2 py-1 rounded-full 
                                     {{ $log->tipe == 'Roda 4' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' }}">
                                     {{ $log->tipe ?? '-' }}
                                 </span>
                             </td>
-                            {{-- ▲▲▲ --}}
-                            
                             <td class="py-2 px-4 text-gray-700">
                                 @if($log->waktu_masuk && $log->waktu_masuk->format('Y-m-d') == $tanggalTerpilih)
                                     {{ $log->waktu_masuk->format('H:i:s') }}
@@ -145,17 +141,102 @@
                     </tbody>
                 </table>
             </div>
+
+            {{-- CARD LAYOUT (Mobile) --}}
+            <div class="md:hidden space-y-3 p-3">
+                @forelse($riwayat as $index => $log)
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+                        {{-- Header --}}
+                        <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] px-4 py-2.5 flex justify-between items-center">
+                            <div>
+                                <p class="text-xs text-blue-200 font-semibold uppercase">{{ $log->nopol ?? 'N/A' }}</p>
+                                <p class="text-white font-bold text-base">{{ $log->pemilik ?? 'N/A' }}</p>
+                            </div>
+                            <span class="text-xs font-bold px-2.5 py-1 rounded-full 
+                                {{ $log->tipe == 'Roda 4' ? 'bg-blue-500 text-white' : 'bg-green-500 text-white' }}">
+                                {{ $log->tipe ?? '-' }}
+                            </span>
+                        </div>
+
+                        {{-- Body --}}
+                        <div class="p-4 space-y-3">
+                            {{-- Waktu Masuk & Keluar --}}
+                            <div class="grid grid-cols-2 gap-3 pb-2 border-b border-gray-100">
+                                <div>
+                                    <p class="text-[10px] text-gray-500 font-semibold uppercase">Masuk</p>
+                                    <p class="text-gray-800 font-bold text-sm">
+                                        @if($log->waktu_masuk && $log->waktu_masuk->format('Y-m-d') == $tanggalTerpilih)
+                                            {{ $log->waktu_masuk->format('H:i:s') }}
+                                        @else <span class="text-gray-400">-</span> @endif
+                                    </p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] text-gray-500 font-semibold uppercase">Keluar</p>
+                                    <p class="text-gray-800 font-bold text-sm">
+                                        @if($log->waktu_keluar && $log->waktu_keluar->format('Y-m-d') == $tanggalTerpilih)
+                                            {{ $log->waktu_keluar->format('H:i:s') }}
+                                        @else <span class="text-gray-400">-</span> @endif
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- Keterangan --}}
+                            <div>
+                                <p class="text-[10px] text-gray-500 font-semibold uppercase mb-1">Keterangan</p>
+                                @if(Auth::user()->peran == 'komandan')
+                                    <form action="{{ route('komandan.kendaraan.log.updateKeterangan', $log->id_log) }}" method="POST">
+                                        @csrf @method('PUT')
+                                        <select name="keterangan" onchange="this.form.submit()" class="w-full border-gray-300 rounded-lg shadow-sm text-sm py-2 focus:border-blue-500 focus:ring-blue-500">
+                                            <option value="tidak menginap" {{ $log->keterangan == 'tidak menginap' ? 'selected' : '' }}>Tidak Menginap</option>
+                                            <option value="menginap" {{ $log->keterangan == 'Menginap' ? 'selected' : '' }}>Menginap</option>
+                                        </select>
+                                    </form>
+                                @else
+                                    <p class="text-gray-800 font-semibold">{{ $log->keterangan }}</p>
+                                @endif
+                            </div>
+
+                            {{-- Tombol Aksi (Jika Komandan) --}}
+                            @if(Auth::user()->peran == 'komandan')
+                                <div class="pt-2">
+                                    @if($log->kendaraan)
+                                        <div class="flex items-center justify-center gap-2 bg-green-50 text-green-700 font-bold py-2 rounded-lg border border-green-300">
+                                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                            <span class="text-xs">Sudah Terdaftar</span>
+                                        </div>
+                                    @else
+                                        <button @click.prevent="showPromoteModal = true; promoteAction = '{{ route('komandan.kendaraan.log.promote', $log->id_log) }}'" 
+                                                class="w-full bg-blue-500 text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition flex items-center justify-center gap-1">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"></path></svg>
+                                            <span class="text-xs">Daftarkan</span>
+                                        </button>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @empty
+                    <div class="bg-white rounded-xl shadow-md p-8 text-center">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <p class="text-gray-500 font-semibold">Data tidak ditemukan.</p>
+                    </div>
+                @endforelse
+            </div>
         </div>
     </div>
 
-    {{-- ▲▲▲ End Riwayat Container ▲▲▲ --}}
-
-    {{-- Tabel 2: KENDARAAN MASTER (Statik / Tidak ikut search ini) --}}
+    {{-- TABEL 2: KENDARAAN YANG TERDAFTAR --}}
     <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
         <div class="bg-gray-100 p-3 border-b border-gray-200">
             <h3 class="font-bold text-gray-800">KENDARAAN YANG TERDAFTAR</h3>
         </div>
-        <div class="overflow-x-auto">
+        
+        {{-- TABEL (Desktop) --}}
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full min-w-max">
                 <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                     <tr>
@@ -194,10 +275,53 @@
                 </tbody>
             </table>
         </div>
-    </div>
 
-    {{-- MODAL EDIT, HAPUS, PROMOTE (Paste kode modal kamu yang sebelumnya di sini) --}}
-    {{-- ... (Kode Modal Disimpan disini) ... --}}
+        {{-- CARD LAYOUT (Mobile) --}}
+        <div class="md:hidden space-y-3 p-3">
+            @forelse($kendaraanMaster as $index => $kendaraan)
+                <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+                    {{-- Header --}}
+                    <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] px-4 py-2.5 flex justify-between items-center">
+                        <div>
+                            <p class="text-xs text-blue-200 font-semibold uppercase">{{ $kendaraan->nomor_plat }}</p>
+                            <p class="text-white font-bold text-base">{{ $kendaraan->pemilik }}</p>
+                        </div>
+                        <span class="text-xs font-bold px-2.5 py-1 rounded-full 
+                            {{ $kendaraan->tipe == 'Roda 4' ? 'bg-blue-500 text-white' : 'bg-green-500 text-white' }}">
+                            {{ $kendaraan->tipe }}
+                        </span>
+                    </div>
+
+                    {{-- Body --}}
+                    @if(Auth::user()->peran == 'komandan')
+                        <div class="p-4">
+                            <div class="flex gap-2">
+                                <button @click="showEditModal = true; editAction = '{{ route('komandan.kendaraan.master.update', $kendaraan->id_kendaraan) }}'; editPlat = '{{ $kendaraan->nomor_plat }}'; editPemilik = '{{ $kendaraan->pemilik }}'; editTipe = '{{ $kendaraan->tipe }}';" 
+                                        class="flex-1 bg-blue-500 text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition flex items-center justify-center gap-1">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
+                                    <span class="text-xs">Edit</span>
+                                </button>
+                                <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('komandan.kendaraan.master.destroy', $kendaraan->id_kendaraan) }}'" 
+                                        class="flex-1 bg-red-500 text-white font-bold py-2 rounded-lg hover:bg-red-600 transition flex items-center justify-center gap-1">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                                    <span class="text-xs">Hapus</span>
+                                </button>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            @empty
+                <div class="bg-white rounded-xl shadow-md p-8 text-center">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <p class="text-gray-500 font-semibold">Tidak ada data.</p>
+                </div>
+            @endforelse
+        </div>
+    </div>
 
     {{-- Modal Edit Kendaraan --}}
     <div x-show="showEditModal"
@@ -273,13 +397,9 @@
 
         if(searchInput && riwayatContainer && form) {
             searchInput.addEventListener('input', function() {
-                // Hapus timeout lama (debounce)
                 clearTimeout(timeout);
-                
-                // Efek loading
                 riwayatContainer.style.opacity = '0.5';
 
-                // Tunggu 500ms setelah selesai ketik
                 timeout = setTimeout(() => {
                     fetchData();
                 }, 500);
@@ -296,8 +416,6 @@
                 .then(html => {
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
-                    
-                    // Hanya ganti isi dari #riwayat-container
                     const newContent = doc.getElementById('riwayat-container');
 
                     if (newContent) {
@@ -305,8 +423,6 @@
                     }
                     
                     riwayatContainer.style.opacity = '1';
-                    
-                    // Update URL agar kalau di-refresh filternya tetap ada
                     window.history.pushState(null, '', `?${searchParams.toString()}`);
                 })
                 .catch(error => {

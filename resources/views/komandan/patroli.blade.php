@@ -82,13 +82,14 @@
         </button>
     </div>
 
-    {{-- Tabel Daftar Patroli --}}
+    {{-- Daftar Patroli --}}
     <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
         <div class="bg-gray-100 p-3 border-b border-gray-200">
             <h3 class="font-bold text-gray-800">DAFTAR PATROLI</h3>
         </div>
         
-        <div class="overflow-x-auto">
+        {{-- TABEL (Desktop) --}}
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full min-w-max">
                 <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                     <tr>
@@ -142,6 +143,72 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        {{-- CARD LAYOUT (Mobile) --}}
+        <div class="md:hidden space-y-3 p-3">
+            @forelse($dataPatroli as $index => $item)
+                <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+                    
+                    {{-- Header: Jenis Patroli & Nama --}}
+                    <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] px-4 py-2.5 flex justify-between items-center">
+                        <div>
+                            <p class="text-xs text-blue-200 font-semibold uppercase">{{ $item->jenis_patroli }}</p>
+                            <p class="text-white font-bold text-base">{{ $item->nama_lengkap }}</p>
+                        </div>
+                        <span class="bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                            {{ $item->waktu_exact->format('H:i') }}
+                        </span>
+                    </div>
+
+                    {{-- Body: Info Detail --}}
+                    <div class="p-4 space-y-3">
+                        
+                        {{-- Wilayah --}}
+                        <div class="flex items-center gap-2 pb-2 border-b border-gray-100">
+                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <div class="flex-1">
+                                <p class="text-[10px] text-gray-500 font-semibold uppercase">Wilayah</p>
+                                <p class="text-gray-800 font-bold text-sm">{{ $item->wilayah }}</p>
+                            </div>
+                            
+                            {{-- Tombol Foto --}}
+                            <button @click="showPhotoModal = true; photoUrl = '{{ asset('storage/' . $item->foto) }}'" 
+                                    class="text-blue-500 hover:text-blue-700 font-semibold text-sm underline">
+                                Lihat Foto
+                            </button>
+                        </div>
+
+                        {{-- Tombol Aksi (Jika Komandan) --}}
+                        @if(Auth::user()->peran == 'komandan')
+                            <div class="flex gap-2 pt-2">
+                                <button @click="showEditModal = true; editAction = '{{ route('komandan.patroli.update', $item->id_patroli) }}'; editWilayah = '{{ $item->wilayah }}'" 
+                                        class="flex-1 bg-blue-500 text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition flex items-center justify-center gap-1">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
+                                    <span class="text-xs">Edit</span>
+                                </button>
+                                <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('komandan.patroli.destroy', $item->id_patroli) }}'" 
+                                        class="flex-1 bg-red-500 text-white font-bold py-2 rounded-lg hover:bg-red-600 transition flex items-center justify-center gap-1">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                                    <span class="text-xs">Hapus</span>
+                                </button>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @empty
+                <div class="bg-white rounded-xl shadow-md p-8 text-center">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <p class="text-gray-500 font-semibold">Tidak ada data patroli pada tanggal ini.</p>
+                </div>
+            @endforelse
         </div>
     </div>
 
@@ -323,7 +390,7 @@
                         @endforeach
                     </div>
 
-                    {{-- NON SHIFT - Placeholder (Optional) --}}
+                    {{-- NON SHIFT - Placeholder --}}
                     <div class="bg-gray-50 rounded-xl p-5 border-2 border-gray-200">
                         <h4 class="text-lg font-bold text-gray-700 mb-4">NON SHIFT</h4>
                         <p class="text-sm text-gray-500 italic">Pengaturan non-shift dapat ditambahkan jika diperlukan.</p>
