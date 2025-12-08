@@ -6,7 +6,7 @@
 
 @section('header-left')
     <a class="inline-block border-2 border-[#1a2847] text-[#1a2847] text-sm font-bold px-4 py-1 rounded-full mb-4">
-        GANGGUAN KAMTIBMAS
+        GANGGUAN<br class="sm:hidden"> KAMTIBMAS
     </a>
 @endsection
 
