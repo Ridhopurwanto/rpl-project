@@ -48,26 +48,33 @@
     @endif
 
     {{-- Form Filter Tanggal --}}
-    <form action="{{ route('komandan.tamu') }}" method="GET">
-        <div class="bg-white p-4 rounded-lg shadow-md mb-6">
-            <div class="flex flex-col sm:flex-row sm:items-end sm:space-x-4 space-y-4 sm:space-y-0">
+    <form action="{{ route('komandan.tamu') }}" method="GET" x-data="{}">
+        <div class="bg-white px-6 py-5 rounded-xl shadow-sm mb-6 border border-gray-200">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
-                {{-- Input Rentang Tanggal (Grid 2 Kolom) --}}
-                <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">DARI TANGGAL:</label>
-                        <input type="date" id="start_date" name="start_date" 
+                {{-- Filter Dari Tanggal --}}
+                <div class="w-full">
+                    <label for="start_date" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Dari Tanggal
+                    </label>
+                    <div class="cursor-pointer" @click="$refs.dateStart.showPicker()">
+                        <input type="date" id="start_date" name="start_date" x-ref="dateStart"
                                onchange="this.form.submit()"
-                               class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400" 
-                               style="color-scheme: dark;"
+                               class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
                                value="{{ $startDate }}">
                     </div>
-                    <div>
-                        <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">SAMPAI TANGGAL:</label>
-                        <input type="date" id="end_date" name="end_date" 
+                </div>
+
+                {{-- Filter Sampai Tanggal --}}
+                <div class="w-full">
+                    <label for="end_date" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Sampai Tanggal
+                    </label>
+                    <div class="cursor-pointer" @click="$refs.dateEnd.showPicker()">
+                        <input type="date" id="end_date" name="end_date" x-ref="dateEnd"
                                onchange="this.form.submit()"
-                               class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400" 
-                               style="color-scheme: dark;"
+                               class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
                                value="{{ $endDate }}">
                     </div>
                 </div>
