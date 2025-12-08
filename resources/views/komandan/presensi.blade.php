@@ -22,7 +22,19 @@
          showRuleModal: false
      }">
     
-    <h2 class="text-2xl font-bold text-slate-800 mb-4">Laporan Presensi Anggota</h2>
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold text-slate-800">Laporan Presensi Anggota</h2>
+        <button @click="showRuleModal = true" 
+                class="bg-[#2a4a6f] text-white p-2.5 rounded-lg shadow-md hover:bg-[#1e3a5f] transition" 
+                title="Pengaturan Shift Rule">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+        </button>
+    </div>
 
     {{-- Tampilkan Notifikasi --}}
     @if(session('success'))
@@ -47,28 +59,45 @@
     @endif
 
     {{-- Form Filter --}}
-    <form action="{{ route('komandan.presensi') }}" method="GET">
-        <div class="bg-white p-4 rounded-lg shadow-md mb-6">
-            <div class="flex flex-col sm:flex-row sm:items-end sm:space-x-4 space-y-4 sm:space-y-0">
-                <div class="flex-1">
-                    <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">TANGGAL:</label>
-                    <input type="date" id="tanggal" name="tanggal" 
-                           onchange="this.form.submit()"
-                           class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400" 
-                           style="color-scheme: dark;"
-                           value="{{ $tanggalTerpilih }}">
+    <form action="{{ route('komandan.presensi') }}" method="GET" x-data="{}">
+        <div class="bg-white px-6 py-5 rounded-xl shadow-sm mb-6 border border-gray-200">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                {{-- Filter Tanggal --}}
+                <div class="w-full">
+                    <label for="tanggal" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Tanggal
+                    </label>
+                    <div class="cursor-pointer" @click="$refs.dateInput.showPicker()">
+                        <input type="date" id="tanggal" name="tanggal" x-ref="dateInput"
+                               onchange="this.form.submit()"
+                               class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
+                               value="{{ $tanggalTerpilih }}">
+                    </div>
                 </div>
-                <div class="flex-1">
-                    <label for="shift" class="block text-sm font-medium text-gray-700 mb-1">JENIS SHIFT:</label>
-                    <select id="shift" name="shift" 
-                            onchange="this.form.submit()"
-                            class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400">
-                        <option value="semua" @if($shiftTerpilih == 'semua') selected @endif>Semua Shift</option>
-                        <option value="Pagi" @if($shiftTerpilih == 'Pagi') selected @endif>Shift Pagi</option>
-                        <option value="Malam" @if($shiftTerpilih == 'Malam') selected @endif>Shift Malam</option>
-                        <option value="Non Shift" @if($shiftTerpilih == 'Non Shift') selected @endif>Non Shift</option>
-                        <option value="Off" @if($shiftTerpilih == 'Off') selected @endif>Off</option>
-                    </select>
+
+                {{-- Filter Jenis Shift --}}
+                <div class="w-full">
+                    <label for="shift" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Jenis Shift
+                    </label>
+                    <div class="relative">
+                        <select id="shift" name="shift" 
+                                onchange="this.form.submit()"
+                                class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                            <option value="semua" @if($shiftTerpilih == 'semua') selected @endif>Semua Shift</option>
+                            <option value="Pagi" @if($shiftTerpilih == 'Pagi') selected @endif>Shift Pagi</option>
+                            <option value="Malam" @if($shiftTerpilih == 'Malam') selected @endif>Shift Malam</option>
+                            <option value="Non Shift" @if($shiftTerpilih == 'Non Shift') selected @endif>Non Shift</option>
+                            <option value="Off" @if($shiftTerpilih == 'Off') selected @endif>Off</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -350,15 +379,6 @@
                 </div>
             @endforelse
         </div>
-    </div>
-
-    {{-- TOMBOL PENGATURAN SHIFT RULE --}}
-    <div class="flex justify-end mb-8">
-        <button @click="showRuleModal = true" 
-                class="flex items-center gap-2 bg-slate-700 text-white px-5 py-2.5 rounded-lg shadow hover:bg-slate-800 transition transform active:scale-95">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-            <span>PENGATURAN SHIFT RULE</span>
-        </button>
     </div>
 
     {{-- MODAL PENGATURAN RULE --}}

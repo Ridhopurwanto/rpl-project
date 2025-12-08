@@ -19,7 +19,19 @@
          showRulesModal: false
      }">
     
-    <h2 class="text-2xl font-bold text-slate-800 mb-4">Laporan Patroli Anggota</h2>
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold text-slate-800">Laporan Patroli Anggota</h2>
+        <button @click="showRulesModal = true" 
+                class="bg-[#2a4a6f] text-white p-2.5 rounded-lg shadow-md hover:bg-[#1e3a5f] transition" 
+                title="Pengaturan Jam Patroli">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+        </button>
+    </div>
 
     {{-- Tampilkan Notifikasi Sukses/Error --}}
     @if(session('success'))
@@ -34,53 +46,51 @@
     @endif
 
     {{-- Form Filter --}}
-    <form action="{{ route('komandan.patroli') }}" method="GET">
-        <div class="bg-white p-4 rounded-lg shadow-md mb-6">
-            <div class="flex flex-col sm:flex-row sm:items-end sm:space-x-4 space-y-4 sm:space-y-0">
+    <form action="{{ route('komandan.patroli') }}" method="GET" x-data="{}">
+        <div class="bg-white px-6 py-5 rounded-xl shadow-sm mb-6 border border-gray-200">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
                 {{-- Filter Tanggal --}}
-                <div class="flex-1">
-                    <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">TANGGAL:</label>
-                    <input type="date" id="tanggal" name="tanggal" 
-                           onchange="this.form.submit()"
-                           class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400" 
-                           style="color-scheme: dark;"
-                           value="{{ $tanggalTerpilih }}">
+                <div class="w-full">
+                    <label for="tanggal" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Tanggal
+                    </label>
+                    <div class="cursor-pointer" @click="$refs.dateInput.showPicker()">
+                        <input type="date" id="tanggal" name="tanggal" x-ref="dateInput"
+                               onchange="this.form.submit()"
+                               class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
+                               value="{{ $tanggalTerpilih }}">
+                    </div>
                 </div>
 
                 {{-- Filter Jenis Patroli --}}
-                <div class="flex-1">
-                    <label for="jenis_patroli" class="block text-sm font-medium text-gray-700 mb-1">JENIS PATROLI:</label>
-                    <select id="jenis_patroli" name="jenis_patroli" 
-                            onchange="this.form.submit()"
-                            class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400">
-                        @forelse($jenisPatroliOptions as $opsi)
-                            <option value="{{ $opsi }}" {{ $jenisPatroliTerpilih == $opsi ? 'selected' : '' }}>
-                                {{ $opsi }}
-                            </option>
-                        @empty
-                            <option value="" disabled selected>Tidak ada data jenis patroli</option>
-                        @endforelse
-                    </select>
+                <div class="w-full">
+                    <label for="jenis_patroli" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Jenis Patroli
+                    </label>
+                    <div class="relative">
+                        <select id="jenis_patroli" name="jenis_patroli" 
+                                onchange="this.form.submit()"
+                                class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                            @forelse($jenisPatroliOptions as $opsi)
+                                <option value="{{ $opsi }}" {{ $jenisPatroliTerpilih == $opsi ? 'selected' : '' }}>
+                                    {{ $opsi }}
+                                </option>
+                            @empty
+                                <option value="" disabled selected>Tidak ada data jenis patroli</option>
+                            @endforelse
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
-
             </div>
         </div>
     </form>
-
-    {{-- Tombol Pengaturan Jam Patroli --}}
-    <div class="flex justify-end mb-4">
-        <button @click="showRulesModal = true" 
-                class="flex items-center gap-2 bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#1e3a5f] transition">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-            </svg>
-            PENGATURAN JAM PATROLI
-        </button>
-    </div>
 
     {{-- Daftar Patroli --}}
     <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
@@ -304,10 +314,10 @@
          class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
          @click.away="showRulesModal = false"
          style="display: none;">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto" @click.stop>
+        <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] flex flex-col" @click.stop>
             
             {{-- Header Modal --}}
-            <div class="sticky top-0 bg-gradient-to-r from-slate-700 to-slate-900 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between z-10">
+            <div class="bg-gradient-to-r from-slate-700 to-slate-900 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between flex-shrink-0">
                 <div class="flex items-center gap-3">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -321,7 +331,8 @@
             </div>
 
             {{-- Body Modal --}}
-            <form action="{{ route('komandan.patroli.updateRules') }}" method="POST" class="p-6">
+            <div class="overflow-y-auto flex-1">
+                <form action="{{ route('komandan.patroli.updateRules') }}" method="POST" class="p-6">
                 @csrf
                 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -398,21 +409,22 @@
 
                 </div>
 
-                {{-- Footer/Action Buttons --}}
-                <div class="mt-6 flex justify-end gap-3">
-                    <button type="button" @click="showRulesModal = false" 
-                            class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">
-                        Batal
-                    </button>
-                    <button type="submit" 
-                            class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                        Simpan Perubahan
-                    </button>
-                </div>
-            </form>
+                    {{-- Footer/Action Buttons --}}
+                    <div class="mt-6 flex justify-end gap-3">
+                        <button type="button" @click="showRulesModal = false" 
+                                class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">
+                            Batal
+                        </button>
+                        <button type="submit" 
+                                class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
+            </div>
 
         </div>
     </div>
