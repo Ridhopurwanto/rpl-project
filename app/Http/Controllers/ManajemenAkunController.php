@@ -29,6 +29,7 @@ class ManajemenAkunController extends Controller
     {
         $request->validate([
             'nama_lengkap' => 'required|string|max:255',
+            'email'        => 'required|email|max:255|unique:pengguna,email',
             // Pastikan tabel di DB bernama 'users' atau sesuaikan 'unique:users,username'
             'username'     => 'required|string|max:255|unique:pengguna,username', 
             'password'     => ['required', 'confirmed', Password::min(8)],
@@ -66,6 +67,7 @@ class ManajemenAkunController extends Controller
         $request->validate([
             'nama_lengkap' => 'required|string|max:255',
             // Validasi unique mengecualikan ID pengguna saat ini
+            'email'        => ['required', 'email', 'max:255', Rule::unique('pengguna')->ignore($user->id_pengguna, 'id_pengguna')],
             'username'     => ['required', 'string', 'max:255', Rule::unique('pengguna')->ignore($user->id_pengguna, 'id_pengguna')],
             'password'     => ['nullable', 'confirmed', Password::min(8)],
             'peran'        => ['required', Rule::in(['anggota', 'komandan', 'bau'])],

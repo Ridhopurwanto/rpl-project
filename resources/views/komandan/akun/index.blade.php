@@ -35,12 +35,14 @@
         
         {{-- Notifikasi --}}
         @if (session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" x-transition
+                class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
                 <span class="block sm:inline">{{ session('success') }}</span>
             </div>
         @endif
         @if ($errors->any())
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" x-transition
+                class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
                 <ul>@foreach ($errors->all() as $error) <li>{{ $error }}</li> @endforeach</ul>
             </div>
         @endif
@@ -233,6 +235,15 @@
                             {{-- Icon Uniform Color --}}
                             <svg class="w-5 h-5 text-[#1e3a5f] mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             <span class="text-sm font-semibold text-gray-700" x-text="infoUser.username || '-'"></span>
+                        </div>
+                    </div>
+
+                    {{-- Email --}}
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Email</label>
+                        <div class="flex items-center bg-gray-50 p-3 rounded-xl border border-gray-100">
+                            <svg class="w-5 h-5 text-[#1e3a5f] mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            <span class="text-sm font-semibold text-gray-700" x-text="infoUser.email || '-'"></span>
                         </div>
                     </div>
 
