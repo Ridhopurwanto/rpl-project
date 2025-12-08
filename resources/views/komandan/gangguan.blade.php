@@ -52,7 +52,6 @@
     {{-- Form Filter --}}
     <form action="{{ route('komandan.gangguan') }}" method="GET" x-data="{}">
         <div class="bg-white px-6 py-5 rounded-xl shadow-sm mb-6 border border-gray-200">
-            <h3 class="text-sm font-bold text-gray-700 mb-4 uppercase tracking-wide">Filter Laporan</h3>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 

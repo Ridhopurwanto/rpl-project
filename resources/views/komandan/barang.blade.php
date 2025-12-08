@@ -21,36 +21,51 @@
     <h2 class="text-2xl font-bold text-slate-800 mb-4">Laporan Barang</h2>
 
     {{-- Form Filter --}}
-    <form id="filterForm" action="{{ route('komandan.barang') }}" method="GET">
-        <div class="bg-white p-4 rounded-lg shadow-md mb-6">
-            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+    <form id="filterForm" action="{{ route('komandan.barang') }}" method="GET" x-data="{}">
+        <div class="bg-white px-6 py-5 rounded-xl shadow-sm mb-6 border border-gray-200">
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
                 {{-- Filter Tanggal --}}
-                <div class="sm:col-span-1">
-                    <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">TANGGAL:</label>
-                    <input type="date" id="tanggal" name="tanggal" 
-                           onchange="document.getElementById('filterForm').submit()"
-                           class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-                           style="color-scheme: dark;"
-                           value="{{ $tanggalTerpilih }}">
+                <div class="w-full">
+                    <label for="tanggal" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Tanggal
+                    </label>
+                    <div class="cursor-pointer" @click="$refs.dateInput.showPicker()">
+                        <input type="date" id="tanggal" name="tanggal" x-ref="dateInput"
+                               onchange="document.getElementById('filterForm').submit()"
+                               class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
+                               value="{{ $tanggalTerpilih }}">
+                    </div>
                 </div>
 
                 {{-- Filter Kategori --}}
-                <div class="sm:col-span-1">
-                    <label for="kategori" class="block text-sm font-medium text-gray-700 mb-1">KATEGORI:</label>
-                    <select id="kategori" name="kategori" 
-                            onchange="document.getElementById('filterForm').submit()"
-                            class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400">
-                        <option value="temuan" {{ $kategoriTerpilih == 'temuan' ? 'selected' : '' }}>Barang Temuan</option>
-                        <option value="titipan" {{ $kategoriTerpilih == 'titipan' ? 'selected' : '' }}>Barang Titipan</option>
-                    </select>
+                <div class="w-full">
+                    <label for="kategori" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Kategori
+                    </label>
+                    <div class="relative">
+                        <select id="kategori" name="kategori" 
+                                onchange="document.getElementById('filterForm').submit()"
+                                class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                            <option value="temuan" {{ $kategoriTerpilih == 'temuan' ? 'selected' : '' }}>Barang Temuan</option>
+                            <option value="titipan" {{ $kategoriTerpilih == 'titipan' ? 'selected' : '' }}>Barang Titipan</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
 
                 {{-- Live Search Input --}}
-                <div class="sm:col-span-2">
-                    <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-1">CARI:</label>
+                <div class="w-full">
+                    <label for="searchInput" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Cari Barang
+                    </label>
                     <input type="text" id="searchInput" name="search" 
-                           class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder-gray-300" 
+                           class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm placeholder-gray-400" 
                            value="{{ $jenisTerpilih }}" 
                            placeholder="Ketik untuk mencari...">
                 </div>
