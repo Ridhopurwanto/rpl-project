@@ -4,14 +4,33 @@
 
 <div x-data="{
         // Definisi variabel form
-        nama_lengkap: '',
-        username: '',
-        peran: 'anggota',
-        jenis_jadwal: 'shift', 
-        status: 'Aktif',
-        tanggal_lahir: '',
-        no_hp: '',
-        alamat: '',
+        nama_lengkap: '{{ old('nama_lengkap') }}',
+        username: '{{ old('username') }}',
+        peran: '{{ old('peran', 'anggota') }}',
+        jenis_jadwal: '{{ old('jenis_jadwal', 'shift') }}', 
+        status: '{{ old('status', 'Aktif') }}',
+        tanggal_lahir: '{{ old('tanggal_lahir') }}',
+        no_hp: '{{ old('no_hp') }}',
+        alamat: '{{ old('alamat') }}',
+        
+        // State untuk preview foto
+        photoPreview: null,
+        photoName: null,
+        photoPosition: 50, // 0-100 (Center)
+
+        // Fungsi udpate preview saat file dipilih
+        updatePreview(event) {
+            const file = event.target.files[0];
+            if (file) {
+                this.photoName = file.name;
+                this.photoPosition = 50; // Reset ke tengah saat ganti foto
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.photoPreview = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        },
 
         // Fungsi untuk mengisi form (Edit)
         fillForm(data) {
@@ -33,6 +52,11 @@
 
         // Fungsi reset (Create)
         resetForm() {
+            // Jika ada old input (error validasi), jangan reset ke kosong
+            @if($errors->any())
+                return;
+            @endif
+            
             this.nama_lengkap = '';
             this.username = '';
             this.peran = 'anggota';
@@ -41,6 +65,9 @@
             this.tanggal_lahir = '';
             this.no_hp = '';
             this.alamat = '';
+            this.photoPreview = null;
+            this.photoName = null;
+            this.photoPosition = 50;
         }
     }"
     {{-- Event Listener --}}
@@ -230,14 +257,48 @@
         <div class="mt-4">
             <label class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-2">Foto Profil</label>
             <div class="flex items-center justify-center w-full">
-                <label for="foto_profil" class="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-white hover:border-[#1e3a5f] transition-all duration-300 group">
+            <div class="flex flex-col items-center justify-center w-full">
+                
+                {{-- State 1: Belum ada foto (Upload Box) --}}
+                <label x-show="!photoPreview" for="foto_profil_{{ $isEdit ? 'edit' : 'create' }}" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-white hover:border-[#1e3a5f] transition-all duration-300 group">
                     <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                        {{-- Icon Uniform Color (Default & Hover state handled by group-hover) --}}
-                        <svg class="w-6 h-6 mb-2 text-[#1e3a5f] group-hover:text-[#1e3a5f] transition-colors opacity-60 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-                        <p class="mb-1 text-xs text-gray-500 group-hover:text-gray-700"><span class="font-semibold text-[#1e3a5f]">Klik upload</span> / drag file</p>
+                        {{-- Icon Uniform Color --}}
+                        <svg class="w-8 h-8 mb-3 text-[#1e3a5f] group-hover:text-[#1e3a5f] transition-colors opacity-60 group-hover:opacity-100 placeholder-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                        <p class="mb-1 text-xs text-gray-500 group-hover:text-gray-700 text-center"><span class="font-bold text-[#1e3a5f]">Klik untuk upload</span><br><span class="text-[10px]">atau drag file ke sini</span></p>
+                        <p class="text-[10px] text-gray-400 mt-1">PNG, JPG (Max. 2MB)</p>
                     </div>
-                    <input id="foto_profil" name="foto_profil" type="file" class="hidden" />
+                    <input id="foto_profil_{{ $isEdit ? 'edit' : 'create' }}" 
+                           x-ref="fileInput"
+                           @change="updatePreview($event)"
+                           name="foto_profil" 
+                           type="file" 
+                           class="hidden" 
+                           accept="image/*" />
                 </label>
+
+                {{-- State 2: Preview Foto --}}
+                <div x-show="photoPreview" class="relative group w-full flex flex-col items-center">
+                    <div class="relative w-32 h-32 mb-3 overflow-hidden rounded-full border-4 border-white shadow-lg">
+                        {{-- Note: object-position controlling Y axis (vertical) --}}
+                        <img :src="photoPreview" 
+                             :style="'object-position: center ' + photoPosition + '%'"
+                             class="w-full h-full object-cover">
+                        
+                        <button type="button" 
+                                @click="photoPreview = null; photoName = null; $refs.fileInput.value = null"
+                                class="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1.5 shadow-md hover:bg-red-600 transition transform hover:scale-110 z-10"
+                                title="Hapus Foto">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> 
+                        </button>
+                    </div>
+
+                    <div class="text-center">
+                        <p class="text-xs font-bold text-[#1e3a5f] truncate max-w-[200px]" x-text="photoName"></p>
+                        <button type="button" @click="$refs.fileInput.click()" class="text-[10px] text-blue-500 hover:text-blue-700 underline mt-1">Ganti Foto</button>
+                    </div>
+                </div>
+
+            </div>
             </div>
         </div>
     </div>

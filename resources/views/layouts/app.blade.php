@@ -13,6 +13,8 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @stack('styles')
         
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" integrity="sha512-cyzxRVeD840N9uCMHf8Ma91W4kmsBRk2R6OqL4+40wL2vB+8f9k76r3/68+1f4+8+8+8+8+8+8+8+8+8+8" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js" integrity="sha512-6lplKUSl86rFkqy91bNZ0NO80g2j+6K6e56886745454545" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="//unpkg.com/alpinejs" defer></script>
     </head>
     <body class="font-sans antialiased">
