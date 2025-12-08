@@ -239,36 +239,44 @@
 
                 {{-- Form Filter dengan HYBRID: Suggestion + Live Search --}}
                 <form action="{{ route('anggota.barang.index') }}" method="GET" id="searchBarangForm"
-                    class="bg-white p-4 rounded-lg shadow-md mt-2 mb-4">
-                    <div class="flex flex-col md:flex-row gap-4">
+                    class="bg-white px-6 py-5 rounded-xl shadow-sm mt-2 mb-4 border border-gray-200" x-data="{}">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                         {{-- Filter Tanggal --}}
-                        <div class="flex-1 w-full">
-                            <label for="tanggal" class="block text-sm font-bold text-slate-600 uppercase mb-1">TANGGAL
-                                :</label>
-                            <input type="date" id="tanggal" name="tanggal" value="{{ $tanggal_terpilih }}"
-                                onchange="document.getElementById('searchBarangForm').submit()"
-                                class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                style="color-scheme: dark;">
+                        <div class="w-full">
+                            <label for="tanggal" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                                Tanggal
+                            </label>
+                            <div class="cursor-pointer" @click="$refs.dateInput.showPicker()">
+                                <input type="date" id="tanggal" name="tanggal" x-ref="dateInput" value="{{ $tanggal_terpilih }}"
+                                    onchange="document.getElementById('searchBarangForm').submit()"
+                                    class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
+                            </div>
                         </div>
 
                         {{-- Filter Kategori (SEMUA, TITIPAN, TEMUAN) --}}
-                        <div class="flex-1 w-full">
-                            <label for="kategori" class="block text-sm font-bold text-slate-600 uppercase mb-1">KATEGORI
-                                :</label>
-                            <select id="kategori" name="kategori"
-                                onchange="document.getElementById('searchBarangForm').submit()"
-                                class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400 cursor-pointer">
-                                <option value="semua" @if($kategori_terpilih == 'semua') selected @endif>Semua Barang</option>
-                                <option value="titipan" @if($kategori_terpilih == 'titipan') selected @endif>Barang Titipan
-                                </option>
-                                <option value="temuan" @if($kategori_terpilih == 'temuan') selected @endif>Barang Temuan
-                                </option>
-                            </select>
+                        <div class="w-full">
+                            <label for="kategori" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                                Kategori
+                            </label>
+                            <div class="relative">
+                                <select id="kategori" name="kategori"
+                                    onchange="document.getElementById('searchBarangForm').submit()"
+                                    class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                                    <option value="semua" @if($kategori_terpilih == 'semua') selected @endif>Semua Barang</option>
+                                    <option value="titipan" @if($kategori_terpilih == 'titipan') selected @endif>Barang Titipan</option>
+                                    <option value="temuan" @if($kategori_terpilih == 'temuan') selected @endif>Barang Temuan</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
 
                         {{-- Search dengan Hybrid (Suggestion + Live Search) --}}
-                        <div class="flex-1 w-full" x-data="{
+                        <div class="w-full" x-data="{
                             searchQuery: '{{ $search_filter ?? '' }}',
                             tanggalFilter: '{{ $tanggal_terpilih }}',
                             kategoriFilter: '{{ $kategori_terpilih }}',
@@ -342,19 +350,20 @@
                             }
                         }">
 
-                            <label for="search" class="block text-sm font-bold text-slate-600 uppercase mb-1">CARI BARANG
-                                :</label>
+                            <label for="search" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                                Cari Barang
+                            </label>
                             <div class="relative">
                                 <input type="text" id="search" name="search" x-model="searchQuery"
                                     @input="getSuggestions(); triggerLiveSearch()"
                                     @focus="if(searchQuery.length >= 1) getSuggestions()"
                                     @keydown.enter.prevent="triggerLiveSearchNow()"
-                                    placeholder="Nama barang, pelapor, atau penerima" autocomplete="off"
-                                    class="w-full bg-[#2a4a6f] text-white px-4 py-2 pr-12 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder-gray-300">
+                                    placeholder="Ketik untuk mencari..." autocomplete="off"
+                                    class="block w-full h-[42px] px-4 pr-12 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm placeholder-gray-400">
 
                                 {{-- Loading Indicator --}}
                                 <div x-show="liveSearching" class="absolute right-14 top-1/2 -translate-y-1/2">
-                                    <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                    <svg class="animate-spin h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
                                             stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor"

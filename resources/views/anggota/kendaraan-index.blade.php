@@ -129,22 +129,24 @@
                 x-transition:leave-end="opacity-0 -translate-y-2">
 
                 {{-- Filter dengan HYBRID: Suggestion + Live Search --}}
-                <div class="bg-white rounded-lg shadow-md p-4 mt-2">
+                <div class="bg-white px-6 py-5 rounded-xl shadow-sm mt-2 border border-gray-200" x-data="{}">
                     <form action="{{ route('anggota.kendaraan.index') }}" method="GET" id="searchForm">
-                        <div class="flex flex-col md:flex-row gap-4 items-end">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                             {{-- Filter Tanggal --}}
-                            <div class="flex-1 w-full">
-                                <label for="tanggal" class="block text-sm font-bold text-slate-600 uppercase mb-1">TANGGAL
-                                    :</label>
-                                <input type="date" id="tanggal" name="tanggal" value="{{ $tanggal_terpilih }}"
-                                    onchange="document.getElementById('searchForm').submit()"
-                                    class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                    style="color-scheme: dark;">
+                            <div class="w-full">
+                                <label for="tanggal" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                                    Tanggal
+                                </label>
+                                <div class="cursor-pointer" @click="$refs.dateInput.showPicker()">
+                                    <input type="date" id="tanggal" name="tanggal" x-ref="dateInput" value="{{ $tanggal_terpilih }}"
+                                        onchange="document.getElementById('searchForm').submit()"
+                                        class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
+                                </div>
                             </div>
 
                             {{-- Search Kendaraan: HYBRID AJAX (Suggestion + Live Search tanpa reload) --}}
-                            <div class="flex-1 w-full" x-data="{
+                            <div class="w-full" x-data="{
                 nopolSearch: '{{ $nopol_filter ?? '' }}',
                 tanggalFilter: '{{ $tanggal_terpilih }}',
                 suggestions: [],
@@ -237,19 +239,20 @@
                 }
             }">
 
-                                <label for="nopol" class="block text-sm font-bold text-slate-600 uppercase mb-1">CARI
-                                    KENDARAAN :</label>
+                                <label for="nopol" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                                    Cari Kendaraan
+                                </label>
                                 <div class="relative">
                                     <input type="text" id="nopol" name="nopol" x-model="nopolSearch"
                                         @input="getSuggestions(); triggerLiveSearch()"
                                         @focus="if(nopolSearch.length >= 1) getSuggestions()"
                                         @keydown.enter.prevent="triggerLiveSearchNow()"
-                                        placeholder="Masukkan Nopol atau Nama Pemilik" autocomplete="off"
-                                        class="w-full bg-[#2a4a6f] text-white px-4 py-2 pr-12 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder-gray-300">
+                                        placeholder="Ketik untuk mencari..." autocomplete="off"
+                                        class="block w-full h-[42px] px-4 pr-12 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm placeholder-gray-400">
 
                                     {{-- Loading Indicator untuk Live Search --}}
                                     <div x-show="liveSearching" class="absolute right-14 top-1/2 -translate-y-1/2">
-                                        <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                        <svg class="animate-spin h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
                                                 stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor"
