@@ -317,17 +317,19 @@
         <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] flex flex-col" @click.stop>
             
             {{-- Header Modal --}}
-            <div class="bg-gradient-to-r from-slate-700 to-slate-900 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between flex-shrink-0">
-                <div class="flex items-center gap-3">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="bg-[#1e3a5f] px-6 py-4 rounded-t-2xl flex items-center justify-between flex-shrink-0 border-b border-[#1e3a5f]">
+                <h3 class="text-lg font-bold text-white flex items-center tracking-wide">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                               d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                               d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     </svg>
-                    <h3 class="text-xl font-bold">PENGATURAN JAM PATROLI</h3>
-                </div>
-                <button @click="showRulesModal = false" class="text-white hover:text-gray-300 text-3xl">&times;</button>
+                    PENGATURAN JAM PATROLI
+                </h3>
+                <button @click="showRulesModal = false" class="text-white/70 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
 
             {{-- Body Modal --}}
@@ -410,17 +412,17 @@
                 </div>
 
                     {{-- Footer/Action Buttons --}}
-                    <div class="mt-6 flex justify-end gap-3">
+                    <div class="mt-6 p-4 border-t bg-gray-50 flex justify-end gap-3">
                         <button type="button" @click="showRulesModal = false" 
-                                class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">
+                                class="bg-gray-200 text-gray-800 px-6 py-2.5 rounded-lg font-semibold hover:bg-gray-300 transition">
                             Batal
                         </button>
                         <button type="submit" 
-                                class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition flex items-center gap-2">
+                                class="bg-[#1e3a5f] text-white px-6 py-2.5 rounded-xl font-bold hover:bg-[#2a4a6f] shadow-lg transition transform hover:-translate-y-0.5 flex items-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
-                            Simpan Perubahan
+                            SIMPAN PERUBAHAN
                         </button>
                     </div>
                 </form>

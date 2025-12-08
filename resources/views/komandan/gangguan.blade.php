@@ -287,47 +287,88 @@
          class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
          @click.away="showEditModal = false"
          style="display: none;">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-4 relative" @click.stop>
-            <div class="flex justify-between items-center pb-3 border-b">
-                <h3 class="text-xl font-bold text-gray-800">EDIT GANGGUAN KAMTIBMAS</h3>
-                <button @click="showEditModal = false" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full relative overflow-hidden" @click.stop>
+            {{-- Header Biru --}}
+            <div class="bg-[#1e3a5f] py-4 px-6 border-b border-[#1e3a5f] flex justify-between items-center">
+                <h3 class="text-lg font-bold text-white flex items-center tracking-wide">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    EDIT GANGGUAN KAMTIBMAS
+                </h3>
+                <button @click="showEditModal = false" class="text-white/70 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
             
-            <form :action="editAction" method="POST" class="mt-4">
+            <form :action="editAction" method="POST">
                 @csrf
                 @method('PUT')
-                <div class="space-y-4">
+                <div class="modal-body max-h-[70vh] overflow-y-auto p-6">
+                <div class="space-y-5">
                     
-                    <div>
-                        <label for="waktu_lapor" class="block text-sm font-medium text-gray-700 mb-1">Waktu Lapor:</label>
-                        <input type="datetime-local" id="waktu_lapor" name="waktu_lapor" x-model="editWaktu"
-                               class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-                    
-                    <div>
-                        <label for="lokasi" class="block text-sm font-medium text-gray-700 mb-1">Lokasi:</label>
-                        <input type="text" id="lokasi" name="lokasi" x-model="editLokasi"
-                               class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    {{-- GROUP: Informasi Laporan --}}
+                    <div class="p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+                                                
+                        <div class="space-y-4">
+                            {{-- Waktu Lapor --}}
+                            <div>
+                                <label for="waktu_lapor" class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">Waktu Lapor <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    </div>
+                                    <input type="datetime-local" id="waktu_lapor" name="waktu_lapor" x-model="editWaktu" required
+                                           class="pl-10 w-full bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5">
+                                </div>
+                            </div>
+                            
+                            {{-- Lokasi --}}
+                            <div>
+                                <label for="lokasi" class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">Lokasi <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                    </div>
+                                    <input type="text" id="lokasi" name="lokasi" x-model="editLokasi" required placeholder="Contoh: Jl. Sudirman"
+                                           class="pl-10 w-full bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5">
+                                </div>
+                            </div>
+
+                            {{-- Kategori --}}
+                            <div>
+                                <label for="kategori_edit" class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">Kategori <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+                                    </div>
+                                    <select id="kategori_edit" name="kategori" x-model="editKategori" required
+                                            class="pl-10 w-full bg-white border border-gray-300 text-[#1e3a5f] text-sm font-bold rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5 cursor-pointer">
+                                        @foreach($kategoriOptions as $kategori)
+                                            <option value="{{ $kategori }}">{{ $kategori }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            {{-- Deskripsi --}}
+                            <div>
+                                <label for="deskripsi" class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">Deskripsi <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <div class="absolute top-3 left-0 pl-3 flex items-start pointer-events-none">
+                                        <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+                                    </div>
+                                    <textarea id="deskripsi" name="deskripsi" x-model="editDeskripsi" rows="3" required placeholder="Keterangan singkat..."
+                                              class="pl-10 w-full bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5"></textarea>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div>
-                        <label for="kategori_edit" class="block text-sm font-medium text-gray-700 mb-1">Kategori:</label>
-                        <select id="kategori_edit" name="kategori" x-model="editKategori"
-                                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            @foreach($kategoriOptions as $kategori)
-                                <option value="{{ $kategori }}">{{ $kategori }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label for="deskripsi" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi (Keterangan):</label>
-                        <textarea id="deskripsi" name="deskripsi" x-model="editDeskripsi" rows="3"
-                                  class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
-                    </div>
+                </div>
+                </div>
 
-                    <button type="submit" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg shadow hover:bg-green-600 transition">
-                        SUBMIT
+                <div class="modal-footer p-4 border-t bg-gray-50">
+                    <button type="submit" class="w-full px-4 py-3 text-white font-bold bg-[#1e3a5f] rounded-xl hover:bg-[#2a4a6f] shadow-lg transition transform hover:-translate-y-0.5">
+                        SIMPAN PERUBAHAN
                     </button>
                 </div>
             </form>
