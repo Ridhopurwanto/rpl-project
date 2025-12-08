@@ -125,7 +125,7 @@
                     </label>
                     <div class="relative">
                         <select x-model="reportType" 
-                                class="block w-full px-4 py-2.5 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                                class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
                             <option value="harian">Laporan Harian</option>
                             <option value="bulanan">Laporan Bulanan</option>
                             <option value="administrasi">Data Administrasi</option>
@@ -143,15 +143,15 @@
                     <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                         Periode Tanggal
                     </label>
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-stretch gap-3">
                         <div class="flex-1 cursor-pointer" @click="$refs.dateStart.showPicker()">
                             <input type="date" x-model="dateFrom" x-ref="dateStart"
-                                   class="block w-full px-4 py-2.5 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
+                                   class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
                         </div>
-                        <span class="text-gray-500 text-sm font-medium">to</span>
+                        <span class="text-gray-500 text-sm font-medium self-center">to</span>
                         <div class="flex-1 cursor-pointer" @click="$refs.dateEnd.showPicker()">
                             <input type="date" x-model="dateTo" x-ref="dateEnd"
-                                   class="block w-full px-4 py-2.5 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
+                                   class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
                         </div>
                     </div>
                 </div>
