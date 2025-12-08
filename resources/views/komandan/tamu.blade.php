@@ -80,7 +80,9 @@
         <div class="bg-gray-100 p-3 border-b border-gray-200">
             <h3 class="font-bold text-gray-800">RIWAYAT KUNJUNGAN</h3>
         </div>
-        <div class="overflow-x-auto">
+        
+        {{-- TABEL (Desktop) --}}
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full min-w-max">
                 <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                     <tr>
@@ -132,13 +134,90 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="{{ Auth::user()->peran == 'komandan' ? '7' : '6' }}" class="py-4 px-4 text-center text-gray-500">
+                        <td colspan="{{ Auth::user()->peran == 'komandan' ? '6' : '5' }}" class="py-4 px-4 text-center text-gray-500">
                             Tidak ada data kunjungan tamu pada tanggal ini.
                         </td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        {{-- CARD LAYOUT (Mobile) --}}
+        <div class="md:hidden space-y-3 p-3">
+            @forelse($riwayatTamu as $index => $tamu)
+                <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+                    {{-- Header --}}
+                    <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] px-4 py-2.5 flex justify-between items-center">
+                        <div class="flex-1">
+                            <p class="text-xs text-blue-200 font-semibold uppercase">Tamu</p>
+                            <p class="text-white font-bold text-base">{{ $tamu->nama_tamu }}</p>
+                        </div>
+                        <span class="bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                            {{ $tamu->waktu_datang->format('d/m/Y') }}
+                        </span>
+                    </div>
+
+                    {{-- Body --}}
+                    <div class="p-4 space-y-3">
+                        {{-- Instansi --}}
+                        <div class="flex items-center gap-2 pb-2 border-b border-gray-100">
+                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            </svg>
+                            <div class="flex-1">
+                                <p class="text-[10px] text-gray-500 font-semibold uppercase">Instansi</p>
+                                <p class="text-gray-800 font-bold text-sm">{{ $tamu->instansi }}</p>
+                            </div>
+                        </div>
+
+                        {{-- Waktu & Tujuan --}}
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <p class="text-[10px] text-gray-500 font-semibold uppercase mb-1">Waktu</p>
+                                <p class="text-gray-800 font-bold text-xs">{{ $tamu->waktu_datang->format('H:i') }}</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-gray-500 font-semibold uppercase mb-1">Tujuan</p>
+                                <p class="text-gray-800 font-bold text-xs">{{ $tamu->tujuan }}</p>
+                            </div>
+                        </div>
+
+                        {{-- Tombol Aksi (Jika Komandan) --}}
+                        @if(Auth::user()->peran == 'komandan')
+                            <div class="flex gap-2 pt-2">
+                                <button @click="
+                                    showEditModal = true; 
+                                    editAction = '{{ route('komandan.tamu.update', $tamu->id_tamu) }}';
+                                    editNama = '{{ $tamu->nama_tamu }}';
+                                    editInstansi = '{{ $tamu->instansi }}';
+                                    editTujuan = '{{ $tamu->tujuan }}';
+                                    editWaktuDatang = '{{ $tamu->waktu_datang->format('Y-m-d\TH:i') }}';
+                                " class="flex-1 bg-blue-500 text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition flex items-center justify-center gap-1">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
+                                    <span class="text-xs">Edit</span>
+                                </button>
+                                <button @click.prevent="
+                                    showDeleteModal = true; 
+                                    deleteAction = '{{ route('komandan.tamu.destroy', $tamu->id_tamu) }}'
+                                " class="flex-1 bg-red-500 text-white font-bold py-2 rounded-lg hover:bg-red-600 transition flex items-center justify-center gap-1">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                                    <span class="text-xs">Hapus</span>
+                                </button>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @empty
+                <div class="bg-white rounded-xl shadow-md p-8 text-center">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                    <p class="text-gray-500 font-semibold">Tidak ada data kunjungan tamu pada tanggal ini.</p>
+                </div>
+            @endforelse
         </div>
     </div>
 
