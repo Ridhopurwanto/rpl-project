@@ -205,7 +205,7 @@
                         <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                     </div>
                     <input type="text" name="nama_lengkap" x-model="nama_lengkap" required placeholder="Nama Lengkap sesuai KTP"
-                        class="pl-10 w-full bg-white border border-gray-300 text-gray-800 text-sm font-bold rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5">
+                        class="pl-10 w-full bg-white border border-gray-300 text-gray-800 text-sm font-bold rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5 uppercase">
                 </div>
             </div>
 
