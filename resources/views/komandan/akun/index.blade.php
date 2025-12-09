@@ -7,7 +7,7 @@
 
 @section('header-left')
     {{-- Update warna border dan text badge agar seragam --}}
-    <a class="inline-block border-2 border-[#1e3a5f] text-[#1e3a5f] text-sm font-bold px-4 py-1 rounded-full mb-4">
+    <a class="inline-block border-2 border-[#1a2847] text-[#1a2847] text-sm font-bold px-4 py-1 rounded-full mb-4">
         MANAJEMEN AKUN
     </a>
 @endsection
@@ -33,8 +33,10 @@
     {{-- Konten Halaman --}}
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {{-- Filter Pencarian --}}
-        <div class="mb-6 flex justify-end">
+        {{-- Header dengan Judul dan Filter --}}
+        <div class="mb-6 flex justify-between items-center">
+            <h2 class="text-2xl font-bold text-gray-800">Daftar Akun</h2>
+            
             <div class="relative w-full max-w-md">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
