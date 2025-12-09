@@ -30,6 +30,8 @@ class PatroliController extends Controller
         if (empty($jenisPatroliTerpilih)) {
             $jenisPatroliTerpilih = $jenisPatroliOptions->first();
         }
+        
+        $perPage = $request->input('per_page', 10);
 
         // 4. Mulai Query
         $query = Patroli::query();
@@ -42,8 +44,8 @@ class PatroliController extends Controller
              $query->where('jenis_patroli', $jenisPatroliTerpilih);
         }
 
-        // Ambil data
-        $dataPatroli = $query->orderBy('waktu_exact', 'asc')->get();
+        // Ambil data dengan pagination
+        $dataPatroli = $query->orderBy('waktu_exact', 'asc')->paginate($perPage);
 
         // ===== TAMBAHKAN INI: AMBIL DATA PATROLI RULES ===== 
         $patroliRules = PatroliRule::all()->groupBy('jenis_shift');
@@ -53,7 +55,8 @@ class PatroliController extends Controller
             'tanggalTerpilih' => $tanggalTerpilih,
             'jenisPatroliTerpilih' => $jenisPatroliTerpilih,
             'jenisPatroliOptions' => $jenisPatroliOptions,
-            'patroliRules' => $patroliRules,  // ← TAMBAHKAN INI
+            'patroliRules' => $patroliRules,
+            'perPage' => $perPage,
         ]);
     }
 
