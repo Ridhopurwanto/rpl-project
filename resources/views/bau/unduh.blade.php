@@ -19,7 +19,7 @@
          barangChecks: [],
 
          downloadQueue: [],
-         baseUrlSingle: '{{ url('/komandan/laporan/download-single') }}', 
+         baseUrlSingle: '{{ url('/bau/laporan/download-single') }}', 
 
          toggleBarang() {
              if (this.isBarangActive) {
