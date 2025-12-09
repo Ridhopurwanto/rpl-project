@@ -14,15 +14,7 @@
 <div class="w-full mx-auto"
      x-data="{ 
         showPhotoModal: false, 
-        photoUrl: '', 
-        showEditModal: false, 
-        editAction: '',
-        editWaktu: '',
-        editLokasi: '',
-        editKategori: '',
-        editDeskripsi: '',
-        showDeleteModal: false,
-        deleteAction: '' 
+        photoUrl: ''
      }">
     
     <h2 class="text-2xl font-bold text-slate-800 mb-4">Laporan Gangguan Kamtibmas</h2>
@@ -56,7 +48,7 @@
         </div>
 
         {{-- Form Filter --}}
-        <form action="{{ route('komandan.gangguan') }}" method="GET" class="p-4 border-b border-gray-200" x-data="{}">
+        <form action="{{ route('bau.gangguan.index') }}" method="GET" class="p-4 border-b border-gray-200" x-data="{}">
             <div class="flex flex-wrap gap-4">
                 {{-- Show Entries --}}
                 <div class="w-[calc(50%-0.5rem)] md:w-auto">
@@ -118,10 +110,7 @@
                         <th class="py-3 px-4 text-center w-[14%]">Tanggal</th>
                         <th class="py-3 px-4 text-center w-[18%]">Lokasi</th>
                         <th class="py-3 px-4 text-center w-[15%]">Kategori</th>
-                        <th class="py-3 px-4 text-center w-[23%]">Ket. (Deskripsi)</th>
-                        @if(Auth::user()->peran == 'komandan')
-                            <th class="py-3 px-4 text-center w-[14%]">Aksi</th>
-                        @endif
+                        <th class="py-3 px-4 text-center w-[37%]">Ket. (Deskripsi)</th>
                     </tr>
                 </thead>
                 <tbody class="text-sm divide-y divide-gray-200">
@@ -138,32 +127,10 @@
                         <td class="py-2 px-4">{{ $gangguan->lokasi }}</td>
                         <td class="py-2 px-4">{{ $gangguan->kategori }}</td>
                         <td class="py-2 px-4">{{ $gangguan->deskripsi }}</td>
-                        @if(Auth::user()->peran == 'komandan')
-                        <td class="py-2 px-4">
-                            <div class="flex justify-center space-x-3">
-                                <button @click="
-                                    showEditModal = true; 
-                                    editAction = '{{ route('komandan.gangguan.update', $gangguan->id_gangguan) }}';
-                                    editWaktu = '{{ $gangguan->waktu_lapor->format('Y-m-d\TH:i') }}';
-                                    editLokasi = '{{ $gangguan->lokasi }}';
-                                    editKategori = '{{ $gangguan->kategori }}';
-                                    editDeskripsi = '{{ $gangguan->deskripsi }}';
-                                " class="text-blue-500 hover:text-blue-700" title="Edit">
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
-                                </button>
-                                <button @click.prevent="
-                                    showDeleteModal = true; 
-                                    deleteAction = '{{ route('komandan.gangguan.destroy', $gangguan->id_gangguan) }}'
-                                " class="text-red-500 hover:text-red-700" title="Hapus">
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                                </button>
-                            </div>
-                        </td>
-                        @endif
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="{{ Auth::user()->peran == 'komandan' ? '7' : '6' }}" class="py-4 px-4 text-center text-gray-500">
+                        <td colspan="6" class="py-4 px-4 text-center text-gray-500">
                             Tidak ada data gangguan kamtibmas pada bulan ini.
                         </td>
                     </tr>
@@ -232,32 +199,7 @@
                         </div>
                     </div>
 
-                    {{-- Tombol Aksi (Full Width di Bawah) - Hanya untuk Komandan --}}
-                    @if(Auth::user()->peran == 'komandan')
-                        <div class="px-4 pb-4 flex gap-2">
-                            {{-- Tombol Edit --}}
-                            <button @click="
-                                showEditModal = true; 
-                                editAction = '{{ route('komandan.gangguan.update', $gangguan->id_gangguan) }}';
-                                editWaktu = '{{ $gangguan->waktu_lapor->format('Y-m-d\TH:i') }}';
-                                editLokasi = '{{ $gangguan->lokasi }}';
-                                editKategori = '{{ $gangguan->kategori }}';
-                                editDeskripsi = '{{ $gangguan->deskripsi }}';
-                            " class="flex-1 bg-blue-500 text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition flex items-center justify-center gap-1">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
-                                <span class="text-xs">Edit</span>
-                            </button>
 
-                            {{-- Tombol Hapus --}}
-                            <button @click.prevent="
-                                showDeleteModal = true; 
-                                deleteAction = '{{ route('komandan.gangguan.destroy', $gangguan->id_gangguan) }}'
-                            " class="flex-1 bg-red-500 text-white font-bold py-2 rounded-lg hover:bg-red-600 transition flex items-center justify-center gap-1">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                                <span class="text-xs">Hapus</span>
-                            </button>
-                        </div>
-                    @endif
                 </div>
             @empty
                 <div class="bg-white rounded-xl shadow-md p-8 text-center">
@@ -316,121 +258,7 @@
         </div>
     </div>
 
-    {{-- Modal Edit Gangguan --}}
-    <div x-show="showEditModal"
-         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
-         @click.away="showEditModal = false"
-         style="display: none;">
-        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full relative overflow-hidden" @click.stop>
-            {{-- Header Biru --}}
-            <div class="bg-[#1e3a5f] py-4 px-6 border-b border-[#1e3a5f] flex justify-between items-center">
-                <h3 class="text-lg font-bold text-white flex items-center tracking-wide">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                    EDIT GANGGUAN KAMTIBMAS
-                </h3>
-                <button @click="showEditModal = false" class="text-white/70 hover:text-white transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            
-            <form :action="editAction" method="POST">
-                @csrf
-                @method('PUT')
-                <div class="modal-body max-h-[70vh] overflow-y-auto p-6">
-                <div class="space-y-5">
-                    
-                    {{-- GROUP: Informasi Laporan --}}
-                    <div class="p-4 bg-blue-50/50 rounded-xl border border-blue-100">
-                                                
-                        <div class="space-y-4">
-                            {{-- Waktu Lapor --}}
-                            <div>
-                                <label for="waktu_lapor" class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">Waktu Lapor <span class="text-red-500">*</span></label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    </div>
-                                    <input type="datetime-local" id="waktu_lapor" name="waktu_lapor" x-model="editWaktu" required
-                                           class="pl-10 w-full bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5">
-                                </div>
-                            </div>
-                            
-                            {{-- Lokasi --}}
-                            <div>
-                                <label for="lokasi" class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">Lokasi <span class="text-red-500">*</span></label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                    </div>
-                                    <input type="text" id="lokasi" name="lokasi" x-model="editLokasi" required placeholder="Contoh: Jl. Sudirman"
-                                           class="pl-10 w-full bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5">
-                                </div>
-                            </div>
 
-                            {{-- Kategori --}}
-                            <div>
-                                <label for="kategori_edit" class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">Kategori <span class="text-red-500">*</span></label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
-                                    </div>
-                                    <select id="kategori_edit" name="kategori" x-model="editKategori" required
-                                            class="pl-10 w-full bg-white border border-gray-300 text-[#1e3a5f] text-sm font-bold rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5 cursor-pointer">
-                                        @foreach($kategoriOptions as $kategori)
-                                            <option value="{{ $kategori }}">{{ $kategori }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            {{-- Deskripsi --}}
-                            <div>
-                                <label for="deskripsi" class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">Deskripsi <span class="text-red-500">*</span></label>
-                                <div class="relative">
-                                    <div class="absolute top-3 left-0 pl-3 flex items-start pointer-events-none">
-                                        <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
-                                    </div>
-                                    <textarea id="deskripsi" name="deskripsi" x-model="editDeskripsi" rows="3" required placeholder="Keterangan singkat..."
-                                              class="pl-10 w-full bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-                </div>
-
-                <div class="modal-footer p-4 border-t bg-gray-50">
-                    <button type="submit" class="w-full px-4 py-3 text-white font-bold bg-[#1e3a5f] rounded-xl hover:bg-[#2a4a6f] shadow-lg transition transform hover:-translate-y-0.5">
-                        SIMPAN PERUBAHAN
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    {{-- Modal Hapus --}}
-    <div x-show="showDeleteModal"
-         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
-         @click.away="showDeleteModal = false"
-         style="display: none;">
-        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full p-6 relative" @click.stop>
-            <h3 class="text-lg font-bold text-gray-900 mb-4">Konfirmasi Hapus</h3>
-            <p class="text-gray-600 mb-6">
-                Apakah Anda yakin ingin menghapus laporan gangguan ini? Tindakan ini tidak dapat dibatalkan.
-            </p>
-            <form :action="deleteAction" method="POST" class="flex justify-end space-x-4">
-                @csrf
-                @method('DELETE')
-                <button type="button" @click="showDeleteModal = false" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">
-                    Batal
-                </button>
-                <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
-                    Ya, Hapus
-                </button>
-            </form>
-        </div>
-    </div>
 
 </div>
 @endsection

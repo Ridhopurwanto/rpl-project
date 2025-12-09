@@ -24,11 +24,17 @@
     <h2 class="text-2xl font-bold text-slate-800 mb-4">Laporan Barang</h2>
 
     {{-- Tabel Barang Temuan --}}
-    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-        <div class="bg-gray-100 p-3 border-b border-gray-200">
-            <h3 class="font-bold text-gray-800">BARANG TEMUAN</h3>
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ showTemuan: true }">
+        <div class="bg-gray-100 p-3 border-b border-gray-200 cursor-pointer hover:bg-gray-200 transition" @click="showTemuan = !showTemuan">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-gray-800">BARANG TEMUAN</h3>
+                <svg class="w-5 h-5 text-gray-600 transition-transform" :class="{ 'rotate-180': !showTemuan }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
         </div>
 
+        <div x-show="showTemuan" x-collapse>
         {{-- Form Filter Temuan --}}
         <form action="{{ route('komandan.barang') }}" method="GET" class="p-4 border-b border-gray-200" x-data="{}">
             <input type="hidden" name="tanggal_titipan" value="{{ $tanggalTitipan }}">
@@ -196,14 +202,21 @@
                 @endif
             </div>
         </div>
+        </div>
     </div>
 
     {{-- Tabel Barang Titipan --}}
-    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-        <div class="bg-gray-100 p-3 border-b border-gray-200">
-            <h3 class="font-bold text-gray-800">BARANG TITIPAN</h3>
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ showTitipan: true }">
+        <div class="bg-gray-100 p-3 border-b border-gray-200 cursor-pointer hover:bg-gray-200 transition" @click="showTitipan = !showTitipan">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-gray-800">BARANG TITIPAN</h3>
+                <svg class="w-5 h-5 text-gray-600 transition-transform" :class="{ 'rotate-180': !showTitipan }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
         </div>
 
+        <div x-show="showTitipan" x-collapse>
         {{-- Form Filter Titipan --}}
         <form action="{{ route('komandan.barang') }}" method="GET" class="p-4 border-b border-gray-200" x-data="{}">
             <input type="hidden" name="tanggal_temuan" value="{{ $tanggalTemuan }}">
@@ -370,6 +383,7 @@
                     <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
                 @endif
             </div>
+        </div>
         </div>
     </div>
 

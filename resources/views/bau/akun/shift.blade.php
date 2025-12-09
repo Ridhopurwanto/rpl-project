@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('header-left')
-    <a href="{{ route('komandan.akun.index') }}" 
+    <a href="{{ route('bau.akun.index') }}" 
        class="inline-flex items-center justify-center w-10 h-10 bg-white text-[#1a2847] rounded-full shadow-md hover:bg-gray-100 transition-colors mb-4"
        title="Kembali">
         {{-- Ikon Panah Kiri (SVG) --}}
@@ -60,7 +60,7 @@
         {{-- KOTAK 1: Navigation Controls (Today, Prev, Next) --}}
         <div class="flex items-center justify-center gap-1 bg-white p-1 rounded-full shadow-sm border border-gray-200 w-auto md:w-auto">
             {{-- Tombol Today --}}
-            <a href="{{ route('komandan.akun.shift', ['id_pengguna' => $user->id_pengguna, 'bulan' => \Carbon\Carbon::now()->format('Y-m')]) }}" 
+            <a href="{{ route('bau.akun.shift', ['id_pengguna' => $user->id_pengguna, 'bulan' => \Carbon\Carbon::now()->format('Y-m')]) }}" 
                class="px-4 py-1.5 text-sm font-semibold text-gray-700 rounded-full hover:bg-gray-100 transition border border-transparent hover:border-gray-300">
                 Today
             </a>
@@ -68,13 +68,13 @@
             <div class="h-6 w-px bg-gray-300 mx-1"></div>
 
             {{-- Tombol Previous (<) --}}
-            <a href="{{ route('komandan.akun.shift', ['id_pengguna' => $user->id_pengguna, 'bulan' => $prevMonth]) }}" 
+            <a href="{{ route('bau.akun.shift', ['id_pengguna' => $user->id_pengguna, 'bulan' => $prevMonth]) }}" 
                class="w-9 h-9 flex items-center justify-center rounded-full text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
             </a>
 
             {{-- Tombol Next (>) --}}
-            <a href="{{ route('komandan.akun.shift', ['id_pengguna' => $user->id_pengguna, 'bulan' => $nextMonth]) }}" 
+            <a href="{{ route('bau.akun.shift', ['id_pengguna' => $user->id_pengguna, 'bulan' => $nextMonth]) }}" 
                class="w-9 h-9 flex items-center justify-center rounded-full text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
             </a>

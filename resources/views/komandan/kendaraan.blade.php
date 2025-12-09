@@ -29,11 +29,18 @@
     @endif
 
     {{-- TABEL 1: RIWAYAT KELUAR/MASUK --}}
-    <div id="riwayat-container" class="transition-opacity duration-200">
+    <div id="riwayat-container" class="transition-opacity duration-200" x-data="{ showRiwayat: true }">
         <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-            <div class="bg-gray-100 p-3 border-b border-gray-200">
-                <h3 class="font-bold text-gray-800">RIWAYAT KELUAR/MASUK</h3>
+            <div class="bg-gray-100 p-3 border-b border-gray-200 cursor-pointer hover:bg-gray-200 transition" @click="showRiwayat = !showRiwayat">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-gray-800">RIWAYAT KELUAR/MASUK</h3>
+                    <svg class="w-5 h-5 text-gray-600 transition-transform" :class="{ 'rotate-180': !showRiwayat }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
             </div>
+
+            <div x-show="showRiwayat" x-collapse>
 
             {{-- Form Filter & Search --}}
             <form id="filterForm" action="{{ route('komandan.kendaraan') }}" method="GET" x-data="{}">
@@ -308,11 +315,13 @@
                     @endif
                 </div>
             </div>
+            </div>
         </div>
     </div>
 
     {{-- TABEL 2: KENDARAAN YANG TERDAFTAR --}}
     <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{
+        showMaster: true,
         masterTipe: '',
         masterSearch: '',
         filterMaster() {
@@ -335,9 +344,16 @@
             });
         }
     }">
-        <div class="bg-gray-100 p-3 border-b border-gray-200">
-            <h3 class="font-bold text-gray-800">KENDARAAN YANG TERDAFTAR</h3>
+        <div class="bg-gray-100 p-3 border-b border-gray-200 cursor-pointer hover:bg-gray-200 transition" @click="showMaster = !showMaster">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-gray-800">KENDARAAN YANG TERDAFTAR</h3>
+                <svg class="w-5 h-5 text-gray-600 transition-transform" :class="{ 'rotate-180': !showMaster }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
         </div>
+
+        <div x-show="showMaster" x-collapse>
 
         {{-- Filter untuk Kendaraan Terdaftar --}}
         <form action="{{ route('komandan.kendaraan') }}" method="GET">
@@ -539,6 +555,7 @@
                     @endif
                 </div>
             </div>
+        </div>
         </div>
     </div>
 

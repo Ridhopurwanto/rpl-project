@@ -47,9 +47,14 @@
         </div>
     @endif
 
-    {{-- Form Filter --}}
-    <form action="{{ route('komandan.tamu') }}" method="GET" x-data="{}">
-        <div class="bg-white px-6 py-5 rounded-xl shadow-sm mb-6 border border-gray-200">
+    {{-- Tabel Riwayat Tamu --}}
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+        <div class="bg-gray-100 p-3 border-b border-gray-200">
+            <h3 class="font-bold text-gray-800">RIWAYAT KUNJUNGAN</h3>
+        </div>
+
+        {{-- Form Filter --}}
+        <form action="{{ route('komandan.tamu') }}" method="GET" class="p-4 border-b border-gray-200" x-data="{}">
             <div class="flex flex-wrap gap-4">
                 {{-- Show Dropdown --}}
                 <div class="w-[calc(50%-0.5rem)] md:w-auto">
@@ -82,14 +87,7 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </form>
-
-    {{-- Tabel Riwayat Tamu --}}
-    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-        <div class="bg-gray-100 p-3 border-b border-gray-200">
-            <h3 class="font-bold text-gray-800">RIWAYAT KUNJUNGAN</h3>
-        </div>
+        </form>
         
         {{-- TABEL (Desktop) --}}
         <div class="hidden md:block overflow-x-auto">
