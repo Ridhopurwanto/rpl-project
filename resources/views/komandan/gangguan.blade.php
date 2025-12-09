@@ -49,12 +49,15 @@
         </div>
     @endif
 
-    {{-- Form Filter --}}
-    <form action="{{ route('komandan.gangguan') }}" method="GET" x-data="{}">
-        <div class="bg-white px-6 py-5 rounded-xl shadow-sm mb-6 border border-gray-200">
-            
+    {{-- Tabel Riwayat Gangguan --}}
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+        <div class="bg-gray-100 p-3 border-b border-gray-200">
+            <h3 class="font-bold text-gray-800">RIWAYAT GANGGUAN</h3>
+        </div>
+
+        {{-- Form Filter --}}
+        <form action="{{ route('komandan.gangguan') }}" method="GET" class="p-4 border-b border-gray-200" x-data="{}">
             <div class="flex flex-wrap gap-4">
-                
                 {{-- Show Entries --}}
                 <div class="w-[calc(50%-0.5rem)] md:w-auto">
                     <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
@@ -79,31 +82,20 @@
                 
                 {{-- Filter Bulan --}}
                 <div class="w-[calc(50%-0.5rem)] md:flex-1">
-                    <label for="bulan" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                        Bulan
-                    </label>
+                    <label for="bulan" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Bulan</label>
                     <div class="cursor-pointer" @click="$refs.monthInput.showPicker()">
-                        <input type="month" id="bulan" name="bulan" x-ref="monthInput"
-                               onchange="this.form.submit()"
-                               class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer" 
-                               value="{{ $bulanTerpilih }}">
+                        <input type="month" id="bulan" name="bulan" x-ref="monthInput" onchange="this.form.submit()" class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer" value="{{ $bulanTerpilih }}">
                     </div>
                 </div>
 
                 {{-- Filter Kategori --}}
                 <div class="w-[calc(50%-0.5rem)] md:flex-1">
-                    <label for="kategori" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                        Kategori
-                    </label>
+                    <label for="kategori" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Kategori</label>
                     <div class="relative">
-                        <select id="kategori" name="kategori" 
-                                onchange="this.form.submit()"
-                                class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                        <select id="kategori" name="kategori" onchange="this.form.submit()" class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
                             <option value="semua">Semua Kategori</option>
                             @foreach($kategoriOptions as $kategori)
-                                <option value="{{ $kategori }}" {{ $kategoriTerpilih == $kategori ? 'selected' : '' }}>
-                                    {{ $kategori }}
-                                </option>
+                                <option value="{{ $kategori }}" {{ $kategoriTerpilih == $kategori ? 'selected' : '' }}>{{ $kategori }}</option>
                             @endforeach
                         </select>
                         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -113,16 +105,8 @@
                         </div>
                     </div>
                 </div>
-
             </div>
-        </div>
-    </form>
-
-    {{-- Tabel Riwayat Gangguan --}}
-    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-        <div class="bg-gray-100 p-3 border-b border-gray-200">
-            <h3 class="font-bold text-gray-800">RIWAYAT GANGGUAN</h3>
-        </div>
+        </form>
         
         {{-- TABEL (Desktop) --}}
         <div class="hidden md:block overflow-x-auto">
