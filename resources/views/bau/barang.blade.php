@@ -24,7 +24,7 @@
     <h2 class="text-2xl font-bold text-slate-800 mb-4">Laporan Barang</h2>
 
     {{-- Form Filter --}}
-    <form id="filterForm" action="{{ route('komandan.barang') }}" method="GET" x-data="{}">
+    <form id="filterForm" action="{{ route('bau.barang.index') }}" method="GET" x-data="{}">
         <div class="bg-white px-6 py-5 rounded-xl shadow-sm mb-6 border border-gray-200">
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
