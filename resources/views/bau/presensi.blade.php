@@ -47,7 +47,7 @@
     @endif
 
     {{-- Form Filter --}}
-    <form action="{{ route('komandan.presensi') }}" method="GET">
+    <form action="{{ route('bau.presensi.index') }}" method="GET">
         <div class="bg-white p-4 rounded-lg shadow-md mb-6">
             <div class="flex flex-col sm:flex-row sm:items-end sm:space-x-4 space-y-4 sm:space-y-0">
                 <div class="flex-1">
@@ -75,7 +75,7 @@
     </form>
 
     {{-- DAFTAR PRESENSI MASUK --}}
-    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6 max-w-6xl">
         <div class="bg-gray-100 p-3 border-b border-gray-200">
             <h3 class="font-bold text-gray-800">DAFTAR PRESENSI MASUK</h3>
         </div>
@@ -90,7 +90,7 @@
                         <th class="py-3 px-4 text-left w-25">Waktu</th>
                         <th class="py-3 px-4 text-center w-25">Foto</th>
                         <th class="py-3 px-4 text-center w-25">Status</th>
-                        <th class="py-3 px-4 text-center w-28">Aksi</th>
+                        <th class="py-3 px-4 text-center w-25">Status</th>
                     </tr>
                 </thead>
                 <tbody class="text-sm divide-y divide-gray-200">
@@ -113,27 +113,10 @@
                                 <span class="text-yellow-500 font-semibold">{{ ucfirst($presensi->status) }}</span>
                             @endif
                         </td>
-
-                            <td class="py-2 px-4">
-                                <div class="flex justify-center space-x-3">
-                                    <button @click="
-                                        showEditModal = true; 
-                                        editAction = '{{ route('komandan.presensi.update', $presensi->id_presensi) }}';
-                                        editWaktu = '{{ $presensi->waktu->format('Y-m-d\TH:i') }}';
-                                        editStatus = '{{ $presensi->status }}';
-                                        editJenisPresensi = '{{ $presensi->jenis_presensi }}';
-                                    " class="text-blue-500 hover:text-blue-700" title="Edit">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
-                                    </button>
-                                    <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('komandan.presensi.destroy', $presensi->id_presensi) }}'" class="text-red-500 hover:text-red-700" title="Hapus">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                                    </button>
-                                </div>
-                            </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="py-4 px-4 text-center text-gray-500">
+                        <td colspan="5" class="py-4 px-4 text-center text-gray-500">
                             Tidak ada data presensi masuk pada tanggal ini.
                         </td>
                     </tr>
@@ -178,6 +161,7 @@
                             </button>
                         </div>
 
+                        @if(Auth::user()->peran == 'komandan')
                             <div class="flex gap-2 pt-2">
                                 <button @click="
                                     showEditModal = true; 
@@ -194,7 +178,7 @@
                                     <span class="text-xs">Hapus</span>
                                 </button>
                             </div>
-
+                        @endif
                     </div>
                 </div>
             @empty
@@ -211,7 +195,7 @@
     </div>
     
     {{-- DAFTAR PRESENSI PULANG --}}
-    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6 max-w-6xl">
         <div class="bg-gray-100 p-3 border-b border-gray-200">
             <h3 class="font-bold text-gray-800">DAFTAR PRESENSI PULANG</h3>
         </div>
@@ -226,7 +210,7 @@
                         <th class="py-3 px-4 text-left w-25">Waktu</th>
                         <th class="py-3 px-4 text-center w-25">Foto</th>
                         <th class="py-3 px-4 text-center w-25">Status</th>
-                        <th class="py-3 px-4 text-center">Aksi</th>
+                        <th class="py-3 px-4 text-center w-25">Status</th>
                     </tr>
                 </thead>
                 <tbody class="text-sm divide-y divide-gray-200">
@@ -249,27 +233,11 @@
                                 <span class="text-yellow-500 font-semibold">{{ ucfirst($presensi->status) }}</span>
                             @endif
                         </td>
-                            </td>
-                            <td class="py-2 px-4">
-                                <div class="flex justify-center space-x-3">
-                                    <button @click="
-                                        showEditModal = true; 
-                                        editAction = '{{ route('komandan.presensi.update', $presensi->id_presensi) }}';
-                                        editWaktu = '{{ $presensi->waktu->format('Y-m-d\TH:i') }}';
-                                        editStatus = '{{ $presensi->status }}';
-                                        editJenisPresensi = '{{ $presensi->jenis_presensi }}';
-                                    " class="text-blue-500 hover:text-blue-700" title="Edit">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
-                                    </button>
-                                    <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('komandan.presensi.destroy', $presensi->id_presensi) }}'" class="text-red-500 hover:text-red-700" title="Hapus">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                                    </button>
-                                </div>
-                            </td>
+                    </tr>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="py-4 px-4 text-center text-gray-500">
+                        <td colspan="5" class="py-4 px-4 text-center text-gray-500">
                             Tidak ada data presensi pulang pada tanggal ini.
                         </td>
                     </tr>
@@ -312,6 +280,7 @@
                             </button>
                         </div>
 
+                        @if(Auth::user()->peran == 'komandan')
                             <div class="flex gap-2 pt-2">
                                 <button @click="
                                     showEditModal = true; 
@@ -328,7 +297,7 @@
                                     <span class="text-xs">Hapus</span>
                                 </button>
                             </div>
-
+                        @endif
                     </div>
                 </div>
             @empty
@@ -344,7 +313,7 @@
         </div>
     </div>
 
-    {{-- TOMBOL PENGATURAN SHIFT RULE (HANYA KOMANDAN) --}}
+    {{-- TOMBOL PENGATURAN SHIFT RULE --}}
     <div class="flex justify-end mb-8">
         <button @click="showRuleModal = true" 
                 class="flex items-center gap-2 bg-slate-700 text-white px-5 py-2.5 rounded-lg shadow hover:bg-slate-800 transition transform active:scale-95">
