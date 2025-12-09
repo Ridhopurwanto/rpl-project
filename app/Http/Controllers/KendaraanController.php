@@ -44,11 +44,13 @@ class KendaraanController extends Controller
             });
         }
         
-        // Eksekusi Query Riwayat
-        $riwayat = $queryRiwayat->orderBy('waktu_masuk', 'desc')->get();
+        // Eksekusi Query Riwayat dengan Pagination
+        $perPageRiwayat = $request->input('per_page_riwayat', 10);
+        $riwayat = $queryRiwayat->orderBy('waktu_masuk', 'desc')->paginate($perPageRiwayat, ['*'], 'page_riwayat');
 
-        // --- Data untuk KENDARAAN TERDAFTAR (Tidak kena filter search) ---
-        $kendaraanMaster = Kendaraan::orderBy('pemilik', 'asc')->get();
+        // --- Data untuk KENDARAAN TERDAFTAR dengan Pagination ---
+        $perPageMaster = $request->input('per_page_master', 10);
+        $kendaraanMaster = Kendaraan::orderBy('pemilik', 'asc')->paginate($perPageMaster, ['*'], 'page_master');
         $registeredPlates = $kendaraanMaster->pluck('nomor_plat')->toArray();
 
         return view('komandan.kendaraan', [
@@ -57,7 +59,9 @@ class KendaraanController extends Controller
             'tanggalTerpilih' => $tanggalFilter,
             'tipeTerpilih' => $tipeFilter,
             'registeredPlates' => $registeredPlates,
-            'search' => $search // <--- Kirim balik agar input tidak hilang
+            'search' => $search,
+            'perPageRiwayat' => $perPageRiwayat,
+            'perPageMaster' => $perPageMaster
         ]);
     }
 
