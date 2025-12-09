@@ -45,58 +45,79 @@
         </div>
     @endif
 
-    {{-- Form Filter --}}
-    <form action="{{ route('komandan.patroli') }}" method="GET" x-data="{}">
-        <div class="bg-white px-6 py-5 rounded-xl shadow-sm mb-6 border border-gray-200">
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
-                {{-- Filter Tanggal --}}
-                <div class="w-full">
-                    <label for="tanggal" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                        Tanggal
-                    </label>
-                    <div class="cursor-pointer" @click="$refs.dateInput.showPicker()">
-                        <input type="date" id="tanggal" name="tanggal" x-ref="dateInput"
-                               onchange="this.form.submit()"
-                               class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
-                               value="{{ $tanggalTerpilih }}">
-                    </div>
-                </div>
-
-                {{-- Filter Jenis Patroli --}}
-                <div class="w-full">
-                    <label for="jenis_patroli" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                        Jenis Patroli
-                    </label>
-                    <div class="relative">
-                        <select id="jenis_patroli" name="jenis_patroli" 
-                                onchange="this.form.submit()"
-                                class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
-                            @forelse($jenisPatroliOptions as $opsi)
-                                <option value="{{ $opsi }}" {{ $jenisPatroliTerpilih == $opsi ? 'selected' : '' }}>
-                                    {{ $opsi }}
-                                </option>
-                            @empty
-                                <option value="" disabled selected>Tidak ada data jenis patroli</option>
-                            @endforelse
-                        </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                            <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
-
     {{-- Daftar Patroli --}}
     <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
         <div class="bg-gray-100 p-3 border-b border-gray-200">
             <h3 class="font-bold text-gray-800">DAFTAR PATROLI</h3>
         </div>
+        
+        {{-- Form Filter --}}
+        <form action="{{ route('komandan.patroli') }}" method="GET" x-data="{}">
+            <div class="px-6 py-5 border-b border-gray-200">
+                <div class="flex flex-wrap gap-4">
+                    
+                    {{-- Show Entries --}}
+                    <div class="w-[calc(50%-0.5rem)] md:w-auto">
+                        <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
+                        <div class="flex items-center gap-2">
+                            <div class="relative">
+                                <select name="per_page" onchange="this.form.submit()" class="block h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                                    <option value="5" {{ $perPage == 5 ? 'selected' : '' }}>5</option>
+                                    <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10</option>
+                                    <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25</option>
+                                    <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>
+                                    <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <span class="text-sm text-gray-600 whitespace-nowrap">rows</span>
+                        </div>
+                    </div>
+                    
+                    {{-- Filter Tanggal --}}
+                    <div class="w-[calc(50%-0.5rem)] md:flex-1">
+                        <label for="tanggal" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                            Tanggal
+                        </label>
+                        <div class="cursor-pointer" @click="$refs.dateInput.showPicker()">
+                            <input type="date" id="tanggal" name="tanggal" x-ref="dateInput"
+                                   onchange="this.form.submit()"
+                                   class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
+                                   value="{{ $tanggalTerpilih }}">
+                        </div>
+                    </div>
+
+                    {{-- Filter Jenis Patroli --}}
+                    <div class="w-[calc(50%-0.5rem)] md:flex-1">
+                        <label for="jenis_patroli" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                            Jenis Patroli
+                        </label>
+                        <div class="relative">
+                            <select id="jenis_patroli" name="jenis_patroli" 
+                                    onchange="this.form.submit()"
+                                    class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                                @forelse($jenisPatroliOptions as $opsi)
+                                    <option value="{{ $opsi }}" {{ $jenisPatroliTerpilih == $opsi ? 'selected' : '' }}>
+                                        {{ $opsi }}
+                                    </option>
+                                @empty
+                                    <option value="" disabled selected>Tidak ada data jenis patroli</option>
+                                @endforelse
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
         
         {{-- TABEL (Desktop) --}}
         <div class="hidden md:block overflow-x-auto">
@@ -220,6 +241,34 @@
                 </div>
             @endforelse
         </div>
+        
+        {{-- Pagination --}}
+        @if($dataPatroli->total() > 0)
+            <div class="flex justify-between items-center px-6 py-4 border-t border-gray-200">
+                <div class="text-sm text-gray-600">
+                    Showing {{ $dataPatroli->firstItem() ?? 0 }} to {{ $dataPatroli->lastItem() ?? 0 }} of {{ $dataPatroli->total() }} entries
+                </div>
+                <div class="flex items-center gap-1">
+                    @if ($dataPatroli->onFirstPage())
+                        <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Previous</span>
+                    @else
+                        <a href="{{ $dataPatroli->appends(request()->query())->previousPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Previous</a>
+                    @endif
+                    @foreach(range(1, $dataPatroli->lastPage()) as $page)
+                        @if($page == $dataPatroli->currentPage())
+                            <span class="px-3 py-1 text-white bg-[#1e3a5f] rounded font-bold">{{ $page }}</span>
+                        @else
+                            <a href="{{ $dataPatroli->appends(request()->query())->url($page) }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
+                        @endif
+                    @endforeach
+                    @if ($dataPatroli->hasMorePages())
+                        <a href="{{ $dataPatroli->appends(request()->query())->nextPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
+                    @else
+                        <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
+                    @endif
+                </div>
+            </div>
+        @endif
     </div>
 
     {{-- Modal Foto --}}

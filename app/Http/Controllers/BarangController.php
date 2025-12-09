@@ -16,56 +16,53 @@ class BarangController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. Ambil filter dari request
-        $tanggalFilter = $request->input('tanggal', now()->format('Y-m-d'));
-        
-        // Kategori: 'temuan' atau 'titipan'
-        $kategoriFilter = $request->input('kategori', 'temuan'); 
-        
-        // Search: Ganti 'jenis' jadi 'search' agar lebih umum
-        $search = $request->input('search'); 
+        $tanggalTemuan = $request->input('tanggal_temuan', now()->format('Y-m-d'));
+        $tanggalTitipan = $request->input('tanggal_titipan', now()->format('Y-m-d'));
+        $searchTemuan = $request->input('search_temuan');
+        $searchTitipan = $request->input('search_titipan');
+        $perPageTemuan = $request->input('per_page_temuan', 10);
+        $perPageTitipan = $request->input('per_page_titipan', 10);
 
-        $query = null;
+        // Query Barang Temuan
+        $queryTemuan = BarangTemuan::query()
+                    ->whereDate('waktu_lapor', $tanggalTemuan)
+                    ->orderBy('waktu_lapor', 'desc');
         
-        // 2. Inisialisasi Query dasar berdasarkan Kategori & Tanggal
-        if ($kategoriFilter == 'temuan') {
-            $query = BarangTemuan::query()
-                        ->whereDate('waktu_lapor', $tanggalFilter)
-                        ->orderBy('waktu_lapor', 'desc');
-            
-        } else { // Kategori 'titipan'
-            $query = BarangTitipan::query()
-                        ->whereDate('waktu_titip', $tanggalFilter)
-                        ->orderBy('waktu_titip', 'desc');
-        }
-
-        // 3. Logika LIVE SEARCH Multi-Kolom
-        if ($search) {
-            $query->where(function($q) use ($search, $kategoriFilter) {
-                // Pencarian Umum (Ada di kedua tabel)
-                $q->where('nama_barang', 'LIKE', "%{$search}%")
-                  ->orWhere('catatan', 'LIKE', "%{$search}%");
-
-                // Pencarian Spesifik per Kategori
-                if ($kategoriFilter == 'temuan') {
-                    // Cari Pelapor & Lokasi (khusus Temuan)
-                    $q->orWhere('nama_pelapor', 'LIKE', "%{$search}%")
-                      ->orWhere('lokasi_penemuan', 'LIKE', "%{$search}%");
-                } else {
-                    // Cari Penitip & Tujuan (khusus Titipan)
-                    $q->orWhere('nama_penitip', 'LIKE', "%{$search}%")
-                      ->orWhere('tujuan', 'LIKE', "%{$search}%");
-                }
+        if ($searchTemuan) {
+            $queryTemuan->where(function($q) use ($searchTemuan) {
+                $q->where('nama_barang', 'LIKE', "%{$searchTemuan}%")
+                  ->orWhere('catatan', 'LIKE', "%{$searchTemuan}%")
+                  ->orWhere('nama_pelapor', 'LIKE', "%{$searchTemuan}%")
+                  ->orWhere('lokasi_penemuan', 'LIKE', "%{$searchTemuan}%");
             });
         }
 
-        $riwayatBarang = $query->get();
+        // Query Barang Titipan
+        $queryTitipan = BarangTitipan::query()
+                    ->whereDate('waktu_titip', $tanggalTitipan)
+                    ->orderBy('waktu_titip', 'desc');
+        
+        if ($searchTitipan) {
+            $queryTitipan->where(function($q) use ($searchTitipan) {
+                $q->where('nama_barang', 'LIKE', "%{$searchTitipan}%")
+                  ->orWhere('catatan', 'LIKE', "%{$searchTitipan}%")
+                  ->orWhere('nama_penitip', 'LIKE', "%{$searchTitipan}%")
+                  ->orWhere('tujuan', 'LIKE', "%{$searchTitipan}%");
+            });
+        }
+
+        $barangTemuan = $queryTemuan->paginate($perPageTemuan, ['*'], 'page_temuan');
+        $barangTitipan = $queryTitipan->paginate($perPageTitipan, ['*'], 'page_titipan');
 
         return view('komandan.barang', [
-            'riwayatBarang' => $riwayatBarang,
-            'tanggalTerpilih' => $tanggalFilter,
-            'kategoriTerpilih' => $kategoriFilter,
-            'jenisTerpilih' => $search, // Oper variabel search ke view (bisa dipakai buat value input)
+            'barangTemuan' => $barangTemuan,
+            'barangTitipan' => $barangTitipan,
+            'tanggalTemuan' => $tanggalTemuan,
+            'tanggalTitipan' => $tanggalTitipan,
+            'searchTemuan' => $searchTemuan,
+            'searchTitipan' => $searchTitipan,
+            'perPageTemuan' => $perPageTemuan,
+            'perPageTitipan' => $perPageTitipan,
         ]);
     }
 }

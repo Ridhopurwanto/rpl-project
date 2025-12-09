@@ -16,19 +16,20 @@ class TamuController extends Controller
      */
     public function index(Request $request)
     {
-        // Ambil tanggal dari filter. Default: hari ini.
         $startDate = $request->input('start_date', now()->format('Y-m-d'));
         $endDate = $request->input('end_date', now()->format('Y-m-d'));
-        // Ambil data tamu berdasarkan filter tanggal
+        $perPage = $request->input('per_page', 10);
+        
         $riwayatTamu = Tamu::whereDate('waktu_datang', '>=', $startDate)
                            ->whereDate('waktu_datang', '<=', $endDate)
                            ->orderBy('waktu_datang', 'asc')
-                           ->get();
+                           ->paginate($perPage);
         
         return view('komandan.tamu', [
             'riwayatTamu' => $riwayatTamu,
-            'startDate' => $startDate, // Kirim balik ke view agar input tetap terisi
-            'endDate' => $endDate,     // Kirim balik ke view agar input tetap terisi
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'perPage' => $perPage,
         ]);
     }
 

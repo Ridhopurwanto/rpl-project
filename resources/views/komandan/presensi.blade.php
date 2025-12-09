@@ -62,10 +62,32 @@
     <form action="{{ route('komandan.presensi') }}" method="GET" x-data="{}">
         <div class="bg-white px-6 py-5 rounded-xl shadow-sm mb-6 border border-gray-200">
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="flex flex-wrap gap-4">
+                
+                {{-- Show Entries --}}
+                <div class="w-[calc(50%-0.5rem)] md:w-auto">
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
+                    <div class="flex items-center gap-2">
+                        <div class="relative">
+                            <select name="per_page" onchange="this.form.submit()" class="block h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                                <option value="5" {{ $perPage == 5 ? 'selected' : '' }}>5</option>
+                                <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10</option>
+                                <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25</option>
+                                <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>
+                                <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <span class="text-sm text-gray-600 whitespace-nowrap">rows</span>
+                    </div>
+                </div>
                 
                 {{-- Filter Tanggal --}}
-                <div class="w-full">
+                <div class="w-[calc(50%-0.5rem)] md:flex-1">
                     <label for="tanggal" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                         Tanggal
                     </label>
@@ -78,7 +100,7 @@
                 </div>
 
                 {{-- Filter Jenis Shift --}}
-                <div class="w-full">
+                <div class="w-[calc(50%-0.5rem)] md:flex-1">
                     <label for="shift" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                         Jenis Shift
                     </label>
@@ -104,10 +126,17 @@
     </form>
 
     {{-- DAFTAR PRESENSI MASUK --}}
-    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-        <div class="bg-gray-100 p-3 border-b border-gray-200">
-            <h3 class="font-bold text-gray-800">DAFTAR PRESENSI MASUK</h3>
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ showMasuk: true }">
+        <div class="bg-gray-100 p-3 border-b border-gray-200 cursor-pointer hover:bg-gray-200 transition" @click="showMasuk = !showMasuk">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-gray-800">DAFTAR PRESENSI MASUK</h3>
+                <svg class="w-5 h-5 text-gray-600 transition-transform" :class="{ 'rotate-180': !showMasuk }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
         </div>
+
+        <div x-show="showMasuk" x-collapse>
         
         {{-- TABEL (Desktop) --}}
         <div class="hidden md:block overflow-x-auto">
@@ -237,13 +266,49 @@
                 </div>
             @endforelse
         </div>
+        
+        {{-- Pagination Masuk --}}
+        @if($dataMasuk->total() > 0)
+            <div class="flex justify-between items-center px-6 py-4 border-t border-gray-200">
+                <div class="text-sm text-gray-600">
+                    Showing {{ $dataMasuk->firstItem() ?? 0 }} to {{ $dataMasuk->lastItem() ?? 0 }} of {{ $dataMasuk->total() }} entries
+                </div>
+                <div class="flex items-center gap-1">
+                    @if ($dataMasuk->onFirstPage())
+                        <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Previous</span>
+                    @else
+                        <a href="{{ $dataMasuk->appends(request()->query())->previousPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Previous</a>
+                    @endif
+                    @foreach(range(1, $dataMasuk->lastPage()) as $page)
+                        @if($page == $dataMasuk->currentPage())
+                            <span class="px-3 py-1 text-white bg-[#1e3a5f] rounded font-bold">{{ $page }}</span>
+                        @else
+                            <a href="{{ $dataMasuk->appends(request()->query())->url($page) }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
+                        @endif
+                    @endforeach
+                    @if ($dataMasuk->hasMorePages())
+                        <a href="{{ $dataMasuk->appends(request()->query())->nextPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
+                    @else
+                        <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
+                    @endif
+                </div>
+            </div>
+        @endif
+        </div>
     </div>
     
     {{-- DAFTAR PRESENSI PULANG --}}
-    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-        <div class="bg-gray-100 p-3 border-b border-gray-200">
-            <h3 class="font-bold text-gray-800">DAFTAR PRESENSI PULANG</h3>
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ showPulang: true }">
+        <div class="bg-gray-100 p-3 border-b border-gray-200 cursor-pointer hover:bg-gray-200 transition" @click="showPulang = !showPulang">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-gray-800">DAFTAR PRESENSI PULANG</h3>
+                <svg class="w-5 h-5 text-gray-600 transition-transform" :class="{ 'rotate-180': !showPulang }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
         </div>
+
+        <div x-show="showPulang" x-collapse>
         
         {{-- TABEL (Desktop) --}}
         <div class="hidden md:block overflow-x-auto">
@@ -370,6 +435,35 @@
                     <p class="text-gray-500 font-semibold">Tidak ada data presensi pulang pada tanggal ini.</p>
                 </div>
             @endforelse
+        </div>
+        
+        {{-- Pagination Pulang --}}
+        @if($dataPulang->total() > 0)
+            <div class="flex justify-between items-center px-6 py-4 border-t border-gray-200">
+                <div class="text-sm text-gray-600">
+                    Showing {{ $dataPulang->firstItem() ?? 0 }} to {{ $dataPulang->lastItem() ?? 0 }} of {{ $dataPulang->total() }} entries
+                </div>
+                <div class="flex items-center gap-1">
+                    @if ($dataPulang->onFirstPage())
+                        <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Previous</span>
+                    @else
+                        <a href="{{ $dataPulang->appends(request()->query())->previousPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Previous</a>
+                    @endif
+                    @foreach(range(1, $dataPulang->lastPage()) as $page)
+                        @if($page == $dataPulang->currentPage())
+                            <span class="px-3 py-1 text-white bg-[#1e3a5f] rounded font-bold">{{ $page }}</span>
+                        @else
+                            <a href="{{ $dataPulang->appends(request()->query())->url($page) }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
+                        @endif
+                    @endforeach
+                    @if ($dataPulang->hasMorePages())
+                        <a href="{{ $dataPulang->appends(request()->query())->nextPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
+                    @else
+                        <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
+                    @endif
+                </div>
+            </div>
+        @endif
         </div>
     </div>
 
