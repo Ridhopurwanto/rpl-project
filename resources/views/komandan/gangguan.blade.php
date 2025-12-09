@@ -104,17 +104,17 @@
         
         {{-- TABEL (Desktop) --}}
         <div class="hidden md:block overflow-x-auto">
-            <table class="w-full min-w-max">
+            <table class="w-full min-w-max table-fixed">
                 <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                     <tr>
-                        <th class="py-3 px-4 text-left w-16">No</th>
-                        <th class="py-3 px-4 text-center w-24">Foto</th>
-                        <th class="py-3 px-4 text-left w-40">Tanggal</th>
-                        <th class="py-3 px-4 text-left w-48">Lokasi</th>
-                        <th class="py-3 px-4 text-left w-40">Kategori</th>
-                        <th class="py-3 px-4 text-left">Ket. (Deskripsi)</th>
+                        <th class="py-3 px-4 text-center w-[6%]">No</th>
+                        <th class="py-3 px-4 text-center w-[10%]">Foto</th>
+                        <th class="py-3 px-4 text-center w-[14%]">Tanggal</th>
+                        <th class="py-3 px-4 text-center w-[18%]">Lokasi</th>
+                        <th class="py-3 px-4 text-center w-[15%]">Kategori</th>
+                        <th class="py-3 px-4 text-center w-[23%]">Ket. (Deskripsi)</th>
                         @if(Auth::user()->peran == 'komandan')
-                            <th class="py-3 px-4 text-center w-28">Aksi</th>
+                            <th class="py-3 px-4 text-center w-[14%]">Aksi</th>
                         @endif
                     </tr>
                 </thead>

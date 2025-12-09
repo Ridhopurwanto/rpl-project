@@ -264,6 +264,17 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', function () {
             return view('bau.dashboard');
         })->name('dashboard');
+
+        Route::resource('akun', App\Http\Controllers\Bau\AkunController::class)->only(['index']);
+        Route::resource('presensi', App\Http\Controllers\Bau\PresensiController::class)->only(['index']);
+        Route::resource('patroli', App\Http\Controllers\Bau\PatroliController::class)->only(['index']);
+        Route::resource('kendaraan', App\Http\Controllers\Bau\KendaraanController::class)->only(['index']);
+        Route::resource('tamu', App\Http\Controllers\Bau\TamuController::class)->only(['index']);
+        Route::resource('barang', App\Http\Controllers\Bau\BarangController::class)->only(['index']);
+        Route::resource('gangguan', App\Http\Controllers\Bau\GangguanController::class)->only(['index']);
+        Route::get('/unduh', [App\Http\Controllers\Bau\UnduhController::class, 'index'])->name('unduh');
+        Route::post('/laporan/download', [App\Http\Controllers\Bau\UnduhController::class, 'download'])->name('laporan.download');
+        Route::get('/laporan/download-single', [App\Http\Controllers\Bau\UnduhController::class, 'downloadSatuan'])->name('laporan.download-single');
     });
 
     // --- RUTE LOGOUT ---
