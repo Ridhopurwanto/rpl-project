@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('patroli', function (Blueprint $table) {
             $table->bigIncrements('id_patroli');
             $table->unsignedBigInteger('id_pengguna')->index('patroli_id_pengguna_foreign');
+            $table->unsignedBigInteger('id_shift')->nullable()->index('patroli_id_shift_foreign');
             $table->string('nama_lengkap');
             $table->dateTime('waktu_exact');
             $table->string('wilayah');

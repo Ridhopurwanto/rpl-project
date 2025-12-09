@@ -113,6 +113,8 @@
                                 <span class="text-yellow-500 font-semibold">{{ ucfirst($presensi->status) }}</span>
                             @endif
                         </td>
+                        @endif
+                    </tr>
                     </tr>
                     @empty
                     <tr>
@@ -233,6 +235,7 @@
                                 <span class="text-yellow-500 font-semibold">{{ ucfirst($presensi->status) }}</span>
                             @endif
                         </td>
+                        @endif
                     </tr>
                     </tr>
                     @empty

@@ -462,21 +462,25 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Toleransi Keterlambatan</label>
-                            <div class="flex items-center">
+                            <div class="flex items-center gap-2">
                                 <input type="number" name="toleransi" required min="0"
                                     value="{{ $globalToleransi }}"
-                                    class="w-full border-gray-300 rounded-l focus:ring-blue-500 focus:border-blue-500 text-sm">
-                                <span class="bg-gray-200 border border-l-0 border-gray-300 rounded-r px-2 py-2 text-gray-600 text-xs font-bold">Menit</span>
+                                    class="w-full border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 text-sm h-[30px]">
+                                <div class="bg-gray-200 border border-gray-300 rounded px-3 h-[30px] flex items-center text-gray-600 text-xs font-bold">
+                                    Menit
+                                </div>
                             </div>
                         </div>
 
                         <div>
                             <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Presensi Dibuka</label>
-                            <div class="flex items-center">
+                            <div class="flex items-center gap-2">
                                 <input type="number" name="dibuka" required min="0"
                                     value="{{ $globalDibuka }}"
-                                    class="w-full border-gray-300 rounded-l focus:ring-blue-500 focus:border-blue-500 text-sm">
-                                <span class="bg-gray-200 border border-l-0 border-gray-300 rounded-r px-2 py-2 text-gray-600 text-xs font-bold">Menit</span>
+                                    class="w-full border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 text-sm h-[30px]">
+                                <div class="bg-gray-200 border border-gray-300 rounded px-3 h-[30px] flex items-center text-gray-600 text-xs font-bold">
+                                    Menit
+                                </div>
                             </div>
                         </div>
 
