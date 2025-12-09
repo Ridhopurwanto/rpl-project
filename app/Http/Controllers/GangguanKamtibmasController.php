@@ -23,6 +23,8 @@ class GangguanKamtibmasController extends Controller
 
         // Filter Kategori
         $kategoriFilter = $request->input('kategori');
+        
+        $perPage = $request->input('per_page', 10);
 
         // Query dasar
         $query = GangguanKamtibmas::query()
@@ -34,7 +36,7 @@ class GangguanKamtibmasController extends Controller
             $query->where('kategori', $kategoriFilter);
         }
 
-        $riwayatGangguan = $query->orderBy('waktu_lapor', 'desc')->get();
+        $riwayatGangguan = $query->orderBy('waktu_lapor', 'desc')->paginate($perPage);
 
         // Ambil daftar Kategori dari ENUM di database
         try {
@@ -52,6 +54,7 @@ class GangguanKamtibmasController extends Controller
             'bulanTerpilih' => $bulanFilter,
             'kategoriTerpilih' => $kategoriFilter,
             'kategoriOptions' => $kategoriOptions,
+            'perPage' => $perPage,
         ]);
     }
 

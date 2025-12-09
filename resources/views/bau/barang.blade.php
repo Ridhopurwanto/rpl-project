@@ -15,42 +15,60 @@
 <div class="w-full mx-auto"
      x-data="{ 
         showPhotoModal: false, 
-        photoUrl: ''
+        photos: [],
+        currentPhotoIndex: 0,
+        touchStartX: 0,
+        touchEndX: 0
      }">
     
     <h2 class="text-2xl font-bold text-slate-800 mb-4">Laporan Barang</h2>
 
     {{-- Form Filter --}}
-    <form id="filterForm" action="{{ route('bau.barang.index') }}" method="GET">
-        <div class="bg-white p-4 rounded-lg shadow-md mb-6">
-            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+    <form id="filterForm" action="{{ route('bau.barang.index') }}" method="GET" x-data="{}">
+        <div class="bg-white px-6 py-5 rounded-xl shadow-sm mb-6 border border-gray-200">
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
                 {{-- Filter Tanggal --}}
-                <div class="sm:col-span-1">
-                    <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">TANGGAL:</label>
-                    <input type="date" id="tanggal" name="tanggal" 
-                           onchange="document.getElementById('filterForm').submit()"
-                           class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-                           style="color-scheme: dark;"
-                           value="{{ $tanggalTerpilih }}">
+                <div class="w-full">
+                    <label for="tanggal" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Tanggal
+                    </label>
+                    <div class="cursor-pointer" @click="$refs.dateInput.showPicker()">
+                        <input type="date" id="tanggal" name="tanggal" x-ref="dateInput"
+                               onchange="document.getElementById('filterForm').submit()"
+                               class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
+                               value="{{ $tanggalTerpilih }}">
+                    </div>
                 </div>
 
                 {{-- Filter Kategori --}}
-                <div class="sm:col-span-1">
-                    <label for="kategori" class="block text-sm font-medium text-gray-700 mb-1">KATEGORI:</label>
-                    <select id="kategori" name="kategori" 
-                            onchange="document.getElementById('filterForm').submit()"
-                            class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400">
-                        <option value="temuan" {{ $kategoriTerpilih == 'temuan' ? 'selected' : '' }}>Barang Temuan</option>
-                        <option value="titipan" {{ $kategoriTerpilih == 'titipan' ? 'selected' : '' }}>Barang Titipan</option>
-                    </select>
+                <div class="w-full">
+                    <label for="kategori" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Kategori
+                    </label>
+                    <div class="relative">
+                        <select id="kategori" name="kategori" 
+                                onchange="document.getElementById('filterForm').submit()"
+                                class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                            <option value="temuan" {{ $kategoriTerpilih == 'temuan' ? 'selected' : '' }}>Barang Temuan</option>
+                            <option value="titipan" {{ $kategoriTerpilih == 'titipan' ? 'selected' : '' }}>Barang Titipan</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
 
                 {{-- Live Search Input --}}
-                <div class="sm:col-span-2">
-                    <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-1">CARI:</label>
+                <div class="w-full">
+                    <label for="searchInput" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Cari Barang
+                    </label>
                     <input type="text" id="searchInput" name="search" 
-                           class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder-gray-300" 
+                           class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm placeholder-gray-400" 
                            value="{{ $jenisTerpilih }}" 
                            placeholder="Ketik untuk mencari...">
                 </div>
@@ -72,25 +90,25 @@
                 @if($kategoriTerpilih == 'temuan')
                     <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                         <tr>
-                            <th class="py-3 px-4 text-left">No</th>
+                            <th class="py-3 px-4 text-center">No</th>
                             <th class="py-3 px-4 text-center">Foto</th>
-                            <th class="py-3 px-4 text-left">Nama Barang</th>
-                            <th class="py-3 px-4 text-left">Pelapor</th>
-                            <th class="py-3 px-4 text-left">Lokasi Temuan</th>
-                            <th class="py-3 px-4 text-left">Catatan</th>
-                            <th class="py-3 px-4 text-left">Status</th>
+                            <th class="py-3 px-4 text-center">Nama Barang</th>
+                            <th class="py-3 px-4 text-center">Pelapor</th>
+                            <th class="py-3 px-4 text-center">Lokasi Temuan</th>
+                            <th class="py-3 px-4 text-center">Catatan</th>
+                            <th class="py-3 px-4 text-center">Status</th>
                         </tr>
                     </thead>
                 @else
                     <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                         <tr>
-                            <th class="py-3 px-4 text-left">No</th>
+                            <th class="py-3 px-4 text-center">No</th>
                             <th class="py-3 px-4 text-center">Foto</th>
-                            <th class="py-3 px-4 text-left">Nama Barang</th>
-                            <th class="py-3 px-4 text-left">Penitip</th>
-                            <th class="py-3 px-4 text-left">Penerima</th>
-                            <th class="py-3 px-4 text-left">Catatan</th>
-                            <th class="py-3 px-4 text-left">Status</th>
+                            <th class="py-3 px-4 text-center">Nama Barang</th>
+                            <th class="py-3 px-4 text-center">Penitip</th>
+                            <th class="py-3 px-4 text-center">Penerima</th>
+                            <th class="py-3 px-4 text-center">Catatan</th>
+                            <th class="py-3 px-4 text-center">Status</th>
                         </tr>
                     </thead>
                 @endif
@@ -103,7 +121,7 @@
                                 <td class="py-2 px-4">{{ $index + 1 }}.</td>
                                 <td class="py-2 px-4 text-center">
                                     @if($barang->foto)
-                                        <button @click="showPhotoModal = true; photoUrl = '{{ asset('storage/' . $barang->foto) }}'" 
+                                        <button @click="showPhotoModal = true; photos = ['{{ asset('storage/' . $barang->foto) }}'@if($barang->foto_penerima), '{{ asset('storage/' . $barang->foto_penerima) }}'@endif]; currentPhotoIndex = 0" 
                                                 class="text-blue-500 hover:underline">
                                             Buka
                                         </button>
@@ -115,7 +133,7 @@
                                 <td class="py-2 px-4">{{ $barang->nama_pelapor }}</td>
                                 <td class="py-2 px-4">{{ $barang->lokasi_penemuan }}</td>
                                 <td class="py-2 px-4">{{ $barang->catatan }}</td>
-                                <td class="py-2 px-4">
+                                <td class="py-2 px-4 text-center">
                                     <span class="px-3 py-1 rounded-full text-xs font-semibold
                                         {{ $barang->status == 'belum selesai' ? 'bg-red-200 text-yellow-800' : 'bg-green-200 text-green-800' }}">
                                         {{ $barang->status }}
@@ -127,7 +145,7 @@
                                 <td class="py-2 px-4">{{ $index + 1 }}.</td>
                                 <td class="py-2 px-4 text-center">
                                     @if($barang->foto)
-                                        <button @click="showPhotoModal = true; photoUrl = '{{ asset('storage/' . $barang->foto) }}'" 
+                                        <button @click="showPhotoModal = true; photos = ['{{ asset('storage/' . $barang->foto) }}'@if($barang->foto_penerima), '{{ asset('storage/' . $barang->foto_penerima) }}'@endif]; currentPhotoIndex = 0" 
                                                 class="text-blue-500 hover:underline">
                                             Buka
                                         </button>
@@ -139,7 +157,7 @@
                                 <td class="py-2 px-4">{{ $barang->nama_penitip }}</td>
                                 <td class="py-2 px-4">{{ $barang->tujuan }}</td>
                                 <td class="py-2 px-4">{{ $barang->catatan }}</td>
-                                <td class="py-2 px-4">
+                                <td class="py-2 px-4 text-center">
                                     <span class="px-3 py-1 rounded-full text-xs font-semibold
                                         {{ $barang->status == 'belum selesai' ? 'bg-red-200 text-yellow-800' : 'bg-green-200 text-green-800' }}">
                                         {{ $barang->status }}
@@ -213,7 +231,7 @@
                         {{-- Tombol Lihat Foto --}}
                         @if($barang->foto)
                             <div class="pt-2">
-                                <button @click="showPhotoModal = true; photoUrl = '{{ asset('storage/' . $barang->foto) }}'" 
+                                <button @click="showPhotoModal = true; photos = ['{{ asset('storage/' . $barang->foto) }}'@if($barang->foto_penerima), '{{ asset('storage/' . $barang->foto_penerima) }}'@endif]; currentPhotoIndex = 0" 
                                         class="w-full bg-blue-500 text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition flex items-center justify-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -237,19 +255,76 @@
         </div>
     </div>
 
-    {{-- Modal Tampil Foto --}}
-    <div x-show="showPhotoModal" 
-         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
-         @click.away="showPhotoModal = false"
-         style="display: none;"
-         x-transition.opacity>
-        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-4 relative" @click.stop>
-            <div class="flex justify-between items-center pb-3 border-b">
-                <h3 class="text-xl font-bold text-gray-800">FOTO BARANG</h3>
-                <button @click="showPhotoModal = false" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+    {{-- Modal Tampil Foto dengan SLIDER (Sama persis dengan Anggota) --}}
+    <div x-show="showPhotoModal" style="display: none;"
+        class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-[60]" x-transition
+        @keydown.window.escape="showPhotoModal = false"
+        @keydown.window.arrow-right="if(showPhotoModal && currentPhotoIndex < photos.length - 1) currentPhotoIndex++"
+        @keydown.window.arrow-left="if(showPhotoModal && currentPhotoIndex > 0) currentPhotoIndex--"
+        @touchstart="touchStartX = $event.changedTouches[0].screenX" 
+        @touchend="
+            touchEndX = $event.changedTouches[0].screenX;
+            if (touchStartX - touchEndX > 50 && currentPhotoIndex < photos.length - 1) currentPhotoIndex++;
+            if (touchEndX - touchStartX > 50 && currentPhotoIndex > 0) currentPhotoIndex--;
+        "
+        @mousedown="touchStartX = $event.screenX"
+        @mouseup="
+            touchEndX = $event.screenX;
+            if (touchStartX - touchEndX > 50 && currentPhotoIndex < photos.length - 1) currentPhotoIndex++;
+            if (touchEndX - touchStartX > 50 && currentPhotoIndex > 0) currentPhotoIndex--;
+        ">
+
+        <div @click.outside="showPhotoModal = false" class="relative max-w-4xl w-full">
+
+            {{-- Header Modal --}}
+            <div class="flex justify-between items-center mb-4">
+                <div class="text-white">
+                    <p class="text-sm text-gray-300">Foto <span x-text="currentPhotoIndex + 1"></span> dari <span
+                            x-text="photos.length"></span></p>
+                    <p class="text-xs text-gray-400 mt-1"
+                        x-text="currentPhotoIndex === 0 ? 'Foto Barang' : 'Foto Penerima'"></p>
+                </div>
+                <button @click="showPhotoModal = false"
+                    class="text-white hover:text-gray-300 text-2xl font-bold bg-gray-800 hover:bg-gray-700 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                    ×
+                </button>
             </div>
-            <div class="mt-4 flex justify-center bg-gray-100 rounded p-2">
-                <img :src="photoUrl" alt="Foto Barang" class="max-w-full max-h-[70vh] rounded object-contain">
+
+            {{-- Image Container --}}
+            <div class="relative flex justify-center bg-transparent">
+                <img :src="photos[currentPhotoIndex]"
+                    class="w-auto h-auto max-h-[70vh] object-contain rounded-lg border-2 border-gray-700">
+
+                {{-- Previous Button --}}
+                <button x-show="currentPhotoIndex > 0" @click="currentPhotoIndex--"
+                    class="absolute left-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
+                        </path>
+                    </svg>
+                </button>
+
+                {{-- Next Button --}}
+                <button x-show="currentPhotoIndex < photos.length - 1" @click="currentPhotoIndex++"
+                    class="absolute right-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+
+            {{-- Indicator Dots --}}
+            <div class="flex justify-center gap-2 mt-4" x-show="photos.length > 1">
+                <template x-for="(photo, index) in photos" :key="index">
+                    <button @click="currentPhotoIndex = index"
+                        :class="currentPhotoIndex === index ? 'bg-white w-8' : 'bg-gray-500 w-2'"
+                        class="h-2 rounded-full transition-all"></button>
+                </template>
+            </div>
+
+            {{-- Hint --}}
+            <div class="text-center mt-4 text-gray-400 text-xs" x-show="photos.length > 1">
+                Swipe atau gunakan tombol panah untuk navigasi
             </div>
         </div>
     </div>

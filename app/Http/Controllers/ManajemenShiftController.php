@@ -102,90 +102,92 @@ class ManajemenShiftController extends Controller
                 ['jenis_shift' => $selectedShiftId]
             );
 
-            // LOGIKA TIMPA / OVERWRITE
+            $affectedDates = [];
+
+            // HANYA JALANKAN LOGIKA POLA JIKA CHECKBOX DICENTANG
             if ($request->apply_pattern) {
+                // Hapus jadwal masa depan
                 Shift::where('id_pengguna', $request->id_pengguna)
                      ->whereDate('tanggal', '>', $targetDate)
                      ->delete();
-            }
 
-            $affectedDates = []; 
-            $currentDate = $targetDate->copy()->addDay();
-            $counter = 1;
+                $currentDate = $targetDate->copy()->addDay();
+                $counter = 1;
 
-            // Ambil Data Libur
-            $hariLibur = $this->getHariLibur($targetDate->year, $endDate->year);
+                // Ambil Data Libur
+                $hariLibur = $this->getHariLibur($targetDate->year, $endDate->year);
 
-            // Tentukan Jenis Jadwal
-            $jadwalType = $user->jenis_jadwal; 
-            if (!$jadwalType) {
-                 $jadwalType = ($user->peran == 'anggota') ? 'shift' : 'non_shift';
-            }
-
-            // LOGIKA SHIFT (2-2-2)
-            if ($jadwalType == 'shift') {
-                $pattern = [
-                    $rules['Pagi'], $rules['Pagi'], 
-                    $rules['Malam'], $rules['Malam'], 
-                    $rules['Off'], $rules['Off']
-                ];
-
-                // Deteksi start index
-                $startIndex = 0; 
-                if ($request->jenis_shift == 'Pagi') {
-                    $yesterday = Shift::where('id_pengguna', $request->id_pengguna)->whereDate('tanggal', $targetDate->copy()->subDay())->first();
-                    $startIndex = ($yesterday && $yesterday->jenis_shift == $rules['Pagi']) ? 1 : 0;
-                }
-                elseif ($request->jenis_shift == 'Malam') {
-                    $yesterday = Shift::where('id_pengguna', $request->id_pengguna)->whereDate('tanggal', $targetDate->copy()->subDay())->first();
-                    $startIndex = ($yesterday && $yesterday->jenis_shift == $rules['Malam']) ? 3 : 2;
-                }
-                elseif ($request->jenis_shift == 'Off') {
-                    $yesterday = Shift::where('id_pengguna', $request->id_pengguna)->whereDate('tanggal', $targetDate->copy()->subDay())->first();
-                    $startIndex = ($yesterday && $yesterday->jenis_shift == $rules['Off']) ? 5 : 4;
+                // Tentukan Jenis Jadwal
+                $jadwalType = $user->jenis_jadwal; 
+                if (!$jadwalType) {
+                     $jadwalType = ($user->peran == 'anggota') ? 'shift' : 'non_shift';
                 }
 
-                while ($currentDate <= $endDate) {
-                    $exists = Shift::where('id_pengguna', $request->id_pengguna)
-                                   ->whereDate('tanggal', $currentDate)
-                                   ->exists();
-                    
-                    if (!$exists) {
-                        $patternIndex = ($startIndex + $counter) % 6;
-                        $newShiftId = $pattern[$patternIndex];
-                        $shiftName = $rules->search($newShiftId); 
+                // LOGIKA SHIFT (2-2-2)
+                if ($jadwalType == 'shift') {
+                    $pattern = [
+                        $rules['Pagi'], $rules['Pagi'], 
+                        $rules['Malam'], $rules['Malam'], 
+                        $rules['Off'], $rules['Off']
+                    ];
 
-                        Shift::create([
-                            'id_pengguna' => $request->id_pengguna, 
-                            'tanggal' => $currentDate->format('Y-m-d'), 
-                            'jenis_shift' => $newShiftId
-                        ]);
-                        $affectedDates[] = ['date' => $currentDate->format('Y-m-d'), 'shift' => $shiftName];
+                    // Deteksi start index
+                    $startIndex = 0; 
+                    if ($request->jenis_shift == 'Pagi') {
+                        $yesterday = Shift::where('id_pengguna', $request->id_pengguna)->whereDate('tanggal', $targetDate->copy()->subDay())->first();
+                        $startIndex = ($yesterday && $yesterday->jenis_shift == $rules['Pagi']) ? 1 : 0;
                     }
-                    $currentDate->addDay();
-                    $counter++;
-                }
-            }
-            // LOGIKA NON-SHIFT (Senin-Jumat)
-            elseif ($jadwalType == 'non_shift') {
-                while ($currentDate <= $endDate) {
-                    $tglStr = $currentDate->format('Y-m-d');
-                    $isOffDay = $currentDate->isWeekend() || in_array($tglStr, $hariLibur);
-                    
-                    $exists = Shift::where('id_pengguna', $request->id_pengguna)
-                                   ->whereDate('tanggal', $currentDate)
-                                   ->exists();
+                    elseif ($request->jenis_shift == 'Malam') {
+                        $yesterday = Shift::where('id_pengguna', $request->id_pengguna)->whereDate('tanggal', $targetDate->copy()->subDay())->first();
+                        $startIndex = ($yesterday && $yesterday->jenis_shift == $rules['Malam']) ? 3 : 2;
+                    }
+                    elseif ($request->jenis_shift == 'Off') {
+                        $yesterday = Shift::where('id_pengguna', $request->id_pengguna)->whereDate('tanggal', $targetDate->copy()->subDay())->first();
+                        $startIndex = ($yesterday && $yesterday->jenis_shift == $rules['Off']) ? 5 : 4;
+                    }
 
-                    if (!$exists) {
-                        if ($isOffDay) {
-                            Shift::create(['id_pengguna' => $request->id_pengguna, 'tanggal' => $tglStr, 'jenis_shift' => $rules['Off']]);
-                            $affectedDates[] = ['date' => $tglStr, 'shift' => 'Off'];
-                        } else {
-                            Shift::create(['id_pengguna' => $request->id_pengguna, 'tanggal' => $tglStr, 'jenis_shift' => $rules['Pagi']]);
-                            $affectedDates[] = ['date' => $tglStr, 'shift' => 'Pagi'];
+                    while ($currentDate <= $endDate) {
+                        $exists = Shift::where('id_pengguna', $request->id_pengguna)
+                                       ->whereDate('tanggal', $currentDate)
+                                       ->exists();
+                        
+                        if (!$exists) {
+                            $patternIndex = ($startIndex + $counter) % 6;
+                            $newShiftId = $pattern[$patternIndex];
+                            $shiftName = $rules->search($newShiftId); 
+
+                            Shift::create([
+                                'id_pengguna' => $request->id_pengguna, 
+                                'tanggal' => $currentDate->format('Y-m-d'), 
+                                'jenis_shift' => $newShiftId
+                            ]);
+                            $affectedDates[] = ['date' => $currentDate->format('Y-m-d'), 'shift' => $shiftName];
                         }
+                        $currentDate->addDay();
+                        $counter++;
                     }
-                    $currentDate->addDay();
+                }
+                // LOGIKA NON-SHIFT (Senin-Jumat)
+                elseif ($jadwalType == 'non_shift') {
+                    while ($currentDate <= $endDate) {
+                        $tglStr = $currentDate->format('Y-m-d');
+                        $isOffDay = $currentDate->isWeekend() || in_array($tglStr, $hariLibur);
+                        
+                        $exists = Shift::where('id_pengguna', $request->id_pengguna)
+                                       ->whereDate('tanggal', $currentDate)
+                                       ->exists();
+
+                        if (!$exists) {
+                            if ($isOffDay) {
+                                Shift::create(['id_pengguna' => $request->id_pengguna, 'tanggal' => $tglStr, 'jenis_shift' => $rules['Off']]);
+                                $affectedDates[] = ['date' => $tglStr, 'shift' => 'Off'];
+                            } else {
+                                Shift::create(['id_pengguna' => $request->id_pengguna, 'tanggal' => $tglStr, 'jenis_shift' => $rules['Pagi']]);
+                                $affectedDates[] = ['date' => $tglStr, 'shift' => 'Pagi'];
+                            }
+                        }
+                        $currentDate->addDay();
+                    }
                 }
             }
 

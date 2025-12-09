@@ -7,7 +7,7 @@
 
 @section('header-left')
     {{-- Update warna border dan text badge agar seragam --}}
-    <a class="inline-block border-2 border-[#1e3a5f] text-[#1e3a5f] text-sm font-bold px-4 py-1 rounded-full mb-4">
+    <a class="flex items-center border-2 border-[#1a2847] text-[#1a2847] text-sm font-bold px-4 py-2 rounded-full">
         MANAJEMEN AKUN
     </a>
 @endsection
@@ -32,6 +32,24 @@
 
     {{-- Konten Halaman --}}
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {{-- Header dengan Judul dan Filter --}}
+        <div class="mb-6 flex justify-between items-center">
+            <h2 class="text-2xl font-bold text-gray-800">Daftar Akun</h2>
+            
+            <div class="relative w-full max-w-md">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <input type="text" 
+                       id="searchName" 
+                       placeholder="Cari nama anggota..."
+                       class="block w-full h-[42px] pl-10 pr-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] placeholder-gray-400 shadow-sm"
+                       @input="filterUsers($event.target.value)">
+            </div>
+        </div>
         
         {{-- Toast Notification --}}
         @if (session('success'))
@@ -102,7 +120,7 @@
                     $innerBg = $user->status == 'Tidak Aktif' ? 'bg-gray-500' : 'bg-[#1e3a5f]';
                 @endphp
 
-                <div class="bg-gray-300 rounded-[2.5rem] p-2 shadow-inner hover:scale-[1.01] transition-transform duration-300">
+                <div class="bg-gray-300 rounded-[2.5rem] p-2 shadow-inner hover:scale-[1.01] transition-transform duration-300 user-card" data-name="{{ strtolower($user->nama_lengkap) }}">
                     <div class="relative {{ $innerBg }} rounded-[2.2rem] p-4 pr-14 shadow-lg flex items-center min-h-[100px]">
                         
                         {{-- 1. AVATAR (Kiri) --}}
@@ -420,5 +438,24 @@
 
 </div>
 </div>
+
+<script>
+function filterUsers(searchTerm) {
+    const cards = document.querySelectorAll('.user-card');
+    const search = searchTerm.toLowerCase().trim();
+    
+    cards.forEach(card => {
+        const userName = card.getAttribute('data-name');
+        const words = userName.split(' ');
+        const match = words.some(word => word.startsWith(search));
+        
+        if (match) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+</script>
 
 @endsection

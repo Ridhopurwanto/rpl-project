@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('header-left')
-    <a class="inline-block border-2 border-[#1a2847] text-[#1a2847] text-sm font-bold px-4 py-1 rounded-full mb-4">
+    <a class="flex items-center border-2 border-[#1a2847] text-[#1a2847] text-sm font-bold px-4 py-2 rounded-full">
         UNDUH
     </a>
 @endsection

@@ -20,7 +20,7 @@
     <body class="font-sans antialiased">
         <div class="min-h-screen flex flex-col max-w-sm mx-auto bg-gray-100 shadow-lg lg:max-w-none lg:mx-0 lg:shadow-none relative">
             
-            <header class="w-full px-4 pt-4 pb-2">
+            <header class="w-full px-4 py-4">
                 <div class="flex justify-between items-center">
                     @php
                             $homeRoute = 'login'; // Default jika terjadi kesalahan
@@ -50,7 +50,7 @@
                             HOME
                         </a> -->
 
-                        <a class="inline-block border-2 border-[#1a2847] text-[#1a2847] text-sm font-bold px-4 py-1 rounded-full mb-4">
+                        <a class="flex items-center border-2 border-[#1a2847] text-[#1a2847] text-sm font-bold px-4 py-2 rounded-full">
                             HOME
                         </a>
                     @show

@@ -5,7 +5,7 @@
 @section('desktop_width', 'lg:max-w-full')
 
 @section('header-left')
-    <a class="inline-block border-2 border-[#1a2847] text-[#1a2847] text-sm font-bold px-4 py-1 rounded-full mb-4">
+    <a class="flex items-center border-2 border-[#1a2847] text-[#1a2847] text-sm font-bold px-4 py-2 rounded-full">
         GANGGUAN<br class="sm:hidden"> KAMTIBMAS
     </a>
 @endsection
@@ -53,10 +53,32 @@
     <form action="{{ route('komandan.gangguan') }}" method="GET" x-data="{}">
         <div class="bg-white px-6 py-5 rounded-xl shadow-sm mb-6 border border-gray-200">
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="flex flex-wrap gap-4">
+                
+                {{-- Show Entries --}}
+                <div class="w-[calc(50%-0.5rem)] md:w-auto">
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
+                    <div class="flex items-center gap-2">
+                        <div class="relative">
+                            <select name="per_page" onchange="this.form.submit()" class="block h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                                <option value="5" {{ $perPage == 5 ? 'selected' : '' }}>5</option>
+                                <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10</option>
+                                <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25</option>
+                                <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>
+                                <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <span class="text-sm text-gray-600 whitespace-nowrap">rows</span>
+                    </div>
+                </div>
                 
                 {{-- Filter Bulan --}}
-                <div class="w-full">
+                <div class="w-[calc(50%-0.5rem)] md:flex-1">
                     <label for="bulan" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                         Bulan
                     </label>
@@ -69,7 +91,7 @@
                 </div>
 
                 {{-- Filter Kategori --}}
-                <div class="w-full">
+                <div class="w-[calc(50%-0.5rem)] md:flex-1">
                     <label for="kategori" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                         Kategori
                     </label>
@@ -264,6 +286,34 @@
                 </div>
             @endforelse
         </div>
+        
+        {{-- Pagination --}}
+        @if($riwayatGangguan->total() > 0)
+            <div class="flex justify-between items-center px-6 py-4 border-t border-gray-200">
+                <div class="text-sm text-gray-600">
+                    Showing {{ $riwayatGangguan->firstItem() ?? 0 }} to {{ $riwayatGangguan->lastItem() ?? 0 }} of {{ $riwayatGangguan->total() }} entries
+                </div>
+                <div class="flex items-center gap-1">
+                    @if ($riwayatGangguan->onFirstPage())
+                        <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Previous</span>
+                    @else
+                        <a href="{{ $riwayatGangguan->appends(request()->query())->previousPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Previous</a>
+                    @endif
+                    @foreach(range(1, $riwayatGangguan->lastPage()) as $page)
+                        @if($page == $riwayatGangguan->currentPage())
+                            <span class="px-3 py-1 text-white bg-[#1e3a5f] rounded font-bold">{{ $page }}</span>
+                        @else
+                            <a href="{{ $riwayatGangguan->appends(request()->query())->url($page) }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
+                        @endif
+                    @endforeach
+                    @if ($riwayatGangguan->hasMorePages())
+                        <a href="{{ $riwayatGangguan->appends(request()->query())->nextPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
+                    @else
+                        <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
+                    @endif
+                </div>
+            </div>
+        @endif
     </div>
 
     {{-- Modal Tampil Foto (Zoom) --}}

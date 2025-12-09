@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('nama_lengkap');
             $table->dateTime('waktu');
             $table->string('foto');
-            $table->enum('status', ['tepat waktu', 'terlambat', 'terlalu cepat']);
+            $table->enum('status', ['tepat waktu', 'terlambat', 'terlalu cepat', 'izin']);
             $table->enum('jenis_presensi', ['Masuk', 'Pulang'])->nullable();
             $table->date('tanggal');
             $table->timestamps();

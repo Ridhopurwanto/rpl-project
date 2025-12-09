@@ -25,6 +25,8 @@ class PresensiController extends Controller
         
         // Ambil filter shift, default: 'semua'.
         $shiftFilter = $request->input('shift', 'semua');
+        
+        $perPage = $request->input('per_page', 10);
 
         // Query dasar: Gabungkan Presensi dengan Shift
         $query = Presensi::join('shift', 'presensi.id_shift', '=', 'shift.id_shift')
@@ -44,15 +46,15 @@ class PresensiController extends Controller
         $queryMasuk = clone $query;
         $queryPulang = clone $query;
 
-        // Ambil data PRESENSI MASUK
+        // Ambil data PRESENSI MASUK dengan pagination
         $dataMasuk = $queryMasuk->where('presensi.jenis_presensi', 'Masuk')
                                ->orderBy('presensi.waktu', 'asc')
-                               ->get();
+                               ->paginate($perPage, ['*'], 'page_masuk');
 
-        // Ambil data PRESENSI PULANG
+        // Ambil data PRESENSI PULANG dengan pagination
         $dataPulang = $queryPulang->where('presensi.jenis_presensi', 'Pulang')
                                  ->orderBy('presensi.waktu', 'asc')
-                                 ->get();
+                                 ->paginate($perPage, ['*'], 'page_pulang');
 
         // --- TAMBAHAN BARU: Ambil Data Shift Rule ---
         // Kita ambil data rule untuk Pagi, Malam, dan Non Shift agar bisa ditampilkan di modal
@@ -70,6 +72,7 @@ class PresensiController extends Controller
             'rules' => $rules,
             'globalToleransi' => $globalRule ? $globalRule->toleransi : 0,
             'globalDibuka' => $globalRule ? $globalRule->dibuka : 0,
+            'perPage' => $perPage,
         ]);
     }
 

@@ -228,7 +228,9 @@
     {{-- Legenda --}}
     <div class="flex justify-center space-x-4 md:space-x-8 mt-6 text-xs md:text-sm font-bold text-gray-600 bg-white p-4 rounded-full shadow-sm mx-auto w-fit">
         <div class="flex items-center"><span class="w-3 h-3 md:w-4 md:h-4 rounded-full bg-yellow-400 mr-2"></span> Shift Pagi</div>
+        @if($user->jenis_jadwal !== 'non_shift')
         <div class="flex items-center"><span class="w-3 h-3 md:w-4 md:h-4 rounded-full bg-blue-500 mr-2"></span> Shift Malam</div>
+        @endif
         <div class="flex items-center"><span class="w-3 h-3 md:w-4 md:h-4 rounded-full bg-red-500 mr-2"></span> Off</div>
     </div>
 
@@ -265,7 +267,7 @@
                         <span x-show="selectedShift == 'Pagi'" class="text-yellow-600 text-xl font-bold">✓</span>
                     </button>
 
-                    <button @click="selectedShift = 'Malam'" :class="selectedShift == 'Malam' ? 'ring-4 ring-blue-200 border-blue-500' : 'border-gray-200 hover:bg-gray-50'" class="w-full flex items-center justify-between p-3 bg-white border-2 rounded-xl transition-all">
+                    <button x-show="'{{ $user->jenis_jadwal }}' !== 'non_shift'" @click="selectedShift = 'Malam'" :class="selectedShift == 'Malam' ? 'ring-4 ring-blue-200 border-blue-500' : 'border-gray-200 hover:bg-gray-50'" class="w-full flex items-center justify-between p-3 bg-white border-2 rounded-xl transition-all">
                         <div class="flex items-center"><div class="w-4 h-4 rounded-full bg-blue-500 mr-3"></div><span class="font-bold text-gray-800">Malam</span></div>
                         <span x-show="selectedShift == 'Malam'" class="text-blue-600 text-xl font-bold">✓</span>
                     </button>
@@ -320,7 +322,13 @@
             openModal(fullDate, formattedDate, currentShift) {
                 this.selectedDate = fullDate;
                 this.selectedDateFormatted = formattedDate;
-                this.selectedShift = currentShift;
+                // Jika non-shift dan shift saat ini adalah Malam, ubah ke Pagi
+                const jenisJadwal = '{{ $user->jenis_jadwal }}';
+                if (jenisJadwal === 'non_shift' && currentShift === 'Malam') {
+                    this.selectedShift = 'Pagi';
+                } else {
+                    this.selectedShift = currentShift;
+                }
                 this.applyToFuture = false; 
                 this.isModalOpen = true;
                 this.feedbackMessage = ''; 
