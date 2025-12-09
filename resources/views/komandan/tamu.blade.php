@@ -47,35 +47,38 @@
         </div>
     @endif
 
-    {{-- Form Filter Tanggal --}}
+    {{-- Form Filter --}}
     <form action="{{ route('komandan.tamu') }}" method="GET" x-data="{}">
         <div class="bg-white px-6 py-5 rounded-xl shadow-sm mb-6 border border-gray-200">
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
+            <div class="flex flex-wrap gap-4">
+                {{-- Show Dropdown --}}
+                <div class="w-[calc(50%-0.5rem)] md:w-auto">
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
+                    <div class="flex items-center gap-2">
+                        <select name="per_page" onchange="this.form.submit()" class="h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm appearance-none cursor-pointer" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em;">
+                            <option value="5" {{ $perPage == 5 ? 'selected' : '' }}>5</option>
+                            <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10</option>
+                            <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25</option>
+                            <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>
+                            <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100</option>
+                        </select>
+                        <span class="text-sm text-gray-600">rows</span>
+                    </div>
+                </div>
+
                 {{-- Filter Dari Tanggal --}}
-                <div class="w-full">
-                    <label for="start_date" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                        Dari Tanggal
-                    </label>
+                <div class="w-[calc(50%-0.5rem)] md:flex-1">
+                    <label for="start_date" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Dari Tanggal</label>
                     <div class="cursor-pointer" @click="$refs.dateStart.showPicker()">
-                        <input type="date" id="start_date" name="start_date" x-ref="dateStart"
-                               onchange="this.form.submit()"
-                               class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
-                               value="{{ $startDate }}">
+                        <input type="date" id="start_date" name="start_date" x-ref="dateStart" onchange="this.form.submit()" class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer" value="{{ $startDate }}">
                     </div>
                 </div>
 
                 {{-- Filter Sampai Tanggal --}}
-                <div class="w-full">
-                    <label for="end_date" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                        Sampai Tanggal
-                    </label>
+                <div class="w-full md:flex-1">
+                    <label for="end_date" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Sampai Tanggal</label>
                     <div class="cursor-pointer" @click="$refs.dateEnd.showPicker()">
-                        <input type="date" id="end_date" name="end_date" x-ref="dateEnd"
-                               onchange="this.form.submit()"
-                               class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
-                               value="{{ $endDate }}">
+                        <input type="date" id="end_date" name="end_date" x-ref="dateEnd" onchange="this.form.submit()" class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer" value="{{ $endDate }}">
                     </div>
                 </div>
             </div>
@@ -106,7 +109,7 @@
                 <tbody class="text-sm divide-y divide-gray-200">
                     @forelse($riwayatTamu as $index => $tamu)
                     <tr>
-                        <td class="py-2 px-4">{{ $index + 1 }}.</td>
+                        <td class="py-2 px-4">{{ $riwayatTamu->firstItem() + $index }}.</td>
                         <td class="py-2 px-4 font-medium">{{ $tamu->nama_tamu }}</td>
                         <td class="py-2 px-4">{{ $tamu->instansi }}</td>
                         <td class="py-2 px-4 text-gray-700 whitespace-nowrap">
@@ -148,6 +151,34 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        {{-- Pagination Desktop --}}
+        <div class="hidden md:flex justify-between items-center px-6 py-4 border-t border-gray-200">
+            <div class="text-sm text-gray-600">
+                Showing {{ $riwayatTamu->firstItem() ?? 0 }} to {{ $riwayatTamu->lastItem() ?? 0 }} of {{ $riwayatTamu->total() }} entries
+            </div>
+            <div class="flex gap-1">
+                @if($riwayatTamu->onFirstPage())
+                    <span class="px-3 py-2 text-sm text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">Previous</span>
+                @else
+                    <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date')])->previousPageUrl() }}" class="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Previous</a>
+                @endif
+
+                @foreach($riwayatTamu->getUrlRange(1, $riwayatTamu->lastPage()) as $page => $url)
+                    @if($page == $riwayatTamu->currentPage())
+                        <span class="px-3 py-2 text-sm text-white bg-[#1e3a5f] rounded-lg">{{ $page }}</span>
+                    @else
+                        <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date')])->url($page) }}" class="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">{{ $page }}</a>
+                    @endif
+                @endforeach
+
+                @if($riwayatTamu->hasMorePages())
+                    <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date')])->nextPageUrl() }}" class="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Next</a>
+                @else
+                    <span class="px-3 py-2 text-sm text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">Next</span>
+                @endif
+            </div>
         </div>
 
         {{-- CARD LAYOUT (Mobile) --}}
@@ -225,6 +256,34 @@
                     <p class="text-gray-500 font-semibold">Tidak ada data kunjungan tamu pada tanggal ini.</p>
                 </div>
             @endforelse
+        </div>
+
+        {{-- Pagination Mobile --}}
+        <div class="md:hidden flex justify-between items-center px-3 py-4 border-t border-gray-200">
+            <div class="text-xs text-gray-600">
+                {{ $riwayatTamu->firstItem() ?? 0 }}-{{ $riwayatTamu->lastItem() ?? 0 }} of {{ $riwayatTamu->total() }}
+            </div>
+            <div class="flex gap-1">
+                @if($riwayatTamu->onFirstPage())
+                    <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Prev</span>
+                @else
+                    <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date')])->previousPageUrl() }}" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Prev</a>
+                @endif
+
+                @foreach($riwayatTamu->getUrlRange(1, $riwayatTamu->lastPage()) as $page => $url)
+                    @if($page == $riwayatTamu->currentPage())
+                        <span class="px-2 py-1 text-xs text-white bg-[#1e3a5f] rounded">{{ $page }}</span>
+                    @else
+                        <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date')])->url($page) }}" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
+                    @endif
+                @endforeach
+
+                @if($riwayatTamu->hasMorePages())
+                    <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date')])->nextPageUrl() }}" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
+                @else
+                    <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
+                @endif
+            </div>
         </div>
     </div>
 
