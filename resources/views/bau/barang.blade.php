@@ -5,7 +5,7 @@
 @section('desktop_width', 'lg:max-w-full')
 
 @section('header-left')
-    <a class="flex items-center border-2 border-[#1a2847] text-[#1a2847] text-sm font-bold px-4 py-2 rounded-full">
+    <a class="inline-block border-2 border-[#1a2847] text-[#1a2847] text-sm font-bold px-4 py-1 rounded-full mb-4">
         BARANG
     </a>
 @endsection
@@ -24,7 +24,7 @@
     <h2 class="text-2xl font-bold text-slate-800 mb-4">Laporan Barang</h2>
 
     {{-- Form Filter --}}
-    <form id="filterForm" action="{{ route('komandan.barang') }}" method="GET" x-data="{}">
+    <form id="filterForm" action="{{ route('bau.barang.index') }}" method="GET" x-data="{}">
         <div class="bg-white px-6 py-5 rounded-xl shadow-sm mb-6 border border-gray-200">
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
