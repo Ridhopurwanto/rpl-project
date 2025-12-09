@@ -67,8 +67,8 @@ class LaporanUnduhController extends Controller
                 ->setOption('isHtml5ParserEnabled', true)
                 ->setOption('isRemoteEnabled', true);
 
-            return $pdf->stream("Laporan_Gabungan_{$timestamp}.pdf");
-            // return $pdf->download("Laporan_Gabungan_{$timestamp}.pdf");
+            // return $pdf->stream("Laporan_Gabungan_{$timestamp}.pdf");
+            return $pdf->download("Laporan_Gabungan_{$timestamp}.pdf");
         }
 
         // kalau bukan excel atau pdf
@@ -110,8 +110,8 @@ class LaporanUnduhController extends Controller
                 ->setOption('isHtml5ParserEnabled', true)
                 ->setOption('isRemoteEnabled', true);
 
-            return $pdf->stream($fileName . '.pdf');
-            // return $pdf->download($fileName . '.pdf');
+            // return $pdf->stream($fileName . '.pdf');
+            return $pdf->download($fileName . '.pdf');
         }
 
         return back()->with('error', 'Format tidak valid');
