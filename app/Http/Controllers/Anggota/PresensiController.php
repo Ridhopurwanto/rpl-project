@@ -88,7 +88,7 @@ class PresensiController extends Controller
         $jadwalAbsen = [
             'nama_shift'     => 'TIDAK ADA JADWAL',
             'info_terdekat'  => '-',
-            'can_presensi'   => false,
+            'canpresensi'   => false,
             'pesan_error'    => 'Tidak ada jadwal shift hari ini.',
             'disable_masuk'  => true, 
             'disable_pulang' => true,
@@ -113,7 +113,7 @@ class PresensiController extends Controller
 
                 if( $jadwalAbsen['nama_shift'] == 'OFF'){
                     $jadwalAbsen['info_terdekat'] = '-';
-                    $jadwalAbsen['can_presensi'] = false;
+                    $jadwalAbsen['canpresensi'] = false;
                     $jadwalAbsen['pesan_error'] = 'Tidak sedang bekerja';
                     $jadwalAbsen['disable_masuk'] = true;
                     $jadwalAbsen['disable_pulang'] = true;
@@ -125,10 +125,10 @@ class PresensiController extends Controller
                     $jadwalAbsen['default_jenis'] = 'masuk';
 
                     if ($now->gte($waktuBukaMasuk)) {
-                        $jadwalAbsen['can_presensi'] = true;
+                        $jadwalAbsen['canpresensi'] = true;
                         $jadwalAbsen['pesan_error'] = '';
                     } else {
-                        $jadwalAbsen['can_presensi'] = false;
+                        $jadwalAbsen['canpresensi'] = false;
                         $jadwalAbsen['pesan_error'] = 'Presensi Masuk belum dibuka. Tunggu ' . $waktuBukaMasuk->format('H:i');
                     }
                 } elseif (!$sudahPulang) {
@@ -136,11 +136,11 @@ class PresensiController extends Controller
                     $jadwalAbsen['disable_masuk'] = true;
                     $jadwalAbsen['disable_pulang'] = false;
                     $jadwalAbsen['default_jenis'] = 'pulang';
-                    $jadwalAbsen['can_presensi'] = true;
+                    $jadwalAbsen['canpresensi'] = true;
                     $jadwalAbsen['pesan_error'] = '';
                 } else {
                     $jadwalAbsen['info_terdekat'] = 'PRESENSI SELESAI';
-                    $jadwalAbsen['can_presensi'] = false;
+                    $jadwalAbsen['canpresensi'] = false;
                     $jadwalAbsen['pesan_error'] = 'Anda sudah menyelesaikan presensi hari ini.';
                     $jadwalAbsen['disable_masuk'] = true;
                     $jadwalAbsen['disable_pulang'] = true;

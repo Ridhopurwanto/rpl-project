@@ -8,25 +8,25 @@
 
 @section('content')
     <div x-data="{ 
-                    showModal: false, 
-                    modalGroup: [], 
-                    selectedCheckpointIndex: 0,
+                                                showModal: false, 
+                                                modalGroup: [], 
+                                                selectedCheckpointIndex: 0,
 
-                    // ===== TAMBAHAN BARU UNTUK MODAL OFF =====
-                    showOffModal: false,
-                    offModalTitle: '',
-                    offModalMessage: '',
+                                                // ===== TAMBAHAN BARU UNTUK MODAL OFF =====
+                                                showOffModal: false,
+                                                offModalTitle: '',
+                                                offModalMessage: '',
 
-                    get currentCheckpoint() { return this.modalGroup[this.selectedCheckpointIndex] || null; },
-                    get modalTitle() { return this.currentCheckpoint ? 'DETAIL ' + this.currentCheckpoint.jenis_patroli : 'DETAIL'; },
-                    get modalPhoto() { return this.currentCheckpoint ? '{{ asset('storage') }}/' + this.currentCheckpoint.foto : ''; },
-                    get modalWaktu() { 
-                        if (!this.currentCheckpoint) return '';
-                        return new Date(this.currentCheckpoint.waktu_exact).toLocaleTimeString('id-ID', { 
-                            hour: '2-digit', minute: '2-digit', second: '2-digit' 
-                        });
-                    }
-                }">
+                                                get currentCheckpoint() { return this.modalGroup[this.selectedCheckpointIndex] || null; },
+                                                get modalTitle() { return this.currentCheckpoint ? 'DETAIL ' + this.currentCheckpoint.jenis_patroli : 'DETAIL'; },
+                                                get modalPhoto() { return this.currentCheckpoint ? '{{ asset('storage') }}/' + this.currentCheckpoint.foto : ''; },
+                                                get modalWaktu() { 
+                                                    if (!this.currentCheckpoint) return '';
+                                                    return new Date(this.currentCheckpoint.waktu_exact).toLocaleTimeString('id-ID', { 
+                                                        hour: '2-digit', minute: '2-digit', second: '2-digit' 
+                                                    });
+                                                }
+                                            }">
 
         {{-- INFO SHIFT HARI INI (TARUH DI ATAS DULU) --}}
         @if($tanggalTerpilih->isToday() && $namaShift)
@@ -57,7 +57,8 @@
                 {{-- Bagian Kanan: Form Filter --}}
                 <form action="{{ route('anggota.patroli.index') }}" method="GET" class="w-full md:w-auto">
                     <div class="w-full md:w-64">
-                        <label for="filter-tanggal" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        <label for="filter-tanggal"
+                            class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                             Tanggal
                         </label>
                         <div class="cursor-pointer" @click="$refs.dateInput.showPicker()">
@@ -89,91 +90,160 @@
                     @php
                         $isSelesai = $item['is_completed'];
                         $hasCheckpoints = $item['has_checkpoints'];
+                        $isExpired = $item['is_expired'] ?? false; // ← TAMBAHAN BARU
+
+                        // CEK APAKAH SHIFT SESUAI
+                        $isShiftMismatch = false;
+                        if ($tanggalTerpilih->isToday() && isset($jenisShift) && isset($item['id_shift'])) {
+                            $isShiftMismatch = $item['id_shift'] != $jenisShift;
+                        }
                     @endphp
 
-                    <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
-                        {{-- Header: Jenis Patroli & Status --}}
-                        <div class="bg-gradient-to-b from-[#243a5e] via-[#2a4a6f] to-[#365c82] px-4 py-2.5 flex justify-between items-center">
-                            <div>
-                                <p class="text-xs text-blue-200 font-semibold uppercase">Jenis Patroli</p>
-                                <p class="text-white font-bold text-base">{{ $item['jenis_patroli'] }}</p>
-                            </div>
+                    {{-- ← JIKA PATROLI TERLEWAT, TAMPILKAN CARD MERAH --}}
+                    @if($isExpired)
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden border-2 border-red-300">
+                            <div class="bg-gradient-to-r from-red-500 to-red-600 px-4 py-2.5 flex justify-between items-center">
+                                <div>
+                                    <p class="text-xs text-red-100 font-semibold uppercase">Jenis Patroli</p>
+                                    <p class="text-white font-bold text-base">{{ $item['jenis_patroli'] }}</p>
+                                </div>
 
-                            {{-- Badge Status --}}
-                            @if($isSelesai)
                                 <span
-                                    class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg uppercase flex items-center gap-1">
+                                    class="bg-red-700 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg uppercase flex items-center gap-1">
                                     <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd"
-                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293z"
                                             clip-rule="evenodd"></path>
                                     </svg>
-                                    Selesai
+                                    Terlewat
                                 </span>
-                            @else
-                                <span class="bg-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg uppercase">
-                                    Proses
-                                </span>
-                            @endif
-                        </div>
-
-                        {{-- Body: Info + Tombol --}}
-                        <div class="p-4 space-y-3">
-                            {{-- Nama Petugas --}}
-                            <div class="flex items-center gap-3 pb-3 border-b border-gray-100">
-                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                            clip-rule="evenodd"></path>
-                                    </svg>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="text-[10px] text-gray-500 font-semibold uppercase">Petugas</p>
-                                    <p class="text-gray-800 font-bold text-base">{{ $item['nama_petugas'] }}</p>
-                                </div>
                             </div>
 
-                            {{-- Progress Bar --}}
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <p class="text-xs text-gray-600 font-semibold">Progress Checkpoint</p>
-                                    <span class="text-xs font-bold {{ $isSelesai ? 'text-green-600' : 'text-orange-600' }}">
-                                        {{ $item['progress'] }} / 17
-                                    </span>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                                    <div class="h-full rounded-full transition-all {{ $isSelesai ? 'bg-green-500' : 'bg-yellow-500' }}"
-                                        style="width: {{ ($item['progress'] / 17) * 100 }}%">
+                            <div class="p-4 bg-red-50">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-red-200 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-sm font-bold text-red-800">Patroli Belum Dilaksanakan</p>
+                                        <p class="text-xs text-red-600">Waktu patroli sudah terlewat ({{ $item['expired_time'] }} WIB)
+                                        </p>
                                     </div>
                                 </div>
                             </div>
-
-                            {{-- Tombol Detail --}}
-                            @if($hasCheckpoints)
-                                <button
-                                    @click.prevent="showModal = true; modalGroup = {{ $item['checkpoints']->values() }}; selectedCheckpointIndex = 0;"
-                                    class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
-                                        </path>
-                                    </svg>
-                                    <span class="text-sm">LIHAT DETAIL</span>
-                                </button>
-                            @else
-                                <div
-                                    class="w-full bg-gray-100 text-gray-500 font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    <span class="text-sm">Patroli sedang berlangsung</span>
-                                </div>
-                            @endif
                         </div>
-                    </div>
+                    @else
+
+                        <div
+                            class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 {{ $isShiftMismatch ? 'opacity-60' : '' }}">
+                            {{-- Header: Jenis Patroli & Status --}}
+                            <div
+                                class="bg-gradient-to-b from-[#243a5e] via-[#2a4a6f] to-[#365c82] px-4 py-2.5 flex justify-between items-center">
+                                <div>
+                                    <p class="text-xs text-blue-200 font-semibold uppercase">Jenis Patroli</p>
+                                    <p class="text-white font-bold text-base">{{ $item['jenis_patroli'] }}</p>
+                                </div>
+
+                                {{-- ← TAMBAHKAN BADGE SHIFT MISMATCH --}}
+                                @if($isShiftMismatch)
+                                    <span
+                                        class="bg-gray-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg uppercase flex items-center gap-1">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                                            </path>
+                                        </svg>
+                                        Terkunci
+                                    </span>
+                                @elseif($isSelesai)
+                                    <span
+                                        class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg uppercase flex items-center gap-1">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                clip-rule="evenodd"></path>
+                                        </svg>
+                                        Selesai
+                                    </span>
+                                @else
+                                    <span class="bg-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg uppercase">
+                                        Proses
+                                    </span>
+                                @endif
+                            </div>
+
+                            {{-- Body: Info + Tombol --}}
+                            <div class="p-4 space-y-3">
+                                {{-- Nama Petugas --}}
+                                <div class="flex items-center gap-3 pb-3 border-b border-gray-100">
+                                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                                clip-rule="evenodd"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-[10px] text-gray-500 font-semibold uppercase">Petugas</p>
+                                        <p class="text-gray-800 font-bold text-base">{{ $item['nama_petugas'] }}</p>
+                                    </div>
+                                </div>
+
+                                {{-- Progress Bar --}}
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <p class="text-xs text-gray-600 font-semibold">Progress Checkpoint</p>
+                                        <span class="text-xs font-bold {{ $isSelesai ? 'text-green-600' : 'text-orange-600' }}">
+                                            {{ $item['progress'] }} / 17
+                                        </span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                                        <div class="h-full rounded-full transition-all {{ $isSelesai ? 'bg-green-500' : 'bg-yellow-500' }}"
+                                            style="width: {{ ($item['progress'] / 17) * 100 }}%">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Tombol Detail - UBAH INI --}}
+                                @if($isShiftMismatch)
+                                    {{-- Tombol Terkunci --}}
+                                    <div
+                                        class="w-full bg-gray-300 text-gray-600 font-bold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 cursor-not-allowed">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                                            </path>
+                                        </svg>
+                                        <span class="text-sm">PATROLI SHIFT LAIN</span>
+                                    </div>
+                                @elseif($hasCheckpoints)
+                                    <button
+                                        @click.prevent="showModal = true; modalGroup = {{ $item['checkpoints']->values() }}; selectedCheckpointIndex = 0;"
+                                        class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                            </path>
+                                        </svg>
+                                        <span class="text-sm">LIHAT DETAIL</span>
+                                    </button>
+                                @else
+                                    <div
+                                        class="w-full bg-gray-100 text-gray-500 font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <span class="text-sm">Patroli sedang berlangsung</span>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
                 @endforeach
 
                 {{-- Tampilkan Patroli yang Terlewat (belum dilaksanakan) --}}
@@ -183,16 +253,16 @@
                             1 => ['Patroli 1', 'Patroli 2', 'Patroli 3', 'Patroli 4', 'Patroli 5', 'Patroli 6'],
                             2 => ['Patroli 1', 'Patroli 2', 'Patroli 3', 'Patroli 4', 'Patroli 5', 'Patroli 6']
                         ];
-                        
+
                         $claimedPatrolis = $displayData->pluck('jenis_patroli')->toArray();
                         $jenisShiftUser = Auth::user()->jenis_shift ?? 1;
                         $semuaPatroli = $jadwalPatroli[$jenisShiftUser];
-                        
-                        $patroliTerlewat = collect($semuaPatroli)->filter(function($patroli) use ($claimedPatrolis) {
+
+                        $patroliTerlewat = collect($semuaPatroli)->filter(function ($patroli) use ($claimedPatrolis) {
                             return !in_array($patroli, $claimedPatrolis);
                         });
                     @endphp
-                    
+
                     @foreach($patroliTerlewat as $patroli)
                         @php
                             // Cek apakah patroli ini sudah terlewat
@@ -214,14 +284,14 @@
                                     'Patroli 6' => ['05:30', '06:30'],
                                 ]
                             ];
-                            
+
                             $jamSelesai = $jadwal[$jenisShiftUser][$patroli][1];
                             $waktuSelesai = \Carbon\Carbon::parse($jamSelesai);
                             $waktuSekarang = \Carbon\Carbon::now();
-                            
+
                             $sudahTerlewat = $waktuSekarang->gt($waktuSelesai);
                         @endphp
-                        
+
                         @if($sudahTerlewat)
                             <div class="bg-white rounded-xl shadow-md overflow-hidden border-2 border-red-300">
                                 <div class="bg-gradient-to-r from-red-500 to-red-600 px-4 py-2.5 flex justify-between items-center">
@@ -229,20 +299,24 @@
                                         <p class="text-xs text-red-100 font-semibold uppercase">Jenis Patroli</p>
                                         <p class="text-white font-bold text-base">{{ $patroli }}</p>
                                     </div>
-                                    
-                                    <span class="bg-red-700 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg uppercase flex items-center gap-1">
+
+                                    <span
+                                        class="bg-red-700 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg uppercase flex items-center gap-1">
                                         <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293z" clip-rule="evenodd"></path>
+                                            <path fill-rule="evenodd"
+                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293z"
+                                                clip-rule="evenodd"></path>
                                         </svg>
                                         Terlewat
                                     </span>
                                 </div>
-                                
+
                                 <div class="p-4 bg-red-50">
                                     <div class="flex items-center gap-3">
                                         <div class="w-10 h-10 bg-red-200 rounded-full flex items-center justify-center flex-shrink-0">
                                             <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                             </svg>
                                         </div>
                                         <div class="flex-1">
@@ -262,17 +336,24 @@
         {{-- Tombol FAB --}}
         @if($tanggalTerpilih->isToday())
             @php
+                // Cek apakah semua patroli (tanpa filter shift) sudah selesai
                 $semuaPatroliSelesai = $displayData->filter(fn($item) => $item['is_completed'])->count() >= 6;
+
+                // Tentukan jam shift untuk pesan
+                $jamShift = '';
+                if (isset($namaShift)) {
+                    $jamShift = $namaShift === 'PAGI' ? '07:00 - 19:00' : '19:00 - 07:00';
+                }
             @endphp
 
             @if(isset($isShiftOff) && $isShiftOff)
-                {{-- FAB Terkunci (OFF) - DENGAN MODAL & HOVER EFFECT --}}
+                {{-- FAB Terkunci (OFF) --}}
                 <div class="fixed bottom-24 right-4 z-40">
                     <button @click="
-                        showOffModal = true;
-                        offModalTitle = 'Patroli Dibatasi';
-                        offModalMessage = 'Hari ini Anda sedang OFF/Libur.\n\nPatroli tidak dapat dilakukan.';
-                    "
+                                                    showOffModal = true;
+                                                    offModalTitle = 'Patroli Dibatasi';
+                                                    offModalMessage = 'Hari ini Anda sedang OFF/Libur.\n\nPatroli tidak dapat dilakukan.';
+                                                "
                         class="bg-gray-400 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg cursor-not-allowed hover:bg-gray-500 transition-all transform hover:scale-110 relative group">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -280,7 +361,31 @@
                             </path>
                         </svg>
 
-                        {{-- Tooltip saat hover --}}
+                        <div
+                            class="absolute bottom-20 right-0 bg-gray-800 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg pointer-events-none">
+                            Klik untuk info lebih lanjut
+                            <div
+                                class="absolute top-full right-4 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-gray-800">
+                            </div>
+                        </div>
+                    </button>
+                </div>
+
+            @elseif(!$isWaktuShiftAktif)
+                {{-- ← FAB Terkunci (Bukan Waktu Shift) - TAMBAHAN BARU --}}
+                <div class="fixed bottom-24 right-4 z-40">
+                    <button @click="
+                                                    showOffModal = true;
+                                                    offModalTitle = 'Patroli Dibatasi';
+                                                    offModalMessage = 'Patroli hanya dapat dilakukan pada waktu shift Anda.\n\nShift {{ $namaShift }}: {{ $jamShift }} WIB';
+                                                "
+                        class="bg-gray-400 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg cursor-not-allowed hover:bg-gray-500 transition-all transform hover:scale-110 relative group">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </path>
+                        </svg>
+
                         <div
                             class="absolute bottom-20 right-0 bg-gray-800 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg pointer-events-none">
                             Klik untuk info lebih lanjut
@@ -292,20 +397,20 @@
                 </div>
 
             @elseif($semuaPatroliSelesai)
-                {{-- FAB Terkunci (Selesai) - DENGAN MODAL & HOVER EFFECT --}}
+                {{-- FAB Terkunci (Selesai) --}}
                 <div class="fixed bottom-24 right-4 z-40">
                     <button @click="
-                        showOffModal = true;
-                        offModalTitle = 'Patroli Selesai';
-                        offModalMessage = 'Semua patroli hari ini sudah selesai.\n\nTerima kasih atas kerja kerasnya!';
-                    "
+                                                    showOffModal = true;
+                                                    offModalTitle = 'Patroli Selesai';
+                                                    offModalMessage = 'Semua patroli hari ini sudah selesai.\n\nTerima kasih atas kerja kerasnya!';
+                                                "
                         class="bg-gray-400 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg cursor-not-allowed hover:bg-gray-500 transition-all transform hover:scale-110 relative group">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </path>
                         </svg>
 
-                        {{-- Tooltip saat hover --}}
                         <div
                             class="absolute bottom-20 right-0 bg-gray-800 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg pointer-events-none">
                             Klik untuk info lebih lanjut
@@ -315,7 +420,6 @@
                         </div>
                     </button>
                 </div>
-
 
             @else
                 {{-- FAB Aktif --}}
@@ -334,7 +438,7 @@
                 </a>
             @endif
         @endif
-
+        
         {{-- Modal --}}
         <div x-show="showModal" @keydown.escape.window="showModal = false"
             class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4" style="display: none;">
