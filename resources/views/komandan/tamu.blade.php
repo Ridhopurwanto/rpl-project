@@ -48,26 +48,33 @@
     @endif
 
     {{-- Form Filter Tanggal --}}
-    <form action="{{ route('komandan.tamu') }}" method="GET">
-        <div class="bg-white p-4 rounded-lg shadow-md mb-6">
-            <div class="flex flex-col sm:flex-row sm:items-end sm:space-x-4 space-y-4 sm:space-y-0">
+    <form action="{{ route('komandan.tamu') }}" method="GET" x-data="{}">
+        <div class="bg-white px-6 py-5 rounded-xl shadow-sm mb-6 border border-gray-200">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
-                {{-- Input Rentang Tanggal (Grid 2 Kolom) --}}
-                <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">DARI TANGGAL:</label>
-                        <input type="date" id="start_date" name="start_date" 
+                {{-- Filter Dari Tanggal --}}
+                <div class="w-full">
+                    <label for="start_date" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Dari Tanggal
+                    </label>
+                    <div class="cursor-pointer" @click="$refs.dateStart.showPicker()">
+                        <input type="date" id="start_date" name="start_date" x-ref="dateStart"
                                onchange="this.form.submit()"
-                               class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400" 
-                               style="color-scheme: dark;"
+                               class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
                                value="{{ $startDate }}">
                     </div>
-                    <div>
-                        <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">SAMPAI TANGGAL:</label>
-                        <input type="date" id="end_date" name="end_date" 
+                </div>
+
+                {{-- Filter Sampai Tanggal --}}
+                <div class="w-full">
+                    <label for="end_date" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Sampai Tanggal
+                    </label>
+                    <div class="cursor-pointer" @click="$refs.dateEnd.showPicker()">
+                        <input type="date" id="end_date" name="end_date" x-ref="dateEnd"
                                onchange="this.form.submit()"
-                               class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400" 
-                               style="color-scheme: dark;"
+                               class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
                                value="{{ $endDate }}">
                     </div>
                 </div>
@@ -226,39 +233,84 @@
          class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
          @click.away="showEditModal = false"
          style="display: none;">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-4 relative" @click.stop>
-            <div class="flex justify-between items-center pb-3 border-b">
-                <h3 class="text-xl font-bold text-gray-800">EDIT DATA TAMU</h3>
-                <button @click="showEditModal = false" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full relative overflow-hidden" @click.stop>
+            {{-- Header Biru --}}
+            <div class="bg-[#1e3a5f] py-4 px-6 border-b border-[#1e3a5f] flex justify-between items-center">
+                <h3 class="text-lg font-bold text-white flex items-center tracking-wide">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    EDIT DATA TAMU
+                </h3>
+                <button @click="showEditModal = false" class="text-white/70 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
             
-            <form :action="editAction" method="POST" class="mt-4">
+            <form :action="editAction" method="POST">
                 @csrf
                 @method('PUT')
-                <div class="space-y-4">
-                    
-                    <div>
-                        <label for="nama_tamu" class="block text-sm font-medium text-gray-700 mb-1">Nama:</label>
-                        <input type="text" id="nama_tamu" name="nama_tamu" x-model="editNama"
-                               class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <div class="modal-body max-h-[70vh] overflow-y-auto p-6">
+                    <div class="space-y-5">
+                        
+                        {{-- GROUP: Informasi Tamu --}}
+                        <div class="p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+
+                            
+                            <div class="space-y-4">
+                                {{-- Nama Tamu --}}
+                                <div>
+                                    <label for="nama_tamu" class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">Nama Tamu <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                        </div>
+                                        <input type="text" id="nama_tamu" name="nama_tamu" x-model="editNama" required placeholder="Nama lengkap tamu"
+                                               class="pl-10 w-full bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5">
+                                    </div>
+                                </div>
+                                
+                                {{-- Instansi --}}
+                                <div>
+                                    <label for="instansi" class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">Instansi <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                        </div>
+                                        <input type="text" id="instansi" name="instansi" x-model="editInstansi" required placeholder="Nama instansi/perusahaan"
+                                               class="pl-10 w-full bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5">
+                                    </div>
+                                </div>
+
+                                {{-- Tujuan --}}
+                                <div>
+                                    <label for="tujuan" class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">Tujuan <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                                        </div>
+                                        <input type="text" id="tujuan" name="tujuan" x-model="editTujuan" required placeholder="Tujuan kunjungan"
+                                               class="pl-10 w-full bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5">
+                                    </div>
+                                </div>
+                                
+                                {{-- Waktu Kunjungan --}}
+                                <div>
+                                    <label for="waktu_datang" class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">Waktu Kunjungan <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        </div>
+                                        <input type="datetime-local" id="waktu_datang" name="waktu_datang" x-model="editWaktuDatang" required
+                                               class="pl-10 w-full bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label for="instansi" class="block text-sm font-medium text-gray-700 mb-1">Instansi:</label>
-                        <input type="text" id="instansi" name="instansi" x-model="editInstansi"
-                               class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label for="tujuan" class="block text-sm font-medium text-gray-700 mb-1">Tujuan:</label>
-                        <input type="text" id="tujuan" name="tujuan" x-model="editTujuan"
-                               class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label for="waktu_datang" class="block text-sm font-medium text-gray-700 mb-1">Waktu Kunjungan:</label>
-                        <input type="datetime-local" id="waktu_datang" name="waktu_datang" x-model="editWaktuDatang"
-                               class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-                    <button type="submit" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg shadow hover:bg-green-600 transition">
-                        SUBMIT
+                </div>
+
+                <div class="modal-footer p-4 border-t bg-gray-50">
+                    <button type="submit" class="w-full px-4 py-3 text-white font-bold bg-[#1e3a5f] rounded-xl hover:bg-[#2a4a6f] shadow-lg transition transform hover:-translate-y-0.5">
+                        SIMPAN PERUBAHAN
                     </button>
                 </div>
             </form>

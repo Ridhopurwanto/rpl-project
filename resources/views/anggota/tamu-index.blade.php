@@ -10,7 +10,7 @@
 <div class="w-full min-h-screen bg-slate-100 p-4 pb-32" x-data="{ showCreateModal: false }">
 
     {{-- KOTAK FILTER RENTANG TANGGAL --}}
-    <div class="bg-white rounded-lg shadow-md p-5 mb-6">
+    <div class="bg-white px-6 py-5 rounded-xl shadow-sm mb-6 border border-gray-200">
         <form action="{{ route('anggota.tamu.index') }}" method="GET" 
               x-data="{ 
                   start: '{{ $startDate }}', 
@@ -20,43 +20,50 @@
                   }
               }">
             
-            <div class="flex flex-col md:flex-row md:items-end gap-4 relative">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
                 
-                {{-- Input Tanggal Awal --}}
-                <div class="flex-1">
-                    <label for="start_date" class="block text-sm font-bold text-slate-600 mb-2 uppercase">Dari Tanggal :</label>
-                    <input 
-                        onchange="this.form.submit()"
-                        type="date" 
-                        id="start_date"
-                        name="start_date"
-                        x-model="start"
-                        class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        style="color-scheme: dark;">
+                {{-- Filter Dari Tanggal --}}
+                <div class="w-full">
+                    <label for="start_date" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Dari Tanggal
+                    </label>
+                    <div class="cursor-pointer" @click="$refs.dateStart.showPicker()">
+                        <input 
+                            onchange="this.form.submit()"
+                            type="date" 
+                            id="start_date"
+                            name="start_date"
+                            x-ref="dateStart"
+                            x-model="start"
+                            class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
+                    </div>
                 </div>
 
-                {{-- Input Tanggal Akhir --}}
-                <div class="flex-1">
-                    <label for="end_date" class="block text-sm font-bold text-slate-600 mb-2 uppercase">Sampai Tanggal :</label>
-                    <input 
-                        onchange="this.form.submit()"
-                        type="date" 
-                        id="end_date"
-                        name="end_date"
-                        x-model="end"
-                        class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        style="color-scheme: dark;">
+                {{-- Filter Sampai Tanggal --}}
+                <div class="w-full">
+                    <label for="end_date" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Sampai Tanggal
+                    </label>
+                    <div class="cursor-pointer" @click="$refs.dateEnd.showPicker()">
+                        <input 
+                            onchange="this.form.submit()"
+                            type="date" 
+                            id="end_date"
+                            name="end_date"
+                            x-ref="dateEnd"
+                            x-model="end"
+                            class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
+                    </div>
                 </div>
 
                 {{-- Tooltip Wrapper --}}
-                <div class="md:mb-[1px] relative"> 
+                <div class="absolute -bottom-8 right-0"> 
                     <div x-show="isInvalid" 
                          x-transition:enter="transition ease-out duration-300"
                          x-transition:enter-start="opacity-0 transform translate-y-2"
                          x-transition:enter-end="opacity-100 transform translate-y-0"
-                         class="absolute bottom-full right-0 mb-2 w-48 bg-yellow-100 border border-yellow-400 text-yellow-800 text-xs font-bold px-3 py-2 rounded shadow-lg z-10 text-center">
+                         class="bg-yellow-100 border border-yellow-400 text-yellow-800 text-xs font-bold px-3 py-2 rounded shadow-lg z-10 text-center whitespace-nowrap">
                         ⚠️ Tanggal awal tidak boleh melebihi tanggal akhir!
-                        <div class="absolute top-full right-8 -mt-1 w-2 h-2 bg-yellow-100 border-b border-r border-yellow-400 transform rotate-45"></div>
                     </div>
                 </div>
             </div>

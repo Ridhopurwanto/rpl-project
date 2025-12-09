@@ -482,30 +482,33 @@
             </div>
         </div>
 
-        {{-- === 3. FILTER RIWAYAT (LIVE SEARCH) === --}}
-        <div class="bg-white rounded-lg shadow-md p-5 mt-4 mb-6">
-            <h3 class="text-sm font-bold text-slate-600 uppercase mb-3">FILTER RIWAYAT :</h3>
+        {{-- === 3. FILTER RIWAYAT === --}}
+        <div class="bg-white px-6 py-5 rounded-xl shadow-sm mt-4 mb-6 border border-gray-200" x-data="{}">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-            <div class="flex flex-col md:flex-row md:items-end gap-4">
-
-                {{-- Input Tanggal Awal --}}
-                <div class="flex-1">
-                    <label for="start_date" class="block text-xs font-bold text-slate-500 mb-1 uppercase">DARI TANGGAL
-                        :</label>
-                    <input type="date" id="start_date" name="start_date" value="{{ $startDate }}"
-                        @change="window.location.href = '{{ route('anggota.presensi.index') }}?start_date=' + $event.target.value + '&end_date=' + document.getElementById('end_date').value"
-                        class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        style="color-scheme: dark;">
+                {{-- Filter Dari Tanggal --}}
+                <div class="w-full">
+                    <label for="start_date" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Dari Tanggal
+                    </label>
+                    <div class="cursor-pointer" @click="$refs.dateStart.showPicker()">
+                        <input type="date" id="start_date" name="start_date" x-ref="dateStart" value="{{ $startDate }}"
+                            @change="window.location.href = '{{ route('anggota.presensi.index') }}?start_date=' + $event.target.value + '&end_date=' + document.getElementById('end_date').value"
+                            class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
+                    </div>
                 </div>
 
-                {{-- Input Tanggal Akhir --}}
-                <div class="flex-1">
-                    <label for="end_date" class="block text-xs font-bold text-slate-500 mb-1 uppercase">SAMPAI TANGGAL
-                        :</label>
-                    <input type="date" id="end_date" name="end_date" value="{{ $endDate }}"
-                        @change="window.location.href = '{{ route('anggota.presensi.index') }}?start_date=' + document.getElementById('start_date').value + '&end_date=' + $event.target.value"
-                        class="w-full bg-[#2a4a6f] text-white px-4 py-2 rounded-lg shadow border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        style="color-scheme: dark;">
+                {{-- Filter Sampai Tanggal --}}
+                <div class="w-full">
+                    <label for="end_date" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Sampai Tanggal
+                    </label>
+                    <div class="cursor-pointer" @click="$refs.dateEnd.showPicker()">
+                        <input type="date" id="end_date" name="end_date" x-ref="dateEnd" value="{{ $endDate }}"
+                            @change="window.location.href = '{{ route('anggota.presensi.index') }}?start_date=' + document.getElementById('start_date').value + '&end_date=' + $event.target.value"
+                            class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
+                    </div>
                 </div>
 
             </div>
