@@ -14,14 +14,11 @@ class GangguanController extends Controller
      */
     public function index(Request $request)
     {
-        // Filter Bulan
         $bulanFilter = $request->input('bulan', now()->format('Y-m'));
         $carbonDate = Carbon::createFromFormat('Y-m', $bulanFilter);
-
-        // Filter Kategori
         $kategoriFilter = $request->input('kategori');
+        $perPage = $request->input('per_page', 10);
 
-        // Query dasar
         $query = GangguanKamtibmas::query()
                     ->whereYear('waktu_lapor', $carbonDate->year)
                     ->whereMonth('waktu_lapor', $carbonDate->month);
@@ -30,8 +27,7 @@ class GangguanController extends Controller
             $query->where('kategori', $kategoriFilter);
         }
 
-        $riwayatGangguan = $query->orderBy('waktu_lapor', 'desc')->get();
-
+        $riwayatGangguan = $query->orderBy('waktu_lapor', 'desc')->paginate($perPage);
         $kategoriOptions = ['Unjuk Rasa', 'Pembakaran Lahan', 'Bentrokan Kepolisian', 'Kriminalitas', 'Kecelakaan', 'Lainnya'];
 
         return view('bau.gangguan', [
@@ -39,6 +35,7 @@ class GangguanController extends Controller
             'bulanTerpilih' => $bulanFilter,
             'kategoriTerpilih' => $kategoriFilter,
             'kategoriOptions' => $kategoriOptions,
+            'perPage' => $perPage,
         ]);
     }
 }
