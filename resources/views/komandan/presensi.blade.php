@@ -114,12 +114,12 @@
             <table class="w-full min-w-max table-fixed">
                 <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                     <tr>
-                        <th class="py-3 px-4 text-left w-16">No</th>
-                        <th class="py-3 px-4 text-center w-25">Nama</th>
-                        <th class="py-3 px-4 text-left w-25">Waktu</th>
-                        <th class="py-3 px-4 text-center w-25">Foto</th>
-                        <th class="py-3 px-4 text-center w-25">Status</th>
-                        <th class="py-3 px-4 text-center w-28">Aksi</th>
+                        <th class="py-3 px-4 text-center w-[8%]">No</th>
+                        <th class="py-3 px-4 text-center w-[28%]">Nama</th>
+                        <th class="py-3 px-4 text-center w-[18%]">Waktu</th>
+                        <th class="py-3 px-4 text-center w-[13%]">Foto</th>
+                        <th class="py-3 px-4 text-center w-[18%]">Status</th>
+                        <th class="py-3 px-4 text-center w-[15%]">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="text-sm divide-y divide-gray-200">
@@ -250,12 +250,12 @@
             <table class="w-full min-w-max table-fixed">
                 <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                     <tr>
-                        <th class="py-3 px-4 text-left w-16">No</th>
-                        <th class="py-3 px-4 text-center w-25">Nama</th>
-                        <th class="py-3 px-4 text-left w-25">Waktu</th>
-                        <th class="py-3 px-4 text-center w-25">Foto</th>
-                        <th class="py-3 px-4 text-center w-25">Status</th>
-                        <th class="py-3 px-4 text-center">Aksi</th>
+                        <th class="py-3 px-4 text-center w-[8%]">No</th>
+                        <th class="py-3 px-4 text-center w-[28%]">Nama</th>
+                        <th class="py-3 px-4 text-center w-[18%]">Waktu</th>
+                        <th class="py-3 px-4 text-center w-[13%]">Foto</th>
+                        <th class="py-3 px-4 text-center w-[18%]">Status</th>
+                        <th class="py-3 px-4 text-center w-[15%]">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="text-sm divide-y divide-gray-200">
