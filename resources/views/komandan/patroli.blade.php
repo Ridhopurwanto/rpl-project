@@ -100,17 +100,17 @@
         
         {{-- TABEL (Desktop) --}}
         <div class="hidden md:block overflow-x-auto">
-            <table class="w-full min-w-max">
+            <table class="w-full min-w-max table-fixed">
                 <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                     <tr>
-                        <th class="py-3 px-4 text-left w-16">No</th>
-                        <th class="py-3 px-4 text-left w-32">Waktu</th>
-                        <th class="py-3 px-4 text-left w-32">Jenis</th>
-                        <th class="py-3 px-4 text-left">Wilayah</th>
-                        <th class="py-3 px-4 text-left w-48">Nama</th>
-                        <th class="py-3 px-4 text-center w-24">Detail</th>
+                        <th class="py-3 px-4 text-center w-[6%]">No</th>
+                        <th class="py-3 px-4 text-center w-[12%]">Waktu</th>
+                        <th class="py-3 px-4 text-center w-[13%]">Jenis</th>
+                        <th class="py-3 px-4 text-center w-[25%]">Wilayah</th>
+                        <th class="py-3 px-4 text-center w-[20%]">Nama</th>
+                        <th class="py-3 px-4 text-center w-[10%]">Detail</th>
                         @if(Auth::user()->peran == 'komandan')
-                            <th class="py-3 px-4 text-center w-28">Aksi</th>
+                            <th class="py-3 px-4 text-center w-[14%]">Aksi</th>
                         @endif
                     </tr>
                 </thead>
@@ -119,7 +119,7 @@
                     <tr>
                         <td class="py-2 px-4">{{ $index + 1 }}.</td>
                         <td class="py-2 px-4">{{ $item->waktu_exact->format('H:i:s') }}</td>
-                        <td class="py-2 px-4">
+                        <td class="py-2 px-4 text-center">
                             <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">
                                 {{ $item->jenis_patroli }}
                             </span>

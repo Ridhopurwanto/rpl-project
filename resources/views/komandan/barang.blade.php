@@ -87,25 +87,25 @@
                 @if($kategoriTerpilih == 'temuan')
                     <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                         <tr>
-                            <th class="py-3 px-4 text-left">No</th>
+                            <th class="py-3 px-4 text-center">No</th>
                             <th class="py-3 px-4 text-center">Foto</th>
-                            <th class="py-3 px-4 text-left">Nama Barang</th>
-                            <th class="py-3 px-4 text-left">Pelapor</th>
-                            <th class="py-3 px-4 text-left">Lokasi Temuan</th>
-                            <th class="py-3 px-4 text-left">Catatan</th>
-                            <th class="py-3 px-4 text-left">Status</th>
+                            <th class="py-3 px-4 text-center">Nama Barang</th>
+                            <th class="py-3 px-4 text-center">Pelapor</th>
+                            <th class="py-3 px-4 text-center">Lokasi Temuan</th>
+                            <th class="py-3 px-4 text-center">Catatan</th>
+                            <th class="py-3 px-4 text-center">Status</th>
                         </tr>
                     </thead>
                 @else
                     <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                         <tr>
-                            <th class="py-3 px-4 text-left">No</th>
+                            <th class="py-3 px-4 text-center">No</th>
                             <th class="py-3 px-4 text-center">Foto</th>
-                            <th class="py-3 px-4 text-left">Nama Barang</th>
-                            <th class="py-3 px-4 text-left">Penitip</th>
-                            <th class="py-3 px-4 text-left">Penerima</th>
-                            <th class="py-3 px-4 text-left">Catatan</th>
-                            <th class="py-3 px-4 text-left">Status</th>
+                            <th class="py-3 px-4 text-center">Nama Barang</th>
+                            <th class="py-3 px-4 text-center">Penitip</th>
+                            <th class="py-3 px-4 text-center">Penerima</th>
+                            <th class="py-3 px-4 text-center">Catatan</th>
+                            <th class="py-3 px-4 text-center">Status</th>
                         </tr>
                     </thead>
                 @endif
@@ -130,7 +130,7 @@
                                 <td class="py-2 px-4">{{ $barang->nama_pelapor }}</td>
                                 <td class="py-2 px-4">{{ $barang->lokasi_penemuan }}</td>
                                 <td class="py-2 px-4">{{ $barang->catatan }}</td>
-                                <td class="py-2 px-4">
+                                <td class="py-2 px-4 text-center">
                                     <span class="px-3 py-1 rounded-full text-xs font-semibold
                                         {{ $barang->status == 'belum selesai' ? 'bg-red-200 text-yellow-800' : 'bg-green-200 text-green-800' }}">
                                         {{ $barang->status }}
@@ -154,7 +154,7 @@
                                 <td class="py-2 px-4">{{ $barang->nama_penitip }}</td>
                                 <td class="py-2 px-4">{{ $barang->tujuan }}</td>
                                 <td class="py-2 px-4">{{ $barang->catatan }}</td>
-                                <td class="py-2 px-4">
+                                <td class="py-2 px-4 text-center">
                                     <span class="px-3 py-1 rounded-full text-xs font-semibold
                                         {{ $barang->status == 'belum selesai' ? 'bg-red-200 text-yellow-800' : 'bg-green-200 text-green-800' }}">
                                         {{ $barang->status }}

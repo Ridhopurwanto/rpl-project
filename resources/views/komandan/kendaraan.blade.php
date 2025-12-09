@@ -91,18 +91,18 @@
             
             {{-- TABEL (Desktop) --}}
             <div class="hidden md:block overflow-x-auto">
-                <table class="w-full min-w-max">
+                <table class="w-full min-w-max table-fixed">
                     <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                         <tr>
-                            <th class="py-3 px-4 text-left w-16">No</th>
-                            <th class="py-3 px-4 text-left w-32">Nopol</th>
-                            <th class="py-3 px-4 text-left">Pemilik</th>
-                            <th class="py-3 px-4 text-left w-24">Tipe</th>
-                            <th class="py-3 px-4 text-left w-28">Masuk</th>
-                            <th class="py-3 px-4 text-left w-28">Keluar</th>
-                            <th class="py-3 px-4 text-left w-40">Ket.</th>
+                            <th class="py-3 px-4 text-center w-[6%]">No</th>
+                            <th class="py-3 px-4 text-center w-[14%]">Nopol</th>
+                            <th class="py-3 px-4 text-center w-[20%]">Pemilik</th>
+                            <th class="py-3 px-4 text-center w-[10%]">Tipe</th>
+                            <th class="py-3 px-4 text-center w-[11%]">Masuk</th>
+                            <th class="py-3 px-4 text-center w-[11%]">Keluar</th>
+                            <th class="py-3 px-4 text-center w-[16%]">Ket.</th>
                             @if(Auth::user()->peran == 'komandan')
-                                <th class="py-3 px-4 text-center w-28">Aksi</th>
+                                <th class="py-3 px-4 text-center w-[12%]">Aksi</th>
                             @endif
                         </tr>
                     </thead>
@@ -112,7 +112,7 @@
                             <td class="py-2 px-4">{{ $index + 1 }}.</td>
                             <td class="py-2 px-4 font-medium">{{ $log->nopol ?? 'N/A' }}</td>
                             <td class="py-2 px-4">{{ $log->pemilik ?? 'N/A' }}</td>
-                            <td class="py-2 px-4">
+                            <td class="py-2 px-4 text-center">
                                 <span class="text-xs font-semibold px-2 py-1 rounded-full 
                                     {{ $log->tipe == 'Roda 4' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' }}">
                                     {{ $log->tipe ?? '-' }}
@@ -251,15 +251,15 @@
         
         {{-- TABEL (Desktop) --}}
         <div class="hidden md:block overflow-x-auto">
-            <table class="w-full min-w-max">
+            <table class="w-full min-w-max table-fixed">
                 <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                     <tr>
-                        <th class="py-3 px-4 text-left w-16">No</th>
-                        <th class="py-3 px-4 text-left w-40">Nopol</th>
-                        <th class="py-3 px-4 text-left">Pemilik</th>
-                        <th class="py-3 px-4 text-left w-32">Tipe</th>
+                        <th class="py-3 px-4 text-center w-[8%]">No</th>
+                        <th class="py-3 px-4 text-center w-[25%]">Nopol</th>
+                        <th class="py-3 px-4 text-center w-[37%]">Pemilik</th>
+                        <th class="py-3 px-4 text-center w-[15%]">Tipe</th>
                         @if(Auth::user()->peran == 'komandan')
-                            <th class="py-3 px-4 text-center w-28">Aksi</th>
+                            <th class="py-3 px-4 text-center w-[15%]">Aksi</th>
                         @endif
                     </tr>
                 </thead>
