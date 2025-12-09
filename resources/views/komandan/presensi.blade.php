@@ -375,26 +375,39 @@
 
     
     {{-- MODAL PENGATURAN RULE --}}
-    <div x-show="showRuleModal"
-         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
-         @click.away="showRuleModal = false"
-         style="display: none;">
+    {{-- MODAL PENGATURAN RULE --}}
+<div x-show="showRuleModal"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
+     @click.away="showRuleModal = false"
+     style="display: none;">
+    
+    {{-- Container Modal dengan max-height dan overflow --}}
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden relative" @click.stop>
         
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden relative" @click.stop>
-            <div class="bg-[#1e3a5f] py-4 px-6 border-b border-[#1e3a5f] flex justify-between items-center">
-                <h3 class="text-lg font-bold text-white flex items-center tracking-wide">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
-                    PENGATURAN JAM SHIFT
-                </h3>
-                <button @click="showRuleModal = false" class="text-white/70 hover:text-white transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
+        {{-- Header Modal (Fixed) --}}
+        <div class="bg-[#1e3a5f] py-4 px-6 border-b border-[#1e3a5f] flex justify-between items-center flex-shrink-0">
+            <h3 class="text-lg font-bold text-white flex items-center tracking-wide">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                </svg>
+                PENGATURAN JAM SHIFT
+            </h3>
+            <button @click="showRuleModal = false" class="text-white/70 hover:text-white transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
 
-            <form action="{{ route('komandan.presensi.updateRules') }}" method="POST" class="p-6">
-                @csrf
-                @method('PUT')
-
+        {{-- Form dengan Scrollable Body --}}
+        <form action="{{ route('komandan.presensi.updateRules') }}" method="POST" class="flex flex-col flex-1 overflow-hidden">
+            @csrf
+            @method('PUT')
+            
+            {{-- Body Modal (Scrollable) --}}
+            <div class="overflow-y-auto flex-1 p-6">
+                
+                {{-- Grid Shift --}}
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     
                     {{-- SHIFT PAGI --}}
@@ -403,15 +416,15 @@
                         <div class="space-y-3">
                             <div>
                                 <label class="text-xs font-bold text-gray-600 block mb-1">JAM MASUK</label>
-                                <input type="time" name="masuk_pagi" required
-                                    value="{{ $rules->firstWhere('jenis_shift', 'Pagi')->jam_masuk ?? '07:00' }}"
-                                    class="w-full border-gray-300 rounded focus:ring-yellow-500 focus:border-yellow-500 text-sm">
+                                <input type="time" name="masuk_pagi" required 
+                                       value="{{ $rules->firstWhere('jenis_shift', 'Pagi')->jam_masuk ?? '07:00' }}"
+                                       class="w-full border-gray-300 rounded focus:ring-yellow-500 focus:border-yellow-500 text-sm">
                             </div>
                             <div>
                                 <label class="text-xs font-bold text-gray-600 block mb-1">JAM PULANG</label>
-                                <input type="time" name="keluar_pagi" required
-                                    value="{{ $rules->firstWhere('jenis_shift', 'Pagi')->jam_keluar ?? '19:00' }}"
-                                    class="w-full border-gray-300 rounded focus:ring-yellow-500 focus:border-yellow-500 text-sm">
+                                <input type="time" name="keluar_pagi" required 
+                                       value="{{ $rules->firstWhere('jenis_shift', 'Pagi')->jam_keluar ?? '19:00' }}"
+                                       class="w-full border-gray-300 rounded focus:ring-yellow-500 focus:border-yellow-500 text-sm">
                             </div>
                         </div>
                     </div>
@@ -422,15 +435,15 @@
                         <div class="space-y-3">
                             <div>
                                 <label class="text-xs font-bold text-gray-600 block mb-1">JAM MASUK</label>
-                                <input type="time" name="masuk_malam" required
-                                    value="{{ $rules->firstWhere('jenis_shift', 'Malam')->jam_masuk ?? '19:00' }}"
-                                    class="w-full border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                <input type="time" name="masuk_malam" required 
+                                       value="{{ $rules->firstWhere('jenis_shift', 'Malam')->jam_masuk ?? '19:00' }}"
+                                       class="w-full border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 text-sm">
                             </div>
                             <div>
                                 <label class="text-xs font-bold text-gray-600 block mb-1">JAM PULANG</label>
-                                <input type="time" name="keluar_malam" required
-                                    value="{{ $rules->firstWhere('jenis_shift', 'Malam')->jam_keluar ?? '07:00' }}"
-                                    class="w-full border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                <input type="time" name="keluar_malam" required 
+                                       value="{{ $rules->firstWhere('jenis_shift', 'Malam')->jam_keluar ?? '07:00' }}"
+                                       class="w-full border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 text-sm">
                             </div>
                         </div>
                     </div>
@@ -441,73 +454,82 @@
                         <div class="space-y-3">
                             <div>
                                 <label class="text-xs font-bold text-gray-600 block mb-1">JAM MASUK</label>
-                                <input type="time" name="masuk_non" required
-                                    value="{{ $rules->firstWhere('jenis_shift', 'Non Shift')->jam_masuk ?? '07:00' }}"
-                                    class="w-full border-gray-300 rounded focus:ring-gray-500 focus:border-gray-500 text-sm">
+                                <input type="time" name="masuk_non" required 
+                                       value="{{ $rules->firstWhere('jenis_shift', 'Non Shift')->jam_masuk ?? '07:00' }}"
+                                       class="w-full border-gray-300 rounded focus:ring-gray-500 focus:border-gray-500 text-sm">
                             </div>
                             <div>
                                 <label class="text-xs font-bold text-gray-600 block mb-1">JAM PULANG</label>
-                                <input type="time" name="keluar_non" required
-                                    value="{{ $rules->firstWhere('jenis_shift', 'Non Shift')->jam_keluar ?? '17:00' }}"
-                                    class="w-full border-gray-300 rounded focus:ring-gray-500 focus:border-gray-500 text-sm">
+                                <input type="time" name="keluar_non" required 
+                                       value="{{ $rules->firstWhere('jenis_shift', 'Non Shift')->jam_keluar ?? '17:00' }}"
+                                       class="w-full border-gray-300 rounded focus:ring-gray-500 focus:border-gray-500 text-sm">
                             </div>
                         </div>
                     </div>
+
                 </div>
 
                 {{-- PENGATURAN GLOBAL --}}
-                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-6">
+                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
                     <h4 class="font-bold text-slate-700 mb-3 text-center text-sm uppercase">Pengaturan Umum</h4>
-                    
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        
+                        {{-- Toleransi --}}
                         <div>
                             <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Toleransi Keterlambatan</label>
                             <div class="flex items-center gap-2">
-                                <input type="number" name="toleransi" required min="0"
-                                    value="{{ $globalToleransi }}"
-                                    class="w-full border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 text-sm h-[30px]">
+                                <input type="number" name="toleransi" required min="0" value="{{ $globalToleransi }}"
+                                       class="w-full border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 text-sm h-[30px]">
                                 <div class="bg-gray-200 border border-gray-300 rounded px-3 h-[30px] flex items-center text-gray-600 text-xs font-bold">
                                     Menit
                                 </div>
                             </div>
                         </div>
 
+                        {{-- Presensi Dibuka --}}
                         <div>
                             <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Presensi Dibuka</label>
                             <div class="flex items-center gap-2">
-                                <input type="number" name="dibuka" required min="0"
-                                    value="{{ $globalDibuka }}"
-                                    class="w-full border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 text-sm h-[30px]">
+                                <input type="number" name="dibuka" required min="0" value="{{ $globalDibuka }}"
+                                       class="w-full border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 text-sm h-[30px]">
                                 <div class="bg-gray-200 border border-gray-300 rounded px-3 h-[30px] flex items-center text-gray-600 text-xs font-bold">
                                     Menit
                                 </div>
                             </div>
                         </div>
 
+                        {{-- Toggle GPS --}}
                         <div class="flex flex-col justify-center">
                             <label class="block text-[10px] font-bold text-gray-500 mb-2 uppercase text-center">Wajib Lokasi (GPS)</label>
                             <label class="relative inline-flex items-center cursor-pointer mx-auto">
-                                <input type="hidden" name="is_geotag_enabled" value="0">
-                                <input type="checkbox" name="is_geotag_enabled" value="1" class="sr-only peer"
-                                    @if($rules->firstWhere('jenis_shift', 'Pagi')->is_geotag_enabled) checked @endif>
+                                <input type="hidden" name="isgeotagenabled" value="0">
+                                <input type="checkbox" name="isgeotagenabled" value="1" class="sr-only peer" 
+                                       @if($rules->firstWhere('jenis_shift', 'Pagi')->isgeotagenabled) checked @endif>
                                 <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                                 <span class="ml-3 text-xs font-bold text-gray-700 peer-checked:text-blue-600">AKTIF</span>
                             </label>
                         </div>
+
                     </div>
                 </div>
 
-                <div class="flex justify-end gap-3 pt-4 border-t bg-gray-50 p-4">
-                    <button type="button" @click="showRuleModal = false" class="px-6 py-2.5 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 font-semibold transition">
-                        Batal
-                    </button>
-                    <button type="submit" class="px-6 py-2.5 bg-[#1e3a5f] text-white rounded-xl hover:bg-[#2a4a6f] font-bold shadow-lg transition transform hover:-translate-y-0.5">
-                        SIMPAN PERUBAHAN
-                    </button>
-                </div>
-            </form>
-        </div>
+            </div>
+
+            {{-- Footer (Fixed) --}}
+            <div class="flex justify-end gap-3 pt-4 border-t bg-gray-50 p-4 flex-shrink-0">
+                <button type="button" @click="showRuleModal = false" 
+                        class="px-6 py-2.5 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 font-semibold transition">
+                    Batal
+                </button>
+                <button type="submit" 
+                        class="px-6 py-2.5 bg-[#1e3a5f] text-white rounded-xl hover:bg-[#2a4a6f] font-bold shadow-lg transition transform hover:-translate-y-0.5">
+                    SIMPAN PERUBAHAN
+                </button>
+            </div>
+
+        </form>
     </div>
+</div>
 
     {{-- MODAL FOTO --}}
     <div x-show="showPhotoModal" 
