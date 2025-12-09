@@ -141,7 +141,7 @@
 
                             <div class="flex flex-wrap gap-1">
                                 @if($user->jenis_jadwal == 'shift' || $user->jenis_jadwal == 'non_shift')
-                                    <a href="{{ route('bau.akun.shift', ['id_pengguna' => $user->id_pengguna]) }}" class="bg-yellow-600 hover:bg-yellow-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow transition">Shift</a>
+                                    <a href="{{ route('bau.akun.shift', ['id_pengguna' => $user->id_pengguna]) }}" class="bg-green-600 hover:bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow transition">Shift</a>
                                 @endif
                                 <span class="text-white/60 text-xs italic">View Only</span>
                             </div>
