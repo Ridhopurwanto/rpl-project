@@ -266,6 +266,7 @@ Route::middleware('auth')->group(function () {
         })->name('dashboard');
 
         Route::resource('akun', App\Http\Controllers\Bau\AkunController::class)->only(['index']);
+        Route::get('akun/{id_pengguna}/shift', [App\Http\Controllers\Bau\ShiftController::class, 'index'])->name('akun.shift');
         Route::resource('presensi', App\Http\Controllers\Bau\PresensiController::class)->only(['index']);
         Route::resource('patroli', App\Http\Controllers\Bau\PatroliController::class)->only(['index']);
         Route::resource('kendaraan', App\Http\Controllers\Bau\KendaraanController::class)->only(['index']);

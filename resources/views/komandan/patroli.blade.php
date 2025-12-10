@@ -11,9 +11,6 @@
      x-data="{ 
          showPhotoModal: false, 
          photoUrl: '', 
-         showEditModal: false, 
-         editAction: '', 
-         editWilayah: '',
          showDeleteModal: false,
          deleteAction: '',
          showRulesModal: false
@@ -154,10 +151,7 @@
                         </td>
                         @if(Auth::user()->peran == 'komandan')
                             <td class="py-2 px-4">
-                                <div class="flex justify-center space-x-3">
-                                    <button @click="showEditModal = true; editAction = '{{ route('komandan.patroli.update', $item->id_patroli) }}'; editWilayah = '{{ $item->wilayah }}'" class="text-blue-500 hover:text-blue-700" title="Edit">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
-                                    </button>
+                                <div class="flex justify-center">
                                     <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('komandan.patroli.destroy', $item->id_patroli) }}'" class="text-red-500 hover:text-red-700" title="Hapus">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
                                     </button>
@@ -215,14 +209,9 @@
 
                         {{-- Tombol Aksi (Jika Komandan) --}}
                         @if(Auth::user()->peran == 'komandan')
-                            <div class="flex gap-2 pt-2">
-                                <button @click="showEditModal = true; editAction = '{{ route('komandan.patroli.update', $item->id_patroli) }}'; editWilayah = '{{ $item->wilayah }}'" 
-                                        class="flex-1 bg-blue-500 text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition flex items-center justify-center gap-1">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
-                                    <span class="text-xs">Edit</span>
-                                </button>
+                            <div class="pt-2">
                                 <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('komandan.patroli.destroy', $item->id_patroli) }}'" 
-                                        class="flex-1 bg-red-500 text-white font-bold py-2 rounded-lg hover:bg-red-600 transition flex items-center justify-center gap-1">
+                                        class="w-full bg-red-500 text-white font-bold py-2 rounded-lg hover:bg-red-600 transition flex items-center justify-center gap-1">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
                                     <span class="text-xs">Hapus</span>
                                 </button>
@@ -284,54 +273,6 @@
             <div class="mt-4">
                 <img :src="photoUrl" alt="Foto Patroli" class="w-full h-auto rounded">
             </div>
-        </div>
-    </div>
-
-    {{-- Modal Edit --}}
-    <div x-show="showEditModal"
-         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
-         @click.away="showEditModal = false"
-         style="display: none;">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-4 relative" @click.stop>
-            <div class="flex justify-between items-center pb-3 border-b">
-                <h3 class="text-xl font-bold text-gray-800">EDIT PATROLI</h3>
-                <button @click="showEditModal = false" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
-            </div>
-            <form :action="editAction" method="POST" class="mt-4">
-                @csrf
-                @method('PUT')
-                <div class="space-y-4">
-                    <div class="w-full h-40 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400">
-                        <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4V5h12v10zm-9.414-2.586a2 2 0 112.828 2.828L8.414 13H12v-1H6.586l1-1zM10 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path></svg>
-                    </div>
-
-                    <div>
-                        <label for="wilayah" class="block text-sm font-medium text-gray-700 mb-1">WILAYAH:</label>
-                        <select id="wilayah" name="wilayah" x-model="editWilayah"
-                                class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <option value="Area Gedung A">Area Gedung A</option>
-                            <option value="Area Parkir Belakang">Area Parkir Belakang</option>
-                            <option value="Area Pos-2">Area Pos-2</option>
-                            <option value="Lobby VVIP">Lobby VVIP</option>
-                            <option value="Area BAU">Area BAU</option>
-                            <option value="Area Kantin">Area Kantin</option>
-                            <option value="Area BAAM">Area BAAM</option>
-                            <option value="Akses Lorong GD-3">Akses Lorong GD-3</option>
-                            <option value="Akses Lorong GD-2">Akses Lorong GD-2</option>
-                            <option value="Area Pos-3">Area Pos-3</option>
-                            <option value="Akses Besi GD-2">Akses Besi GD-2</option>
-                            <option value="Akses Kaca GD-2">Akses Kaca GD-2</option>
-                            <option value="Akses Selatan Audit">Akses Selatan Audit</option>
-                            <option value="Akses Ruang Lektor">Akses Ruang Lektor</option>
-                            <option value="Akses Parkir Basement">Akses Parkir Basement</option>
-                            <option value="Akses Lift GD-2">Akses Lift GD-2</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg shadow hover:bg-green-600 transition">
-                        SUBMIT
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 
