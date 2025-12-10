@@ -8,8 +8,7 @@
         <h1 class="text-2xl font-bold text-gray-800">
             Profil Pengguna
         </h1>
-        <a href="{{ route(auth()->user()->peran . '.dashboard') }}" class="text-sm font-medium text-gray-500 hover:text-[#2a4a6f] transition-colors flex items-center">
-            <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+        <a href="{{ route(auth()->user()->peran . '.dashboard')  }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#2a4a6f] focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
             Kembali
         </a>
     </div>
