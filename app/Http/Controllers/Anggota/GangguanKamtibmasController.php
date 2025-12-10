@@ -22,26 +22,38 @@ class GangguanKamtibmasController extends Controller
         $bulan_terpilih = $request->input('bulan', date('Y-m'));
         $kategori_terpilih = $request->input('kategori', 'semua');
 
+        if (empty($bulan_terpilih)) {
+            $bulan_terpilih = Carbon::today()->format('Y-m');
+        }
+
         // 2. Parsing bulan (YYYY-MM)
         $carbonDate = Carbon::createFromFormat('Y-m', $bulan_terpilih);
 
-        // 3. Query Data
+        // 3. Ambil daftar kategori dari enum database
+        $kategoris = \DB::select("SHOW COLUMNS FROM gangguan_kamtibmas WHERE Field = 'kategori'")[0]->Type;
+        preg_match('/^enum\((.*)\)$/', $kategoris, $matches);
+        $kategori_list = array_map(function($value) {
+            return trim($value, "'");
+        }, explode(',', $matches[1]));
+
+        // 4. Query Data
         $query = GangguanKamtibmas::query()
                     ->whereYear('waktu_lapor', $carbonDate->year)
                     ->whereMonth('waktu_lapor', $carbonDate->month);
 
-        // 4. Filter Kategori jika bukan 'semua'
+        // 5. Filter Kategori jika bukan 'semua'
         if ($kategori_terpilih !== 'semua') {
             $query->where('kategori', $kategori_terpilih);
         }
 
         $laporan_gangguan = $query->orderBy('waktu_lapor', 'desc')->get();
 
-        // 5. Kirim ke View
+        // 6. Kirim ke View
         return view('anggota.gangguan-index', [
             'laporan_gangguan' => $laporan_gangguan,
             'bulan_terpilih' => $bulan_terpilih,
             'kategori_terpilih' => $kategori_terpilih,
+            'kategori_list' => $kategori_list,
         ]);
     }
 
