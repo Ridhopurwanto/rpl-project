@@ -20,8 +20,16 @@ class TamuController extends Controller
         $endDate = $request->input('end_date', now()->format('Y-m-d'));
         $perPage = $request->input('per_page', 10);
         
+        $cari = $request->input('cari');
+        
         $riwayatTamu = Tamu::whereDate('waktu_datang', '>=', $startDate)
                            ->whereDate('waktu_datang', '<=', $endDate)
+                           ->when($cari, function ($query, $cari) {
+                               $query->where(function ($q) use ($cari) {
+                                   $q->where('nama_tamu', 'like', "%{$cari}%")
+                                     ->orWhere('instansi', 'like', "%{$cari}%");
+                               });
+                           })
                            ->orderBy('waktu_datang', 'asc')
                            ->paginate($perPage);
         
