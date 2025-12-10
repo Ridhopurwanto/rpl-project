@@ -24,6 +24,7 @@ class KendaraanController extends Controller
         // 2. Filter tanggal riwayat
         $tanggal_riwayat = $request->input('tanggal', Carbon::today()->toDateString());
         $nopol_filter    = $request->input('nopol');
+        $keterangan_filter = $request->input('keterangan');
 
         $query = LogKendaraan::where('status', 'Keluar')
                              ->whereDate('waktu_keluar', $tanggal_riwayat);
@@ -37,6 +38,10 @@ class KendaraanController extends Controller
             });
         }
 
+        if ($keterangan_filter) {
+            $query->where('keterangan', $keterangan_filter);
+        }
+
         $riwayat_kendaraan = $query->orderBy('waktu_keluar', 'desc')->get();
 
         return view('anggota.kendaraan-index', [
@@ -44,6 +49,7 @@ class KendaraanController extends Controller
             'riwayat_kendaraan' => $riwayat_kendaraan,
             'tanggal_terpilih'  => $tanggal_riwayat,
             'nopol_filter'      => $nopol_filter,
+            'keterangan_filter' => $keterangan_filter,
         ]);
     }
 
@@ -205,6 +211,7 @@ class KendaraanController extends Controller
     {
         $tanggal_riwayat = $request->input('tanggal', Carbon::today()->toDateString());
         $nopol_filter    = $request->input('nopol');
+        $keterangan_filter = $request->input('keterangan');
 
         $query = LogKendaraan::where('status', 'Keluar')
                              ->whereDate('waktu_keluar', $tanggal_riwayat);
@@ -218,6 +225,10 @@ class KendaraanController extends Controller
                       '(^|[[:space:]])' . preg_quote($nopol_filter_upper, '/')
                   ]);
             });
+        }
+
+        if ($keterangan_filter) {
+            $query->where('keterangan', $keterangan_filter);
         }
 
         $riwayat_kendaraan = $query->orderBy('waktu_keluar', 'desc')->get();

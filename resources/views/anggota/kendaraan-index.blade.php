@@ -12,8 +12,62 @@
                         selectedVehicleId: null,
                         selectedVehicleNopol: '',
                         selectedVehicleStatus: '',
-                        showCreateModal: false 
+                        showCreateModal: false,
+                        showSuccessNotif: {{ session('success') ? 'true' : 'false' }},
+                        showErrorNotif: {{ session('error') ? 'true' : 'false' }}
                      }">
+
+        {{-- Floating Notification Success --}}
+        <div x-show="showSuccessNotif" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform translate-x-full"
+             x-transition:enter-end="opacity-100 transform translate-x-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 transform translate-x-0"
+             x-transition:leave-end="opacity-0 transform translate-x-full"
+             x-init="if(showSuccessNotif) setTimeout(() => showSuccessNotif = false, 5000)"
+             class="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 min-w-[300px] max-w-md"
+             style="display: none;">
+            <div class="flex-shrink-0">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <p class="font-semibold text-sm">{{ session('success') }}</p>
+            </div>
+            <button @click="showSuccessNotif = false" class="flex-shrink-0 text-white hover:text-green-100 transition-colors">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+            </button>
+        </div>
+
+        {{-- Floating Notification Error --}}
+        <div x-show="showErrorNotif" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform translate-x-full"
+             x-transition:enter-end="opacity-100 transform translate-x-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 transform translate-x-0"
+             x-transition:leave-end="opacity-0 transform translate-x-full"
+             x-init="if(showErrorNotif) setTimeout(() => showErrorNotif = false, 5000)"
+             class="fixed top-4 right-4 z-50 bg-red-500 text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 min-w-[300px] max-w-md"
+             style="display: none;">
+            <div class="flex-shrink-0">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <p class="font-semibold text-sm">{{ session('error') }}</p>
+            </div>
+            <button @click="showErrorNotif = false" class="flex-shrink-0 text-white hover:text-red-100 transition-colors">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+            </button>
+        </div>
 
         {{-- 1. BAGIAN KENDARAAN AKTIF --}}
         <div class="mb-4" x-data="{ isOpen: true }">
@@ -131,7 +185,7 @@
                 {{-- Filter dengan HYBRID: Suggestion + Live Search --}}
                 <div class="bg-white px-6 py-5 rounded-xl shadow-sm mt-2 border border-gray-200" x-data="{}">
                     <form action="{{ route('anggota.kendaraan.index') }}" method="GET" id="searchForm">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                             {{-- Filter Tanggal --}}
                             <div class="w-full">
@@ -145,10 +199,32 @@
                                 </div>
                             </div>
 
+                            {{-- Filter Keterangan (BARU) --}}
+                            <div class="w-full">
+                                <label for="keterangan" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                                    Keterangan
+                                </label>
+                                <div class="relative">
+                                    <select id="keterangan" name="keterangan"
+                                        onchange="document.getElementById('searchForm').submit()"
+                                        class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                                        <option value="" @if(empty($keterangan_filter)) selected @endif>Semua</option>
+                                        <option value="Menginap" @if($keterangan_filter == 'Menginap') selected @endif>Menginap</option>
+                                        <option value="Tidak Menginap" @if($keterangan_filter == 'Tidak Menginap') selected @endif>Tidak Menginap</option>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+
                             {{-- Search Kendaraan: HYBRID AJAX (Suggestion + Live Search tanpa reload) --}}
                             <div class="w-full" x-data="{
                 nopolSearch: '{{ $nopol_filter ?? '' }}',
                 tanggalFilter: '{{ $tanggal_terpilih }}',
+                keteranganFilter: '{{ $keterangan_filter ?? '' }}',
                 suggestions: [],
                 loading: false,
                 showSuggestions: false,
@@ -156,7 +232,7 @@
                 liveSearching: false,
 
                 async getSuggestions() {
-                    console.log('Mencari suggestion:', this.nopolSearch);
+                    // console.log('Mencari suggestion:', this.nopolSearch);
 
                     if (this.nopolSearch.length < 1) {
                         this.suggestions = [];
@@ -170,10 +246,10 @@
                     try {
                         const response = await fetch(`{{ route('anggota.kendaraan.searchNopol') }}?search=${encodeURIComponent(this.nopolSearch)}&tanggal=${this.tanggalFilter}`);
                         const data = await response.json();
-                        console.log('Suggestions:', data);
+                        // console.log('Suggestions:', data);
                         this.suggestions = data;
                     } catch (error) {
-                        console.error('Error:', error);
+                        // console.error('Error:', error);
                         this.suggestions = [];
                     } finally {
                         this.loading = false;
@@ -191,8 +267,8 @@
                     clearTimeout(this.liveSearchTimeout);
 
                     this.liveSearchTimeout = setTimeout(() => {
-                        if (this.nopolSearch.length >= 2) {
-                            console.log('Live Search triggered');
+                        if (this.nopolSearch.length >= 2 || this.nopolSearch.length === 0) {
+                            // console.log('Live Search triggered');
                             this.performLiveSearch();
                         }
                     }, 1000); // 1 detik delay
@@ -213,18 +289,19 @@
                         const url = new URL(window.location);
                         url.searchParams.set('nopol', this.nopolSearch);
                         url.searchParams.set('tanggal', this.tanggalFilter);
+                        url.searchParams.set('keterangan', this.keteranganFilter);
                         window.history.pushState({}, '', url);
 
                         // Fetch hasil riwayat via AJAX
-                        const response = await fetch(`{{ route('anggota.kendaraan.getRiwayat') }}?nopol=${encodeURIComponent(this.nopolSearch)}&tanggal=${this.tanggalFilter}`);
+                        const response = await fetch(`{{ route('anggota.kendaraan.getRiwayat') }}?nopol=${encodeURIComponent(this.nopolSearch)}&tanggal=${this.tanggalFilter}&keterangan=${encodeURIComponent(this.keteranganFilter)}`);
                         const html = await response.text();
 
                         // Update container riwayat
                         document.getElementById('riwayat-container').innerHTML = html;
 
-                        console.log('Live search completed');
+                        // console.log('Live search completed');
                     } catch (error) {
-                        console.error('Live search error:', error);
+                        // console.error('Live search error:', error);
                     } finally {
                         this.liveSearching = false;
                     }
@@ -244,7 +321,7 @@
                                 </label>
                                 <div class="relative">
                                     <input type="text" id="nopol" name="nopol" x-model="nopolSearch"
-                                        @input="getSuggestions(); triggerLiveSearch()"
+                                        @input="triggerLiveSearch()"
                                         @focus="if(nopolSearch.length >= 1) getSuggestions()"
                                         @keydown.enter.prevent="triggerLiveSearchNow()"
                                         placeholder="Ketik untuk mencari..." autocomplete="off"
@@ -271,7 +348,7 @@
                                     </button>
 
                                     {{-- Dropdown Suggestions (TETAP TAMPIL!) --}}
-                                    <div x-show="showSuggestions" @click.away="showSuggestions = false" x-transition
+                                    <!-- <div x-show="showSuggestions" @click.away="showSuggestions = false" x-transition
                                         class="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-2xl mt-1 z-50 max-h-80 overflow-y-auto"
                                         style="display: none;">
 
@@ -317,7 +394,7 @@
                                             <p class="text-sm font-semibold mb-1">Tidak ditemukan pada tanggal ini</p>
                                             <p class="text-xs text-gray-400">Coba kata kunci lain atau ganti tanggal</p>
                                         </div>
-                                    </div>
+                                    </div> -->
                                 </div>
                             </div>
 

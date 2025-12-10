@@ -209,6 +209,9 @@
                                 id="no_identitas" 
                                 name="no_identitas" 
                                 placeholder="Contoh: 6402021212120001"
+                                pattern="[0-9]*"
+                                inputmode="numeric"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                 class="w-full px-4 py-2 bg-white text-gray-900 rounded-md border-none focus:ring-2 focus:ring-blue-500">
                         </div>
                     </div>
