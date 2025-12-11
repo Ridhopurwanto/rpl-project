@@ -66,7 +66,7 @@
                 setInterval(() => { this.updateTime() }, 1000);
 
                 // ✅ LANGSUNG MINTA IZIN LOKASI SAAT HALAMAN DIBUKA
-                this.requestLocationOnLoad();
+                this.requestLocationOnLoad(true);
             },
 
             updateTime() {
@@ -77,7 +77,7 @@
             },
 
             // ✅ FUNGSI BARU: Request lokasi otomatis saat load
-            requestLocationOnLoad() {
+            requestLocationOnLoad(silent = false) {
                 if (!navigator.geolocation) {
                     console.warn('Browser tidak mendukung geolocation');
                     return;
@@ -105,6 +105,13 @@
                             this.showLocationAlert = true;
                             setTimeout(() => {
                                 this.showLocationAlert = false;
+                            }, 8000);
+                        }
+
+                        if (!silent && distance > this.maxDistance) {
+                            this.showLocationAlert = true;
+                            setTimeout(() => {
+                            this.showLocationAlert = false;
                             }, 8000);
                         }
                     },

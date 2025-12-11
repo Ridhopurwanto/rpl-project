@@ -309,7 +309,7 @@ class PresensiController extends Controller
             'dibuka' => 'required|numeric|min:0',
         ]);
 
-        $geoStatus = $request->input('is_geotag_enabled', 0);
+        $geoStatus = $request->input('isgeotagenabled', 0);
 
         // --- VALIDASI TAMBAHAN ---
         // Jam Pulang Shift Pagi harus sama persis dengan Jam Masuk Shift Malam (Sambung)
