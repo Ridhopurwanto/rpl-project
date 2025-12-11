@@ -111,6 +111,18 @@
 
         {{-- Daftar Kartu Akun --}}
         <div class="space-y-4">
+            {{-- Pesan Data Tidak Ditemukan --}}
+            <div id="noDataMessage" class="hidden text-center py-12">
+                <div class="bg-gray-100 rounded-2xl p-8 max-w-md mx-auto">
+                    <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 9l-6 6m0-6l6 6"></path>
+                    </svg>
+                    <h3 class="text-lg font-bold text-gray-600 mb-2">Data Tidak Ditemukan</h3>
+                    <p class="text-sm text-gray-500">Tidak ada anggota yang sesuai dengan pencarian Anda.</p>
+                </div>
+            </div>
+            
             @foreach ($users as $user) 
 
                 @php
@@ -361,11 +373,7 @@
                 </div>
             </div>
 
-            <div class="modal-footer p-4 border-t border-gray-100 bg-gray-50">
-                <button type="button" @click="openInfoModal = false" class="w-full px-4 py-3 text-white font-bold bg-[#1e3a5f] rounded-xl hover:bg-[#2a4a6f] shadow-lg transition transform hover:-translate-y-0.5">
-                    Tutup
-                </button>
-            </div>
+
         </div>
     </div>
 
@@ -442,7 +450,9 @@
 <script>
 function filterUsers(searchTerm) {
     const cards = document.querySelectorAll('.user-card');
+    const noDataMessage = document.getElementById('noDataMessage');
     const search = searchTerm.toLowerCase().trim();
+    let visibleCount = 0;
     
     cards.forEach(card => {
         const userName = card.getAttribute('data-name');
@@ -451,10 +461,18 @@ function filterUsers(searchTerm) {
         
         if (match) {
             card.style.display = '';
+            visibleCount++;
         } else {
             card.style.display = 'none';
         }
     });
+    
+    // Tampilkan pesan "Data Tidak Ditemukan" jika tidak ada hasil
+    if (visibleCount === 0 && search !== '') {
+        noDataMessage.classList.remove('hidden');
+    } else {
+        noDataMessage.classList.add('hidden');
+    }
 }
 </script>
 
