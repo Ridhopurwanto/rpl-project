@@ -12,6 +12,74 @@ use Illuminate\Support\Carbon;
 class KendaraanController extends Controller
 {
     /**
+     * AJAX Live Search untuk Riwayat
+     */
+    public function searchRiwayat(Request $request)
+    {
+        $tanggalFilter = $request->input('tanggal', now()->format('Y-m-d'));
+        $tipeFilter = $request->input('tipe'); 
+        $search = $request->input('search');
+        $perPageRiwayat = $request->input('per_page_riwayat', 10);
+
+        $queryRiwayat = LogKendaraan::with('kendaraan')
+            ->where(function($q) use ($tanggalFilter) {
+                $q->whereDate('waktu_masuk', $tanggalFilter)
+                  ->orWhereDate('waktu_keluar', $tanggalFilter);
+            });
+
+        if ($tipeFilter) {
+            $queryRiwayat->whereHas('kendaraan', function ($q) use ($tipeFilter) {
+                $q->where('tipe', $tipeFilter);
+            });
+        }
+
+        if ($search) {
+            $queryRiwayat->where(function($q) use ($search) {
+                $q->where('nopol', 'LIKE', "%{$search}%")
+                  ->orWhere('pemilik', 'LIKE', "%{$search}%");
+            });
+        }
+        
+        $riwayat = $queryRiwayat->orderBy('waktu_masuk', 'desc')->paginate($perPageRiwayat, ['*'], 'page_riwayat');
+        $registeredPlates = Kendaraan::pluck('nomor_plat')->toArray();
+
+        return response()->json([
+            'html' => view('komandan.partials.riwayat-table', compact('riwayat', 'tanggalFilter', 'registeredPlates'))->render(),
+            'pagination' => view('komandan.partials.riwayat-pagination', compact('riwayat'))->render()
+        ]);
+    }
+
+    /**
+     * AJAX Live Search untuk Master
+     */
+    public function searchMaster(Request $request)
+    {
+        $tipeMaster = $request->input('tipe_master');
+        $searchMaster = $request->input('search_master');
+        $perPageMaster = $request->input('per_page_master', 10);
+        
+        $queryMaster = Kendaraan::query();
+        
+        if ($tipeMaster) {
+            $queryMaster->where('tipe', $tipeMaster);
+        }
+        
+        if ($searchMaster) {
+            $queryMaster->where(function($q) use ($searchMaster) {
+                $q->where('nomor_plat', 'LIKE', "%{$searchMaster}%")
+                  ->orWhere('pemilik', 'LIKE', "%{$searchMaster}%");
+            });
+        }
+        
+        $kendaraanMaster = $queryMaster->orderBy('pemilik', 'asc')->paginate($perPageMaster, ['*'], 'page_master');
+
+        return response()->json([
+            'html' => view('komandan.partials.master-table', compact('kendaraanMaster'))->render(),
+            'pagination' => view('komandan.partials.master-pagination', compact('kendaraanMaster'))->render()
+        ]);
+    }
+
+    /**
      * Menampilkan halaman utama laporan kendaraan (Riwayat & Master)
      *
      */
@@ -50,7 +118,21 @@ class KendaraanController extends Controller
 
         // --- Data untuk KENDARAAN TERDAFTAR dengan Pagination ---
         $perPageMaster = $request->input('per_page_master', 10);
-        $kendaraanMaster = Kendaraan::orderBy('pemilik', 'asc')->paginate($perPageMaster, ['*'], 'page_master');
+        $tipeMaster = $request->input('tipe_master');
+        $searchMaster = $request->input('search_master');
+        
+        $queryMaster = Kendaraan::query();
+        if ($tipeMaster) {
+            $queryMaster->where('tipe', $tipeMaster);
+        }
+        if ($searchMaster) {
+            $queryMaster->where(function($q) use ($searchMaster) {
+                $q->where('nomor_plat', 'LIKE', "%{$searchMaster}%")
+                  ->orWhere('pemilik', 'LIKE', "%{$searchMaster}%");
+            });
+        }
+        
+        $kendaraanMaster = $queryMaster->orderBy('pemilik', 'asc')->paginate($perPageMaster, ['*'], 'page_master');
         $registeredPlates = $kendaraanMaster->pluck('nomor_plat')->toArray();
 
         return view('komandan.kendaraan', [
@@ -60,6 +142,8 @@ class KendaraanController extends Controller
             'tipeTerpilih' => $tipeFilter,
             'registeredPlates' => $registeredPlates,
             'search' => $search,
+            'tipeMaster' => $tipeMaster,
+            'searchMaster' => $searchMaster,
             'perPageRiwayat' => $perPageRiwayat,
             'perPageMaster' => $perPageMaster
         ]);

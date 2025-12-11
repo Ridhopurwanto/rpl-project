@@ -46,7 +46,7 @@
                         <div class="w-[calc(50%-0.5rem)] md:w-auto">
                             <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
                             <div class="flex items-center gap-2">
-                                <select name="per_page_riwayat" onchange="document.getElementById('filterForm').submit()" class="block h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em;">
+                                <select name="per_page_riwayat" class="block h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em;">
                                     <option value="5" {{ $perPageRiwayat == 5 ? 'selected' : '' }}>5</option>
                                     <option value="10" {{ $perPageRiwayat == 10 ? 'selected' : '' }}>10</option>
                                     <option value="25" {{ $perPageRiwayat == 25 ? 'selected' : '' }}>25</option>
@@ -63,7 +63,6 @@
                                 Tanggal
                             </label>
                             <input type="date" id="tanggal" name="tanggal"
-                                   onchange="document.getElementById('filterForm').submit()"
                                    class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
                                    value="{{ $tanggalTerpilih }}">
                         </div>
@@ -74,7 +73,6 @@
                                 Tipe
                             </label>
                             <select id="tipe" name="tipe" 
-                                    onchange="document.getElementById('filterForm').submit()"
                                     class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em;">
                                 <option value="">Semua Tipe</option>
                                 <option value="Roda 2" {{ $tipeTerpilih == 'Roda 2' ? 'selected' : '' }}>Roda 2</option>
@@ -96,131 +94,13 @@
                 </div>
             </form>
             
-            {{-- TABEL (Desktop) --}}
-            <div class="hidden md:block overflow-x-auto">
-                <table class="w-full min-w-max table-fixed">
-                    <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
-                        <tr>
-                            <th class="py-3 px-4 text-center w-[8%]">No</th>
-                            <th class="py-3 px-4 text-center w-[18%]">Nopol</th>
-                            <th class="py-3 px-4 text-center w-[24%]">Pemilik</th>
-                            <th class="py-3 px-4 text-center w-[12%]">Tipe</th>
-                            <th class="py-3 px-4 text-center w-[13%]">Masuk</th>
-                            <th class="py-3 px-4 text-center w-[13%]">Keluar</th>
-                            <th class="py-3 px-4 text-center w-[12%]">Ket.</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-sm divide-y divide-gray-200">
-                        @forelse($riwayat as $index => $log)
-                        <tr>
-                            <td class="py-2 px-4">{{ $index + 1 }}.</td>
-                            <td class="py-2 px-4 font-medium">{{ $log->nopol ?? 'N/A' }}</td>
-                            <td class="py-2 px-4">{{ $log->pemilik ?? 'N/A' }}</td>
-                            <td class="py-2 px-4 text-center">
-                                <span class="text-xs font-semibold px-2 py-1 rounded-full 
-                                    {{ $log->tipe == 'Roda 4' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' }}">
-                                    {{ $log->tipe ?? '-' }}
-                                </span>
-                            </td>
-                            <td class="py-2 px-4 text-gray-700">
-                                @if($log->waktu_masuk && $log->waktu_masuk->format('Y-m-d') == $tanggalTerpilih)
-                                    {{ $log->waktu_masuk->format('H:i:s') }}
-                                @else <span class="text-gray-400">-</span> @endif
-                            </td>
-                            <td class="py-2 px-4 text-gray-700">
-                                @if($log->waktu_keluar && $log->waktu_keluar->format('Y-m-d') == $tanggalTerpilih)
-                                    {{ $log->waktu_keluar->format('H:i:s') }}
-                                @else <span class="text-gray-400">-</span> @endif
-                            </td>
-                            <td class="py-2 px-4">{{ $log->keterangan }}</td>
-                        </tr>
-                        @empty
-                        <tr><td colspan="7" class="py-4 px-4 text-center text-gray-500">Data tidak ditemukan.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
+            <div id="riwayat-table-container">
+                @include('bau.partials.riwayat-table', ['riwayat' => $riwayat, 'tanggalFilter' => $tanggalTerpilih])
             </div>
 
-            {{-- CARD LAYOUT (Mobile) --}}
-            <div class="md:hidden space-y-3 p-3">
-                @forelse($riwayat as $index => $log)
-                    <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
-                        <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] px-4 py-2.5 flex justify-between items-center">
-                            <div>
-                                <p class="text-xs text-blue-200 font-semibold uppercase">{{ $log->nopol ?? 'N/A' }}</p>
-                                <p class="text-white font-bold text-base">{{ $log->pemilik ?? 'N/A' }}</p>
-                            </div>
-                            <span class="text-xs font-bold px-2.5 py-1 rounded-full 
-                                {{ $log->tipe == 'Roda 4' ? 'bg-blue-500 text-white' : 'bg-green-500 text-white' }}">
-                                {{ $log->tipe ?? '-' }}
-                            </span>
-                        </div>
-
-                        <div class="p-4 space-y-3">
-                            <div class="grid grid-cols-2 gap-3 pb-2 border-b border-gray-100">
-                                <div>
-                                    <p class="text-[10px] text-gray-500 font-semibold uppercase">Masuk</p>
-                                    <p class="text-gray-800 font-bold text-sm">
-                                        @if($log->waktu_masuk && $log->waktu_masuk->format('Y-m-d') == $tanggalTerpilih)
-                                            {{ $log->waktu_masuk->format('H:i:s') }}
-                                        @else <span class="text-gray-400">-</span> @endif
-                                    </p>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] text-gray-500 font-semibold uppercase">Keluar</p>
-                                    <p class="text-gray-800 font-bold text-sm">
-                                        @if($log->waktu_keluar && $log->waktu_keluar->format('Y-m-d') == $tanggalTerpilih)
-                                            {{ $log->waktu_keluar->format('H:i:s') }}
-                                        @else <span class="text-gray-400">-</span> @endif
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div>
-                                <p class="text-[10px] text-gray-500 font-semibold uppercase mb-1">Keterangan</p>
-                                <p class="text-gray-800 font-semibold">{{ $log->keterangan }}</p>
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    <div class="bg-white rounded-xl shadow-md p-8 text-center">
-                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                        </div>
-                        <p class="text-gray-500 font-semibold">Data tidak ditemukan.</p>
-                    </div>
-                @endforelse
+            <div id="riwayat-pagination-container">
+                @include('bau.partials.riwayat-pagination', ['riwayat' => $riwayat])
             </div>
-
-            {{-- Pagination --}}
-            @if($riwayat->total() > 0)
-            <div class="flex justify-between items-center px-6 py-4 border-t border-gray-200">
-                <div class="text-sm text-gray-600">
-                    Showing {{ $riwayat->firstItem() ?? 0 }} to {{ $riwayat->lastItem() ?? 0 }} of {{ $riwayat->total() }} entries
-                </div>
-                <div class="flex items-center gap-1">
-                    @if ($riwayat->onFirstPage())
-                        <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Previous</span>
-                    @else
-                        <a href="{{ $riwayat->appends(request()->query())->previousPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Previous</a>
-                    @endif
-                    @foreach(range(1, $riwayat->lastPage()) as $page)
-                        @if($page == $riwayat->currentPage())
-                            <span class="px-3 py-1 text-white bg-[#1e3a5f] rounded font-bold">{{ $page }}</span>
-                        @else
-                            <a href="{{ $riwayat->appends(request()->query())->url($page) }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
-                        @endif
-                    @endforeach
-                    @if ($riwayat->hasMorePages())
-                        <a href="{{ $riwayat->appends(request()->query())->nextPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
-                    @else
-                        <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
-                    @endif
-                </div>
-            </div>
-            @endif
             </div>
         </div>
     </div>
@@ -248,7 +128,7 @@
                     <div class="w-[calc(50%-0.5rem)] md:w-auto">
                         <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
                         <div class="flex items-center gap-2">
-                            <select name="per_page_master" onchange="this.form.submit()" class="block h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em;">
+                            <select name="per_page_master" class="block h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em;">
                                 <option value="5" {{ $perPageMaster == 5 ? 'selected' : '' }}>5</option>
                                 <option value="10" {{ $perPageMaster == 10 ? 'selected' : '' }}>10</option>
                                 <option value="25" {{ $perPageMaster == 25 ? 'selected' : '' }}>25</option>
@@ -265,7 +145,6 @@
                             Tipe
                         </label>
                         <select id="tipe_master" name="tipe_master" 
-                                onchange="document.getElementById('filterFormMaster').submit()"
                                 class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em;">
                             <option value="">Semua Tipe</option>
                             <option value="Roda 2" {{ $tipeMaster == 'Roda 2' ? 'selected' : '' }}>Roda 2</option>
@@ -287,116 +166,97 @@
             </div>
         </form>
         
-        <div class="hidden md:block overflow-x-auto">
-            <table class="w-full min-w-max table-fixed">
-                <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
-                    <tr>
-                        <th class="py-3 px-4 text-center w-[10%]">No</th>
-                        <th class="py-3 px-4 text-center w-[30%]">Nopol</th>
-                        <th class="py-3 px-4 text-center w-[40%]">Pemilik</th>
-                        <th class="py-3 px-4 text-center w-[20%]">Tipe</th>
-                    </tr>
-                </thead>
-                <tbody class="text-sm divide-y divide-gray-200">
-                    @forelse($kendaraanMaster as $index => $kendaraan)
-                    <tr>
-                        <td class="py-2 px-4">{{ $index + 1 }}.</td>
-                        <td class="py-2 px-4 font-medium">{{ $kendaraan->nomor_plat }}</td>
-                        <td class="py-2 px-4">{{ $kendaraan->pemilik }}</td>
-                        <td class="py-2 px-4 text-center">
-                            <span class="text-xs font-semibold px-2 py-1 rounded-full 
-                                {{ $kendaraan->tipe == 'Roda 4' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' }}">
-                                {{ $kendaraan->tipe }}
-                            </span>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr><td colspan="4" class="py-4 px-4 text-center text-gray-500">Tidak ada data.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
+        <div id="master-table-container">
+            @include('bau.partials.master-table', ['kendaraanMaster' => $kendaraanMaster])
         </div>
 
-        <div class="md:hidden space-y-3 p-3">
-            @forelse($kendaraanMaster as $index => $kendaraan)
-                <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
-                    <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] px-4 py-2.5 flex justify-between items-center">
-                        <div>
-                            <p class="text-xs text-blue-200 font-semibold uppercase">{{ $kendaraan->nomor_plat }}</p>
-                            <p class="text-white font-bold text-base">{{ $kendaraan->pemilik }}</p>
-                        </div>
-                        <span class="text-xs font-bold px-2.5 py-1 rounded-full 
-                            {{ $kendaraan->tipe == 'Roda 4' ? 'bg-blue-500 text-white' : 'bg-green-500 text-white' }}">
-                            {{ $kendaraan->tipe }}
-                        </span>
-                    </div>
-                </div>
-            @empty
-                <div class="bg-white rounded-xl shadow-md p-8 text-center">
-                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                    </div>
-                    <p class="text-gray-500 font-semibold">Tidak ada data.</p>
-                </div>
-            @endforelse
+        <div id="master-pagination-container">
+            @include('bau.partials.master-pagination', ['kendaraanMaster' => $kendaraanMaster])
         </div>
-
-        @if($kendaraanMaster->total() > 0)
-        <div class="flex justify-between items-center px-6 py-4 border-t border-gray-200">
-            <div class="text-sm text-gray-600">
-                Showing {{ $kendaraanMaster->firstItem() ?? 0 }} to {{ $kendaraanMaster->lastItem() ?? 0 }} of {{ $kendaraanMaster->total() }} entries
-            </div>
-            <div class="flex items-center gap-1">
-                @if ($kendaraanMaster->onFirstPage())
-                    <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Previous</span>
-                @else
-                    <a href="{{ $kendaraanMaster->appends(request()->query())->previousPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Previous</a>
-                @endif
-                @foreach(range(1, $kendaraanMaster->lastPage()) as $page)
-                    @if($page == $kendaraanMaster->currentPage())
-                        <span class="px-3 py-1 text-white bg-[#1e3a5f] rounded font-bold">{{ $page }}</span>
-                    @else
-                        <a href="{{ $kendaraanMaster->appends(request()->query())->url($page) }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
-                    @endif
-                @endforeach
-                @if ($kendaraanMaster->hasMorePages())
-                    <a href="{{ $kendaraanMaster->appends(request()->query())->nextPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
-                @else
-                    <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
-                @endif
-            </div>
-        </div>
-        @endif
         </div>
     </div>
 
 </div>
 
 <script>
-// Live search untuk Riwayat
+// AJAX Live Search untuk Riwayat
 let searchTimeout;
 const searchInput = document.getElementById('searchInput');
 if (searchInput) {
     searchInput.addEventListener('input', function() {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
-            document.getElementById('filterForm').submit();
-        }, 500);
+            loadRiwayatData();
+        }, 300);
     });
 }
 
-// Live search untuk Master
+// AJAX Live Search untuk Master
 let searchMasterTimeout;
 const searchMasterInput = document.getElementById('searchMasterInput');
 if (searchMasterInput) {
     searchMasterInput.addEventListener('input', function() {
         clearTimeout(searchMasterTimeout);
         searchMasterTimeout = setTimeout(() => {
-            document.getElementById('filterFormMaster').submit();
-        }, 500);
+            loadMasterData();
+        }, 300);
     });
 }
+
+// Function untuk load data riwayat via AJAX
+function loadRiwayatData(page = 1) {
+    const formData = new FormData(document.getElementById('filterForm'));
+    formData.append('page_riwayat', page);
+    
+    const params = new URLSearchParams();
+    for (let [key, value] of formData) {
+        params.append(key, value);
+    }
+    
+    fetch('{{ route("bau.kendaraan.searchRiwayat") }}?' + params.toString())
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('riwayat-table-container').innerHTML = data.html;
+            document.getElementById('riwayat-pagination-container').innerHTML = data.pagination;
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+// Function untuk load data master via AJAX
+function loadMasterData(page = 1) {
+    const formData = new FormData(document.getElementById('filterFormMaster'));
+    formData.append('page_master', page);
+    
+    const params = new URLSearchParams();
+    for (let [key, value] of formData) {
+        params.append(key, value);
+    }
+    
+    fetch('{{ route("bau.kendaraan.searchMaster") }}?' + params.toString())
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('master-table-container').innerHTML = data.html;
+            document.getElementById('master-pagination-container').innerHTML = data.pagination;
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+// Function untuk pagination riwayat
+function loadRiwayatPage(page) {
+    loadRiwayatData(page);
+}
+
+// Function untuk pagination master
+function loadMasterPage(page) {
+    loadMasterData(page);
+}
+
+// Event listener untuk filter changes (tanggal, tipe)
+document.getElementById('tanggal').addEventListener('change', loadRiwayatData);
+document.getElementById('tipe').addEventListener('change', loadRiwayatData);
+document.querySelector('select[name="per_page_riwayat"]').addEventListener('change', loadRiwayatData);
+
+document.getElementById('tipe_master').addEventListener('change', loadMasterData);
+document.querySelector('select[name="per_page_master"]').addEventListener('change', loadMasterData);
 </script>
 @endsection

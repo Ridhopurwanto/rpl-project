@@ -210,6 +210,10 @@ Route::middleware('auth')->group(function () {
             ->name('kendaraan.master.destroy');
         Route::post('/kendaraan/log/{id_log}/promote', [KendaraanController::class, 'promoteLogToMaster'])
             ->name('kendaraan.log.promote');
+        Route::get('/kendaraan/search-riwayat', [KendaraanController::class, 'searchRiwayat'])
+            ->name('kendaraan.searchRiwayat');
+        Route::get('/kendaraan/search-master', [KendaraanController::class, 'searchMaster'])
+            ->name('kendaraan.searchMaster');
 
         // Tamu
         Route::get('/tamu', [TamuController::class, 'index'])
@@ -270,6 +274,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('presensi', App\Http\Controllers\Bau\PresensiController::class)->only(['index']);
         Route::resource('patroli', App\Http\Controllers\Bau\PatroliController::class)->only(['index']);
         Route::resource('kendaraan', App\Http\Controllers\Bau\KendaraanController::class)->only(['index']);
+        Route::get('/kendaraan/search-riwayat', [App\Http\Controllers\Bau\KendaraanController::class, 'searchRiwayat'])->name('kendaraan.searchRiwayat');
+        Route::get('/kendaraan/search-master', [App\Http\Controllers\Bau\KendaraanController::class, 'searchMaster'])->name('kendaraan.searchMaster');
         Route::resource('tamu', App\Http\Controllers\Bau\TamuController::class)->only(['index']);
         Route::resource('barang', App\Http\Controllers\Bau\BarangController::class)->only(['index']);
         Route::resource('gangguan', App\Http\Controllers\Bau\GangguanController::class)->only(['index']);
