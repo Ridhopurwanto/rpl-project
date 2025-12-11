@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
 class PatroliClaim extends Model
 {
@@ -12,13 +13,14 @@ class PatroliClaim extends Model
     protected $table = 'patroli_claims';
     protected $primaryKey = 'id_claim';
     
-    // ✅ FIX 1: Nonaktifkan timestamps otomatis Laravel
+    // ✅ Nonaktifkan timestamps otomatis Laravel
     public $timestamps = false;
     
     protected $fillable = [
         'id_pengguna',
         'tanggal',
         'jenis_patroli',
+        'id_shift',      // ✅ TAMBAHKAN INI! (PENTING!)
         'claimed_at'
     ];
 
@@ -27,11 +29,16 @@ class PatroliClaim extends Model
         'claimed_at' => 'datetime'
     ];
 
-    // ✅ FIX 2: Relasi ke User (sesuaikan dengan nama model user kamu)
+    // ✅ Relasi ke Shift
+    public function shift()
+    {
+        return $this->belongsTo(Shift::class, 'id_shift', 'id_shift');
+    }
+
+    // ✅ Relasi ke User/Pengguna
     public function pengguna()
     {
-        // Jika model user kamu bernama "User", ganti jadi User::class
-        // Jika model user kamu bernama "Pengguna", tambahkan: use App\Models\Pengguna;
-        return $this->belongsTo(User::class, 'id_pengguna', 'id_pengguna');
+        // Ganti 'User' jadi 'Pengguna' kalau model kamu namanya Pengguna
+        return $this->belongsTo(user::class, 'id_pengguna', 'id_pengguna');
     }
 }

@@ -294,13 +294,9 @@
                     </div>
                 </div>
 
-                {{-- ← TAMBAHAN BARU: PROGRESS AREA (RESPONSIF) --}}
+                {{-- ✅ PERBAIKAN: PROGRESS AREA (REACTIF) --}}
                 @if($isOwner || $isClaimed)
-                    <div class="flex items-center gap-3 bg-purple-50 rounded-lg p-3 border border-purple-100" x-data="{ 
-                            get currentProgress() { 
-                                return window.Alpine ? window.Alpine.$data($el.closest('[x-data]')).completedList?.length || {{ $totalCompleted }} : {{ $totalCompleted }}
-                            } 
-                         }">
+                    <div class="flex items-center gap-3 bg-purple-50 rounded-lg p-3 border border-purple-100">
                         <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -311,7 +307,8 @@
                         <div class="flex-1">
                             <p class="text-xs text-purple-600 font-semibold uppercase mb-0.5">Progress Checkpoint</p>
                             <p class="text-base font-bold text-purple-900 font-mono tracking-wide">
-                                <span x-text="currentProgress"></span> / 17 AREA SELESAI
+                                {{-- ✅ LANGSUNG PAKAI completedList dari parent scope --}}
+                                <span x-text="completedList.length"></span> / 17 AREA SELESAI
                             </p>
                         </div>
                     </div>

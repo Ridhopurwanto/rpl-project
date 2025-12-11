@@ -11,7 +11,6 @@ class Patroli extends Model
     use HasFactory;
 
     protected $table = 'patroli';
-
     protected $primaryKey = 'id_patroli';
 
     protected $fillable = [
@@ -22,6 +21,7 @@ class Patroli extends Model
         'foto',
         'tanggal',
         'jenis_patroli',
+        'id_shift',  // ✅ TAMBAHKAN INI! (PENTING!)
     ];
 
     protected $casts = [
@@ -46,6 +46,13 @@ class Patroli extends Model
         });
     }
 
+    // ✅ Relasi ke Shift
+    public function shift()
+    {
+        return $this->belongsTo(Shift::class, 'id_shift', 'id_shift');
+    }
+
+    // ✅ Relasi ke Pengguna
     public function pengguna()
     {
         return $this->belongsTo(User::class, 'id_pengguna', 'id_pengguna');
