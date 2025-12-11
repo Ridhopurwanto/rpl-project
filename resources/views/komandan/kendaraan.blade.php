@@ -12,7 +12,22 @@
         showEditModal: false, editAction: '', editPlat: '', editPemilik: '', editTipe: '',
         showDeleteModal: false, deleteAction: '',
         showPromoteModal: false, promoteAction: ''
-     }">
+     }"
+     @edit-master.window="
+        editAction = `/komandan/kendaraan/master/${$event.detail.id}`;
+        editPlat = $event.detail.plat;
+        editPemilik = $event.detail.pemilik;
+        editTipe = $event.detail.tipe;
+        showEditModal = true;
+     "
+     @delete-master.window="
+        deleteAction = `/komandan/kendaraan/master/${$event.detail.id}`;
+        showDeleteModal = true;
+     "
+     @promote-master.window="
+        promoteAction = `/komandan/kendaraan/log/${$event.detail.id}/promote`;
+        showPromoteModal = true;
+     ">
     
     <h2 class="text-2xl font-bold text-slate-800 mb-4">Laporan Kendaraan</h2>
 
@@ -379,15 +394,43 @@
 
     {{-- Modal Promote --}}
     <div x-show="showPromoteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4" @click.away="showPromoteModal = false" style="display: none;">
-    <div class="bg-white rounded-lg shadow-xl max-w-sm w-full p-6 relative" @click.stop>
-        <h3 class="text-lg font-bold text-gray-900 mb-4">Konfirmasi Pendaftaran</h3>
-        <p class="text-gray-600 mb-6">Tambahkan kendaraan ini ke Daftar Master?</p>
-        <form :action="promoteAction" method="POST" class="flex justify-end space-x-4">
-            @csrf
-            <button type="button" @click="showPromoteModal = false" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">Batal</button>
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">OK</button>
-        </form>
-    </div>
+        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full relative overflow-hidden" @click.stop>
+            {{-- Header Biru --}}
+            <div class="bg-[#1e3a5f] py-4 px-6 border-b border-[#1e3a5f] flex justify-between items-center">
+                <h3 class="text-lg font-bold text-white flex items-center tracking-wide">
+                    DAFTARKAN KENDARAAN
+                </h3>
+                <button @click="showPromoteModal = false" class="text-white/70 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                    </div>
+                    <h4 class="text-lg font-bold text-gray-900 mb-2">Konfirmasi Pendaftaran</h4>
+                    <p class="text-gray-600">Tambahkan kendaraan ini ke Daftar Master agar dapat digunakan untuk pencatatan selanjutnya?</p>
+                </div>
+                
+                <form :action="promoteAction" method="POST" class="space-y-4">
+                    @csrf
+                    <div class="flex gap-3">
+                        <button type="button" @click="showPromoteModal = false" 
+                                class="flex-1 px-4 py-3 text-gray-700 font-bold bg-gray-100 rounded-xl hover:bg-gray-200 transition">
+                            Batal
+                        </button>
+                        <button type="submit" 
+                                class="flex-1 px-4 py-3 text-white font-bold bg-[#1e3a5f] rounded-xl hover:bg-[#2a4a6f] shadow-lg transition transform hover:-translate-y-0.5">
+                            Ya, Daftarkan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
 </div>
@@ -466,56 +509,9 @@ function loadMasterPage(page) {
     loadMasterData(page);
 }
 
-// Function untuk promote to master
-function promoteToMaster(logId) {
-    if (confirm('Tambahkan kendaraan ini ke Daftar Master?')) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/komandan/kendaraan/log/${logId}/promote`;
-        
-        const csrfToken = document.createElement('input');
-        csrfToken.type = 'hidden';
-        csrfToken.name = '_token';
-        csrfToken.value = '{{ csrf_token() }}';
-        form.appendChild(csrfToken);
-        
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
 
-// Function untuk edit master
-function editMaster(id, plat, pemilik, tipe) {
-    // Trigger Alpine.js modal
-    const event = new CustomEvent('edit-master', {
-        detail: { id, plat, pemilik, tipe }
-    });
-    document.dispatchEvent(event);
-}
 
-// Function untuk delete master
-function deleteMaster(id) {
-    if (confirm('Apakah Anda yakin ingin menghapus data kendaraan ini?')) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/komandan/kendaraan/master/${id}`;
-        
-        const csrfToken = document.createElement('input');
-        csrfToken.type = 'hidden';
-        csrfToken.name = '_token';
-        csrfToken.value = '{{ csrf_token() }}';
-        form.appendChild(csrfToken);
-        
-        const methodField = document.createElement('input');
-        methodField.type = 'hidden';
-        methodField.name = '_method';
-        methodField.value = 'DELETE';
-        form.appendChild(methodField);
-        
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
+
 
 // Event listener untuk filter changes (tanggal, tipe)
 document.getElementById('tanggal').addEventListener('change', loadRiwayatData);

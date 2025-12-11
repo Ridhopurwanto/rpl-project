@@ -24,10 +24,10 @@
                 </td>
                 <td class="py-2 px-4 text-center">
                     <div class="flex justify-center space-x-3">
-                        <button onclick="editMaster({{ $kendaraan->id_kendaraan }}, '{{ $kendaraan->nomor_plat }}', '{{ $kendaraan->pemilik }}', '{{ $kendaraan->tipe }}')" class="text-blue-500 hover:text-blue-700">
+                        <button @click="$dispatch('edit-master', { id: {{ $kendaraan->id_kendaraan }}, plat: '{{ $kendaraan->nomor_plat }}', pemilik: '{{ $kendaraan->pemilik }}', tipe: '{{ $kendaraan->tipe }}' })" class="text-blue-500 hover:text-blue-700">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
                         </button>
-                        <button onclick="deleteMaster({{ $kendaraan->id_kendaraan }})" class="text-red-500 hover:text-red-700">
+                        <button @click="$dispatch('delete-master', { id: {{ $kendaraan->id_kendaraan }} })" class="text-red-500 hover:text-red-700">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
                         </button>
                     </div>
@@ -57,12 +57,12 @@
 
             <div class="p-4">
                 <div class="flex gap-2">
-                    <button onclick="editMaster({{ $kendaraan->id_kendaraan }}, '{{ $kendaraan->nomor_plat }}', '{{ $kendaraan->pemilik }}', '{{ $kendaraan->tipe }}')" 
+                    <button @click="$dispatch('edit-master', { id: {{ $kendaraan->id_kendaraan }}, plat: '{{ $kendaraan->nomor_plat }}', pemilik: '{{ $kendaraan->pemilik }}', tipe: '{{ $kendaraan->tipe }}' })" 
                             class="flex-1 bg-blue-500 text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition flex items-center justify-center gap-1">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
                         <span class="text-xs">Edit</span>
                     </button>
-                    <button onclick="deleteMaster({{ $kendaraan->id_kendaraan }})" 
+                    <button @click="$dispatch('delete-master', { id: {{ $kendaraan->id_kendaraan }} })" 
                             class="flex-1 bg-red-500 text-white font-bold py-2 rounded-lg hover:bg-red-600 transition flex items-center justify-center gap-1">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
                         <span class="text-xs">Hapus</span>
