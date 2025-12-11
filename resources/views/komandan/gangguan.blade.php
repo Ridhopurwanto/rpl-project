@@ -477,13 +477,13 @@
                             {{-- Waktu Lapor --}}
                             <div>
                                 <label for="waktu_lapor" class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">Waktu Lapor <span class="text-red-500">*</span></label>
-                                <div class="relative">
+                                <div class="relative cursor-pointer" @click="$refs.waktuLaporInput.showPicker()">
                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                     </div>
-                                    <input type="datetime-local" id="waktu_lapor" name="waktu_lapor" x-model="editWaktu" required
+                                    <input type="datetime-local" id="waktu_lapor" name="waktu_lapor" x-ref="waktuLaporInput" x-model="editWaktu" required
                                            :max="maxDate"
-                                           class="pl-10 w-full bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5">
+                                           class="pl-10 w-full bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5 cursor-pointer">
                                 </div>
                             </div>
                             
