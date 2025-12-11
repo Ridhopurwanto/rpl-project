@@ -26,9 +26,7 @@ class KendaraanController extends Controller
             });
 
         if ($tipeFilter) {
-            $queryRiwayat->whereHas('kendaraan', function ($q) use ($tipeFilter) {
-                $q->where('tipe', $tipeFilter);
-            });
+            $queryRiwayat->where('tipe', $tipeFilter);
         }
 
         if ($search) {
@@ -96,9 +94,7 @@ class KendaraanController extends Controller
             });
 
         if ($tipeFilter) {
-            $queryRiwayat->whereHas('kendaraan', function ($q) use ($tipeFilter) {
-                $q->where('tipe', $tipeFilter);
-            });
+            $queryRiwayat->where('tipe', $tipeFilter);
         }
 
         if ($search) {

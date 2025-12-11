@@ -39,8 +39,8 @@
                     <form action="{{ route('komandan.kendaraan.log.updateKeterangan', $log->id_log) }}" method="POST">
                         @csrf @method('PUT')
                         <select name="keterangan" onchange="this.form.submit()" class="border-gray-300 rounded-lg shadow-sm text-xs py-1 focus:border-blue-500 focus:ring-blue-500">
-                            <option value="tidak menginap" {{ $log->keterangan == 'tidak menginap' ? 'selected' : '' }}>Tidak Menginap</option>
-                            <option value="menginap" {{ $log->keterangan == 'Menginap' ? 'selected' : '' }}>Menginap</option>
+                            <option value="Tidak Menginap" {{ $log->keterangan == 'Tidak Menginap' ? 'selected' : '' }}>Tidak Menginap</option>
+                            <option value="Menginap" {{ $log->keterangan == 'Menginap' ? 'selected' : '' }}>Menginap</option>
                         </select>
                     </form>
                 </td>
@@ -99,8 +99,8 @@
                     <form action="{{ route('komandan.kendaraan.log.updateKeterangan', $log->id_log) }}" method="POST">
                         @csrf @method('PUT')
                         <select name="keterangan" onchange="this.form.submit()" class="w-full border-gray-300 rounded-lg shadow-sm text-sm py-2 focus:border-blue-500 focus:ring-blue-500">
-                            <option value="tidak menginap" {{ $log->keterangan == 'tidak menginap' ? 'selected' : '' }}>Tidak Menginap</option>
-                            <option value="menginap" {{ $log->keterangan == 'Menginap' ? 'selected' : '' }}>Menginap</option>
+                            <option value="Tidak Menginap" {{ $log->keterangan == 'Tidak Menginap' ? 'selected' : '' }}>Tidak Menginap</option>
+                            <option value="Menginap" {{ $log->keterangan == 'Menginap' ? 'selected' : '' }}>Menginap</option>
                         </select>
                     </form>
                 </div>

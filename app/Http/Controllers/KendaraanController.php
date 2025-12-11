@@ -28,9 +28,7 @@ class KendaraanController extends Controller
             });
 
         if ($tipeFilter) {
-            $queryRiwayat->whereHas('kendaraan', function ($q) use ($tipeFilter) {
-                $q->where('tipe', $tipeFilter);
-            });
+            $queryRiwayat->where('tipe', $tipeFilter);
         }
 
         if ($search) {
@@ -97,11 +95,9 @@ class KendaraanController extends Controller
                   ->orWhereDate('waktu_keluar', $tanggalFilter);
             });
 
-        // 3. Filter Tipe (Jika ada)
+        // 3. Filter Tipe (Jika ada) - Cek tipe dari log langsung, bukan dari relasi kendaraan
         if ($tipeFilter) {
-            $queryRiwayat->whereHas('kendaraan', function ($q) use ($tipeFilter) {
-                $q->where('tipe', $tipeFilter);
-            });
+            $queryRiwayat->where('tipe', $tipeFilter);
         }
 
         // ▼▼▼ 4. LOGIKA LIVE SEARCH (KHUSUS RIWAYAT) ▼▼▼
@@ -265,7 +261,7 @@ class KendaraanController extends Controller
 
         // Validasi input
         $request->validate([
-            'keterangan' => 'required|string|in:menginap,tidak menginap',
+            'keterangan' => 'required|string|in:Menginap,Tidak Menginap',
         ]);
 
         try {
