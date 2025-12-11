@@ -43,19 +43,9 @@
                                 onchange="this.form.submit()"
                                 class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
                             <option value="semua" @if($kategori_terpilih == 'semua') selected @endif>Semua Kategori</option>
-                            <option value="Curat" @if($kategori_terpilih == 'Curat') selected @endif>Curat</option>
-                            <option value="Curas" @if($kategori_terpilih == 'Curas') selected @endif>Curas</option>
-                            <option value="Curanmor" @if($kategori_terpilih == 'Curanmor') selected @endif>Curanmor</option>
-                            <option value="Narkoba" @if($kategori_terpilih == 'Narkoba') selected @endif>Narkoba</option>
-                            <option value="Laka Lantas" @if($kategori_terpilih == 'Laka Lantas') selected @endif>Laka Lantas</option>
-                            <option value="Pembunuhan" @if($kategori_terpilih == 'Pembunuhan') selected @endif>Pembunuhan</option>
-                            <option value="Perkelahian" @if($kategori_terpilih == 'Perkelahian') selected @endif>Perkelahian</option>
-                            <option value="Mabok" @if($kategori_terpilih == 'Mabok') selected @endif>Mabok</option>
-                            <option value="Unjuk Rasa" @if($kategori_terpilih == 'Unjuk Rasa') selected @endif>Unjuk Rasa</option>
-                            <option value="Penyerobotan Tanah" @if($kategori_terpilih == 'Penyerobotan Tanah') selected @endif>Penyerobotan Tanah</option>
-                            <option value="Kenakalan Remaja" @if($kategori_terpilih == 'Kenakalan Remaja') selected @endif>Kenakalan Remaja</option>
-                            <option value="Kebakaran" @if($kategori_terpilih == 'Kebakaran') selected @endif>Kebakaran</option>
-                            <option value="Bencana Alam" @if($kategori_terpilih == 'Bencana Alam') selected @endif>Bencana Alam</option>
+                            @foreach($kategori_list as $kategori)
+                                <option value="{{ $kategori }}" @if($kategori_terpilih == $kategori) selected @endif>{{ $kategori }}</option>
+                            @endforeach
                         </select>
                         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                             <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -275,19 +265,9 @@
                             <label class="col-span-1 text-gray-300 font-semibold text-sm self-center">KATEGORI :</label>
                             <div class="col-span-2">
                                 <select name="kategori" class="w-full px-4 py-2 bg-white text-gray-900 rounded-md border-none focus:ring-2 focus:ring-blue-500" required>
-                                    <option value="Curat">Curat</option>
-                                    <option value="Curas">Curas</option>
-                                    <option value="Curanmor">Curanmor</option>
-                                    <option value="Narkoba">Narkoba</option>
-                                    <option value="Laka Lantas">Laka Lantas</option>
-                                    <option value="Pembunuhan">Pembunuhan</option>
-                                    <option value="Perkelahian">Perkelahian</option>
-                                    <option value="Mabok">Mabok</option>
-                                    <option value="Unjuk Rasa">Unjuk Rasa</option>
-                                    <option value="Penyerobotan Tanah">Penyerobotan Tanah</option>
-                                    <option value="Kenakalan Remaja">Kenakalan Remaja</option>
-                                    <option value="Kebakaran">Kebakaran</option>
-                                    <option value="Bencana Alam">Bencana Alam</option>
+                                    @foreach($kategori_list as $kategori)
+                                        <option value="{{ $kategori }}">{{ $kategori }}</option>
+                                    @endforeach
                                 </select>
                             </div>
 

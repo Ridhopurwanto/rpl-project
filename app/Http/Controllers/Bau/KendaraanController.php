@@ -10,30 +10,25 @@ use App\Models\LogKendaraan;
 class KendaraanController extends Controller
 {
     /**
-     * Menampilkan halaman utama laporan kendaraan (Riwayat & Master) - Read Only
+     * AJAX Live Search untuk Riwayat
      */
-    public function index(Request $request)
+    public function searchRiwayat(Request $request)
     {
-        // 1. Ambil Filter
         $tanggalFilter = $request->input('tanggal', now()->format('Y-m-d'));
         $tipeFilter = $request->input('tipe'); 
         $search = $request->input('search');
+        $perPageRiwayat = $request->input('per_page_riwayat', 10);
 
-        // 2. Query Dasar Riwayat (Filter Tanggal)
         $queryRiwayat = LogKendaraan::with('kendaraan')
             ->where(function($q) use ($tanggalFilter) {
                 $q->whereDate('waktu_masuk', $tanggalFilter)
                   ->orWhereDate('waktu_keluar', $tanggalFilter);
             });
 
-        // 3. Filter Tipe (Jika ada)
         if ($tipeFilter) {
-            $queryRiwayat->whereHas('kendaraan', function ($q) use ($tipeFilter) {
-                $q->where('tipe', $tipeFilter);
-            });
+            $queryRiwayat->where('tipe', $tipeFilter);
         }
 
-        // 4. Search
         if ($search) {
             $queryRiwayat->where(function($q) use ($search) {
                 $q->where('nopol', 'LIKE', "%{$search}%")
@@ -41,20 +36,101 @@ class KendaraanController extends Controller
             });
         }
         
-        // Eksekusi Query Riwayat
-        $riwayat = $queryRiwayat->orderBy('waktu_masuk', 'desc')->get();
+        $riwayat = $queryRiwayat->orderBy('waktu_masuk', 'desc')->paginate($perPageRiwayat, ['*'], 'page_riwayat');
 
-        // --- Data untuk KENDARAAN TERDAFTAR ---
-        $kendaraanMaster = Kendaraan::orderBy('pemilik', 'asc')->get();
-        $registeredPlates = $kendaraanMaster->pluck('nomor_plat')->toArray();
+        return response()->json([
+            'html' => view('bau.partials.riwayat-table', compact('riwayat', 'tanggalFilter'))->render(),
+            'pagination' => view('bau.partials.riwayat-pagination', compact('riwayat'))->render()
+        ]);
+    }
+
+    /**
+     * AJAX Live Search untuk Master
+     */
+    public function searchMaster(Request $request)
+    {
+        $tipeMaster = $request->input('tipe_master');
+        $searchMaster = $request->input('search_master');
+        $perPageMaster = $request->input('per_page_master', 10);
+        
+        $queryMaster = Kendaraan::query();
+        
+        if ($tipeMaster) {
+            $queryMaster->where('tipe', $tipeMaster);
+        }
+        
+        if ($searchMaster) {
+            $queryMaster->where(function($q) use ($searchMaster) {
+                $q->where('nomor_plat', 'LIKE', "%{$searchMaster}%")
+                  ->orWhere('pemilik', 'LIKE', "%{$searchMaster}%");
+            });
+        }
+        
+        $kendaraanMaster = $queryMaster->orderBy('pemilik', 'asc')->paginate($perPageMaster, ['*'], 'page_master');
+
+        return response()->json([
+            'html' => view('bau.partials.master-table', compact('kendaraanMaster'))->render(),
+            'pagination' => view('bau.partials.master-pagination', compact('kendaraanMaster'))->render()
+        ]);
+    }
+
+    /**
+     * Menampilkan halaman utama laporan kendaraan (Riwayat & Master) - Read Only
+     */
+    public function index(Request $request)
+    {
+        $tanggalFilter = $request->input('tanggal', now()->format('Y-m-d'));
+        $tipeFilter = $request->input('tipe'); 
+        $search = $request->input('search');
+        $tipeMaster = $request->input('tipe_master');
+        $searchMaster = $request->input('search_master');
+        $perPageRiwayat = $request->input('per_page_riwayat', 10);
+        $perPageMaster = $request->input('per_page_master', 10);
+
+        $queryRiwayat = LogKendaraan::with('kendaraan')
+            ->where(function($q) use ($tanggalFilter) {
+                $q->whereDate('waktu_masuk', $tanggalFilter)
+                  ->orWhereDate('waktu_keluar', $tanggalFilter);
+            });
+
+        if ($tipeFilter) {
+            $queryRiwayat->where('tipe', $tipeFilter);
+        }
+
+        if ($search) {
+            $queryRiwayat->where(function($q) use ($search) {
+                $q->where('nopol', 'LIKE', "%{$search}%")
+                  ->orWhere('pemilik', 'LIKE', "%{$search}%");
+            });
+        }
+        
+        $riwayat = $queryRiwayat->orderBy('waktu_masuk', 'desc')->paginate($perPageRiwayat, ['*'], 'page_riwayat');
+        
+        $queryMaster = Kendaraan::query();
+        
+        if ($tipeMaster) {
+            $queryMaster->where('tipe', $tipeMaster);
+        }
+        
+        if ($searchMaster) {
+            $queryMaster->where(function($q) use ($searchMaster) {
+                $q->where('nomor_plat', 'LIKE', "%{$searchMaster}%")
+                  ->orWhere('pemilik', 'LIKE', "%{$searchMaster}%");
+            });
+        }
+        
+        $kendaraanMaster = $queryMaster->orderBy('pemilik', 'asc')->paginate($perPageMaster, ['*'], 'page_master');
 
         return view('bau.kendaraan', [
             'riwayat' => $riwayat,
             'kendaraanMaster' => $kendaraanMaster,
             'tanggalTerpilih' => $tanggalFilter,
             'tipeTerpilih' => $tipeFilter,
-            'registeredPlates' => $registeredPlates,
-            'search' => $search
+            'search' => $search,
+            'tipeMaster' => $tipeMaster,
+            'searchMaster' => $searchMaster,
+            'perPageRiwayat' => $perPageRiwayat,
+            'perPageMaster' => $perPageMaster,
         ]);
     }
 }

@@ -19,37 +19,113 @@
         editInstansi: '',
         editTujuan: '',
         editWaktuDatang: '',
+        maxDate: '{{ now()->format('Y-m-d\T23:59') }}',
         showDeleteModal: false,
         deleteAction: '' 
      }">
+
+
+
+
     
     <h2 class="text-2xl font-bold text-slate-800 mb-4">Laporan Kunjungan Tamu</h2>
 
-    {{-- Tampilkan Notifikasi Sukses/Error --}}
-    @if(session('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-            <span>{{ session('success') }}</span>
+    {{-- Toast Notification --}}
+    @if (session('success'))
+        <div x-data="{ show: true }" 
+             x-show="show" 
+             x-init="setTimeout(() => show = false, 5000)"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-x-full"
+             x-transition:enter-end="opacity-100 translate-x-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-x-0"
+             x-transition:leave-end="opacity-0 translate-x-full"
+             class="fixed top-4 right-4 z-50 max-w-sm w-full bg-white rounded-lg shadow-lg border-l-4 border-green-500 p-4">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="ml-3 flex-1">
+                    <p class="text-sm font-medium text-gray-900">{{ session('success') }}</p>
+                </div>
+                <button @click="show = false" class="ml-4 flex-shrink-0 text-gray-400 hover:text-gray-500">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
         </div>
     @endif
-    @if(session('error'))
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-            <span>{{ session('error') }}</span>
-        </div>
-    @endif
-    @if ($errors->any())
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-            <strong class="font-bold">Oops! Terjadi kesalahan:</strong>
-            <ul class="mt-2 list-disc list-inside">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+    
+    @if (session('error'))
+        <div x-data="{ show: true }" 
+             x-show="show" 
+             x-init="setTimeout(() => show = false, 5000)"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-x-full"
+             x-transition:enter-end="opacity-100 translate-x-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-x-0"
+             x-transition:leave-end="opacity-0 translate-x-full"
+             class="fixed top-4 right-4 z-50 max-w-sm w-full bg-white rounded-lg shadow-lg border-l-4 border-red-500 p-4">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="ml-3 flex-1">
+                    <p class="text-sm font-medium text-gray-900">{{ session('error') }}</p>
+                </div>
+                <button @click="show = false" class="ml-4 flex-shrink-0 text-gray-400 hover:text-gray-500">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
         </div>
     @endif
 
-    {{-- Form Filter --}}
-    <form action="{{ route('komandan.tamu') }}" method="GET" x-data="{}">
-        <div class="bg-white px-6 py-5 rounded-xl shadow-sm mb-6 border border-gray-200">
+    @if ($errors->any())
+        <div x-data="{ show: true }" 
+             x-show="show" 
+             x-init="setTimeout(() => show = false, 5000)"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-x-full"
+             x-transition:enter-end="opacity-100 translate-x-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-x-0"
+             x-transition:leave-end="opacity-0 translate-x-full"
+             class="fixed top-4 right-4 z-50 max-w-sm w-full bg-white rounded-lg shadow-lg border-l-4 border-red-500 p-4">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="ml-3 flex-1">
+                    <ul class="text-sm text-gray-900 space-y-1">@foreach ($errors->all() as $error) <li>{{ $error }}</li> @endforeach</ul>
+                </div>
+                <button @click="show = false" class="ml-4 flex-shrink-0 text-gray-400 hover:text-gray-500">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    @endif
+
+    {{-- Tabel Riwayat Tamu --}}
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+        <div class="bg-gray-100 p-3 border-b border-gray-200">
+            <h3 class="font-bold text-gray-800">RIWAYAT KUNJUNGAN</h3>
+        </div>
+
+        {{-- Form Filter --}}
+        <form action="{{ route('komandan.tamu') }}" method="GET" class="p-4 border-b border-gray-200" x-data="{ cari: '{{ request('cari') }}' }">
             <div class="flex flex-wrap gap-4">
                 {{-- Show Dropdown --}}
                 <div class="w-[calc(50%-0.5rem)] md:w-auto">
@@ -75,21 +151,30 @@
                 </div>
 
                 {{-- Filter Sampai Tanggal --}}
-                <div class="w-full md:flex-1">
+                <div class="w-[calc(50%-0.5rem)] md:flex-1">
                     <label for="end_date" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Sampai Tanggal</label>
                     <div class="cursor-pointer" @click="$refs.dateEnd.showPicker()">
                         <input type="date" id="end_date" name="end_date" x-ref="dateEnd" onchange="this.form.submit()" class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer" value="{{ $endDate }}">
                     </div>
                 </div>
-            </div>
-        </div>
-    </form>
 
-    {{-- Tabel Riwayat Tamu --}}
-    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-        <div class="bg-gray-100 p-3 border-b border-gray-200">
-            <h3 class="font-bold text-gray-800">RIWAYAT KUNJUNGAN</h3>
-        </div>
+                {{-- Filter Pencarian (Search) --}}
+                <div class="w-full md:flex-1">
+                    <label for="cari" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Cari</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        <input type="text" id="cari" name="cari" x-model="cari" 
+                               @input.debounce.800ms="$el.form.submit()"
+                               class="block w-full h-[42px] pl-10 pr-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm"
+                               placeholder="Nama atau Instansi...">
+                    </div>
+                </div>
+            </div>
+        </form>
         
         {{-- TABEL (Desktop) --}}
         <div class="hidden md:block overflow-x-auto">
@@ -296,7 +381,6 @@
             {{-- Header Biru --}}
             <div class="bg-[#1e3a5f] py-4 px-6 border-b border-[#1e3a5f] flex justify-between items-center">
                 <h3 class="text-lg font-bold text-white flex items-center tracking-wide">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                     EDIT DATA TAMU
                 </h3>
                 <button @click="showEditModal = false" class="text-white/70 hover:text-white transition">
@@ -354,12 +438,12 @@
                                 {{-- Waktu Kunjungan --}}
                                 <div>
                                     <label for="waktu_datang" class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">Waktu Kunjungan <span class="text-red-500">*</span></label>
-                                    <div class="relative">
+                                    <div class="relative cursor-pointer" @click="$refs.waktuDatangInput.showPicker()">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                             <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                         </div>
-                                        <input type="datetime-local" id="waktu_datang" name="waktu_datang" x-model="editWaktuDatang" required
-                                               class="pl-10 w-full bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5">
+                                        <input type="datetime-local" id="waktu_datang" name="waktu_datang" x-ref="waktuDatangInput" x-model="editWaktuDatang" :max="maxDate" required
+                                               class="pl-10 w-full bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5 cursor-pointer">
                                     </div>
                                 </div>
                             </div>

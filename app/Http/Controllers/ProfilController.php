@@ -83,17 +83,18 @@ class ProfilController extends Controller
         return redirect()->route('profil.index')->with('success', 'Profil berhasil diperbarui!');
     }
 
-    /**
+    /** 
      * Proses Update Password
-     */
+    */
     public function updatePassword(Request $request)
     {
-        // 1. Validasi Input Password
+        // 1. Validasi Input (Masuk ke bag 'password_errors')
         $request->validateWithBag('password_errors', [
             'password_lama' => 'required',
-            'password_baru' => 'required|min:8|confirmed', // 'confirmed' otomatis cek password_baru_confirmation
+            'password_baru' => 'required|min:8|confirmed',
         ], [
             'password_lama.required' => 'Password lama harus diisi.',
+            'password_baru.required' => 'Password baru harus diisi.', // Tambahan
             'password_baru.min'      => 'Password baru minimal 8 karakter.',
             'password_baru.confirmed'=> 'Konfirmasi password tidak cocok.',
         ]);
@@ -102,13 +103,17 @@ class ProfilController extends Controller
 
         // 2. Cek apakah password lama benar
         if (!Hash::check($request->password_lama, $pengguna->password)) {
-            return back()->withErrors(['password_lama' => 'Password lama yang Anda masukkan salah.'])->withInput();
+            // PERBAIKAN: Tambahkan argumen kedua 'password_errors' agar masuk ke tas yang benar
+            return back()
+                ->withErrors(['password_lama' => 'Password lama yang Anda masukkan salah.'], 'password_errors')
+                ->withInput();
         }
 
-        // 3. Update Password Baru (Hash)
-        User::where('id_pengguna', $pengguna->id_pengguna)->update([
+        // 3. Update Password Baru
+        // Gunakan object user langsung agar lebih aman & clean
+        $pengguna->forceFill([
             'password' => Hash::make($request->password_baru)
-        ]);
+        ])->save();
 
         return back()->with('success', 'Password berhasil diubah!');
     }

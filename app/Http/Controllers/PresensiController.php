@@ -311,6 +311,16 @@ class PresensiController extends Controller
 
         $geoStatus = $request->input('is_geotag_enabled', 0);
 
+        // --- VALIDASI TAMBAHAN ---
+        // Jam Pulang Shift Pagi harus sama persis dengan Jam Masuk Shift Malam (Sambung)
+        // Kita ambil 5 karakter pertama (HH:mm) untuk mengantisipasi perbedaan detik (misal 19:00 vs 19:00:00)
+        $pagiKeluar = substr($request->keluar_pagi, 0, 5);
+        $malamMasuk = substr($request->masuk_malam, 0, 5);
+
+        if ($pagiKeluar != $malamMasuk) {
+            return redirect()->back()->with('error', 'Jam Pulang Shift Pagi harus bersambung dengan Jam Masuk Shift Malam (Tidak boleh ada jeda).');
+        }
+
         try {
             // 1. Update Shift Pagi
             ShiftRule::where('jenis_shift', 'Pagi')->update([

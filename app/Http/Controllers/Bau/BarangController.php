@@ -14,49 +14,44 @@ class BarangController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. Ambil filter dari request
-        $tanggalFilter = $request->input('tanggal', now()->format('Y-m-d'));
-        $kategoriFilter = $request->input('kategori', 'temuan'); 
-        $search = $request->input('search'); 
+        $tanggalTemuan = $request->input('tanggal_temuan', now()->format('Y-m-d'));
+        $tanggalTitipan = $request->input('tanggal_titipan', now()->format('Y-m-d'));
+        $searchTemuan = $request->input('search_temuan');
+        $searchTitipan = $request->input('search_titipan');
+        $perPageTemuan = $request->input('per_page_temuan', 10);
+        $perPageTitipan = $request->input('per_page_titipan', 10);
 
-        $query = null;
-        
-        // 2. Inisialisasi Query dasar
-        if ($kategoriFilter == 'temuan') {
-            $query = BarangTemuan::query()
-                        ->whereDate('waktu_lapor', $tanggalFilter)
-                        ->orderBy('waktu_lapor', 'desc');
-        } else { // Kategori 'titipan'
-            $query = BarangTitipan::query()
-                        ->whereDate('waktu_titip', $tanggalFilter)
-                        ->orderBy('waktu_titip', 'desc');
-        }
-
-        // 3. Logika LIVE SEARCH
-        if ($search) {
-            $query->where(function($q) use ($search, $kategoriFilter) {
-                // Pencarian Umum
-                $q->where('nama_barang', 'LIKE', "%{$search}%")
-                  ->orWhere('catatan', 'LIKE', "%{$search}%");
-
-                // Pencarian Spesifik per Kategori
-                if ($kategoriFilter == 'temuan') {
-                    $q->orWhere('nama_pelapor', 'LIKE', "%{$search}%")
-                      ->orWhere('lokasi_penemuan', 'LIKE', "%{$search}%");
-                } else {
-                    $q->orWhere('nama_penitip', 'LIKE', "%{$search}%")
-                      ->orWhere('tujuan', 'LIKE', "%{$search}%");
-                }
+        $queryTemuan = BarangTemuan::whereDate('waktu_lapor', $tanggalTemuan);
+        if ($searchTemuan) {
+            $queryTemuan->where(function($q) use ($searchTemuan) {
+                $q->where('nama_barang', 'LIKE', "%{$searchTemuan}%")
+                  ->orWhere('nama_pelapor', 'LIKE', "%{$searchTemuan}%")
+                  ->orWhere('lokasi_penemuan', 'LIKE', "%{$searchTemuan}%")
+                  ->orWhere('catatan', 'LIKE', "%{$searchTemuan}%");
             });
         }
+        $barangTemuan = $queryTemuan->orderBy('waktu_lapor', 'desc')->paginate($perPageTemuan, ['*'], 'page_temuan');
 
-        $riwayatBarang = $query->get();
+        $queryTitipan = BarangTitipan::whereDate('waktu_titip', $tanggalTitipan);
+        if ($searchTitipan) {
+            $queryTitipan->where(function($q) use ($searchTitipan) {
+                $q->where('nama_barang', 'LIKE', "%{$searchTitipan}%")
+                  ->orWhere('nama_penitip', 'LIKE', "%{$searchTitipan}%")
+                  ->orWhere('tujuan', 'LIKE', "%{$searchTitipan}%")
+                  ->orWhere('catatan', 'LIKE', "%{$searchTitipan}%");
+            });
+        }
+        $barangTitipan = $queryTitipan->orderBy('waktu_titip', 'desc')->paginate($perPageTitipan, ['*'], 'page_titipan');
 
         return view('bau.barang', [
-            'riwayatBarang' => $riwayatBarang,
-            'tanggalTerpilih' => $tanggalFilter,
-            'kategoriTerpilih' => $kategoriFilter,
-            'jenisTerpilih' => $search,
+            'barangTemuan' => $barangTemuan,
+            'barangTitipan' => $barangTitipan,
+            'tanggalTemuan' => $tanggalTemuan,
+            'tanggalTitipan' => $tanggalTitipan,
+            'searchTemuan' => $searchTemuan,
+            'searchTitipan' => $searchTitipan,
+            'perPageTemuan' => $perPageTemuan,
+            'perPageTitipan' => $perPageTitipan,
         ]);
     }
 }

@@ -18,6 +18,7 @@
             namaPenerima: '',
             tanggalSelesai: '{{ now()->format('Y-m-d') }}',
             waktuSelesai: '{{ now()->format('H:i') }}',
+            minTanggalSelesai: '',
             showCreateModal: false,
          }">
 
@@ -101,7 +102,7 @@
 
                             {{-- Tombol Selesai Full Width --}}
                             <button
-                                @click.prevent="selesaiModalOpen = true; selesaiFormAction = '{{ route('anggota.barang.selesaiTitipan', $barang->id_barang) }}';"
+                                @click.prevent="selesaiModalOpen = true; selesaiFormAction = '{{ route('anggota.barang.selesaiTitipan', $barang->id_barang) }}'; minTanggalSelesai = '{{ $barang->waktu_titip->format('Y-m-d') }}';"
                                 class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition-all">
                                 SELESAI
                             </button>
@@ -201,7 +202,7 @@
 
                             {{-- Tombol Selesai Full Width --}}
                             <button
-                                @click.prevent="selesaiModalOpen = true; selesaiFormAction = '{{ route('anggota.barang.selesaiTemuan', $barang->id_barang) }}';"
+                                @click.prevent="selesaiModalOpen = true; selesaiFormAction = '{{ route('anggota.barang.selesaiTemuan', $barang->id_barang) }}'; minTanggalSelesai = '{{ $barang->waktu_lapor->format('Y-m-d') }}';"
                                 class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition-all">
                                 SELESAI
                             </button>
@@ -250,6 +251,7 @@
                             <div class="cursor-pointer" @click="$refs.dateInput.showPicker()">
                                 <input type="date" id="tanggal" name="tanggal" x-ref="dateInput" value="{{ $tanggal_terpilih }}"
                                     onchange="document.getElementById('searchBarangForm').submit()"
+                                    max="{{ date('Y-m-d') }}"
                                     class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
                             </div>
                         </div>
@@ -287,7 +289,7 @@
                             liveSearching: false,
 
                             async getSuggestions() {
-                                if (this.searchQuery.length < 1) {
+                                if (!this.searchQuery || this.searchQuery.length < 1) {
                                     this.suggestions = [];
                                     this.showSuggestions = false;
                                     return;
@@ -308,16 +310,37 @@
                                 }
                             },
 
-                            selectBarang(namaBarang) {
+                            selectBarang(idBarang, kategoriBarang, namaBarang) {
                                 this.searchQuery = namaBarang;
                                 this.showSuggestions = false;
-                                this.triggerLiveSearchNow();
+                                this.triggerLiveSearchById(idBarang, kategoriBarang);
+                            },
+
+                            async triggerLiveSearchById(idBarang, kategoriBarang) {
+                                this.liveSearching = true;
+
+                                try {
+                                    const url = new URL(window.location);
+                                    url.searchParams.set('search', this.searchQuery);
+                                    url.searchParams.set('tanggal', this.tanggalFilter);
+                                    url.searchParams.set('kategori', this.kategoriFilter);
+                                    window.history.pushState({}, '', url);
+
+                                    const response = await fetch(`{{ route('anggota.barang.getRiwayat') }}?id_barang=${idBarang}&kategori_barang=${kategoriBarang}&tanggal=${this.tanggalFilter}`);
+                                    const html = await response.text();
+
+                                    document.getElementById('riwayat-container').innerHTML = html;
+                                } catch (error) {
+                                    console.error('Live search error:', error);
+                                } finally {
+                                    this.liveSearching = false;
+                                }
                             },
 
                             triggerLiveSearch() {
                                 clearTimeout(this.liveSearchTimeout);
                                 this.liveSearchTimeout = setTimeout(() => {
-                                    if (this.searchQuery.length >= 2) {
+                                    if (this.searchQuery.length === 0) {
                                         this.performLiveSearch();
                                     }
                                 }, 1000);
@@ -355,8 +378,8 @@
                             </label>
                             <div class="relative">
                                 <input type="text" id="search" name="search" x-model="searchQuery"
-                                    @input="getSuggestions(); triggerLiveSearch()"
-                                    @focus="if(searchQuery.length >= 1) getSuggestions()"
+                                    @input="getSuggestions(); triggerLiveSearch();"
+                                    @focus="if(searchQuery && searchQuery.length >= 1) getSuggestions()"
                                     @keydown.enter.prevent="triggerLiveSearchNow()"
                                     placeholder="Ketik untuk mencari..." autocomplete="off"
                                     class="block w-full h-[42px] px-4 pr-12 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm placeholder-gray-400">
@@ -399,7 +422,7 @@
                                     </div>
 
                                     <template x-for="suggestion in suggestions" :key="suggestion.id_barang">
-                                        <div @click="selectBarang(suggestion.nama_barang)"
+                                        <div @click="selectBarang(suggestion.id_barang, suggestion.kategori, suggestion.nama_barang)"
                                             class="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-0 transition-colors">
                                             <div class="flex items-center justify-between">
                                                 <div class="flex-1">
@@ -418,7 +441,7 @@
                                         </div>
                                     </template>
 
-                                    <div x-show="!loading && suggestions.length === 0 && searchQuery.length >= 1"
+                                    <div x-show="!loading && suggestions.length === 0 && searchQuery && searchQuery.length >= 1"
                                         class="px-4 py-4 text-center text-gray-500">
                                         <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
@@ -809,6 +832,7 @@
                                         <label class="block text-gray-300 font-semibold text-sm mb-1 uppercase">TANGGAL
                                             :</label>
                                         <input type="date" name="tanggal_ambil" value="{{ date('Y-m-d') }}"
+                                            :min="minTanggalSelesai"
                                             class="w-full px-4 py-2 bg-white text-gray-900 rounded-md border-none focus:ring-2 focus:ring-blue-500"
                                             required>
                                     </div>

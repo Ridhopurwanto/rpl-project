@@ -91,9 +91,33 @@
                                 
                                 {{-- Info Pengguna --}}
                                 <div class="flex items-center space-x-3 mb-4 pb-3 border-b border-gray-200">
-                                    <div class="w-14 h-14 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400">
-                                        {{-- Placeholder Ikon Foto --}}
-                                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4V5h12v10zm-9.414-2.586a2 2 0 112.828 2.828L8.414 13H12v-1H6.586l1-1zM10 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path></svg>
+                                    <div class="w-14 h-14 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 overflow-hidden">
+                                        @php
+                                            // Menggunakan Auth::user() karena ini file layout (global)
+                                            $currentUser = Auth::user();
+                                            $fotoUrl = null;
+
+                                            if ($currentUser && $currentUser->foto_profil) {
+                                                // 1. Cek di folder Storage
+                                                if (file_exists(public_path('storage/' . $currentUser->foto_profil))) {
+                                                    $fotoUrl = asset('storage/' . $currentUser->foto_profil);
+                                                } 
+                                                // 2. Cek di folder Uploads Custom
+                                                elseif (file_exists(public_path('uploads/profil/' . $currentUser->foto_profil))) {
+                                                    $fotoUrl = asset('uploads/profil/' . $currentUser->foto_profil);
+                                                }
+                                            }
+                                        @endphp
+
+                                        @if($fotoUrl)
+                                            {{-- Tampilkan Foto --}}
+                                            <img src="{{ $fotoUrl }}" alt="Foto Profil" class="w-full h-full object-cover">
+                                        @else
+                                            {{-- Fallback: Tampilkan Inisial Nama (Mirip index.blade.php) --}}
+                                            <span class="text-xl font-bold text-gray-500">
+                                                {{ strtoupper(substr($currentUser->nama_lengkap ?? $currentUser->username, 0, 1)) }}
+                                            </span>
+                                        @endif
                                     </div>
                                     <div>
                                         {{-- Mengambil nama_lengkap atau username --}}
