@@ -41,10 +41,20 @@ class DailyLogSeeder extends Seeder
             'Tumblr Starbucks', 'Botol Minum Tupperware', 'Flashdisk Sandisk', 'Kacamata Hitam'
         ];
 
+        // Lokasi for Barang/Gangguan (Generic)
         $lokasiList = [
             'Lobby Utama', 'Pos Satpam Depan', 'Parkiran Dosen', 'Parkiran Mahasiswa',
             'Kantin Pusat', 'Musholla', 'Gedung 1 Lantai 1', 'Gedung 2 Lantai 3',
             'Perpustakaan', 'Ruang Server', 'Toilet Lantai 1', 'Taman Depan'
+        ];
+
+        // Specific Patrol Areas (From Migration Enum)
+        $patroliAreas = [
+            'AREA POS 2', 'LOBBY VVIP', 'LOBBY AUDIT', 'KOLAM IKAN VVIP', 
+            'AREA BAU', 'AREA KANTIN', 'AREA BAAK', 'AKSES LORONG GD 3', 
+            'AKSES LORONG GD 2', 'AREA POS 3', 'AKSES BESI GD 2', 
+            'AKSES KACA GD 2', 'AKSES SELATAN AUDIT', 'AKSES RUANG LETKOR', 
+            'AKSES PARKIR BASEMENT', 'AKSES LIFT GD 2', 'AREA POS 1'
         ];
 
         $catatanTemuan = [
@@ -142,6 +152,7 @@ class DailyLogSeeder extends Seeder
             }
 
             // === 2. PATROLI LOGIC ===
+            // 1-2 Patroli sessions per day
             $patroliCount = rand(1, 2);
             for ($p = 0; $p < $patroliCount; $p++) {
                 $patrollerId = $faker->randomElement($userIds);
@@ -149,14 +160,15 @@ class DailyLogSeeder extends Seeder
                 $sessionStart = $startDate->copy()->setTime(rand(8, 22), rand(0, 59));
                 $jenisPatroli = 'Patroli ' . rand(1, 6); 
 
-                for ($area = 1; $area <= 17; $area++) {
-                    $checkpointTime = $sessionStart->copy()->addMinutes($area * rand(1, 3));
+                foreach ($patroliAreas as $index => $areaName) {
+                    // Time progresses by 2-5 minutes per area
+                    $checkpointTime = $sessionStart->copy()->addMinutes(($index + 1) * rand(2, 5));
                     
                     Patroli::create([
                         'id_pengguna' => $patrollerId,
                         'nama_lengkap' => $patroller->nama_lengkap ?? $faker->name,
                         'waktu_exact' => $checkpointTime,
-                        'wilayah' => 'Area ' . $area,
+                        'wilayah' => $areaName, // Now using ENUM value
                         'foto' => 'placeholder.jpg',
                         'tanggal' => $dateString,
                         'jenis_patroli' => $jenisPatroli,
