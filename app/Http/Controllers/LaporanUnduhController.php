@@ -83,17 +83,37 @@ class LaporanUnduhController extends Controller
         $end     = $request->query('end');
 
         $type = $this->normalizeType($rawType);
-        $data = $this->fetchData($type, $start, $end);
 
-        if (!$data) {
-            return back()->with('error', "Jenis laporan $type tidak ditemukan.");
+        // KHUSUS BARANG: Fetch Temu & Titip sekaligus agar masuk ke satu sheet 'barang'
+        if ($type == 'barang') {
+            $dataTemu = $this->fetchData('barang_temu', $start, $end);
+            $dataTitip = $this->fetchData('barang_titip', $start, $end);
+            
+            // Jika keduanya kosong, anggap data kosong
+            if ($dataTemu->isEmpty() && $dataTitip->isEmpty()) {
+                 return back()->with('error', "Laporan barang tidak ditemukan pada periode tersebut.");
+            }
+
+            $dataWrapper = [
+                'tanggalMulai'   => $start,
+                'tanggalSelesai' => $end,
+                'barang_temu'    => $dataTemu,
+                'barang_titip'   => $dataTitip,
+            ];
+        } else {
+            // Logic default untuk tipe lain
+            $data = $this->fetchData($type, $start, $end);
+
+            if (!$data) {
+                return back()->with('error', "Jenis laporan $type tidak ditemukan.");
+            }
+
+            $dataWrapper = [
+                'tanggalMulai'   => $start,
+                'tanggalSelesai' => $end,
+                $type            => $data,
+            ];
         }
-
-        $dataWrapper = [
-            'tanggalMulai'   => $start,
-            'tanggalSelesai' => $end,
-            $type            => $data,
-        ];
 
         $fileName = ucfirst($type) . "_{$start}_sd_{$end}";
 
@@ -139,9 +159,18 @@ class LaporanUnduhController extends Controller
         switch ($type) {
             case 'presensi':    return Presensi::whereBetween('tanggal', [$start, $end])->get();
             case 'patroli':     return Patroli::whereBetween('tanggal', [$start, $end])->get();
-            case 'tamu':        return Tamu::whereBetween('created_at', [$startFull, $endFull])->get();
-            case 'barang_temu': return BarangTemuan::whereBetween('created_at', [$startFull, $endFull])->get();
-            case 'barang_titip':return BarangTitipan::whereBetween('created_at', [$startFull, $endFull])->get();
+            case 'tamu':        
+                return Tamu::whereDate('waktu_datang', '>=', $start)
+                           ->whereDate('waktu_datang', '<=', $end)
+                           ->get();
+            case 'barang_temu': 
+                return BarangTemuan::whereDate('waktu_lapor', '>=', $start)
+                                   ->whereDate('waktu_lapor', '<=', $end)
+                                   ->get();
+            case 'barang_titip':
+                return BarangTitipan::whereDate('waktu_titip', '>=', $start)
+                                    ->whereDate('waktu_titip', '<=', $end)
+                                    ->get();
             case 'kendaraan':   return LogKendaraan::whereBetween('waktu_masuk', [$startFull, $endFull])->get();
             case 'gangguan':    return GangguanKamtibmas::whereBetween('waktu_lapor', [$startFull, $endFull])->get();
             case 'shift':       return Shift::whereBetween('tanggal', [$start, $end])->get();

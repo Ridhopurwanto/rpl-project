@@ -135,11 +135,13 @@
                     <div class="flex flex-col sm:flex-row items-stretch gap-2 sm:gap-3">
                         <div class="flex-1 min-w-0">
                             <input type="date" x-model="dateFrom" x-ref="dateStart"
+                                   @click="$el.showPicker()"
                                    class="block w-full h-[42px] px-3 sm:px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
                         </div>
                         <span class="text-gray-500 text-sm font-medium self-center text-center sm:text-left">s/d</span>
                         <div class="flex-1 min-w-0">
                             <input type="date" x-model="dateTo" x-ref="dateEnd"
+                                   @click="$el.showPicker()"
                                    class="block w-full h-[42px] px-3 sm:px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
                         </div>
                     </div>
