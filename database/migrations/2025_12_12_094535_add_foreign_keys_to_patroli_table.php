@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('patroli', function (Blueprint $table) {
+            $table->foreign(['id_claim'])->references(['id_claim'])->on('patroli_claims')->onUpdate('cascade')->onDelete('set null');
             $table->foreign(['id_pengguna'])->references(['id_pengguna'])->on('pengguna')->onUpdate('restrict')->onDelete('cascade');
-            $table->foreign(['id_shift'])->references(['id_shift'])->on('shift')->onUpdate('restrict')->onDelete('set null');
         });
     }
 
@@ -23,8 +23,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('patroli', function (Blueprint $table) {
+            $table->dropForeign('patroli_id_claim_foreign');
             $table->dropForeign('patroli_id_pengguna_foreign');
-            $table->dropForeign('patroli_id_shift_foreign');
         });
     }
 };

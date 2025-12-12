@@ -21,6 +21,7 @@ class PatroliClaim extends Model
         'tanggal',
         'jenis_patroli',
         'id_shift',      // ✅ TAMBAHKAN INI! (PENTING!)
+        'id_patroli_rule',
         'claimed_at'
     ];
 
@@ -28,6 +29,18 @@ class PatroliClaim extends Model
         'tanggal' => 'date',
         'claimed_at' => 'datetime'
     ];
+
+    public function rule()
+{
+    // Menghubungkan Claim ke Master Rule
+    return $this->belongsTo(PatroliRule::class, 'id_patroli_rule');
+}
+
+    public function patrolis()
+    {
+        // Satu Claim memiliki banyak titik checkpoint (foto)
+        return $this->hasMany(Patroli::class, 'id_claim');
+    }
 
     // ✅ Relasi ke Shift
     public function shift()

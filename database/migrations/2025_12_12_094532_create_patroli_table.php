@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('patroli', function (Blueprint $table) {
             $table->bigIncrements('id_patroli');
             $table->unsignedBigInteger('id_pengguna')->index('patroli_id_pengguna_foreign');
-            $table->unsignedBigInteger('id_shift')->nullable()->index('patroli_id_shift_foreign');
+            $table->unsignedBigInteger('id_claim')->nullable()->index('patroli_id_claim_foreign_idx');
             $table->string('nama_lengkap');
             $table->dateTime('waktu_exact');
             $table->enum('wilayah', ['AREA POS 2', 'LOBBY VVIP', 'LOBBY AUDIT', 'KOLAM IKAN VVIP', 'AREA BAU', 'AREA KANTIN', 'AREA BAAK', 'AKSES LORONG GD 3', 'AKSES LORONG GD 2', 'AREA POS 3', 'AKSES BESI GD 2', 'AKSES KACA GD 2', 'AKSES SELATAN AUDIT', 'AKSES RUANG LETKOR', 'AKSES PARKIR BASEMENT', 'AKSES LIFT GD 2', 'AREA POS 1']);

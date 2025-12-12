@@ -21,6 +21,7 @@ class Patroli extends Model
         'foto',
         'tanggal',
         'jenis_patroli',
+        'id_claim',
         'id_shift',  // ✅ TAMBAHKAN INI! (PENTING!)
     ];
 
@@ -44,6 +45,12 @@ class Patroli extends Model
                 }
             }
         });
+    }
+
+    public function claim()
+    {
+        // Setiap foto checkpoint milik satu Claim spesifik
+        return $this->belongsTo(PatroliClaim::class, 'id_claim');
     }
 
     // ✅ Relasi ke Shift

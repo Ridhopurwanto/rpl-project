@@ -14,11 +14,10 @@ return new class extends Migration
         Schema::create('patroli_claims', function (Blueprint $table) {
             $table->bigIncrements('id_claim');
             $table->unsignedBigInteger('id_pengguna')->index('patroli_claims_id_pengguna_foreign');
+            $table->unsignedBigInteger('id_shift')->nullable()->index('patroli_claims_id_shift_foreign');
+            $table->unsignedBigInteger('id_patroli_rule')->nullable()->index('patroli_id_patroli_rule_foreign_idx');
             $table->date('tanggal');
-            $table->string('jenis_patroli', 50);
             $table->timestamp('claimed_at')->useCurrent();
-
-            $table->unique(['tanggal', 'jenis_patroli']);
         });
     }
 
