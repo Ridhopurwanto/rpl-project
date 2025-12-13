@@ -51,7 +51,7 @@
                 <form action="{{ route('anggota.patroli.index') }}" method="GET" class="w-full md:w-auto">
                     <div class="w-full md:w-64">
                         <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Tanggal</label>
-                        <input type="date" name="tanggal" value="{{ $tanggalTerpilih->format('Y-m-d') }}" onchange="this.form.submit()"
+                        <input type="date" name="tanggal" value="{{ $tanggalTerpilih->format('Y-m-d') }}" max="{{ date('Y-m-d') }}" onchange="this.form.submit()"
                             class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg shadow-sm cursor-pointer">
                     </div>
                 </form>

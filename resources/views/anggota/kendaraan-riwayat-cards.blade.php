@@ -29,7 +29,7 @@
             <div class="grid grid-cols-2 gap-3 text-sm">
                 <div>
                     <p class="text-gray-500 text-xs uppercase mb-1">Lama Parkir</p>
-                    <p class="text-gray-800 font-semibold">{{ $log->waktu_masuk->diffForHumans($log->waktu_keluar, true) }}</p>
+                    <p class="text-gray-800 font-semibold">{{ $log->waktu_masuk->locale('id')->diffForHumans($log->waktu_keluar, true) }}</p>
                 </div>
                 <div>
                     <p class="text-gray-500 text-xs uppercase mb-1">Waktu Keluar</p>

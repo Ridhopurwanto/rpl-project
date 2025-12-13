@@ -7,6 +7,32 @@
 @endsection
 
 @section('content')
+    {{-- Style untuk animasi --}}
+    <style>
+        /* Animasi Loading Dots (...) */
+        .loading-dots::after {
+            content: ' .';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+        @keyframes dots {
+            0%, 20% { content: ' .'; }
+            40% { content: ' ..'; }
+            60% { content: ' ...'; }
+            80%, 100% { content: ''; }
+        }
+
+        /* Animasi Lainnya */
+        @keyframes countdown { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 100; } }
+        .timer-circle { fill: none; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 0; transform: rotate(-90deg); transform-origin: center; }
+        .animate-timer { animation: countdown 5s linear forwards; }
+        
+        @keyframes pulse-subtle { 0%, 100% { opacity: 1; } 50% { opacity: 0.95; } }
+        .animate-pulse-subtle { animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        
+        .modal-scroll::-webkit-scrollbar { width: 6px; }
+        .modal-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.1); border-radius: 10px; }
+        .modal-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 10px; }
+    </style>
 
     <div class="w-full min-h-screen bg-slate-100 p-4 pb-32" x-data="{
                 showPhotoModal: false,
@@ -23,6 +49,14 @@
                 showLocationAlert: false,
                 locationDistance: null,
 
+                // Notifikasi Floating
+                showSuccessNotif: {{ session('success') ? 'true' : 'false' }},
+                showErrorNotif: {{ session('error') ? 'true' : 'false' }},
+                errorMessage: '{{ session('error') }}',
+
+                // STATE BARU: Loading saat mencari lokasi
+                isLoadingLocation: false,
+
                 // ===== TAMBAHAN BARU UNTUK MODAL OFF =====
                 showOffModal: false,
                 offModalTitle: '',
@@ -34,6 +68,13 @@
             maxDistance: 80,
 
             requiresGeotag: {{ $wajibGeotag ? 'true' : 'false' }},
+
+            // Fungsi Trigger Error Floating (Kuning)
+                triggerWarning(message) {
+                    this.errorMessage = message;
+                    this.showErrorNotif = true;
+                    setTimeout(() => this.showErrorNotif = false, 5000);
+                },
 
             // TAMBAHAN 2: Fungsi Submit Baru
             submitPresensi() {
@@ -66,7 +107,7 @@
                 setInterval(() => { this.updateTime() }, 1000);
 
                 // ✅ LANGSUNG MINTA IZIN LOKASI SAAT HALAMAN DIBUKA
-                this.requestLocationOnLoad(true);
+                // this.requestLocationOnLoad(true);
             },
 
             updateTime() {
@@ -157,72 +198,56 @@
             },
 
             checkLocation() {
-                return new Promise((resolve, reject) => {
-                    // Jika tidak wajib, langsung lolos (bypass)
-                    if (!this.requiresGeotag) {
-                        resolve(true); 
-                        return;
-                    }
-
-                    if (!navigator.geolocation) {
-                        reject('Browser tidak mendukung geolocation');
-                        return;
-                    }
-
-                    // Jika sudah ada koordinat dari requestLocationOnLoad, gunakan itu
-                    if (this.userLatitude && this.userLongitude) {
-                        const distance = this.calculateDistance(
-                            this.userLatitude, 
-                            this.userLongitude,
-                            this.campusLat,
-                            this.campusLng
-                        );
-
-                        if (distance <= this.maxDistance) {
-                            resolve(true);
-                        } else {
-                            this.locationDistance = Math.round(distance);
-                            this.showLocationAlert = true;
-                            reject(`Anda berada ${Math.round(distance)}m dari kampus. Harap berada dalam radius ${this.maxDistance}m.`);
+                    return new Promise((resolve, reject) => {   
+                        if (!this.requiresGeotag) {
+                            setTimeout(() => { this.isLoadingLocation = false; resolve(true); }, 500); 
+                            return;
                         }
-                        return;
-                    }
 
-                    // Kalau belum ada, request lagi
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                            this.userLatitude = position.coords.latitude;
-                            this.userLongitude = position.coords.longitude;
+                        // Reset State
+                        this.isLoadingLocation = true; // AKTIFKAN LOADING BANNER
 
-                            const distance = this.calculateDistance(
-                                this.userLatitude, 
-                                this.userLongitude,
-                                this.campusLat,
-                                this.campusLng
-                            );
 
-                            if (distance <= this.maxDistance) {
-                                resolve(true);
-                            } else {
+                        if (!navigator.geolocation) {
+                            this.isLoadingLocation = false;
+                            reject('Browser tidak mendukung geolocation');
+                            return;
+                        }
+
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                this.userLatitude = position.coords.latitude;
+                                this.userLongitude = position.coords.longitude;
+                                const distance = this.calculateDistance(this.userLatitude, this.userLongitude, this.campusLat, this.campusLng);
                                 this.locationDistance = Math.round(distance);
+
+                                // Delay sedikit agar user sempat melihat 'Memeriksa...'
+                                setTimeout(() => {
+                                    this.isLoadingLocation = false; // MATIKAN LOADING
+                                    if (distance <= this.maxDistance) {
+                                        resolve(true);
+                                    } else {
+                                        this.locationError = `Anda berada di luar radius (${Math.round(distance)}m).`;
+                                        this.showLocationAlert = true;
+                                        reject(`Jarak: ${Math.round(distance)}m.`);
+                                    }
+                                }, 800);
+                            },
+                            (error) => {
+                                this.isLoadingLocation = false; // MATIKAN LOADING
+                                let errorMsg = 'Gagal mendapatkan lokasi.';
+                                if (error.code === 1) errorMsg = 'Izin lokasi ditolak.';
+                                else if (error.code === 2) errorMsg = 'GPS mati / Sinyal lemah.';
+                                else if (error.code === 3) errorMsg = 'Timeout.';
+                                
+                                this.locationError = errorMsg;
                                 this.showLocationAlert = true;
-                                reject(`Anda berada ${Math.round(distance)}m dari kampus. Harap berada dalam radius ${this.maxDistance}m.`);
-                            }
-                        },
-                        (error) => {
-                            let errorMsg = 'Tidak dapat mengakses lokasi';
-                            if (error.code === 1) {
-                                errorMsg = 'Izin lokasi ditolak. Mohon izinkan akses lokasi di pengaturan browser.';
-                                this.showLocationAlert = true;
-                            }
-                            else if (error.code === 2) errorMsg = 'Lokasi tidak tersedia';
-                            else if (error.code === 3) errorMsg = 'Timeout mendapatkan lokasi';
-                            reject(errorMsg);
-                        },
-                        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-                    );
-                });
-            },
+                                reject(errorMsg);
+                            },
+                            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                        );
+                    });
+                },
 
             startCamera() {
                 this.cameraState = 'camera';
@@ -274,6 +299,91 @@
                 this.showLocationAlert = false;
             }
              }" x-init="init()">
+        
+        {{-- ==================== NOTIFIKASI LOADING LOKASI (BARU) ==================== --}}
+        <div x-show="isLoadingLocation" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 -translate-y-4"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 -translate-y-4"
+             class="fixed top-10 left-1/2 transform -translate-x-1/2 z-[100]" 
+             style="display: none;">
+            
+            <div class="bg-[#1a2847]/90 backdrop-blur-md text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-white/20">
+                {{-- Ikon GPS Pulse --}}
+                <div class="relative flex h-3 w-3">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                </div>
+                
+                {{-- Teks dengan animasi dots --}}
+                <span class="font-bold text-xs tracking-wide uppercase">
+                    MEMERIKSA LOKASI<span class="loading-dots"></span>
+                </span>
+            </div>
+        </div>
+
+        {{-- 1. Floating Notification Success --}}
+        <div x-show="showSuccessNotif" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform translate-x-full"
+             x-transition:enter-end="opacity-100 transform translate-x-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 transform translate-x-0"
+             x-transition:leave-end="opacity-0 transform translate-x-full"
+             x-init="if(showSuccessNotif) setTimeout(() => showSuccessNotif = false, 5000)"
+             class="fixed top-4 right-4 z-[100] bg-green-500 text-white pl-6 pr-2 py-4 rounded-lg shadow-2xl flex items-center gap-3 min-w-[300px] max-w-md"
+             style="display: none;">
+            <div class="flex-shrink-0">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <p class="font-semibold text-sm">{{ session('success') }}</p>
+            </div>
+            <button @click="showSuccessNotif = false" class="relative flex-shrink-0 text-white hover:text-green-100 transition-colors w-10 h-10 flex items-center justify-center">
+                <svg class="absolute inset-0 w-full h-full p-1" viewBox="0 0 36 36">
+                     <path class="text-green-700/40 timer-circle" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                     <path class="text-white timer-circle animate-timer" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="currentColor"></path>
+                </svg>
+                <svg class="w-4 h-4 relative z-10" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+            </button>
+        </div>
+
+        {{-- 2. Floating Notification Warning/Error --}}
+        <div x-show="showErrorNotif" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform translate-x-full"
+             x-transition:enter-end="opacity-100 transform translate-x-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 transform translate-x-0"
+             x-transition:leave-end="opacity-0 transform translate-x-full"
+             x-init="if(showErrorNotif) setTimeout(() => showErrorNotif = false, 5000)"
+             class="fixed top-4 right-4 z-[100] bg-yellow-500 text-white pl-6 pr-2 py-4 rounded-lg shadow-2xl flex items-center gap-3 min-w-[300px] max-w-md"
+             style="display: none;">
+            <div class="flex-shrink-0">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <p class="font-bold text-sm" x-text="errorMessage"></p>
+            </div>
+            <button @click="showErrorNotif = false" class="relative flex-shrink-0 text-white hover:text-yellow-100 transition-colors w-10 h-10 flex items-center justify-center">
+                <svg class="absolute inset-0 w-full h-full p-1" viewBox="0 0 36 36">
+                     <path class="text-yellow-700/40 timer-circle" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                     <path class="text-white timer-circle animate-timer" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="currentColor"></path>
+                </svg>
+                <svg class="w-4 h-4 relative z-10" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+            </button>
+        </div>
 
         {{-- ================= NOTIFIKASI LOKASI CUSTOM ================= --}}
         <div x-show="showLocationAlert" x-transition:enter="transition ease-out duration-300"
@@ -623,45 +733,45 @@
         </div>
 
         {{-- 4. TOMBOL FAB SMART BUTTON --}}
-    <div x-data="{
-            canPresensi: {{ isset($jadwalAbsen['canpresensi']) && $jadwalAbsen['canpresensi'] ? 'true' : 'false' }},
-            pesanError: '{{ $jadwalAbsen['pesanerror'] ?? 'Tidak dapat melakukan presensi saat ini' }}'
-        }">
-        
-        <button @click="
-            if (!canPresensi) {
-                // MODAL UNTUK SHIFT OFF
-                showOffModal = true;
-                offModalTitle = 'Presensi Dibatasi';
-                offModalMessage = pesanError;
-            } else {
-                checkLocation()
-                    .then(() => {
-                        showCreateModal = true;
-                        $nextTick(() => { startCamera(); });
-                    })
-                    .catch(error => {
-                        showLocationAlert = true;
-                        setTimeout(() => { showLocationAlert = false; }, 8000);
-                    });
-            }
-        "
-        :class="canPresensi ? 'bg-[#2a4a6f] cursor-pointer' : 'bg-gray-400 cursor-not-allowed opacity-90'"
-        class="fixed bottom-24 right-6 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform z-40">
+        <div x-data="{
+                canPresensi: {{ isset($jadwalAbsen['canpresensi']) && $jadwalAbsen['canpresensi'] ? 'true' : 'false' }},
+                pesanError: '{{ $jadwalAbsen['pesanerror'] ?? 'Tidak dapat melakukan presensi saat ini' }}'
+            }">
             
-            <template x-if="canPresensi">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-            </template>
-            
-            <template x-if="!canPresensi">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                </svg>
-            </template>
-        </button>
-    </div>
+            <button @click="
+                if (!canPresensi) {
+                    // MODAL UNTUK SHIFT OFF
+                    showOffModal = true;
+                    offModalTitle = 'Presensi Dibatasi';
+                    offModalMessage = pesanError;
+                } else {
+                    checkLocation()
+                        .then(() => {
+                            showCreateModal = true;
+                            $nextTick(() => { startCamera(); });
+                        })
+                        .catch(error => {
+                            showLocationAlert = true;
+                            setTimeout(() => { showLocationAlert = false; }, 8000);
+                        });
+                }
+            "
+            :class="canPresensi ? 'bg-[#2a4a6f] cursor-pointer' : 'bg-gray-400 cursor-not-allowed opacity-90'"
+            class="fixed bottom-24 right-6 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform z-40">
+                
+                <template x-if="canPresensi">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                </template>
+                
+                <template x-if="!canPresensi">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                </template>
+            </button>
+        </div>
 
 
         {{-- ================= MODAL FOTO & CREATE ================= --}}
@@ -901,36 +1011,3 @@
 
     </div>
 @endsection
-
-<style>
-    @keyframes pulse-subtle {
-
-        0%,
-        100% {
-            opacity: 1;
-        }
-
-        50% {
-            opacity: 0.95;
-        }
-    }
-
-    .animate-pulse-subtle {
-        animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-
-    /* Custom scrollbar untuk modal */
-    .modal-scroll::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .modal-scroll::-webkit-scrollbar-track {
-        background: rgba(0, 0, 0, 0.1);
-        border-radius: 10px;
-    }
-
-    .modal-scroll::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 10px;
-    }
-</style>

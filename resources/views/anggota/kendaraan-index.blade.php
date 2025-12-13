@@ -7,6 +7,27 @@
 @endsection
 
 @section('content')
+    {{-- Style untuk animasi timer notifikasi --}}
+    <style>
+        @keyframes countdown {
+            from { stroke-dashoffset: 0; }
+            to { stroke-dashoffset: 100; }
+        }
+        .timer-circle {
+            fill: none;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-dasharray: 100;
+            stroke-dashoffset: 0;
+            transform: rotate(-90deg);
+            transform-origin: center;
+        }
+        /* Animasi berjalan 5 detik sesuai timeout javascript */
+        .animate-timer {
+            animation: countdown 5s linear forwards;
+        }
+    </style>
+
     <div class="w-full min-h-screen bg-slate-100 p-4 pb-32" x-data="{ 
                         modalCheckoutOpen: false, 
                         selectedVehicleId: null,
@@ -26,7 +47,7 @@
              x-transition:leave-start="opacity-100 transform translate-x-0"
              x-transition:leave-end="opacity-0 transform translate-x-full"
              x-init="if(showSuccessNotif) setTimeout(() => showSuccessNotif = false, 5000)"
-             class="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 min-w-[300px] max-w-md"
+             class="fixed top-4 right-4 z-50 bg-green-500 text-white pl-6 pr-2 py-1 rounded-lg shadow-2xl flex items-center gap-3 min-w-[300px] max-w-md"
              style="display: none;">
             <div class="flex-shrink-0">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -36,8 +57,15 @@
             <div class="flex-1">
                 <p class="font-semibold text-sm">{{ session('success') }}</p>
             </div>
-            <button @click="showSuccessNotif = false" class="flex-shrink-0 text-white hover:text-green-100 transition-colors">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            {{-- Tombol Close dengan Timer Circle --}}
+            <button @click="showSuccessNotif = false" class="relative flex-shrink-0 text-white hover:text-green-100 transition-colors w-10 h-10 flex items-center justify-center">
+                {{-- SVG Timer Circle --}}
+                <svg class="absolute inset-0 w-full h-full p-1" viewBox="0 0 36 36">
+                     <path class="text-green-700/40 timer-circle" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" style="stroke-dasharray: 100; stroke-dashoffset: 0;"></path>
+                     <path class="text-white timer-circle animate-timer" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="currentColor"></path>
+                </svg>
+                {{-- Icon X --}}
+                <svg class="w-4 h-4 relative z-10" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
                 </svg>
             </button>
@@ -52,7 +80,7 @@
              x-transition:leave-start="opacity-100 transform translate-x-0"
              x-transition:leave-end="opacity-0 transform translate-x-full"
              x-init="if(showErrorNotif) setTimeout(() => showErrorNotif = false, 5000)"
-             class="fixed top-4 right-4 z-50 bg-red-500 text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 min-w-[300px] max-w-md"
+             class="fixed top-4 right-4 z-50 bg-red-500 text-white pl-6 pr-2 py-1 rounded-lg shadow-2xl flex items-center gap-3 min-w-[300px] max-w-md"
              style="display: none;">
             <div class="flex-shrink-0">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -62,8 +90,14 @@
             <div class="flex-1">
                 <p class="font-semibold text-sm">{{ session('error') }}</p>
             </div>
-            <button @click="showErrorNotif = false" class="flex-shrink-0 text-white hover:text-red-100 transition-colors">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            {{-- Tombol Close dengan Timer Circle --}}
+            <button @click="showErrorNotif = false" class="relative flex-shrink-0 text-white hover:text-red-100 transition-colors w-10 h-10 flex items-center justify-center">
+                {{-- SVG Timer Circle --}}
+                <svg class="absolute inset-0 w-full h-full p-1" viewBox="0 0 36 36">
+                     <path class="text-red-800/40 timer-circle" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" style="stroke-dasharray: 100; stroke-dashoffset: 0;"></path>
+                     <path class="text-white timer-circle animate-timer" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="currentColor"></path>
+                </svg>
+                <svg class="w-4 h-4 relative z-10" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
                 </svg>
             </button>
@@ -195,6 +229,7 @@
                                 <div class="cursor-pointer" @click="$refs.dateInput.showPicker()">
                                     <input type="date" id="tanggal" name="tanggal" x-ref="dateInput" value="{{ $tanggal_terpilih }}"
                                         onchange="document.getElementById('searchForm').submit()"
+                                        max="{{ date('Y-m-d') }}"
                                         class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
                                 </div>
                             </div>
@@ -222,106 +257,106 @@
 
                             {{-- Search Kendaraan: HYBRID AJAX (Suggestion + Live Search tanpa reload) --}}
                             <div class="w-full" x-data="{
-                nopolSearch: '{{ $nopol_filter ?? '' }}',
-                tanggalFilter: '{{ $tanggal_terpilih }}',
-                keteranganFilter: '{{ $keterangan_filter ?? '' }}',
-                suggestions: [],
-                loading: false,
-                showSuggestions: false,
-                liveSearchTimeout: null,
-                liveSearching: false,
+                            nopolSearch: '{{ $nopol_filter ?? '' }}',
+                            tanggalFilter: '{{ $tanggal_terpilih }}',
+                            keteranganFilter: '{{ $keterangan_filter ?? '' }}',
+                            suggestions: [],
+                            loading: false,
+                            showSuggestions: false,
+                            liveSearchTimeout: null,
+                            liveSearching: false,
 
-                async getSuggestions() {
-                    // console.log('Mencari suggestion:', this.nopolSearch);
+                            async getSuggestions() {
+                                // console.log('Mencari suggestion:', this.nopolSearch);
 
-                    if (this.nopolSearch.length < 1) {
-                        this.suggestions = [];
-                        this.showSuggestions = false;
-                        return;
-                    }
+                                if (this.nopolSearch.length < 1) {
+                                    this.suggestions = [];
+                                    this.showSuggestions = false;
+                                    return;
+                                }
 
-                    this.loading = true;
-                    this.showSuggestions = true;
+                                this.loading = true;
+                                this.showSuggestions = true;
 
-                    try {
-                        const response = await fetch(`{{ route('anggota.kendaraan.searchNopol') }}?search=${encodeURIComponent(this.nopolSearch)}&tanggal=${this.tanggalFilter}`);
-                        const data = await response.json();
-                        // console.log('Suggestions:', data);
-                        this.suggestions = data;
-                    } catch (error) {
-                        // console.error('Error:', error);
-                        this.suggestions = [];
-                    } finally {
-                        this.loading = false;
-                    }
-                },
+                                try {
+                                    const response = await fetch(`{{ route('anggota.kendaraan.searchNopol') }}?search=${encodeURIComponent(this.nopolSearch)}&tanggal=${this.tanggalFilter}`);
+                                    const data = await response.json();
+                                    // console.log('Suggestions:', data);
+                                    this.suggestions = data;
+                                } catch (error) {
+                                    // console.error('Error:', error);
+                                    this.suggestions = [];
+                                } finally {
+                                    this.loading = false;
+                                }
+                            },
 
-                selectNopol(nopol) {
-                    this.nopolSearch = nopol;
-                    this.showSuggestions = false;
-                    this.triggerLiveSearchNow(); // Langsung trigger live search
-                },
+                            selectNopol(nopol) {
+                                this.nopolSearch = nopol;
+                                this.showSuggestions = false;
+                                this.triggerLiveSearchNow(); // Langsung trigger live search
+                            },
 
-                // Live Search dengan AJAX (tanpa reload page)
-                triggerLiveSearch() {
-                    clearTimeout(this.liveSearchTimeout);
+                            // Live Search dengan AJAX (tanpa reload page)
+                            triggerLiveSearch() {
+                                clearTimeout(this.liveSearchTimeout);
 
-                    this.liveSearchTimeout = setTimeout(() => {
-                        if (this.nopolSearch.length >= 2 || this.nopolSearch.length === 0) {
-                            // console.log('Live Search triggered');
-                            this.performLiveSearch();
-                        }
-                    }, 1000); // 1 detik delay
-                },
+                                this.liveSearchTimeout = setTimeout(() => {
+                                    if (this.nopolSearch.length === 0) {
+                                        // console.log('Live Search triggered');
+                                        this.performLiveSearch();
+                                    }
+                                }, 1000); // 1 detik delay
+                            },
 
-                // Trigger instant (ketika user klik suggestion)
-                triggerLiveSearchNow() {
-                    clearTimeout(this.liveSearchTimeout);
-                    this.performLiveSearch();
-                },
+                            // Trigger instant (ketika user klik suggestion)
+                            triggerLiveSearchNow() {
+                                clearTimeout(this.liveSearchTimeout);
+                                this.performLiveSearch();
+                            },
 
-                // AJAX Live Search
-                async performLiveSearch() {
-                    this.liveSearching = true;
+                            // AJAX Live Search
+                            async performLiveSearch() {
+                                this.liveSearching = true;
 
-                    try {
-                        // Update URL tanpa reload
-                        const url = new URL(window.location);
-                        url.searchParams.set('nopol', this.nopolSearch);
-                        url.searchParams.set('tanggal', this.tanggalFilter);
-                        url.searchParams.set('keterangan', this.keteranganFilter);
-                        window.history.pushState({}, '', url);
+                                try {
+                                    // Update URL tanpa reload
+                                    const url = new URL(window.location);
+                                    url.searchParams.set('nopol', this.nopolSearch);
+                                    url.searchParams.set('tanggal', this.tanggalFilter);
+                                    url.searchParams.set('keterangan', this.keteranganFilter);
+                                    window.history.pushState({}, '', url);
 
-                        // Fetch hasil riwayat via AJAX
-                        const response = await fetch(`{{ route('anggota.kendaraan.getRiwayat') }}?nopol=${encodeURIComponent(this.nopolSearch)}&tanggal=${this.tanggalFilter}&keterangan=${encodeURIComponent(this.keteranganFilter)}`);
-                        const html = await response.text();
+                                    // Fetch hasil riwayat via AJAX
+                                    const response = await fetch(`{{ route('anggota.kendaraan.getRiwayat') }}?nopol=${encodeURIComponent(this.nopolSearch)}&tanggal=${this.tanggalFilter}&keterangan=${encodeURIComponent(this.keteranganFilter)}`);
+                                    const html = await response.text();
 
-                        // Update container riwayat
-                        document.getElementById('riwayat-container').innerHTML = html;
+                                    // Update container riwayat
+                                    document.getElementById('riwayat-container').innerHTML = html;
 
-                        // console.log('Live search completed');
-                    } catch (error) {
-                        // console.error('Live search error:', error);
-                    } finally {
-                        this.liveSearching = false;
-                    }
-                },
+                                    // console.log('Live search completed');
+                                } catch (error) {
+                                    // console.error('Live search error:', error);
+                                } finally {
+                                    this.liveSearching = false;
+                                }
+                            },
 
-                updateTanggal(newDate) {
-                    this.tanggalFilter = newDate;
-                    if (this.nopolSearch.length > 0) {
-                        this.getSuggestions();
-                        this.triggerLiveSearch();
-                    }
-                }
-            }">
+                            updateTanggal(newDate) {
+                                this.tanggalFilter = newDate;
+                                if (this.nopolSearch.length > 0) {
+                                    this.getSuggestions();
+                                    this.triggerLiveSearch();
+                                }
+                            }
+                        }">
 
                                 <label for="nopol" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                                     Cari Kendaraan
                                 </label>
                                 <div class="relative">
                                     <input type="text" id="nopol" name="nopol" x-model="nopolSearch"
-                                        @input="triggerLiveSearch()"
+                                        @input="triggerLiveSearch(); getSuggestions();"
                                         @focus="if(nopolSearch.length >= 1) getSuggestions()"
                                         @keydown.enter.prevent="triggerLiveSearchNow()"
                                         placeholder="Ketik untuk mencari..." autocomplete="off"
@@ -348,7 +383,7 @@
                                     </button>
 
                                     {{-- Dropdown Suggestions (TETAP TAMPIL!) --}}
-                                    <!-- <div x-show="showSuggestions" @click.away="showSuggestions = false" x-transition
+                                    <div x-show="showSuggestions" @click.away="showSuggestions = false" x-transition
                                         class="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-2xl mt-1 z-50 max-h-80 overflow-y-auto"
                                         style="display: none;">
 
@@ -394,7 +429,7 @@
                                             <p class="text-sm font-semibold mb-1">Tidak ditemukan pada tanggal ini</p>
                                             <p class="text-xs text-gray-400">Coba kata kunci lain atau ganti tanggal</p>
                                         </div>
-                                    </div> -->
+                                    </div>
                                 </div>
                             </div>
 
