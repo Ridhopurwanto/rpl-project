@@ -199,7 +199,7 @@
                     {{-- Header: Jenis Patroli & Nama --}}
                     <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] px-4 py-2.5 flex justify-between items-center">
                         <div>
-                            <p class="text-xs text-blue-200 font-semibold uppercase">{{ $item->jenis_patroli }}</p>
+                            <p class="text-xs text-blue-200 font-semibold uppercase">{{ $item->jenis_patroli }} - {{ $shiftLabel }}</p>
                             <p class="text-white font-bold text-base">{{ $item->nama_lengkap }}</p>
                         </div>
                         <span class="bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">

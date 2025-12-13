@@ -13,6 +13,21 @@
     </thead>
     <tbody>
         @forelse($data as $index => $item)
+            @php
+                // --- LOGIKA DETEKSI SHIFT ---
+                $shiftLabel = 'Unknown';
+                
+                // 1. Cek dari Relasi Database (Data Baru)
+                if ($item->claim && $item->claim->rule) {
+                    $shiftLabel = $item->claim->rule->jenis_shift;
+                } 
+                // 2. Fallback cek jam (Data Lama)
+                elseif (isset($item->waktu_exact)) {
+                    $hour = \Carbon\Carbon::parse($item->waktu_exact)->hour;
+                    $shiftLabel = ($hour >= 7 && $hour < 19) ? 'Pagi' : 'Malam';
+                }
+            @endphp
+
             <tr>
                 <td style="{{ $tdCenterStyle }}">{{ $index + 1 }}</td>
                 <td style="{{ $tdCenterStyle }}; text-align: center; vertical-align: middle;">
@@ -24,7 +39,7 @@
                 <td style="{{ $tdStyle }}">{{ $item->nama_lengkap ?? '-' }}</td>
                 <td style="{{ $tdCenterStyle }}">{{ \Carbon\Carbon::parse($item->waktu_exact)->format('H:i') }}</td>
                 <td style="{{ $tdStyle }}">{{ $item->wilayah ?? '-' }}</td>
-                <td style="{{ $tdCenterStyle }}">{{ $item->jenis_patroli ?? '-' }}</td>
+                <td style="{{ $tdCenterStyle }}">{{ $item->jenis_patroli ?? '-' }} - {{ $shiftLabel }}</td>
             </tr>
         @empty
             <tr><td colspan="7" style="{{ $tdCenterStyle }}">Tidak ada data patroli</td></tr>

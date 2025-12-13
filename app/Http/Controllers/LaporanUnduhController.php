@@ -158,7 +158,7 @@ class LaporanUnduhController extends Controller
 
         switch ($type) {
             case 'presensi':    return Presensi::whereBetween('tanggal', [$start, $end])->get();
-            case 'patroli':     return Patroli::whereBetween('tanggal', [$start, $end])->get();
+            case 'patroli':     return Patroli::with(['claim.rule'])->whereBetween('tanggal', [$start, $end])->get();
             case 'tamu':        
                 return Tamu::whereDate('waktu_datang', '>=', $start)
                            ->whereDate('waktu_datang', '<=', $end)
