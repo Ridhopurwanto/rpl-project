@@ -34,7 +34,8 @@ class PatroliController extends Controller
         $perPage = $request->input('per_page', 10);
 
         // 4. Mulai Query
-        $query = Patroli::query();
+        // $query = Patroli::query();
+        $query = Patroli::query()->with(['claim.rule']);
 
         // Filter Tanggal
         $query->whereDate('tanggal', $tanggalTerpilih);

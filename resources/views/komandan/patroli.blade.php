@@ -134,12 +134,33 @@
                 </thead>
                 <tbody class="text-sm divide-y divide-gray-200">
                     @forelse($dataPatroli as $index => $item)
+                    @php
+                        $shiftLabel = 'Unknown';
+                        
+                        // 1. Coba ambil dari Relasi Rule (Prioritas untuk data baru)
+                        if ($item->claim && $item->claim->rule) {
+                            $shiftLabel = $item->claim->rule->jenis_shift;
+                        } 
+                        // 2. Fallback untuk data lama (berdasarkan jam)
+                        else {
+                            $hour = $item->waktu_exact->hour;
+                            $shiftLabel = ($hour >= 7 && $hour < 19) ? 'Pagi' : 'Malam';
+                        }
+
+                        // Tentukan Style CSS
+                        $shiftClass = 'bg-gray-100 text-gray-800 border-gray-200'; // Default
+                        if (stripos($shiftLabel, 'Pagi') !== false) {
+                            $shiftClass = 'bg-yellow-100 text-yellow-800 border-yellow-200';
+                        } elseif (stripos($shiftLabel, 'Malam') !== false) {
+                            $shiftClass = 'bg-blue-100 text-blue-800 border-blue-200';
+                        }
+                    @endphp
                     <tr>
                         <td class="py-2 px-4">{{ $index + 1 }}.</td>
                         <td class="py-2 px-4">{{ $item->waktu_exact->format('H:i:s') }}</td>
                         <td class="py-2 px-4 text-center">
-                            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">
-                                {{ $item->jenis_patroli }}
+                            <span class="{{ $shiftClass }} border text-xs font-bold px-3 py-1 rounded-full uppercase shadow-sm whitespace-nowrap">
+                                {{ $item->jenis_patroli }} - {{ $shiftLabel }}
                             </span>
                         </td>
                         <td class="py-2 px-4 font-medium">{{ $item->wilayah }}</td>
