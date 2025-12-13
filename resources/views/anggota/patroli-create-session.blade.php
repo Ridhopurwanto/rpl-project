@@ -218,6 +218,8 @@
                         <p class="text-white text-xs font-bold">
                             @if(!empty($patroliPending) && $patroliPending)
                                 MENUNGGU
+                            @elseif($totalCompleted >= 17)
+                                SELESAI
                             @elseif(!empty($patroliExpired) && $patroliExpired)
                                 TERLEWAT
                             @else
@@ -289,7 +291,7 @@
                     {{-- 2. STATUS EXPIRED (SUDAH LEWAT) --}}
                     <div class="bg-red-50 border border-red-200 rounded-lg p-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
@@ -301,15 +303,22 @@
                         </div>
                     </div>
 
+
                 @else
                     {{-- 3. STATUS AKTIF (BISA CLAIM / LIHAT PROGRESS) --}}
                     @if($isClaimed && $isOwner)
+                        @if($totalCompleted >= 17)
+                            <div class="bg-green-50 rounded-lg p-4 border border-green-200 text-center">
+                                <p class="text-sm font-bold text-green-800">Selesai Anda Kerjakan</p>
+                            </div>
+                        @else
                             <div class="bg-green-50 rounded-lg p-4 border border-green-200 text-center">
                                 <p class="text-sm font-bold text-green-800">Sedang Anda Kerjakan</p>
                             </div>
+                        @endif
                     @elseif($isClaimed && !$isOwner)
                         <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 text-center">
-                            <p class="text-sm font-bold text-gray-700">Sedang dikerjakan oleh {{ $claimedBy }}</p>
+                            <p class="text-sm font-bold text-gray-700">Dikerjakan oleh {{ $claimedBy }}</p>
                         </div>
 
                     @else
