@@ -420,7 +420,7 @@
             @include('komandan.partials.master-table', ['kendaraanMaster' => $kendaraanMaster])
         </div>
 
-        {{-- CARD LAYOUT (Mobile) --}}
+        <!-- {{-- CARD LAYOUT (Mobile) --}}
         <div class="md:hidden space-y-2 p-3">
             @forelse($kendaraanMaster as $index => $kendaraan)
                 <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 master-card" data-tipe="{{ $kendaraan->tipe }}" data-searchtext="{{ strtolower($kendaraan->nomor_plat . ' ' . $kendaraan->pemilik) }}">
@@ -496,7 +496,7 @@
                 </div>
             </div>
         @endif
-        </div>
+        </div> -->
     </div>
 
     {{-- Modal Edit Kendaraan --}}

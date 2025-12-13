@@ -59,7 +59,7 @@
     </table>
 </div>
 
-{{-- CARD LAYOUT (Mobile) --}}
+<!-- {{-- CARD LAYOUT (Mobile) --}}
 <div class="md:hidden space-y-3 p-3">
     @forelse($riwayat as $index => $log)
         <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
@@ -131,4 +131,4 @@
             <p class="text-gray-500 font-semibold">Data tidak ditemukan.</p>
         </div>
     @endforelse
-</div>
+</div> -->
