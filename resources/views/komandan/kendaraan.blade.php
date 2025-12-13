@@ -92,10 +92,15 @@
     {{-- TABEL 1: RIWAYAT KELUAR/MASUK --}}
     <div id="riwayat-container" class="transition-opacity duration-200" x-data="{ showRiwayat: true }">
         <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-            <div class="bg-gray-100 p-3 border-b border-gray-200 cursor-pointer hover:bg-gray-200 transition" @click="showRiwayat = !showRiwayat">
+            <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] p-3 border-b border-[#2a4a6f] cursor-pointer hover:bg-[#2a4a6f] transition" @click="showRiwayat = !showRiwayat">
                 <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-gray-800">RIWAYAT KELUAR/MASUK</h3>
-                    <svg class="w-5 h-5 text-gray-600 transition-transform" :class="{ 'rotate-180': !showRiwayat }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2v0a2 2 0 00-2 2v0M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
+                        </svg>
+                        <h3 class="font-bold text-white">RIWAYAT KELUAR/MASUK</h3>
+                    </div>
+                    <svg class="w-5 h-5 text-white transition-transform" :class="{ 'rotate-180': !showRiwayat }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </div>
@@ -182,9 +187,132 @@
                 @include('komandan.partials.riwayat-table', ['riwayat' => $riwayat, 'tanggalFilter' => $tanggalTerpilih, 'registeredPlates' => $registeredPlates])
             </div>
 
+<<<<<<< HEAD
+            {{-- CARD LAYOUT (Mobile) --}}
+            <div class="md:hidden space-y-2 p-3">
+                @forelse($riwayat as $index => $log)
+                    <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
+                        <div class="flex gap-3 p-3">
+                            {{-- Info Kendaraan di Sebelah Kiri --}}
+                            <div class="flex-1 min-w-0">
+                                {{-- Nopol & Tipe Badge --}}
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <h4 class="font-bold text-gray-800 text-sm">{{ $log->nopol ?? 'N/A' }}</h4>
+                                        <p class="text-gray-600 text-xs">{{ $log->pemilik ?? 'N/A' }}</p>
+                                    </div>
+                                    <span class="text-xs font-bold px-2 py-1 rounded-full 
+                                        {{ $log->tipe == 'Roda 4' ? 'bg-blue-500 text-white' : 'bg-green-500 text-white' }}">
+                                        {{ $log->tipe ?? '-' }}
+                                    </span>
+                                </div>
+
+                                {{-- Waktu Masuk & Keluar (Sejajar) --}}
+                                <div class="flex items-center gap-3 mb-2">
+                                    {{-- Waktu Masuk --}}
+                                    <div class="flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                                        </svg>
+                                        <p class="text-gray-700 font-semibold text-xs">
+                                            @if($log->waktu_masuk && $log->waktu_masuk->format('Y-m-d') == $tanggalTerpilih)
+                                                {{ $log->waktu_masuk->format('H:i:s') }}
+                                            @else <span class="text-gray-400">-</span> @endif
+                                        </p>
+                                    </div>
+                                    
+                                    {{-- Waktu Keluar --}}
+                                    <div class="flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                        </svg>
+                                        <p class="text-gray-700 font-semibold text-xs">
+                                            @if($log->waktu_keluar && $log->waktu_keluar->format('Y-m-d') == $tanggalTerpilih)
+                                                {{ $log->waktu_keluar->format('H:i:s') }}
+                                            @else <span class="text-gray-400">-</span> @endif
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {{-- Keterangan --}}
+                                <div class="mb-2">
+                                    @if(Auth::user()->peran == 'komandan')
+                                        <form action="{{ route('komandan.kendaraan.log.updateKeterangan', $log->id_log) }}" method="POST">
+                                            @csrf @method('PUT')
+                                            <select name="keterangan" onchange="this.form.submit()" class="w-full border-gray-300 rounded text-xs py-1 focus:border-blue-500 focus:ring-blue-500">
+                                                <option value="tidak menginap" {{ $log->keterangan == 'tidak menginap' ? 'selected' : '' }}>Tidak Menginap</option>
+                                                <option value="menginap" {{ $log->keterangan == 'Menginap' ? 'selected' : '' }}>Menginap</option>
+                                            </select>
+                                        </form>
+                                    @else
+                                        <p class="text-gray-700 font-semibold text-xs">{{ $log->keterangan }}</p>
+                                    @endif
+                                </div>
+
+                                {{-- Tombol Aksi --}}
+                                @if(Auth::user()->peran == 'komandan')
+                                    <div>
+                                        @if($log->kendaraan)
+                                            <div class="flex items-center justify-center gap-1 bg-green-50 text-green-700 font-bold py-1.5 rounded border border-green-300">
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                                <span class="text-xs">Terdaftar</span>
+                                            </div>
+                                        @else
+                                            <button @click.prevent="showPromoteModal = true; promoteAction = '{{ route('komandan.kendaraan.log.promote', $log->id_log) }}'" 
+                                                    class="w-full bg-blue-500 text-white font-bold py-1.5 rounded text-xs hover:bg-blue-600 transition flex items-center justify-center gap-1">
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"></path></svg>
+                                                Daftarkan
+                                            </button>
+                                        @endif
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="bg-white rounded-lg shadow-sm p-6 text-center">
+                        <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <p class="text-gray-500 text-sm font-semibold">Data tidak ditemukan.</p>
+                    </div>
+                @endforelse
+            </div>
+
+            {{-- Pagination --}}
+            @if($riwayat->total() > 0)
+                <div class="flex justify-between items-center px-6 py-4 border-t border-gray-200">
+                    <div class="text-sm text-gray-600">
+                        Showing {{ $riwayat->firstItem() ?? 0 }} to {{ $riwayat->lastItem() ?? 0 }} of {{ $riwayat->total() }} entries
+                    </div>
+                    <div class="flex items-center gap-1">
+                        @if ($riwayat->onFirstPage())
+                            <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Previous</span>
+                        @else
+                            <a href="{{ $riwayat->appends(request()->except('page_riwayat'))->previousPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Previous</a>
+                        @endif
+                        @foreach(range(1, $riwayat->lastPage()) as $page)
+                            @if($page == $riwayat->currentPage())
+                                <span class="px-3 py-1 text-white bg-[#1e3a5f] rounded font-bold">{{ $page }}</span>
+                            @else
+                                <a href="{{ $riwayat->appends(request()->except('page_riwayat'))->url($page) }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
+                            @endif
+                        @endforeach
+                        @if ($riwayat->hasMorePages())
+                            <a href="{{ $riwayat->appends(request()->except('page_riwayat'))->nextPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
+                        @else
+                            <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
+                        @endif
+                    </div>
+                </div>
+            @endif
+=======
             <div id="riwayat-pagination-container">
                 @include('komandan.partials.riwayat-pagination', ['riwayat' => $riwayat])
             </div>
+>>>>>>> 380e17a61840f0fb2dfa91e6e28519ad7231dd33
             </div>
         </div>
     </div>
@@ -214,10 +342,15 @@
             });
         }
     }">
-        <div class="bg-gray-100 p-3 border-b border-gray-200 cursor-pointer hover:bg-gray-200 transition" @click="showMaster = !showMaster">
+        <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] p-3 border-b border-[#2a4a6f] cursor-pointer hover:bg-[#2a4a6f] transition" @click="showMaster = !showMaster">
             <div class="flex justify-between items-center">
-                <h3 class="font-bold text-gray-800">KENDARAAN YANG TERDAFTAR</h3>
-                <svg class="w-5 h-5 text-gray-600 transition-transform" :class="{ 'rotate-180': !showMaster }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h3 class="font-bold text-white">KENDARAAN YANG TERDAFTAR</h3>
+                </div>
+                <svg class="w-5 h-5 text-white transition-transform" :class="{ 'rotate-180': !showMaster }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
             </div>
@@ -293,9 +426,88 @@
             @include('komandan.partials.master-table', ['kendaraanMaster' => $kendaraanMaster])
         </div>
 
+<<<<<<< HEAD
+        {{-- CARD LAYOUT (Mobile) --}}
+        <div class="md:hidden space-y-2 p-3">
+            @forelse($kendaraanMaster as $index => $kendaraan)
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 master-card" data-tipe="{{ $kendaraan->tipe }}" data-searchtext="{{ strtolower($kendaraan->nomor_plat . ' ' . $kendaraan->pemilik) }}">
+                    <div class="flex gap-3 p-3">
+                        {{-- Info Kendaraan --}}
+                        <div class="flex-1 min-w-0">
+                            {{-- Nopol & Tipe Badge --}}
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <h4 class="font-bold text-gray-800 text-sm">{{ $kendaraan->nomor_plat }}</h4>
+                                    <p class="text-gray-600 text-xs">{{ $kendaraan->pemilik }}</p>
+                                </div>
+                                <span class="text-xs font-bold px-2 py-1 rounded-full 
+                                    {{ $kendaraan->tipe == 'Roda 4' ? 'bg-blue-500 text-white' : 'bg-green-500 text-white' }}">
+                                    {{ $kendaraan->tipe }}
+                                </span>
+                            </div>
+
+                            {{-- Tombol Aksi --}}
+                            @if(Auth::user()->peran == 'komandan')
+                                <div class="flex gap-1.5">
+                                    <button @click="showEditModal = true; editAction = '{{ route('komandan.kendaraan.master.update', $kendaraan->id_kendaraan) }}'; editPlat = '{{ $kendaraan->nomor_plat }}'; editPemilik = '{{ $kendaraan->pemilik }}'; editTipe = '{{ $kendaraan->tipe }}';" 
+                                            class="flex-1 bg-blue-500 text-white font-bold py-1.5 rounded text-xs hover:bg-blue-600 transition flex items-center justify-center gap-1">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
+                                        Edit
+                                    </button>
+                                    <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('komandan.kendaraan.master.destroy', $kendaraan->id_kendaraan) }}'" 
+                                            class="flex-1 bg-red-500 text-white font-bold py-1.5 rounded text-xs hover:bg-red-600 transition flex items-center justify-center gap-1">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                                        Hapus
+                                    </button>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="bg-white rounded-lg shadow-sm p-6 text-center">
+                    <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <p class="text-gray-500 text-sm font-semibold">Tidak ada data.</p>
+                </div>
+            @endforelse
+        </div>
+        
+        {{-- Pagination --}}
+        @if($kendaraanMaster->total() > 0)
+            <div class="flex justify-between items-center px-6 py-4 border-t border-gray-200">
+                <div class="text-sm text-gray-600">
+                    Showing {{ $kendaraanMaster->firstItem() ?? 0 }} to {{ $kendaraanMaster->lastItem() ?? 0 }} of {{ $kendaraanMaster->total() }} entries
+                </div>
+                <div class="flex items-center gap-1">
+                    @if ($kendaraanMaster->onFirstPage())
+                        <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Previous</span>
+                    @else
+                        <a href="{{ $kendaraanMaster->appends(request()->except('page_master'))->previousPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Previous</a>
+                    @endif
+                    @foreach(range(1, $kendaraanMaster->lastPage()) as $page)
+                        @if($page == $kendaraanMaster->currentPage())
+                            <span class="px-3 py-1 text-white bg-[#1e3a5f] rounded font-bold">{{ $page }}</span>
+                        @else
+                            <a href="{{ $kendaraanMaster->appends(request()->except('page_master'))->url($page) }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
+                        @endif
+                    @endforeach
+                    @if ($kendaraanMaster->hasMorePages())
+                        <a href="{{ $kendaraanMaster->appends(request()->except('page_master'))->nextPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
+                    @else
+                        <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
+                    @endif
+                </div>
+            </div>
+        @endif
+=======
         <div id="master-pagination-container">
             @include('komandan.partials.master-pagination', ['kendaraanMaster' => $kendaraanMaster])
         </div>
+>>>>>>> 380e17a61840f0fb2dfa91e6e28519ad7231dd33
         </div>
     </div>
 
@@ -308,10 +520,21 @@
             {{-- Header Biru --}}
             <div class="bg-[#1e3a5f] py-4 px-6 border-b border-[#1e3a5f] flex justify-between items-center">
                 <h3 class="text-lg font-bold text-white flex items-center tracking-wide">
+<<<<<<< HEAD
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
+                        </path>
+                    </svg>
+=======
+>>>>>>> 380e17a61840f0fb2dfa91e6e28519ad7231dd33
                     EDIT DATA KENDARAAN
                 </h3>
                 <button @click="showEditModal = false" class="text-white/70 hover:text-white transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
                 </button>
             </div>
             
@@ -384,20 +607,44 @@
 
     {{-- Modal Hapus --}}
     <div x-show="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4" @click.away="showDeleteModal = false" style="display: none;">
-    <div class="bg-white rounded-lg shadow-xl max-w-sm w-full p-6 relative" @click.stop>
-        <h3 class="text-lg font-bold text-gray-900 mb-4">Konfirmasi Hapus</h3>
-        <p class="text-gray-600 mb-6">Apakah Anda yakin ingin menghapus data kendaraan ini? Tindakan ini tidak dapat dibatalkan.</p>
-        <form :action="deleteAction" method="POST" class="flex justify-end space-x-4">
-            @csrf
-            @method('DELETE')
-            <button type="button" @click="showDeleteModal = false" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">Batal</button>
-            <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Ya, Hapus</button>
-        </form>
-    </div>
+        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full p-6 relative" @click.stop>
+            <h3 class="text-lg font-bold text-gray-900 mb-4">Konfirmasi Hapus</h3>
+            <p class="text-gray-600 mb-6">
+                Apakah Anda yakin ingin menghapus data kendaraan ini? Tindakan ini tidak dapat dibatalkan.
+            </p>
+            <form :action="deleteAction" method="POST" class="flex justify-end space-x-4">
+                @csrf
+                @method('DELETE')
+                <button type="button" @click="showDeleteModal = false"
+                    class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">
+                    Batal
+                </button>
+                <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                    Ya, Hapus
+                </button>
+            </form>
+        </div>
     </div>
 
     {{-- Modal Promote --}}
     <div x-show="showPromoteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4" @click.away="showPromoteModal = false" style="display: none;">
+<<<<<<< HEAD
+        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full p-6 relative" @click.stop>
+            <h3 class="text-lg font-bold text-gray-900 mb-4">Konfirmasi Pendaftaran</h3>
+            <p class="text-gray-600 mb-6">
+                Tambahkan kendaraan ini ke Daftar Master?
+            </p>
+            <form :action="promoteAction" method="POST" class="flex justify-end space-x-4">
+                @csrf
+                <button type="button" @click="showPromoteModal = false"
+                    class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">
+                    Batal
+                </button>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                    OK
+                </button>
+            </form>
+=======
         <div class="bg-white rounded-xl shadow-xl max-w-lg w-full relative overflow-hidden" @click.stop>
             {{-- Header Biru --}}
             <div class="bg-[#1e3a5f] py-4 px-6 border-b border-[#1e3a5f] flex justify-between items-center">
@@ -434,6 +681,7 @@
                     </div>
                 </form>
             </div>
+>>>>>>> 380e17a61840f0fb2dfa91e6e28519ad7231dd33
         </div>
     </div>
 
