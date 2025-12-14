@@ -23,6 +23,8 @@
                     jamMulai: '{{ $jadwalPatroli[$jenisPatroliTerpilih][0] }}',
                     countdownText: '-- : -- : --',
                     isPending: {{ !empty($patroliPending) && $patroliPending ? 'true' : 'false' }},
+                    
+                    currentFacingMode: 'environment',
 
                     get isCompleted() {
                         return this.completedList.length >= 17;
@@ -120,11 +122,27 @@
                     startCamera() {
                         this.cameraState = 'camera';
                         this.imageBase64 = '';
+                        
+                        this.stopCamera(); // Stop stream lama jika ada
+
                         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-                                .then(stream => { this.stream = stream; this.$refs.videoFeed.srcObject = stream; })
-                                .catch(err => { alert('Gagal akses kamera: ' + err.message); });
-                        } else { alert('Browser tidak support kamera'); }
+                            navigator.mediaDevices.getUserMedia({ 
+                                video: { facingMode: this.currentFacingMode } 
+                            })
+                            .then(stream => { 
+                                this.stream = stream; 
+                                this.$refs.videoFeed.srcObject = stream; 
+                            })
+                            .catch(err => { 
+                                alert('Gagal akses kamera: ' + err.message); 
+                            });
+                        } else { 
+                            alert('Browser tidak support kamera'); 
+                        }
+                    },
+                    switchCamera() {
+                        this.currentFacingMode = (this.currentFacingMode === 'user') ? 'environment' : 'user';
+                        this.startCamera();
                     },
                     stopCamera() {
                         if (this.stream) {
@@ -135,9 +153,25 @@
                     takeSnapshot() {
                         const video = this.$refs.videoFeed;
                         const canvas = this.$refs.canvas;
+                        
+                        // Set ukuran canvas sesuai video
                         canvas.width = video.videoWidth;
                         canvas.height = video.videoHeight;
-                        canvas.getContext('2d').drawImage(video, 0, 0);
+                        
+                        const ctx = canvas.getContext('2d');
+
+                        if (this.currentFacingMode === 'user') {
+                            ctx.translate(canvas.width, 0);
+                            ctx.scale(-1, 1);
+                        }
+
+                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        
+                        // Reset transformasi agar tidak mempengaruhi penggunaan canvas berikutnya (opsional tapi good practice)
+                        if (this.currentFacingMode === 'user') {
+                            ctx.setTransform(1, 0, 0, 1, 0, 0); 
+                        }
+
                         this.imageBase64 = canvas.toDataURL('image/jpeg', 0.8);
                         this.cameraState = 'preview';
                         this.stopCamera();
@@ -381,19 +415,46 @@
             @endif
         @endif
 
-        {{-- MODAL KAMERA --}}
+        {{-- MODAL KAMERA (DENGAN SWITCH) --}}
         <div x-show="showModal" class="relative z-50" style="display: none;">
              <div x-show="showModal" class="fixed inset-0 bg-black bg-opacity-75"></div>
              <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                 <div class="flex min-h-full items-center justify-center p-4">
                     <div class="relative w-full max-w-md bg-[#2a4a6f] rounded-xl p-6">
-                        <button @click="closeModal()" class="absolute top-4 right-4 text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                        
+                        <button @click="closeModal()" class="absolute top-4 right-4 text-white">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                        
                         <h3 class="text-white text-xl font-bold text-center mb-4" x-text="currentArea"></h3>
-                        <div class="mb-4 bg-black aspect-[4/3] relative">
-                            <video x-ref="videoFeed" x-show="cameraState==='camera'" autoplay playsinline class="w-full h-full object-cover"></video>
-                            <img :src="imageBase64" x-show="cameraState==='preview'" class="w-full h-full object-cover">
+                        
+                        {{-- AREA KAMERA --}}
+                        <div class="mb-4 bg-black aspect-[4/3] relative rounded-lg overflow-hidden group border border-white/20">
+                            
+                            {{-- VIDEO --}}
+                            <video x-ref="videoFeed" x-show="cameraState==='camera'" autoplay playsinline 
+                                   class="w-full h-full object-cover transition-transform duration-300"
+                                   :class="currentFacingMode === 'user' ? 'transform scale-x-[-1]' : ''">
+                            </video>
+                            
+                            {{-- HASIL FOTO --}}
+                            <img :src="imageBase64" x-show="cameraState==='preview'" 
+                                 class="w-full h-full object-cover transition-transform duration-300">
+
+                            {{-- TOMBOL SWITCH (Hanya muncul saat mode Camera) --}}
+                            <button type="button" 
+                                    x-show="cameraState === 'camera'"
+                                    @click="switchCamera()"
+                                    class="absolute top-3 left-3 z-10 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full backdrop-blur-sm border border-white/20 transition-all transform active:scale-95 shadow-md"
+                                    title="Ganti Kamera">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                </svg>
+                            </button>
                         </div>
+
                         <canvas x-ref="canvas" class="hidden"></canvas>
+                        
                         <div class="space-y-3">
                             <button x-show="cameraState==='camera'" @click="takeSnapshot()" class="w-full bg-white text-[#2a4a6f] font-bold py-3 rounded-lg">AMBIL FOTO</button>
                             <div x-show="cameraState==='preview'" class="grid grid-cols-2 gap-3">

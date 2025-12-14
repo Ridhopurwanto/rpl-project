@@ -49,10 +49,16 @@
                 showLocationAlert: false,
                 locationDistance: null,
 
+                currentFacingMode: 'user',
+
                 // Notifikasi Floating
                 showSuccessNotif: {{ session('success') ? 'true' : 'false' }},
-                showErrorNotif: {{ session('error') ? 'true' : 'false' }},
-                errorMessage: '{{ session('error') }}',
+
+                // Gabungkan session('error') dengan $errors->first()
+                errorMessage: '{{ session('error') ?? ($errors->any() ? $errors->first() : '') }}',
+
+                // Tampilkan notif jika session('error') ADA atau $errors ADA
+                showErrorNotif: {{ (session('error') || $errors->any()) ? 'true' : 'false' }},
 
                 // STATE BARU: Loading saat mencari lokasi
                 isLoadingLocation: false,
@@ -62,242 +68,299 @@
                 offModalTitle: '',
                 offModalMessage: '',
 
-            // Koordinat kampus Anda
-            campusLat: -6.2315465,
-            campusLng: 106.8666516, 
-            maxDistance: 80,
+                // Koordinat kampus Anda
+                campusLat: -6.2315465,
+                campusLng: 106.8666516, 
+                maxDistance: 80,
 
-            requiresGeotag: {{ $wajibGeotag ? 'true' : 'false' }},
+                filterStartDate: '{{ $startDate }}',
+                filterEndDate: '{{ $endDate }}',
 
-            // Fungsi Trigger Error Floating (Kuning)
-                triggerWarning(message) {
-                    this.errorMessage = message;
-                    this.showErrorNotif = true;
-                    setTimeout(() => this.showErrorNotif = false, 5000);
+                applyFilter() {
+                    // 1. Validasi Tanggal
+                    if (this.filterStartDate > this.filterEndDate) {
+                        // Panggil notifikasi warning (kuning) yang sudah ada
+                        this.triggerWarning('Tanggal awal tidak boleh melebihi tanggal akhir!');
+                        return; // Batalkan reload
+                    }
+
+                    // 2. Jika valid, lakukan redirect
+                    window.location.href = `{{ route('anggota.presensi.index') }}?start_date=${this.filterStartDate}&end_date=${this.filterEndDate}`;
                 },
 
-            // TAMBAHAN 2: Fungsi Submit Baru
-            submitPresensi() {
-                // 1. Cek Foto (Wajib untuk semua)
-                if (this.cameraState === 'camera' || !this.imageBase64) {
-                    alert('⚠️ HARAP AMBIL FOTO TERLEBIH DAHULU!');
-                    return;
-                }
+                requiresGeotag: {{ $wajibGeotag ? 'true' : 'false' }},
 
-                // 2. Cek Lokasi (Hanya jika Wajib Geotag)
-                if (this.requiresGeotag) {
-                    if (!this.userLatitude || !this.userLongitude) {
-                        // Tampilkan alert lokasi
-                        this.showLocationAlert = true;
+                // Fungsi Trigger Error Floating (Kuning)
+                    triggerWarning(message) {
+                        this.errorMessage = message;
+                        this.showErrorNotif = true;
+                        setTimeout(() => this.showErrorNotif = false, 5000);
+                    },
 
-                        // Opsional: Coba request lokasi lagi
-                        this.requestLocationOnLoad();
-
-                        // Scroll ke atas agar alert terlihat (jika tertutup)
-                        return; // Stop proses
+                // TAMBAHAN 2: Fungsi Submit Baru
+                submitPresensi() {
+                    // 1. Cek Foto (Wajib untuk semua)
+                    if (this.cameraState === 'camera' || !this.imageBase64) {
+                        alert('⚠️ HARAP AMBIL FOTO TERLEBIH DAHULU!');
+                        return;
                     }
-                }
 
-                // 3. Jika lolos, submit form manual via JS
-                this.$refs.formPresensi.submit();
-            },
-
-            init() {
-                this.updateTime();
-                setInterval(() => { this.updateTime() }, 1000);
-
-                // ✅ LANGSUNG MINTA IZIN LOKASI SAAT HALAMAN DIBUKA
-                // this.requestLocationOnLoad(true);
-            },
-
-            updateTime() {
-                const now = new Date();
-                this.currentTime = now.toLocaleTimeString('id-ID', { 
-                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
-                }).replace(/\./g, ':') + ' WIB';
-            },
-
-            // ✅ FUNGSI BARU: Request lokasi otomatis saat load
-            requestLocationOnLoad(silent = false) {
-                if (!navigator.geolocation) {
-                    console.warn('Browser tidak mendukung geolocation');
-                    return;
-                }
-
-                // Langsung request permission
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        this.userLatitude = position.coords.latitude;
-                        this.userLongitude = position.coords.longitude;
-                        console.log('✅ Lokasi terdeteksi:', this.userLatitude, this.userLongitude);
-
-                        // Cek jarak dari kampus
-                        const distance = this.calculateDistance(
-                            this.userLatitude, 
-                            this.userLongitude,
-                            this.campusLat,
-                            this.campusLng
-                        );
-                        this.locationDistance = Math.round(distance);
-                        console.log('📍 Jarak dari kampus:', this.locationDistance, 'meter');
-
-                        // Tampilkan alert jika di luar radius
-                        if (distance > this.maxDistance) {
+                    // 2. Cek Lokasi (Hanya jika Wajib Geotag)
+                    if (this.requiresGeotag) {
+                        if (!this.userLatitude || !this.userLongitude) {
+                            // Tampilkan alert lokasi
                             this.showLocationAlert = true;
+
+                            // Opsional: Coba request lokasi lagi
+                            this.requestLocationOnLoad();
+
+                            // Scroll ke atas agar alert terlihat (jika tertutup)
+                            return; // Stop proses
+                        }
+                    }
+
+                    // 3. Jika lolos, submit form manual via JS
+                    this.$refs.formPresensi.submit();
+                },
+
+                init() {
+                    this.updateTime();
+                    setInterval(() => { this.updateTime() }, 1000);
+
+                    // ✅ LANGSUNG MINTA IZIN LOKASI SAAT HALAMAN DIBUKA
+                    // this.requestLocationOnLoad(true);
+                },
+
+                updateTime() {
+                    const now = new Date();
+                    this.currentTime = now.toLocaleTimeString('id-ID', { 
+                        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
+                    }).replace(/\./g, ':') + ' WIB';
+                },
+
+                // ✅ FUNGSI BARU: Request lokasi otomatis saat load
+                requestLocationOnLoad(silent = false) {
+                    if (!navigator.geolocation) {
+                        console.warn('Browser tidak mendukung geolocation');
+                        return;
+                    }
+
+                    // Langsung request permission
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            this.userLatitude = position.coords.latitude;
+                            this.userLongitude = position.coords.longitude;
+                            console.log('✅ Lokasi terdeteksi:', this.userLatitude, this.userLongitude);
+
+                            // Cek jarak dari kampus
+                            const distance = this.calculateDistance(
+                                this.userLatitude, 
+                                this.userLongitude,
+                                this.campusLat,
+                                this.campusLng
+                            );
+                            this.locationDistance = Math.round(distance);
+                            console.log('📍 Jarak dari kampus:', this.locationDistance, 'meter');
+
+                            // Tampilkan alert jika di luar radius
+                            if (distance > this.maxDistance) {
+                                this.showLocationAlert = true;
+                                setTimeout(() => {
+                                    this.showLocationAlert = false;
+                                }, 8000);
+                            }
+
+                            if (!silent && distance > this.maxDistance) {
+                                this.showLocationAlert = true;
+                                setTimeout(() => {
+                                this.showLocationAlert = false;
+                                }, 8000);
+                            }
+                        },
+                        (error) => {
+                            let errorMsg = 'Tidak dapat mengakses lokasi';
+                            if (error.code === 1) {
+                                errorMsg = 'Lokasi belum terdeteksi. Mohon aktifkan GPS dan refresh halaman.';
+                            } else if (error.code === 2) {
+                                errorMsg = 'Lokasi tidak tersedia. Pastikan GPS aktif.';
+                            } else if (error.code === 3) {
+                                errorMsg = 'Timeout saat mendapatkan lokasi.';
+                            }
+                            this.locationError = errorMsg;
+                            this.showLocationAlert = true;
+                            console.error('❌ Error geolocation:', errorMsg);
+
                             setTimeout(() => {
                                 this.showLocationAlert = false;
-                            }, 8000);
+                            }, 5000);
+                        },
+                        { 
+                            enableHighAccuracy: true, 
+                            timeout: 10000, 
+                            maximumAge: 0 
                         }
-
-                        if (!silent && distance > this.maxDistance) {
-                            this.showLocationAlert = true;
-                            setTimeout(() => {
-                            this.showLocationAlert = false;
-                            }, 8000);
-                        }
-                    },
-                    (error) => {
-                        let errorMsg = 'Tidak dapat mengakses lokasi';
-                        if (error.code === 1) {
-                            errorMsg = 'Lokasi belum terdeteksi. Mohon aktifkan GPS dan refresh halaman.';
-                        } else if (error.code === 2) {
-                            errorMsg = 'Lokasi tidak tersedia. Pastikan GPS aktif.';
-                        } else if (error.code === 3) {
-                            errorMsg = 'Timeout saat mendapatkan lokasi.';
-                        }
-                        this.locationError = errorMsg;
-                        this.showLocationAlert = true;
-                        console.error('❌ Error geolocation:', errorMsg);
-
-                        setTimeout(() => {
-                            this.showLocationAlert = false;
-                        }, 5000);
-                    },
-                    { 
-                        enableHighAccuracy: true, 
-                        timeout: 10000, 
-                        maximumAge: 0 
-                    }
-                );
-            },
-
-            // Calculate distance between two coordinates (Haversine formula)
-            calculateDistance(lat1, lon1, lat2, lon2) {
-                const R = 6371e3; // Earth radius in meters
-                const φ1 = lat1 * Math.PI / 180;
-                const φ2 = lat2 * Math.PI / 180;
-                const Δφ = (lat2 - lat1) * Math.PI / 180;
-                const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-                const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-                        Math.cos(φ1) * Math.cos(φ2) *
-                        Math.sin(Δλ/2) * Math.sin(Δλ/2);
-                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-
-                return R * c; // Distance in meters
-            },
-
-            checkLocation() {
-                    return new Promise((resolve, reject) => {   
-                        if (!this.requiresGeotag) {
-                            setTimeout(() => { this.isLoadingLocation = false; resolve(true); }, 500); 
-                            return;
-                        }
-
-                        // Reset State
-                        this.isLoadingLocation = true; // AKTIFKAN LOADING BANNER
-
-
-                        if (!navigator.geolocation) {
-                            this.isLoadingLocation = false;
-                            reject('Browser tidak mendukung geolocation');
-                            return;
-                        }
-
-                        navigator.geolocation.getCurrentPosition(
-                            (position) => {
-                                this.userLatitude = position.coords.latitude;
-                                this.userLongitude = position.coords.longitude;
-                                const distance = this.calculateDistance(this.userLatitude, this.userLongitude, this.campusLat, this.campusLng);
-                                this.locationDistance = Math.round(distance);
-
-                                // Delay sedikit agar user sempat melihat 'Memeriksa...'
-                                setTimeout(() => {
-                                    this.isLoadingLocation = false; // MATIKAN LOADING
-                                    if (distance <= this.maxDistance) {
-                                        resolve(true);
-                                    } else {
-                                        this.locationError = `Anda berada di luar radius (${Math.round(distance)}m).`;
-                                        this.showLocationAlert = true;
-                                        reject(`Jarak: ${Math.round(distance)}m.`);
-                                    }
-                                }, 800);
-                            },
-                            (error) => {
-                                this.isLoadingLocation = false; // MATIKAN LOADING
-                                let errorMsg = 'Gagal mendapatkan lokasi.';
-                                if (error.code === 1) errorMsg = 'Izin lokasi ditolak.';
-                                else if (error.code === 2) errorMsg = 'GPS mati / Sinyal lemah.';
-                                else if (error.code === 3) errorMsg = 'Timeout.';
-                                
-                                this.locationError = errorMsg;
-                                this.showLocationAlert = true;
-                                reject(errorMsg);
-                            },
-                            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-                        );
-                    });
+                    );
                 },
 
-            startCamera() {
-                this.cameraState = 'camera';
-                this.imageBase64 = '';
-                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
-                    .then(stream => {
-                        this.stream = stream;
-                        this.$refs.videoFeed.srcObject = stream;
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        // Notifikasi error kamera yang lebih baik
-                        this.showCustomAlert('Kamera Tidak Dapat Diakses', 'Mohon izinkan akses kamera untuk melanjutkan presensi.', 'error');
-                    });
-                } else {
-                    this.showCustomAlert('Browser Tidak Mendukung', 'Browser Anda tidak mendukung akses kamera.', 'warning');
-                }
-            },
+                // Calculate distance between two coordinates (Haversine formula)
+                calculateDistance(lat1, lon1, lat2, lon2) {
+                    const R = 6371e3; // Earth radius in meters
+                    const φ1 = lat1 * Math.PI / 180;
+                    const φ2 = lat2 * Math.PI / 180;
+                    const Δφ = (lat2 - lat1) * Math.PI / 180;
+                    const Δλ = (lon2 - lon1) * Math.PI / 180;
 
-            showCustomAlert(title, message, type = 'info') {
-                // Implementasi alert custom jika diperlukan
-                alert(title + '\n\n' + message);
-            },
+                    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                            Math.cos(φ1) * Math.cos(φ2) *
+                            Math.sin(Δλ/2) * Math.sin(Δλ/2);
+                    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
-            stopCamera() {
-                if (this.stream) {
-                    this.stream.getTracks().forEach(track => track.stop());
-                    this.stream = null;
+                    return R * c; // Distance in meters
+                },
+
+                checkLocation() {
+                        return new Promise((resolve, reject) => {   
+                            if (!this.requiresGeotag) {
+                                setTimeout(() => { this.isLoadingLocation = false; resolve(true); }, 500); 
+                                return;
+                            }
+
+                            // Reset State
+                            this.isLoadingLocation = true; // AKTIFKAN LOADING BANNER
+
+
+                            if (!navigator.geolocation) {
+                                this.isLoadingLocation = false;
+                                reject('Browser tidak mendukung geolocation');
+                                return;
+                            }
+
+                            navigator.geolocation.getCurrentPosition(
+                                (position) => {
+                                    this.userLatitude = position.coords.latitude;
+                                    this.userLongitude = position.coords.longitude;
+                                    const distance = this.calculateDistance(this.userLatitude, this.userLongitude, this.campusLat, this.campusLng);
+                                    this.locationDistance = Math.round(distance);
+
+                                    // Delay sedikit agar user sempat melihat 'Memeriksa...'
+                                    setTimeout(() => {
+                                        this.isLoadingLocation = false; // MATIKAN LOADING
+                                        if (distance <= this.maxDistance) {
+                                            resolve(true);
+                                        } else {
+                                            this.locationError = `Anda berada di luar radius (${Math.round(distance)}m).`;
+                                            this.showLocationAlert = true;
+                                            reject(`Jarak: ${Math.round(distance)}m.`);
+                                        }
+                                    }, 800);
+                                },
+                                (error) => {
+                                    this.isLoadingLocation = false; // MATIKAN LOADING
+                                    let errorMsg = 'Gagal mendapatkan lokasi.';
+                                    if (error.code === 1) errorMsg = 'Izin lokasi ditolak.';
+                                    else if (error.code === 2) errorMsg = 'GPS mati / Sinyal lemah.';
+                                    else if (error.code === 3) errorMsg = 'Timeout.';
+                                    
+                                    this.locationError = errorMsg;
+                                    this.showLocationAlert = true;
+                                    reject(errorMsg);
+                                },
+                                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                            );
+                        });
+                    },
+
+                
+                startCamera() {
+                    this.cameraState = 'camera';
+                    this.imageBase64 = '';
+                    
+                    // Pastikan stop dulu sebelum mulai baru (penting saat switch)
+                    this.stopCamera();
+
+                    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                        // Gunakan variable this.currentFacingMode
+                        navigator.mediaDevices.getUserMedia({ 
+                            video: { facingMode: this.currentFacingMode } 
+                        })
+                        .then(stream => {
+                            this.stream = stream;
+                            this.$refs.videoFeed.srcObject = stream;
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            this.showCustomAlert('Kamera Error', 'Gagal mengakses kamera. Pastikan izin diberikan.', 'error');
+                        });
+                    } else {
+                        this.showCustomAlert('Browser Tidak Mendukung', 'Browser Anda tidak mendukung akses kamera.', 'warning');
+                    }
+                },
+
+                // --- TAMBAHAN 3: FUNGSI SWITCH CAMERA ---
+                switchCamera() {
+                    // Toggle antara 'user' dan 'environment'
+                    this.currentFacingMode = (this.currentFacingMode === 'user') ? 'environment' : 'user';
+                    this.startCamera();
+                },
+
+                showCustomAlert(title, message, type = 'info') {
+                    // Implementasi alert custom jika diperlukan
+                    alert(title + '\n\n' + message);
+                },
+
+                stopCamera() {
+                    if (this.stream) {
+                        this.stream.getTracks().forEach(track => track.stop());
+                        this.stream = null;
+                    }
+                },
+                takeSnapshot() {
+                    const video = this.$refs.videoFeed;
+                    const canvas = this.$refs.canvas;
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    const ctx = canvas.getContext('2d');
+                    ctx.translate(canvas.width, 0);
+                    ctx.scale(-1, 1);
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    this.imageBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                    this.cameraState = 'preview';
+                    this.stopCamera();
+                },
+
+                takeSnapshot() {
+                    const video = this.$refs.videoFeed;
+                    const canvas = this.$refs.canvas;
+                    
+                    // Set ukuran canvas sesuai video
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    
+                    const ctx = canvas.getContext('2d');
+
+                    if (this.currentFacingMode === 'user') {
+                        ctx.translate(canvas.width, 0);
+                        ctx.scale(-1, 1);
+                    }
+
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    
+                    // Reset transformasi agar tidak mempengaruhi penggunaan canvas berikutnya (opsional tapi good practice)
+                    if (this.currentFacingMode === 'user') {
+                        ctx.setTransform(1, 0, 0, 1, 0, 0); 
+                    }
+
+                    this.imageBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                    this.cameraState = 'preview';
+                    this.stopCamera();
+                },
+
+                retakePhoto() {
+                    this.startCamera();
+                },
+                closeLocationAlert() {
+                    this.showLocationAlert = false;
                 }
-            },
-            takeSnapshot() {
-                const video = this.$refs.videoFeed;
-                const canvas = this.$refs.canvas;
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                const ctx = canvas.getContext('2d');
-                ctx.translate(canvas.width, 0);
-                ctx.scale(-1, 1);
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                this.imageBase64 = canvas.toDataURL('image/jpeg', 0.8);
-                this.cameraState = 'preview';
-                this.stopCamera();
-            },
-            retakePhoto() {
-                this.startCamera();
-            },
-            closeLocationAlert() {
-                this.showLocationAlert = false;
-            }
              }" x-init="init()">
         
         {{-- ==================== NOTIFIKASI LOADING LOKASI (BARU) ==================== --}}
@@ -334,7 +397,7 @@
              x-transition:leave-start="opacity-100 transform translate-x-0"
              x-transition:leave-end="opacity-0 transform translate-x-full"
              x-init="if(showSuccessNotif) setTimeout(() => showSuccessNotif = false, 5000)"
-             class="fixed top-4 right-4 z-[100] bg-green-500 text-white pl-6 pr-2 py-4 rounded-lg shadow-2xl flex items-center gap-3 min-w-[300px] max-w-md"
+             class="fixed top-4 right-4 z-[100] bg-green-500 text-white pl-6 pr-2 py-1 rounded-lg shadow-2xl flex items-center gap-3 min-w-[300px] max-w-md"
              style="display: none;">
             <div class="flex-shrink-0">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -364,7 +427,7 @@
              x-transition:leave-start="opacity-100 transform translate-x-0"
              x-transition:leave-end="opacity-0 transform translate-x-full"
              x-init="if(showErrorNotif) setTimeout(() => showErrorNotif = false, 5000)"
-             class="fixed top-4 right-4 z-[100] bg-yellow-500 text-white pl-6 pr-2 py-4 rounded-lg shadow-2xl flex items-center gap-3 min-w-[300px] max-w-md"
+             class="fixed top-4 right-4 z-[100] bg-yellow-500 text-white pl-6 pr-2 py-1 rounded-lg shadow-2xl flex items-center gap-3 min-w-[300px] max-w-md"
              style="display: none;">
             <div class="flex-shrink-0">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -600,7 +663,8 @@
         </div>
 
         {{-- === 3. FILTER RIWAYAT === --}}
-        <div class="bg-white px-6 py-5 rounded-xl shadow-sm mt-4 mb-6 border border-gray-200" x-data="{}">
+        {{-- Hapus x-data="{}" disini agar menyatu dengan scope utama --}}
+        <div class="bg-white px-6 py-5 rounded-xl shadow-sm mt-4 mb-6 border border-gray-200">
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
@@ -610,8 +674,10 @@
                         Dari Tanggal
                     </label>
                     <div class="cursor-pointer" @click="$refs.dateStart.showPicker()">
-                        <input type="date" id="start_date" name="start_date" x-ref="dateStart" value="{{ $startDate }}"
-                            @change="window.location.href = '{{ route('anggota.presensi.index') }}?start_date=' + $event.target.value + '&end_date=' + document.getElementById('end_date').value"
+                        {{-- Gunakan x-model dan panggil applyFilter() saat berubah --}}
+                        <input type="date" id="start_date" x-ref="dateStart" 
+                            x-model="filterStartDate"
+                            @change="applyFilter()"
                             class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
                     </div>
                 </div>
@@ -622,8 +688,10 @@
                         Sampai Tanggal
                     </label>
                     <div class="cursor-pointer" @click="$refs.dateEnd.showPicker()">
-                        <input type="date" id="end_date" name="end_date" x-ref="dateEnd" value="{{ $endDate }}"
-                            @change="window.location.href = '{{ route('anggota.presensi.index') }}?start_date=' + document.getElementById('start_date').value + '&end_date=' + $event.target.value"
+                        {{-- Gunakan x-model dan panggil applyFilter() saat berubah --}}
+                        <input type="date" id="end_date" x-ref="dateEnd" 
+                            x-model="filterEndDate"
+                            @change="applyFilter()"
                             class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
                     </div>
                 </div>
@@ -910,23 +978,46 @@
                                 </div>
                             </div>
 
-
+                           
                             {{-- ===== AREA KAMERA / PREVIEW ===== --}}
-                            <div
-                                class="mb-5 rounded-lg overflow-hidden border-2 border-white/20 bg-black relative aspect-[4/3] shadow-lg">
-                                <video x-ref="videoFeed" x-show="cameraState === 'camera'" autoplay playsinline
-                                    class="w-full h-full object-cover transform scale-x-[-1]"></video>
-                                <img :src="imageBase64" x-show="cameraState === 'preview'"
-                                    class="w-full h-full object-cover transform" style="display: none;">
+                            <div class="mb-5 rounded-lg overflow-hidden border-2 border-white/20 bg-black relative aspect-[4/3] shadow-lg group">
+                                
+                                {{-- VIDEO FEED --}}
+                                {{-- Perhatikan :class untuk mirror hanya jika kamera depan --}}
+                                <video x-ref="videoFeed" 
+                                       x-show="cameraState === 'camera'" 
+                                       autoplay playsinline
+                                       class="w-full h-full object-cover transition-transform duration-300"
+                                       :class="currentFacingMode === 'user' ? 'transform scale-x-[-1]' : ''">
+                                </video>
+
+                                {{-- HASIL FOTO --}}
+                                <img :src="imageBase64" 
+                                     x-show="cameraState === 'preview'"
+                                     class="w-full h-full object-cover transition-transform duration-300" 
+                                     style="display: none;">
+
+                                {{-- LOADING SPINNER --}}
                                 <div x-show="cameraState === 'camera' && !stream"
-                                    class="absolute inset-0 flex items-center justify-center text-white text-xs">
+                                    class="absolute inset-0 flex items-center justify-center text-white text-xs z-0">
                                     <div class="text-center">
-                                        <div
-                                            class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white mb-2">
+                                        <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white mb-2">
                                         </div>
                                         <p>Memuat Kamera...</p>
                                     </div>
                                 </div>
+
+                                {{-- TOMBOL SWITCH CAMERA (Hanya muncul saat mode Camera) --}}
+                                <button type="button" 
+                                        x-show="cameraState === 'camera'"
+                                        @click="switchCamera()"
+                                        class="absolute top-3 left-3 z-10 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full backdrop-blur-sm border border-white/20 transition-all transform active:scale-95 shadow-md"
+                                        title="Ganti Kamera">
+                                    {{-- Icon Switch / Rotate --}}
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                    </svg>
+                                </button>
                             </div>
                             <canvas x-ref="canvas" class="hidden"></canvas>
 

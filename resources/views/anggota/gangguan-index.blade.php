@@ -332,19 +332,31 @@
                         state: 'camera', 
                         stream: null,
                         imageBase64: '',
+                        currentFacingMode: 'environment',
                         
                         startCamera() {
                             this.state = 'camera';
                             this.imageBase64 = '';
+                            
+                            this.stopCamera(); // Reset dulu
+
                             if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
                                 alert('Browser tidak support kamera'); return;
                             }
-                            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
+                            navigator.mediaDevices.getUserMedia({ 
+                                video: { facingMode: this.currentFacingMode }, 
+                                audio: false 
+                            })
                             .then(stream => {
                                 this.stream = stream;
                                 this.$refs.videoFeed.srcObject = stream;
                             })
                             .catch(err => console.error('Error:', err));
+                        },
+
+                        switchCamera() {
+                            this.currentFacingMode = (this.currentFacingMode === 'user') ? 'environment' : 'user';
+                            this.startCamera();
                         },
 
                         stopCamera() {
@@ -359,7 +371,22 @@
                             const canvas = this.$refs.canvas;
                             canvas.width = video.videoWidth;
                             canvas.height = video.videoHeight;
-                            canvas.getContext('2d').drawImage(video, 0, 0);
+                            
+                            const ctx = canvas.getContext('2d');
+
+                            // Mirror logic jika kamera depan
+                            if (this.currentFacingMode === 'user') {
+                                ctx.translate(canvas.width, 0);
+                                ctx.scale(-1, 1);
+                            }
+
+                            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                            
+                            // Reset transform
+                            if (this.currentFacingMode === 'user') {
+                                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                            }
+
                             this.imageBase64 = canvas.toDataURL('image/jpeg', 0.8);
                             this.state = 'preview';
                             this.stopCamera();
@@ -369,7 +396,7 @@
                             this.startCamera();
                         }
                      }"
-                     x-effect="showCreateModal ? startCamera() : stopCamera()"
+                     x-init="$watch('showCreateModal', value => value ? startCamera() : stopCamera())"
                 >
 
                     {{-- Tombol Close (X) --}}
@@ -385,12 +412,32 @@
 
                         {{-- AREA KAMERA --}}
                         <div class="mb-5 rounded-lg overflow-hidden border-2 border-slate-500 bg-black relative aspect-[4/3]">
-                            <video x-show="state === 'camera'" x-ref="videoFeed" autoplay playsinline class="w-full h-full object-cover"></video>
-                            <img x-show="state === 'preview'" :src="imageBase64" class="w-full h-full object-cover" style="display: none;">
+                            
+                            {{-- Video Feed (Pakai CSS Mirror jika kamera depan) --}}
+                            <video x-show="state === 'camera'" x-ref="videoFeed" autoplay playsinline 
+                                class="w-full h-full object-cover transition-transform duration-300"
+                                :class="currentFacingMode === 'user' ? 'transform scale-x-[-1]' : ''">
+                            </video>
+                            
+                            {{-- Hasil Foto (Tanpa class mirror) --}}
+                            <img x-show="state === 'preview'" :src="imageBase64" 
+                                class="w-full h-full object-cover transition-transform duration-300"
+                                style="display: none;">
                             
                             <div x-show="state === 'camera' && !stream" class="absolute inset-0 flex items-center justify-center text-white text-xs">
                                 Memuat Kamera...
                             </div>
+
+                            {{-- TOMBOL SWITCH CAMERA --}}
+                            <button type="button" 
+                                    x-show="state === 'camera'"
+                                    @click="switchCamera()"
+                                    class="absolute top-3 left-3 z-10 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full backdrop-blur-sm border border-white/20 transition-all transform active:scale-95 shadow-md"
+                                    title="Ganti Kamera">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                </svg>
+                            </button>
                         </div>
                         <canvas x-ref="canvas" class="hidden"></canvas>
 

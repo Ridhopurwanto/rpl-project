@@ -169,14 +169,7 @@ class PresensiController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'foto_base64' => 'required|string',
-            'jenis_presensi' => 'required|in:masuk,pulang',
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
-        ]);
-        
+    {        
         $user = Auth::user();
         $now = Carbon::now();
         $status = 'tepat waktu';
@@ -190,10 +183,12 @@ class PresensiController extends Controller
             $isGeotagEnabled = $shiftHariIni->shiftRule->is_geotag_enabled;
         }
 
-        // 2. Validasi Input
         $rules = [
             'foto_base64' => 'required|string',
             'jenis_presensi' => 'required|in:masuk,pulang',
+            // Default: latitude/longitude boleh nullable jika geotag mati
+            'latitude' => 'nullable', 
+            'longitude' => 'nullable',
         ];
 
         // Hanya validasi lat/long jika fitur dinyalakan
@@ -289,6 +284,7 @@ class PresensiController extends Controller
                 }                
             }
 
+
             // 4. Simpan Data (DENGAN LATITUDE & LONGITUDE)
             Presensi::create([
                 'id_pengguna'    => $user->id_pengguna,
@@ -304,7 +300,7 @@ class PresensiController extends Controller
             ]);
 
             return redirect()->route('anggota.presensi.index')
-                             ->with('success', 'Presensi ' . $request->jenis_presensi . ' berhasil! Status: ' . $status . ' | Jarak: ' . round($distance) . 'm');
+                             ->with('success', 'Presensi ' . $request->jenis_presensi . ' berhasil! Status: ' . $status);
 
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal: ' . $e->getMessage());
