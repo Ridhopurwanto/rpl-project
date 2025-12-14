@@ -466,15 +466,5 @@
                 </div>
              </div>
         </div>
-        
-        {{-- MODAL ALERT --}}
-        <div x-show="showAlertModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80">
-            <div class="bg-white p-6 rounded-lg max-w-sm w-full text-center">
-                <h3 class="text-lg font-bold mb-2">Info</h3>
-                <p x-text="alertData.waktu" class="mb-4"></p>
-                <button @click="showAlertModal=false" class="bg-blue-600 text-white px-4 py-2 rounded">OK</button>
-            </div>
-        </div>
-
     </div>
 @endsection
