@@ -50,7 +50,7 @@ class PenggunaSeeder extends Seeder
                 'username'      => 'bau',
                 'email'         => 'admin_bau@siap.com',
                 'password'      => Hash::make('password123'),
-                'peran'         => 'bau',
+                'peran'         => 'supervisor',
                 'jenis_jadwal'  => null,
                 'tanggal_lahir' => '1990-11-30',
                 'no_hp'         => '081233334444',

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('email')->nullable()->unique();
             $table->string('password');
             $table->rememberToken();
-            $table->enum('peran', ['anggota', 'komandan', 'bau']);
+            $table->enum('peran', ['anggota', 'komandan', 'supervisor']);
             $table->enum('jenis_jadwal', ['shift', 'non_shift'])->nullable();
             $table->date('tanggal_lahir')->nullable();
             $table->string('no_hp', 20)->nullable();
