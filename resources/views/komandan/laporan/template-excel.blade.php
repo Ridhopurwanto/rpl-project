@@ -5,6 +5,7 @@
         /* CSS Reset sederhana untuk PDF */
         body { font-family: sans-serif; }
         table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #000000; }
     </style>
 </head>
 <body>
@@ -27,7 +28,7 @@
             'kendaraan' => 7,
             'tamu' => 6,
             'gangguan' => 6,
-            'shift' => 3 + \Carbon\Carbon::parse($meta['tanggalMulai'])->diffInDays(\Carbon\Carbon::parse($meta['tanggalSelesai'])) + 1,
+            'shift' => 34, // Fixed colspan for Shift to ensure full A4 Landscape width (3 info + 31 days)
             'anggota' => 9, 
             'kendaraan_terdaftar' => 4 
         ];

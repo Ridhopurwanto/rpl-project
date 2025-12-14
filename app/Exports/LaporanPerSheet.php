@@ -84,19 +84,11 @@ class LaporanPerSheet implements FromView, ShouldAutoSize, WithTitle, WithStyles
 
         // Khusus Shift, karena kolom kecil-kecil, kita geser anchor ke kiri agar tidak keluar page
         if ($this->type == 'shift') {
-             // Manual recalc for safety or extract logic
-             $start = \Carbon\Carbon::parse($this->metadata['tanggalMulai']);
-             $end = \Carbon\Carbon::parse($this->metadata['tanggalSelesai']);
-             $diff = $start->diffInDays($end) + 1;
-             $total = 3 + $diff;
-             
-             // Mundur 2 kolom dari belakang (width 4 * 2 = 8 width units... approx enough to keep inside?)
-             // Logo width 70px.
-             $targetIndex = $total - 2; 
-             if ($targetIndex < 1) $targetIndex = 1;
-
-             $coord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($targetIndex) . '1';
-             $offsetX = 0; // Reset offset
+             // Force fixed position to end of standard page (Col AI = 35 or AH = 34)
+             // Anchor at AF (32), 2 cols before usage (AH=34). 
+             // 3 cols * width 4 (~84px). Logo ~70px. Offset 5 puts it nicely near end.
+             $coord = 'AF1'; 
+             $offsetX = 5; 
         } else {
              // Logic offset biasa
              $offsetX = 10;
@@ -104,9 +96,10 @@ class LaporanPerSheet implements FromView, ShouldAutoSize, WithTitle, WithStyles
              if ($this->type == 'kendaraan') $offsetX = 90;
              if ($this->type == 'tamu') $offsetX = 125; 
              if ($this->type == 'gangguan') $offsetX = 125; 
-             if ($this->type == 'patroli') $offsetX = 80;
+             if ($this->type == 'patroli') $offsetX = 60;
              if ($this->type == 'anggota') $offsetX = 25; // Col I width 15. Offset positions logo to right with margin
              if ($this->type == 'kendaraan_terdaftar') $offsetX = 90; // Col D width 25. High offset to push to right edge.
+             if ($this->type == 'presensi') $offsetX = 60; // Col F width 20.
         }
 
         $drawing2->setCoordinates($coord); 
@@ -131,11 +124,8 @@ class LaporanPerSheet implements FromView, ShouldAutoSize, WithTitle, WithStyles
             case 'anggota': $colCount = 9; break;
             case 'kendaraan_terdaftar': $colCount = 4; break;
             case 'shift':
-                 // Hitung dinamis sesuai template
-                 $start = \Carbon\Carbon::parse($this->metadata['tanggalMulai']);
-                 $end = \Carbon\Carbon::parse($this->metadata['tanggalSelesai']);
-                 $diff = $start->diffInDays($end) + 1;
-                 $colCount = 3 + $diff;
+                 // Fixed 34 columns (3 info + 31 days) to fill page
+                 $colCount = 34;
                  break;
         }
 
@@ -225,10 +215,9 @@ class LaporanPerSheet implements FromView, ShouldAutoSize, WithTitle, WithStyles
                 'C' => 15, // JABATAN
             ];
             
-            // Kolom tanggal D s/d AJ (kira-kira 31 hari)
-            // Kita set width kecil (4)
+            // Set widths for dates up to 31 days (Total cols reach AI approx)
             $colIndex = 4; // D
-            for ($i = 1; $i <= 33; $i++) {
+            for ($i = 1; $i <= 31; $i++) {
                 $letter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex);
                 $widths[$letter] = 4;
                 $colIndex++;

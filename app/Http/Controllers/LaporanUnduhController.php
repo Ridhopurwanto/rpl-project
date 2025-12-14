@@ -157,24 +157,51 @@ class LaporanUnduhController extends Controller
         $endFull   = $end   . ' 23:59:59';
 
         switch ($type) {
-            case 'presensi':    return Presensi::whereBetween('tanggal', [$start, $end])->get();
-            case 'patroli':     return Patroli::with(['claim.rule'])->whereBetween('tanggal', [$start, $end])->get();
+            case 'presensi':    
+                return Presensi::whereBetween('tanggal', [$start, $end])
+                               ->orderBy('tanggal', 'asc')
+                               ->orderBy('waktu', 'asc')
+                               ->get();
+            case 'patroli':     
+                return Patroli::with(['claim.rule'])
+                              ->whereBetween('tanggal', [$start, $end])
+                              ->orderBy('tanggal', 'asc')
+                              ->orderBy('waktu_exact', 'asc')
+                              ->get();
             case 'tamu':        
                 return Tamu::whereDate('waktu_datang', '>=', $start)
                            ->whereDate('waktu_datang', '<=', $end)
+                           ->orderBy('waktu_datang', 'asc')
                            ->get();
             case 'barang_temu': 
                 return BarangTemuan::whereDate('waktu_lapor', '>=', $start)
                                    ->whereDate('waktu_lapor', '<=', $end)
+                                   ->orderBy('waktu_lapor', 'asc')
                                    ->get();
             case 'barang_titip':
                 return BarangTitipan::whereDate('waktu_titip', '>=', $start)
                                     ->whereDate('waktu_titip', '<=', $end)
+                                    ->orderBy('waktu_titip', 'asc')
                                     ->get();
-            case 'kendaraan':   return LogKendaraan::whereBetween('waktu_masuk', [$startFull, $endFull])->get();
-            case 'gangguan':    return GangguanKamtibmas::whereBetween('waktu_lapor', [$startFull, $endFull])->get();
-            case 'shift':       return Shift::whereBetween('tanggal', [$start, $end])->get();
-            case 'anggota':     return User::whereIn('peran', ['anggota', 'komandan'])->get();
+            case 'kendaraan':   
+                return LogKendaraan::whereBetween('waktu_masuk', [$startFull, $endFull])
+                                   ->orderBy('waktu_masuk', 'asc')
+                                   ->get();
+            case 'gangguan':    
+                return GangguanKamtibmas::whereBetween('waktu_lapor', [$startFull, $endFull])
+                                        ->orderBy('waktu_lapor', 'asc')
+                                        ->get();
+            case 'shift':       
+                return Shift::join('pengguna', 'shift.id_pengguna', '=', 'pengguna.id_pengguna')
+                            ->whereBetween('shift.tanggal', [$start, $end])
+                            ->orderBy('pengguna.nama_lengkap', 'asc') // Sort by Name
+                            ->orderBy('shift.tanggal', 'asc')
+                            ->select('shift.*') // Keep shift data
+                            ->get();
+            case 'anggota':     
+                return User::whereIn('peran', ['anggota', 'komandan'])
+                           ->orderBy('nama_lengkap', 'asc') // Sort by Name
+                           ->get();
             case 'kendaraan_terdaftar': return Kendaraan::orderBy('tipe', 'asc')->get();
             default:            return null;
         }
