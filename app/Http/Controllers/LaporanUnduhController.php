@@ -175,7 +175,7 @@ class LaporanUnduhController extends Controller
             case 'gangguan':    return GangguanKamtibmas::whereBetween('waktu_lapor', [$startFull, $endFull])->get();
             case 'shift':       return Shift::whereBetween('tanggal', [$start, $end])->get();
             case 'anggota':     return User::whereIn('peran', ['anggota', 'komandan'])->get();
-            case 'kendaraan_terdaftar': return Kendaraan::all();
+            case 'kendaraan_terdaftar': return Kendaraan::orderBy('tipe', 'asc')->get();
             default:            return null;
         }
     }

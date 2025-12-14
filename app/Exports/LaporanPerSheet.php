@@ -105,6 +105,8 @@ class LaporanPerSheet implements FromView, ShouldAutoSize, WithTitle, WithStyles
              if ($this->type == 'tamu') $offsetX = 125; 
              if ($this->type == 'gangguan') $offsetX = 125; 
              if ($this->type == 'patroli') $offsetX = 80;
+             if ($this->type == 'anggota') $offsetX = 25; // Col I width 15. Offset positions logo to right with margin
+             if ($this->type == 'kendaraan_terdaftar') $offsetX = 90; // Col D width 25. High offset to push to right edge.
         }
 
         $drawing2->setCoordinates($coord); 
@@ -232,6 +234,29 @@ class LaporanPerSheet implements FromView, ShouldAutoSize, WithTitle, WithStyles
                 $colIndex++;
             }
             return $widths;
+        }
+
+        if ($this->type == 'kendaraan_terdaftar') {
+            return [
+                'A' => 5,  // NO
+                'B' => 25, // NOMOR PLAT
+                'C' => 50, // PEMILIK (Reduced from 80 to balanced width)
+                'D' => 25, // TIPE
+            ];
+        }
+
+        if ($this->type == 'anggota') {
+            return [
+                'A' => 4,  // NO
+                'B' => 8,  // FOTO
+                'C' => 22, // NAMA
+                'D' => 10, // PERAN
+                'E' => 12, // JADWAL
+                'F' => 12, // TGL LAHIR
+                'G' => 22, // ALAMAT
+                'H' => 30, // EMAIL
+                'I' => 15, // HP
+            ];
         }
 
         // Default auto-size for others

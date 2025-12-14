@@ -1,5 +1,5 @@
 <h3>DAFTAR KENDARAAN TERDAFTAR</h3>
-<table border="1" style="border-collapse: collapse; width: 100%;">
+<table border="1" style="border-collapse: collapse; width: 100%; border: 1px solid #000000;">
     <thead>
         <tr>
             <th style="{{ $thStyle }}" width="5">NO</th>
