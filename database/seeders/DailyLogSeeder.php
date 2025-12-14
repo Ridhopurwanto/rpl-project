@@ -13,6 +13,7 @@ use App\Models\Tamu;
 use App\Models\BarangTitipan;
 use App\Models\BarangTemuan;
 use App\Models\GangguanKamtibmas;
+use Illuminate\Support\Str;
 
 class DailyLogSeeder extends Seeder
 {
@@ -22,7 +23,7 @@ class DailyLogSeeder extends Seeder
 
         // STRICTLY 2025 as requested
         $startDate = Carbon::create(2025, 10, 1);
-        $endDate = Carbon::create(2025, 12, 31);
+        $endDate = Carbon::create(2025, 12, 14);
         
         $anggotaUsers = User::where('peran', 'anggota')->get();
         
@@ -113,12 +114,15 @@ class DailyLogSeeder extends Seeder
                 
                 $statusMasuk = $entryOffset > 10 ? 'terlambat' : 'tepat waktu';
 
+                // Photo Presensi Path
+                $presensiPhoto = 'presensi/presensi_' . uniqid() . '.jpg';
+
                 Presensi::create([
                     'id_pengguna' => $uid,
                     'id_shift' => $shiftId,
                     'nama_lengkap' => $user->nama_lengkap ?? $faker->name,
                     'waktu' => $entryTime,
-                    'foto' => 'placeholder.jpg',
+                    'foto' => $presensiPhoto,
                     'status' => $statusMasuk,
                     'jenis_presensi' => 'Masuk',
                     'tanggal' => $dateString,
@@ -135,13 +139,16 @@ class DailyLogSeeder extends Seeder
                     $exitTime->addMinutes($exitOffset);
 
                     $statusPulang = $exitOffset < 0 ? 'terlalu cepat' : 'tepat waktu'; 
+                    
+                    // Photo Presensi Path (Pulang)
+                    $presensiPhotoPulang = 'presensi/presensi_' . uniqid() . '.jpg';
 
                     Presensi::create([
                         'id_pengguna' => $uid,
                         'id_shift' => $shiftId,
                         'nama_lengkap' => $user->nama_lengkap ?? $faker->name,
                         'waktu' => $exitTime,
-                        'foto' => 'placeholder.jpg',
+                        'foto' => $presensiPhotoPulang,
                         'status' => $statusPulang,
                         'jenis_presensi' => 'Pulang',
                         'tanggal' => $dateString, 
@@ -152,7 +159,6 @@ class DailyLogSeeder extends Seeder
             }
 
             // === 2. PATROLI LOGIC ===
-            // 1-2 Patroli sessions per day
             $patroliCount = rand(1, 2);
             for ($p = 0; $p < $patroliCount; $p++) {
                 $patrollerId = $faker->randomElement($userIds);
@@ -161,15 +167,17 @@ class DailyLogSeeder extends Seeder
                 $jenisPatroli = 'Patroli ' . rand(1, 6); 
 
                 foreach ($patroliAreas as $index => $areaName) {
-                    // Time progresses by 2-5 minutes per area
                     $checkpointTime = $sessionStart->copy()->addMinutes(($index + 1) * rand(2, 5));
                     
+                    // Patroli Photo Path
+                     $patroliPhoto = 'patroli/patroli_' . uniqid() . '.jpg';
+
                     Patroli::create([
                         'id_pengguna' => $patrollerId,
                         'nama_lengkap' => $patroller->nama_lengkap ?? $faker->name,
                         'waktu_exact' => $checkpointTime,
-                        'wilayah' => $areaName, // Now using ENUM value
-                        'foto' => 'placeholder.jpg',
+                        'wilayah' => $areaName, 
+                        'foto' => $patroliPhoto,
                         'tanggal' => $dateString,
                         'jenis_patroli' => $jenisPatroli,
                     ]);
@@ -188,18 +196,22 @@ class DailyLogSeeder extends Seeder
                     $isDone = $faker->boolean(80);
                     $endT = $isDone ? $startT->copy()->addHours(rand(1, 8)) : null;
 
+                    // Paths
+                    $titipanPhoto = 'barang/titipan/barang_' . uniqid() . '.jpg';
+                    $penerimaPhoto = $isDone ? 'barang/penerima/penerima_' . uniqid() . '.jpg' : null;
+
                     BarangTitipan::create([
                         'id_pengguna' => $ownerId,
                         'nama_barang' => $itemName,
                         'nama_penitip' => $faker->name,
                         'tujuan' => $faker->name,
-                        'foto' => 'placeholder.jpg',
+                        'foto' => $titipanPhoto,
                         'catatan' => $faker->randomElement($catatanTitipan),
                         'status' => $isDone ? 'selesai' : 'belum selesai',
                         'waktu_titip' => $startT,
                         'waktu_selesai' => $endT,
                         'nama_penerima' => $isDone ? $faker->name : null,
-                        'foto_penerima' => $isDone ? 'placeholder.jpg' : null,
+                        'foto_penerima' => $penerimaPhoto,
                     ]);
                 } else {
                     // TEMUAN
@@ -207,18 +219,22 @@ class DailyLogSeeder extends Seeder
                     $isDone = $faker->boolean(60);
                      $endT = $isDone ? $startT->copy()->addHours(rand(1, 48)) : null;
 
+                    // Paths
+                    $temuanPhoto = 'barang/temuan/barang_' . uniqid() . '.jpg';
+                    $penerimaPhoto = $isDone ? 'barang/penerima/penerima_' . uniqid() . '.jpg' : null;
+
                     BarangTemuan::create([
                         'id_pengguna' => $ownerId,
                         'nama_barang' => $itemName,
                         'nama_pelapor' => $faker->name,
                         'lokasi_penemuan' => $faker->randomElement($lokasiList),
-                        'foto' => 'placeholder.jpg',
+                        'foto' => $temuanPhoto,
                         'catatan' => $faker->randomElement($catatanTemuan),
                         'status' => $isDone ? 'selesai' : 'belum selesai',
                         'waktu_lapor' => $startT,
                         'waktu_selesai' => $endT,
                         'nama_penerima' => $isDone ? $faker->name : null,
-                        'foto_penerima' => $isDone ? 'placeholder.jpg' : null,
+                        'foto_penerima' => $penerimaPhoto,
                     ]);
                 }
             }
@@ -232,7 +248,7 @@ class DailyLogSeeder extends Seeder
                     'tujuan' => $faker->randomElement($tujuanTamu),
                     'id_pengguna' => $faker->randomElement($userIds),
                     'waktu_datang' => $startDate->copy()->setTime(rand(8, 15), rand(0, 59)),
-                    'no_identitas' => $faker->numerify('35##############'), // NIK Jatim-ish style
+                    'no_identitas' => $faker->numerify('35##############'),
                 ]);
             }
 
@@ -241,11 +257,14 @@ class DailyLogSeeder extends Seeder
                 $kat = $faker->randomElement(array_keys($gangguanKategori));
                 $desc = $faker->randomElement($gangguanKategori[$kat]);
                 
+                // Gangguan Photo Path
+                $gangguanPhoto = 'gangguan/gangguan_' . uniqid() . '.jpg';
+
                 GangguanKamtibmas::create([
                     'id_pengguna' => $faker->randomElement($userIds),
                     'waktu_lapor' => $startDate->copy()->setTime(rand(0, 23), rand(0, 59)),
                     'lokasi' => $faker->randomElement($lokasiList),
-                    'foto' => 'placeholder.jpg',
+                    'foto' => $gangguanPhoto,
                     'deskripsi' => $desc,
                     'kategori' => $kat,
                 ]);
