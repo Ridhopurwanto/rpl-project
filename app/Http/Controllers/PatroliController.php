@@ -13,69 +13,84 @@ class PatroliController extends Controller
 {
     public function index(Request $request)
     {
-        // Ambil Tanggal (Default Hari Ini)
+        // 1. Ambil Tanggal (Default Hari Ini)
         $tanggalTerpilih = $request->input('tanggal', now()->format('Y-m-d'));
         
-        // Definisikan Opsi Jenis Patroli
+        // 2. Definisikan Opsi Jenis Patroli (Untuk Dropdown Filter)
         $jenisPatroliOptions = collect([
             'Semua',
-            'Patroli 1',
-            'Patroli 2',
-            'Patroli 3',
-            'Patroli 4',
-            'Patroli 5',
-            'Patroli 6'
+            'Patroli 1', 'Patroli 2', 'Patroli 3', 
+            'Patroli 4', 'Patroli 5', 'Patroli 6'
         ]);
-
-        // === SHIFT PAGI (jenis_shift = 1) ===
+        
+        // ---------------------------------------------------------
+        // QUERY SHIFT PAGI (jenis_shift = 'Pagi')
+        // ---------------------------------------------------------
         $jenisPatroliTerpilihPagi = $request->input('jenis_patroli_pagi', 'Semua');
         $perPagePagi = $request->input('per_page_pagi', 10);
 
-        // Query untuk Shift Pagi - LEFT JOIN ke shift dan pengguna
         $queryPagi = Patroli::query()
-            ->with(['claim.rule']) 
+            ->with(['claim.rule']) // Eager load relasi
             ->whereDate('tanggal', $tanggalTerpilih)
             ->whereHas('claim.rule', function ($q) {
-                $q->where('jenis_shift', 1); // 1 = Pagi
+                // Filter hanya yang shift Pagi
+                $q->where('jenis_shift', 'Pagi'); 
             })
             ->orderBy('waktu_exact', 'asc');
 
-        // Filter jenis patroli jika bukan "Semua"
+        // Filter Jenis Patroli Pagi (jika user memilih spesifik)
         if ($jenisPatroliTerpilihPagi !== 'Semua') {
-            $queryPagi->where('patroli.jenis_patroli', $jenisPatroliTerpilihPagi);
+            $queryPagi->whereHas('claim.rule', function ($q) use ($jenisPatroliTerpilihPagi) {
+                $q->where('jenis_patroli', $jenisPatroliTerpilihPagi);
+            });
         }
 
         $dataPatroliPagi = $queryPagi->paginate($perPagePagi, ['*'], 'page_pagi');
 
-        // === SHIFT MALAM (jenis_shift = 2) ===
+
+        // ---------------------------------------------------------
+        // QUERY SHIFT MALAM (jenis_shift = 'Malam')
+        // ---------------------------------------------------------
         $jenisPatroliTerpilihMalam = $request->input('jenis_patroli_malam', 'Semua');
         $perPageMalam = $request->input('per_page_malam', 10);
 
-        // Query untuk Shift Malam - LEFT JOIN ke shift dan pengguna
         $queryMalam = Patroli::query()
-            ->with(['claim.rule']) 
+            ->with(['claim.rule']) // Eager load relasi
             ->whereDate('tanggal', $tanggalTerpilih)
             ->whereHas('claim.rule', function ($q) {
-                $q->where('jenis_shift', 2); // 1 = Pagi
+                // Filter hanya yang shift Malam
+                $q->where('jenis_shift', 'Malam'); 
             })
             ->orderBy('waktu_exact', 'asc');
 
-        // Filter jenis patroli jika bukan "Semua"
+        // Filter Jenis Patroli Malam (jika user memilih spesifik)
         if ($jenisPatroliTerpilihMalam !== 'Semua') {
-            $queryMalam->where('patroli.jenis_patroli', $jenisPatroliTerpilihMalam);
+            $queryMalam->whereHas('claim.rule', function ($q) use ($jenisPatroliTerpilihMalam) {
+                $q->where('jenis_patroli', $jenisPatroliTerpilihMalam);
+            });
         }
 
         $dataPatroliMalam = $queryMalam->paginate($perPageMalam, ['*'], 'page_malam');
 
-        // Ambil data Patroli Rules
-        $patroliRules = PatroliRule::all()->groupBy('jenis_shift');
 
+        // ---------------------------------------------------------
+        // DATA PENDUKUNG (Rules untuk Modal Edit Jam)
+        // ---------------------------------------------------------
+        // Mengambil semua rules dan mengelompokkan berdasarkan shift (Pagi/Malam)
+        // Agar mudah ditampilkan di modal setting jam
+        $patroliRules = PatroliRule::all()->groupBy('jenis_shift');
+        
         return view('komandan.patroli', [
+            // Data Utama
             'dataPatroliPagi' => $dataPatroliPagi,
             'dataPatroliMalam' => $dataPatroliMalam,
+            
+            // Filter State
             'tanggalTerpilih' => $tanggalTerpilih,
             'jenisPatroliTerpilihPagi' => $jenisPatroliTerpilihPagi,
             'jenisPatroliTerpilihMalam' => $jenisPatroliTerpilihMalam,
+            
+            // Options & Config
             'jenisPatroliOptions' => $jenisPatroliOptions,
             'patroliRules' => $patroliRules,
             'perPagePagi' => $perPagePagi,
