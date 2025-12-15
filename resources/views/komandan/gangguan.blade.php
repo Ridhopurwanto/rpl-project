@@ -140,7 +140,6 @@
                         </div>
                     </div>
 
-                    {{-- Filter Bulan --}}
                     {{-- Filter Bulan (Custom Picker) --}}
                     <div class="w-[calc(50%-0.5rem)] md:flex-1" x-data="{
                         showPicker: false,

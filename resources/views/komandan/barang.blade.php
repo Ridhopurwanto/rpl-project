@@ -103,6 +103,15 @@
         </div>
     </div>
 
+    {{-- Loading Indicator --}}
+    <div id="loading-indicator" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+        <div class="bg-white p-4 rounded-lg shadow-xl flex items-center gap-3">
+            <div class="animate-spin rounded-full h-8 w-8 border-4 border-[#1e3a5f] border-t-transparent"></div>
+            <span class="font-bold text-[#1e3a5f]">Memuat Data...</span>
+        </div>
+    </div>
+
+
 </div>
 
 {{-- SCRIPT AJAX SEARCH & PAGINATION --}}
@@ -120,6 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function fetchResults(url) {
+        toggleLoading(true);
         if (!url) {
             // Collect params from inputs inside the results container (which are re-rendered)
             const searchInputTemuan = document.getElementById('searchInputTemuan');
@@ -169,7 +179,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Note: Livewire is better for this, but with vanilla JS + Alpine + AJAX replacement:
                 // We might need to manually trigger Alpine to scan the new DOM.
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => console.error('Error:', error))
+            .finally(() => {
+                toggleLoading(false);
+            });
+    }
+
+    function toggleLoading(show) {
+        const loader = document.getElementById('loading-indicator');
+        if (loader) loader.style.display = show ? 'flex' : 'none';
     }
 
     function attachListeners() {

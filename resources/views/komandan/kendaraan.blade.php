@@ -443,6 +443,14 @@
         </div>
     </div>
 
+    {{-- Loading Indicator --}}
+    <div id="loading-indicator" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+        <div class="bg-white p-4 rounded-lg shadow-xl flex items-center gap-3">
+            <div class="animate-spin rounded-full h-8 w-8 border-4 border-[#1e3a5f] border-t-transparent"></div>
+            <span class="font-bold text-[#1e3a5f]">Memuat Data...</span>
+        </div>
+    </div>
+
 </div>
 
 {{-- SCRIPT AJAX LIVE SEARCH --}}
@@ -473,6 +481,8 @@ if (searchMasterInput) {
 
 // Function untuk load data riwayat via AJAX
 function loadRiwayatData(page = 1) {
+    toggleLoading(true);
+
     const formData = new FormData(document.getElementById('filterForm'));
     formData.append('page_riwayat', page);
     
@@ -487,11 +497,16 @@ function loadRiwayatData(page = 1) {
             document.getElementById('riwayat-table-container').innerHTML = data.html;
             document.getElementById('riwayat-pagination-container').innerHTML = data.pagination;
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => console.error('Error:', error))
+        .finally(() => {
+            toggleLoading(false);
+        });
 }
 
 // Function untuk load data master via AJAX
 function loadMasterData(page = 1) {
+    toggleLoading(true);
+
     const formData = new FormData(document.getElementById('filterFormMaster'));
     formData.append('page_master', page);
     
@@ -506,7 +521,15 @@ function loadMasterData(page = 1) {
             document.getElementById('master-table-container').innerHTML = data.html;
             document.getElementById('master-pagination-container').innerHTML = data.pagination;
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => console.error('Error:', error))
+        .finally(() => {
+            toggleLoading(false);
+        });
+}
+
+function toggleLoading(show) {
+    const loader = document.getElementById('loading-indicator');
+    if (loader) loader.style.display = show ? 'flex' : 'none';
 }
 
 // Function untuk pagination riwayat
