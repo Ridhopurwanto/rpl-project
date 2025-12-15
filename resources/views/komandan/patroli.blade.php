@@ -61,62 +61,20 @@
     <div x-show="showPagi" x-collapse>
         
         {{-- Form Filter Shift Pagi --}}
-        <form action="{{ route('komandan.patroli') }}" method="GET" x-data="{}">
-            <input type="hidden" name="shift" value="Pagi">
-            <div class="px-6 py-5 border-b border-gray-200">
-                <div class="flex flex-wrap gap-4">
-                    
-                    {{-- Show Entries --}}
-                    <div class="w-[calc(50%-0.5rem)] md:w-auto">
-                        <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
-                        <div class="flex items-center gap-2">
-                            <div class="relative">
-                                <select name="per_page_pagi" onchange="this.form.submit()" class="block h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
-                                    <option value="5" {{ $perPagePagi == 5 ? 'selected' : '' }}>5</option>
-                                    <option value="10" {{ $perPagePagi == 10 ? 'selected' : '' }}>10</option>
-                                    <option value="25" {{ $perPagePagi == 25 ? 'selected' : '' }}>25</option>
-                                    <option value="50" {{ $perPagePagi == 50 ? 'selected' : '' }}>50</option>
-                                    <option value="100" {{ $perPagePagi == 100 ? 'selected' : '' }}>100</option>
-                                </select>
-                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                    <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                    </svg>
-                                </div>
-                            </div>
-                            <span class="text-sm text-gray-600 whitespace-nowrap">rows</span>
-                        </div>
-                    </div>
-                    
-                    {{-- Filter Tanggal --}}
-                    <div class="w-[calc(50%-0.5rem)] md:flex-1">
-                        <label for="tanggal_pagi" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                            Tanggal
-                        </label>
-                        <div class="cursor-pointer" @click="$refs.dateInputPagi.showPicker()">
-                            <input type="date" id="tanggal_pagi" name="tanggal" x-ref="dateInputPagi"
-                                onchange="this.form.submit()"
-                                class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
-                                value="{{ $tanggalTerpilih }}">
-                        </div>
-                    </div>
-
-                    {{-- Filter Jenis Patroli --}}
-                    <div class="w-[calc(50%-0.5rem)] md:flex-1">
-                        <label for="jenis_patroli_pagi" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                            Jenis Patroli
-                        </label>
+        <div class="px-6 py-5 border-b border-gray-200">
+            <div class="flex flex-wrap gap-4">
+                
+                {{-- Show Entries --}}
+                <div class="w-[calc(50%-0.5rem)] md:w-auto">
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
+                    <div class="flex items-center gap-2">
                         <div class="relative">
-                            <select id="jenis_patroli_pagi" name="jenis_patroli_pagi" 
-                                    onchange="this.form.submit()"
-                                    class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
-                                @forelse($jenisPatroliOptions as $opsi)
-                                    <option value="{{ $opsi }}" {{ $jenisPatroliTerpilihPagi == $opsi ? 'selected' : '' }}>
-                                        {{ $opsi }}
-                                    </option>
-                                @empty
-                                    <option value="" disabled selected>Tidak ada data jenis patroli</option>
-                                @endforelse
+                            <select id="perPagePagi" name="per_page_pagi" class="filter-input block h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                                <option value="5" {{ $perPagePagi == 5 ? 'selected' : '' }}>5</option>
+                                <option value="10" {{ $perPagePagi == 10 ? 'selected' : '' }}>10</option>
+                                <option value="25" {{ $perPagePagi == 25 ? 'selected' : '' }}>25</option>
+                                <option value="50" {{ $perPagePagi == 50 ? 'selected' : '' }}>50</option>
+                                <option value="100" {{ $perPagePagi == 100 ? 'selected' : '' }}>100</option>
                             </select>
                             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                 <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -124,153 +82,51 @@
                                 </svg>
                             </div>
                         </div>
+                        <span class="text-sm text-gray-600 whitespace-nowrap">rows</span>
                     </div>
                 </div>
-            </div>
-        </form>
-        
-        {{-- TABEL (Desktop & Tablet) --}}
-        <div class="hidden md:block overflow-x-auto">
-            <table class="w-full min-w-max table-fixed">
-                <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
-                    <tr>
-                        <th class="py-3 px-4 text-center w-[5%]">No</th>
-                        <th class="py-3 px-4 text-center w-[25%]">Nama</th>
-                        <th class="py-3 px-4 text-center w-[20%]">Jenis Patroli</th>
-                        <th class="py-3 px-4 text-center w-[15%]">Waktu</th>
-                        <th class="py-3 px-4 text-center w-[20%]">Wilayah</th>
-                        <th class="py-3 px-4 text-center w-[5%]">Foto</th>
-                        <th class="py-3 px-4 text-center w-[10%]">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="text-sm divide-y divide-gray-200">
-                    @forelse($dataPatroliPagi as $index => $item)
-                    <tr>
-                        <td class="py-2 px-4 text-center">{{ $dataPatroliPagi->firstItem() + $index }}.</td>
-                        <td class="py-2 px-4 font-medium text-center">{{ $item->nama_lengkap }}</td>
-                        <td class="py-2 px-4 text-center">{{ $item->jenis_patroli }}</td>
-                        <td class="py-2 px-4 text-center">{{ $item->waktu_exact->format('H:i:s') }}</td>
-                        <td class="py-2 px-4 text-center">{{ $item->wilayah }}</td>
-                        <td class="py-2 px-4 text-center">
-                            <button @click="showPhotoModal = true; photoUrl = '{{ asset('storage/' . $item->foto) }}'" class="text-blue-500 hover:underline">
-                                Buka
-                            </button>
-                        </td>
-                        <td class="py-2 px-4">
-                            @if(Auth::user()->peran == 'komandan')
-                                <div class="flex justify-center space-x-3">
-                                    <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('komandan.patroli.destroy', $item->id_patroli) }}'" class="text-red-500 hover:text-red-700" title="Hapus">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                                    </button>
-                                </div>
-                            @endif
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="7" class="py-4 px-4 text-center text-gray-500">
-                            Tidak ada data patroli shift pagi pada tanggal ini.
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        
-{{-- CARD LAYOUT (Mobile) - UNTUK SHIFT PAGI --}}
-<div class="md:hidden space-y-2 p-3">
-    @forelse($dataPatroliPagi as $index => $item)
-        <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 relative">
-            @if(Auth::user()->peran == 'komandan')
-                <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('komandan.patroli.destroy', $item->id_patroli) }}'" 
-                        class="absolute top-2 right-2 bg-red-500 text-white p-2 rounded hover:bg-red-600 transition">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                </button>
-            @endif
-            <div class="flex gap-3 p-3">
-                {{-- Foto di Sebelah Kiri --}}
-                <div class="flex-shrink-0">
-                    <button
-                        @click="showPhotoModal = true; photoUrl = '{{ asset('storage/' . $item->foto) }}'"
-                        class="block w-20 h-20 rounded-lg overflow-hidden border-2 border-gray-200 hover:border-blue-500 transition">
-                        <img src="{{ asset('storage/' . $item->foto) }}" 
-                             alt="Foto" 
-                             class="w-full h-full object-cover">
-                    </button>
+                
+                {{-- Filter Tanggal --}}
+                <div class="w-[calc(50%-0.5rem)] md:flex-1">
+                    <label for="tanggal_pagi" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Tanggal
+                    </label>
+                    <div class="cursor-pointer" @click="$refs.dateInputPagi.showPicker()">
+                        <input type="date" id="tanggal_pagi" name="tanggal" x-ref="dateInputPagi"
+                            class="filter-input block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
+                            value="{{ $tanggalTerpilih }}">
+                    </div>
                 </div>
 
-                {{-- Info di Sebelah Kanan --}}
-                <div class="flex-1 min-w-0">
-                    {{-- Jenis Patroli Badge --}}
-                    <div class="mb-1">
-                        <span class="inline-block bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">{{ $item->jenis_patroli }}</span>
-                    </div>
-                    
-                    {{-- Nama --}}
-                    <h4 class="font-bold text-gray-800 text-sm mb-2">{{ $item->nama_lengkap }}</h4>
-
-                    {{-- Info Wilayah & Waktu (Sejajar) --}}
-                    <div class="flex items-center gap-3 mb-2">
-                        {{-- Wilayah --}}
-                        <div class="flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                {{-- Filter Jenis Patroli --}}
+                <div class="w-[calc(50%-0.5rem)] md:flex-1">
+                    <label for="jenis_patroli_pagi" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Jenis Patroli
+                    </label>
+                    <div class="relative">
+                        <select id="jenis_patroli_pagi" name="jenis_patroli_pagi" 
+                                class="filter-input block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                            @forelse($jenisPatroliOptions as $opsi)
+                                <option value="{{ $opsi }}" {{ $jenisPatroliTerpilihPagi == $opsi ? 'selected' : '' }}>
+                                    {{ $opsi }}
+                                </option>
+                            @empty
+                                <option value="" disabled selected>Tidak ada data jenis patroli</option>
+                            @endforelse
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
-                            <p class="text-gray-700 font-semibold text-xs">{{ $item->wilayah }}</p>
-                        </div>
-                        
-                        {{-- Waktu --}}
-                        <div class="flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <p class="text-gray-700 font-semibold text-xs">{{ $item->waktu_exact->format('H:i:s') }}</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    @empty
-        <div class="bg-white rounded-lg shadow-sm p-6 text-center">
-            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-            </div>
-            <p class="text-gray-500 text-sm font-semibold">Tidak ada data patroli shift pagi pada tanggal ini.</p>
+        
+        <div id="patroli-pagi-wrapper">
+             @include('komandan.partials.patroli-list', ['data' => $dataPatroliPagi, 'shift' => 'pagi'])
         </div>
-    @endforelse
-</div>
-
-        {{-- Pagination Shift Pagi --}}
-        @if($dataPatroliPagi->total() > 0)
-            <div class="flex justify-between items-center px-6 py-4 border-t border-gray-200">
-                <div class="text-sm text-gray-600">
-                    Showing {{ $dataPatroliPagi->firstItem() ?? 0 }} to {{ $dataPatroliPagi->lastItem() ?? 0 }} of {{ $dataPatroliPagi->total() }} entries
-                </div>
-                <div class="flex items-center gap-1">
-                    @if ($dataPatroliPagi->onFirstPage())
-                        <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Previous</span>
-                    @else
-                        <a href="{{ $dataPatroliPagi->appends(request()->query())->previousPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Previous</a>
-                    @endif
-                    @foreach(range(1, $dataPatroliPagi->lastPage()) as $page)
-                        @if($page == $dataPatroliPagi->currentPage())
-                            <span class="px-3 py-1 text-white bg-[#1e3a5f] rounded font-bold">{{ $page }}</span>
-                        @else
-                            <a href="{{ $dataPatroliPagi->appends(request()->query())->url($page) }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
-                        @endif
-                    @endforeach
-                    @if ($dataPatroliPagi->hasMorePages())
-                        <a href="{{ $dataPatroliPagi->appends(request()->query())->nextPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
-                    @else
-                        <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
-                    @endif
-                </div>
-            </div>
-        @endif
         
     </div>
 </div>
@@ -294,62 +150,20 @@
     <div x-show="showMalam" x-collapse>
         
         {{-- Form Filter Shift Malam --}}
-        <form action="{{ route('komandan.patroli') }}" method="GET" x-data="{}">
-            <input type="hidden" name="shift" value="Malam">
-            <div class="px-6 py-5 border-b border-gray-200">
-                <div class="flex flex-wrap gap-4">
-                    
-                    {{-- Show Entries --}}
-                    <div class="w-[calc(50%-0.5rem)] md:w-auto">
-                        <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
-                        <div class="flex items-center gap-2">
-                            <div class="relative">
-                                <select name="per_page_malam" onchange="this.form.submit()" class="block h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
-                                    <option value="5" {{ $perPageMalam == 5 ? 'selected' : '' }}>5</option>
-                                    <option value="10" {{ $perPageMalam == 10 ? 'selected' : '' }}>10</option>
-                                    <option value="25" {{ $perPageMalam == 25 ? 'selected' : '' }}>25</option>
-                                    <option value="50" {{ $perPageMalam == 50 ? 'selected' : '' }}>50</option>
-                                    <option value="100" {{ $perPageMalam == 100 ? 'selected' : '' }}>100</option>
-                                </select>
-                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                    <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                    </svg>
-                                </div>
-                            </div>
-                            <span class="text-sm text-gray-600 whitespace-nowrap">rows</span>
-                        </div>
-                    </div>
-                    
-                    {{-- Filter Tanggal --}}
-                    <div class="w-[calc(50%-0.5rem)] md:flex-1">
-                        <label for="tanggal_malam" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                            Tanggal
-                        </label>
-                        <div class="cursor-pointer" @click="$refs.dateInputMalam.showPicker()">
-                            <input type="date" id="tanggal_malam" name="tanggal" x-ref="dateInputMalam"
-                                onchange="this.form.submit()"
-                                class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
-                                value="{{ $tanggalTerpilih }}">
-                        </div>
-                    </div>
-
-                    {{-- Filter Jenis Patroli --}}
-                    <div class="w-[calc(50%-0.5rem)] md:flex-1">
-                        <label for="jenis_patroli_malam" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                            Jenis Patroli
-                        </label>
+        <div class="px-6 py-5 border-b border-gray-200">
+            <div class="flex flex-wrap gap-4">
+                
+                {{-- Show Entries --}}
+                <div class="w-[calc(50%-0.5rem)] md:w-auto">
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
+                    <div class="flex items-center gap-2">
                         <div class="relative">
-                            <select id="jenis_patroli_malam" name="jenis_patroli_malam" 
-                                    onchange="this.form.submit()"
-                                    class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
-                                @forelse($jenisPatroliOptions as $opsi)
-                                    <option value="{{ $opsi }}" {{ $jenisPatroliTerpilihMalam == $opsi ? 'selected' : '' }}>
-                                        {{ $opsi }}
-                                    </option>
-                                @empty
-                                    <option value="" disabled selected>Tidak ada data jenis patroli</option>
-                                @endforelse
+                            <select id="perPageMalam" name="per_page_malam" class="filter-input block h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                                <option value="5" {{ $perPageMalam == 5 ? 'selected' : '' }}>5</option>
+                                <option value="10" {{ $perPageMalam == 10 ? 'selected' : '' }}>10</option>
+                                <option value="25" {{ $perPageMalam == 25 ? 'selected' : '' }}>25</option>
+                                <option value="50" {{ $perPageMalam == 50 ? 'selected' : '' }}>50</option>
+                                <option value="100" {{ $perPageMalam == 100 ? 'selected' : '' }}>100</option>
                             </select>
                             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                 <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -357,155 +171,51 @@
                                 </svg>
                             </div>
                         </div>
+                        <span class="text-sm text-gray-600 whitespace-nowrap">rows</span>
                     </div>
                 </div>
-            </div>
-        </form>
-        
-        {{-- TABEL (Desktop & Tablet) --}}
-        <div class="hidden md:block overflow-x-auto">
-            <table class="w-full min-w-max table-fixed">
-                <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
-                    <tr>
-                        <th class="py-3 px-4 text-center w-[5%]">No</th>
-                        <th class="py-3 px-4 text-center w-[25%]">Nama</th>
-                        <th class="py-3 px-4 text-center w-[20%]">Jenis Patroli</th>
-                        <th class="py-3 px-4 text-center w-[15%]">Waktu</th>
-                        <th class="py-3 px-4 text-center w-[20%]">Wilayah</th>
-                        <th class="py-3 px-4 text-center w-[5%]">Foto</th>
-                        <th class="py-3 px-4 text-center w-[10%]">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="text-sm divide-y divide-gray-200">
-                    @forelse($dataPatroliMalam as $index => $item)
-                    <tr>
-                        <td class="py-2 px-4 text-center">{{ $dataPatroliMalam->firstItem() + $index }}.</td>
-                        <td class="py-2 px-4 font-medium text-center">{{ $item->nama_lengkap }}</td>
-                        <td class="py-2 px-4 text-center">{{ $item->jenis_patroli }}</td>
-                        <td class="py-2 px-4 text-center">{{ $item->waktu_exact->format('H:i:s') }}</td>
-                        <td class="py-2 px-4 text-center">{{ $item->wilayah }}</td>
-                        <td class="py-2 px-4 text-center">
-                            <button @click="showPhotoModal = true; photoUrl = '{{ asset('storage/' . $item->foto) }}'" class="text-blue-500 hover:underline">
-                                Buka
-                            </button>
-                        </td>
-                        <td class="py-2 px-4">
-                            @if(Auth::user()->peran == 'komandan')
-                                <div class="flex justify-center space-x-3">
-                                    <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('komandan.patroli.destroy', $item->id_patroli) }}'" class="text-red-500 hover:text-red-700" title="Hapus">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                                    </button>
-                                </div>
-                            @endif
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="7" class="py-4 px-4 text-center text-gray-500">
-                            Tidak ada data patroli shift malam pada tanggal ini.
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-
-{{-- CARD LAYOUT (Mobile) - UNTUK SHIFT MALAM --}}
-<div class="md:hidden space-y-2 p-3">
-    @forelse($dataPatroliMalam as $index => $item)
-        <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 relative">
-            @if(Auth::user()->peran == 'komandan')
-                <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('komandan.patroli.destroy', $item->id_patroli) }}'" 
-                        class="absolute top-2 right-2 bg-red-500 text-white p-2 rounded hover:bg-red-600 transition">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                </button>
-            @endif
-            <div class="flex gap-3 p-3">
-                {{-- Foto di Sebelah Kiri --}}
-                <div class="flex-shrink-0">
-                    <button
-                        @click="showPhotoModal = true; photoUrl = '{{ asset('storage/' . $item->foto) }}'"
-                        class="block w-20 h-20 rounded-lg overflow-hidden border-2 border-gray-200 hover:border-blue-500 transition">
-                        <img src="{{ asset('storage/' . $item->foto) }}" 
-                             alt="Foto" 
-                             class="w-full h-full object-cover">
-                    </button>
+                
+                {{-- Filter Tanggal --}}
+                <div class="w-[calc(50%-0.5rem)] md:flex-1">
+                    <label for="tanggal_malam" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Tanggal
+                    </label>
+                    <div class="cursor-pointer" @click="$refs.dateInputMalam.showPicker()">
+                        <input type="date" id="tanggal_malam" name="tanggal" x-ref="dateInputMalam"
+                            class="filter-input block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
+                            value="{{ $tanggalTerpilih }}">
+                    </div>
                 </div>
 
-                {{-- Info di Sebelah Kanan --}}
-                <div class="flex-1 min-w-0">
-                    {{-- Jenis Patroli Badge --}}
-                    <div class="mb-1">
-                        <span class="inline-block bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">{{ $item->jenis_patroli }}</span>
-                    </div>
-                    
-                    {{-- Nama --}}
-                    <h4 class="font-bold text-gray-800 text-sm mb-2">{{ $item->nama_lengkap }}</h4>
-
-                    {{-- Info Wilayah & Waktu (Sejajar) --}}
-                    <div class="flex items-center gap-3 mb-2">
-                        {{-- Wilayah --}}
-                        <div class="flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                {{-- Filter Jenis Patroli --}}
+                <div class="w-[calc(50%-0.5rem)] md:flex-1">
+                    <label for="jenis_patroli_malam" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Jenis Patroli
+                    </label>
+                    <div class="relative">
+                        <select id="jenis_patroli_malam" name="jenis_patroli_malam" 
+                                class="filter-input block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                            @forelse($jenisPatroliOptions as $opsi)
+                                <option value="{{ $opsi }}" {{ $jenisPatroliTerpilihMalam == $opsi ? 'selected' : '' }}>
+                                    {{ $opsi }}
+                                </option>
+                            @empty
+                                <option value="" disabled selected>Tidak ada data jenis patroli</option>
+                            @endforelse
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
-                            <p class="text-gray-700 font-semibold text-xs">{{ $item->wilayah }}</p>
-                        </div>
-                        
-                        {{-- Waktu --}}
-                        <div class="flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <p class="text-gray-700 font-semibold text-xs">{{ $item->waktu_exact->format('H:i:s') }}</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    @empty
-        <div class="bg-white rounded-lg shadow-sm p-6 text-center">
-            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-            </div>
-            <p class="text-gray-500 text-sm font-semibold">Tidak ada data patroli shift malam pada tanggal ini.</p>
-        </div>
-    @endforelse
-</div>
-
-
         
-        {{-- Pagination Shift Malam --}}
-        @if($dataPatroliMalam->total() > 0)
-            <div class="flex justify-between items-center px-6 py-4 border-t border-gray-200">
-                <div class="text-sm text-gray-600">
-                    Showing {{ $dataPatroliMalam->firstItem() ?? 0 }} to {{ $dataPatroliMalam->lastItem() ?? 0 }} of {{ $dataPatroliMalam->total() }} entries
-                </div>
-                <div class="flex items-center gap-1">
-                    @if ($dataPatroliMalam->onFirstPage())
-                        <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Previous</span>
-                    @else
-                        <a href="{{ $dataPatroliMalam->appends(request()->query())->previousPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Previous</a>
-                    @endif
-                    @foreach(range(1, $dataPatroliMalam->lastPage()) as $page)
-                        @if($page == $dataPatroliMalam->currentPage())
-                            <span class="px-3 py-1 text-white bg-[#1e3a5f] rounded font-bold">{{ $page }}</span>
-                        @else
-                            <a href="{{ $dataPatroliMalam->appends(request()->query())->url($page) }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
-                        @endif
-                    @endforeach
-                    @if ($dataPatroliMalam->hasMorePages())
-                        <a href="{{ $dataPatroliMalam->appends(request()->query())->nextPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
-                    @else
-                        <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
-                    @endif
-                </div>
-            </div>
-        @endif
+        <div id="patroli-malam-wrapper">
+             @include('komandan.partials.patroli-list', ['data' => $dataPatroliMalam, 'shift' => 'malam'])
+        </div>
         
     </div>
 </div>
@@ -691,5 +401,86 @@
         </div>
     </div>
 
+    {{-- Loading Indicator --}}
+    <div id="loading-indicator" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+        <div class="bg-white p-4 rounded-lg shadow-xl flex items-center gap-3">
+            <div class="animate-spin rounded-full h-8 w-8 border-4 border-[#1e3a5f] border-t-transparent"></div>
+            <span class="font-bold text-[#1e3a5f]">Memuat Data...</span>
+        </div>
+    </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterInputs = document.querySelectorAll('.filter-input');
+        
+        // Sync Dates
+        const datePagi = document.getElementById('tanggal_pagi');
+        const dateMalam = document.getElementById('tanggal_malam');
+        
+        if(datePagi && dateMalam) {
+            datePagi.addEventListener('change', () => dateMalam.value = datePagi.value);
+            dateMalam.addEventListener('change', () => datePagi.value = dateMalam.value);
+        }
+
+        // Handle Filter Changes
+        filterInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                fetchData();
+            });
+        });
+
+        // Handle Pagination
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.pagination-link')) {
+                e.preventDefault();
+                const url = e.target.closest('.pagination-link').href;
+                fetchData(url);
+            }
+        });
+
+        function fetchData(url = null) {
+            toggleLoading(true);
+            
+            // Build URL if not provided (filter change)
+            if (!url) {
+                const params = new URLSearchParams();
+                
+                // Get Date (Pagi/Malam synced so just take one)
+                params.append('tanggal', document.getElementById('tanggal_pagi').value);
+                
+                params.append('per_page_pagi', document.getElementById('perPagePagi').value);
+                params.append('jenis_patroli_pagi', document.getElementById('jenis_patroli_pagi').value);
+                
+                params.append('per_page_malam', document.getElementById('perPageMalam').value);
+                params.append('jenis_patroli_malam', document.getElementById('jenis_patroli_malam').value);
+                
+                url = "{{ route('komandan.patroli') }}?" + params.toString();
+            }
+
+            fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('patroli-pagi-wrapper').innerHTML = data.html_pagi;
+                document.getElementById('patroli-malam-wrapper').innerHTML = data.html_malam;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat memuat data.');
+            })
+            .finally(() => {
+                toggleLoading(false);
+            });
+        }
+        
+        function toggleLoading(show) {
+            const loader = document.getElementById('loading-indicator');
+            if (loader) loader.style.display = show ? 'flex' : 'none';
+        }
+    });
+</script>
 @endsection

@@ -49,6 +49,14 @@ class GangguanKamtibmasController extends Controller
             $kategoriOptions = ['Curat', 'Curas', 'Curanmor', 'Narkoba', 'Laka Lantas', 'Pembunuhan', 'Perkelahian', 'Mabok', 'Unjuk Rasa', 'Penyerobotan Tanah', 'Kenakalan Remaja', 'Kebakaran', 'Bencana Alam'];
         }
 
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('komandan.partials.gangguan-list', [
+                    'riwayatGangguan' => $riwayatGangguan,
+                ])->render(),
+            ]);
+        }
+
         return view('komandan.gangguan', [
             'riwayatGangguan' => $riwayatGangguan,
             'bulanTerpilih' => $bulanFilter,

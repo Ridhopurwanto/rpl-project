@@ -80,6 +80,19 @@ class PatroliController extends Controller
         // Agar mudah ditampilkan di modal setting jam
         $patroliRules = PatroliRule::all()->groupBy('jenis_shift');
         
+        if ($request->ajax()) {
+            return response()->json([
+                'html_pagi' => view('komandan.partials.patroli-list', [
+                    'data' => $dataPatroliPagi,
+                    'shift' => 'pagi'
+                ])->render(),
+                'html_malam' => view('komandan.partials.patroli-list', [
+                    'data' => $dataPatroliMalam,
+                    'shift' => 'malam'
+                ])->render(),
+            ]);
+        }
+
         return view('komandan.patroli', [
             // Data Utama
             'dataPatroliPagi' => $dataPatroliPagi,

@@ -33,6 +33,10 @@ class TamuController extends Controller
                            ->orderBy('waktu_datang', 'desc')
                            ->paginate($perPage);
         
+        if ($request->ajax()) {
+            return view('komandan.partials.tamu-list', compact('riwayatTamu'));
+        }
+        
         return view('komandan.tamu', [
             'riwayatTamu' => $riwayatTamu,
             'startDate' => $startDate,

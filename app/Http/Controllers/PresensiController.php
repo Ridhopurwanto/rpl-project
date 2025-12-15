@@ -64,6 +64,19 @@ class PresensiController extends Controller
         $globalRule = $rules->firstWhere('jenis_shift', 'Pagi');
 
         // Kirim data ke view
+        if ($request->ajax()) {
+            return response()->json([
+                'html_masuk' => view('komandan.partials.presensi-masuk', [
+                    'dataMasuk' => $dataMasuk,
+                    'shiftTerpilih' => $shiftFilter,
+                ])->render(),
+                'html_pulang' => view('komandan.partials.presensi-pulang', [
+                    'dataPulang' => $dataPulang,
+                    'shiftTerpilih' => $shiftFilter,
+                ])->render(),
+            ]);
+        }
+
         return view('komandan.presensi', [
             'dataMasuk' => $dataMasuk,
             'dataPulang' => $dataPulang,
