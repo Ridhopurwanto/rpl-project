@@ -30,7 +30,7 @@ class TamuController extends Controller
                                      ->orWhere('instansi', 'like', "%{$cari}%");
                                });
                            })
-                           ->orderBy('waktu_datang', 'asc')
+                           ->orderBy('waktu_datang', 'desc')
                            ->paginate($perPage);
         
         return view('komandan.tamu', [

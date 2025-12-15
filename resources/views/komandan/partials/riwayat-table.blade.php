@@ -59,76 +59,80 @@
     </table>
 </div>
 
-<!-- {{-- CARD LAYOUT (Mobile) --}}
-<div class="md:hidden space-y-3 p-3">
-    @forelse($riwayat as $index => $log)
-        <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
-            <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] px-4 py-2.5 flex justify-between items-center">
-                <div>
-                    <p class="text-xs text-blue-200 font-semibold uppercase">{{ $log->nopol ?? 'N/A' }}</p>
-                    <p class="text-white font-bold text-base">{{ $log->pemilik ?? 'N/A' }}</p>
-                </div>
-                <span class="text-xs font-bold px-2.5 py-1 rounded-full 
-                    {{ $log->tipe == 'Roda 4' ? 'bg-blue-500 text-white' : 'bg-green-500 text-white' }}">
-                    {{ $log->tipe ?? '-' }}
-                </span>
-            </div>
+{{-- CARD LAYOUT (Mobile) --}}
+        <div class="md:hidden space-y-2 p-3">
+            @forelse($riwayat as $index => $log)
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 master-card" data-tipe="{{ $log->tipe }}" data-searchtext="{{ strtolower(($log->nopol ?? '') . ' ' . ($log->pemilik ?? '')) }}">
+                    <div class="flex gap-3 p-3">
+                        {{-- Info Kendaraan --}}
+                        <div class="flex-1 min-w-0">
+                            {{-- Nopol & Tipe Badge --}}
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <h4 class="font-bold text-gray-800 text-sm">{{ $log->nopol ?? 'N/A' }}</h4>
+                                    <p class="text-gray-600 text-xs">{{ $log->pemilik ?? 'N/A' }}</p>
+                                </div>
+                                <span class="text-xs font-bold px-2 py-1 rounded-full 
+                                    {{ $log->tipe == 'Roda 4' ? 'bg-blue-500 text-white' : 'bg-green-500 text-white' }}">
+                                    {{ $log->tipe ?? '-' }}
+                                </span>
+                            </div>
 
-            <div class="p-4 space-y-3">
-                <div class="grid grid-cols-2 gap-3 pb-2 border-b border-gray-100">
-                    <div>
-                        <p class="text-[10px] text-gray-500 font-semibold uppercase">Masuk</p>
-                        <p class="text-gray-800 font-bold text-sm">
-                            @if($log->waktu_masuk && $log->waktu_masuk->format('Y-m-d') == $tanggalFilter)
-                                {{ $log->waktu_masuk->format('H:i:s') }}
-                            @else <span class="text-gray-400">-</span> @endif
-                        </p>
-                    </div>
-                    <div>
-                        <p class="text-[10px] text-gray-500 font-semibold uppercase">Keluar</p>
-                        <p class="text-gray-800 font-bold text-sm">
-                            @if($log->waktu_keluar && $log->waktu_keluar->format('Y-m-d') == $tanggalFilter)
-                                {{ $log->waktu_keluar->format('H:i:s') }}
-                            @else <span class="text-gray-400">-</span> @endif
-                        </p>
-                    </div>
-                </div>
+                            {{-- Waktu Masuk/Keluar --}}
+                            <div class="grid grid-cols-2 gap-2 mb-2 text-xs">
+                                <div>
+                                    <p class="text-gray-500 font-semibold">Masuk:</p>
+                                    <p class="text-gray-800 font-bold">
+                                        @if($log->waktu_masuk && $log->waktu_masuk->format('Y-m-d') == $tanggalFilter)
+                                            {{ $log->waktu_masuk->format('H:i:s') }}
+                                        @else <span class="text-gray-400">-</span> @endif
+                                    </p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 font-semibold">Keluar:</p>
+                                    <p class="text-gray-800 font-bold">
+                                        @if($log->waktu_keluar && $log->waktu_keluar->format('Y-m-d') == $tanggalFilter)
+                                            {{ $log->waktu_keluar->format('H:i:s') }}
+                                        @else <span class="text-gray-400">-</span> @endif
+                                    </p>
+                                </div>
+                            </div>
 
-                <div>
-                    <p class="text-[10px] text-gray-500 font-semibold uppercase mb-1">Keterangan</p>
-                    <form action="{{ route('komandan.kendaraan.log.updateKeterangan', $log->id_log) }}" method="POST">
-                        @csrf @method('PUT')
-                        <select name="keterangan" onchange="this.form.submit()" class="w-full border-gray-300 rounded-lg shadow-sm text-sm py-2 focus:border-blue-500 focus:ring-blue-500">
-                            <option value="Tidak Menginap" {{ $log->keterangan == 'Tidak Menginap' ? 'selected' : '' }}>Tidak Menginap</option>
-                            <option value="Menginap" {{ $log->keterangan == 'Menginap' ? 'selected' : '' }}>Menginap</option>
-                        </select>
-                    </form>
-                </div>
+                            {{-- Keterangan --}}
+                            <div class="mb-2">
+                                <form action="{{ route('komandan.kendaraan.log.updateKeterangan', $log->id_log) }}" method="POST">
+                                    @csrf @method('PUT')
+                                    <select name="keterangan" onchange="this.form.submit()" class="w-full border-gray-300 rounded text-xs py-1 focus:border-blue-500 focus:ring-blue-500">
+                                        <option value="Tidak Menginap" {{ $log->keterangan == 'Tidak Menginap' ? 'selected' : '' }}>Tidak Menginap</option>
+                                        <option value="Menginap" {{ $log->keterangan == 'Menginap' ? 'selected' : '' }}>Menginap</option>
+                                    </select>
+                                </form>
+                            </div>
 
-                <div class="pt-2">
-                    @if($log->kendaraan)
-                        <div class="flex items-center justify-center gap-2 bg-green-50 text-green-700 font-bold py-2 rounded-lg border border-green-300">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                            <span class="text-xs">Sudah Terdaftar</span>
+                            {{-- Status/Aksi --}}
+                            @if($log->kendaraan)
+                                <div class="flex items-center justify-center gap-1 bg-green-50 text-green-700 font-bold py-1.5 rounded text-xs border border-green-300">
+                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                    Terdaftar
+                                </div>
+                            @else
+                                <button @click="$dispatch('promote-master', { id: {{ $log->id_log }}, plat: '{{ $log->nopol }}', pemilik: '{{ $log->pemilik }}' })" 
+                                        class="w-full bg-blue-500 text-white font-bold py-1.5 rounded text-xs hover:bg-blue-600 transition flex items-center justify-center gap-1">
+                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"></path></svg>
+                                    Daftarkan
+                                </button>
+                            @endif
                         </div>
-                    @else
-                        <button @click="$dispatch('promote-master', { id: {{ $log->id_log }}, plat: '{{ $log->nopol }}', pemilik: '{{ $log->pemilik }}' })" 
-                                class="w-full bg-blue-500 text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition flex items-center justify-center gap-1">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"></path></svg>
-                            <span class="text-xs">Daftarkan</span>
-                        </button>
-                    @endif
+                    </div>
                 </div>
-            </div>
+            @empty
+                <div class="bg-white rounded-lg shadow-sm p-6 text-center">
+                    <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <p class="text-gray-500 text-sm font-semibold">Data tidak ditemukan.</p>
+                </div>
+            @endforelse
         </div>
-    @empty
-        <div class="bg-white rounded-xl shadow-md p-8 text-center">
-            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-            </div>
-            <p class="text-gray-500 font-semibold">Data tidak ditemukan.</p>
-        </div>
-    @endforelse
-</div> -->

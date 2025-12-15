@@ -118,7 +118,7 @@
                             <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
                             <div class="flex items-center gap-2">
                                 <div class="relative">
-                                    <select name="per_page_riwayat" onchange="document.getElementById('filterForm').submit()" class="block h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                                    <select name="per_page_riwayat" class="block h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
                                         <option value="5" {{ $perPageRiwayat == 5 ? 'selected' : '' }}>5</option>
                                         <option value="10" {{ $perPageRiwayat == 10 ? 'selected' : '' }}>10</option>
                                         <option value="25" {{ $perPageRiwayat == 25 ? 'selected' : '' }}>25</option>
@@ -142,7 +142,6 @@
                             </label>
                             <div class="cursor-pointer" @click="$refs.dateInput.showPicker()">
                                 <input type="date" id="tanggal" name="tanggal" x-ref="dateInput"
-                                       onchange="document.getElementById('filterForm').submit()"
                                        class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
                                        value="{{ $tanggalTerpilih }}">
                             </div>
@@ -155,7 +154,6 @@
                             </label>
                             <div class="relative">
                                 <select id="tipe" name="tipe" 
-                                        onchange="document.getElementById('filterForm').submit()"
                                         class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
                                     <option value="">Semua Tipe</option>
                                     <option value="Roda 2" {{ $tipeTerpilih == 'Roda 2' ? 'selected' : '' }}>Roda 2</option>
@@ -187,126 +185,11 @@
                 @include('komandan.partials.riwayat-table', ['riwayat' => $riwayat, 'tanggalFilter' => $tanggalTerpilih, 'registeredPlates' => $registeredPlates])
             </div>
 
-            {{-- CARD LAYOUT (Mobile) --}}
-            <div class="md:hidden space-y-2 p-3">
-                @forelse($riwayat as $index => $log)
-                    <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
-                        <div class="flex gap-3 p-3">
-                            {{-- Info Kendaraan di Sebelah Kiri --}}
-                            <div class="flex-1 min-w-0">
-                                {{-- Nopol & Tipe Badge --}}
-                                <div class="flex justify-between items-start mb-2">
-                                    <div>
-                                        <h4 class="font-bold text-gray-800 text-sm">{{ $log->nopol ?? 'N/A' }}</h4>
-                                        <p class="text-gray-600 text-xs">{{ $log->pemilik ?? 'N/A' }}</p>
-                                    </div>
-                                    <span class="text-xs font-bold px-2 py-1 rounded-full 
-                                        {{ $log->tipe == 'Roda 4' ? 'bg-blue-500 text-white' : 'bg-green-500 text-white' }}">
-                                        {{ $log->tipe ?? '-' }}
-                                    </span>
-                                </div>
-
-                                {{-- Waktu Masuk & Keluar (Sejajar) --}}
-                                <div class="flex items-center gap-3 mb-2">
-                                    {{-- Waktu Masuk --}}
-                                    <div class="flex items-center gap-1">
-                                        <svg class="w-3.5 h-3.5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
-                                        </svg>
-                                        <p class="text-gray-700 font-semibold text-xs">
-                                            @if($log->waktu_masuk && $log->waktu_masuk->format('Y-m-d') == $tanggalTerpilih)
-                                                {{ $log->waktu_masuk->format('H:i:s') }}
-                                            @else <span class="text-gray-400">-</span> @endif
-                                        </p>
-                                    </div>
-                                    
-                                    {{-- Waktu Keluar --}}
-                                    <div class="flex items-center gap-1">
-                                        <svg class="w-3.5 h-3.5 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                                        </svg>
-                                        <p class="text-gray-700 font-semibold text-xs">
-                                            @if($log->waktu_keluar && $log->waktu_keluar->format('Y-m-d') == $tanggalTerpilih)
-                                                {{ $log->waktu_keluar->format('H:i:s') }}
-                                            @else <span class="text-gray-400">-</span> @endif
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {{-- Keterangan --}}
-                                <div class="mb-2">
-                                    @if(Auth::user()->peran == 'komandan')
-                                        <form action="{{ route('komandan.kendaraan.log.updateKeterangan', $log->id_log) }}" method="POST">
-                                            @csrf @method('PUT')
-                                            <select name="keterangan" onchange="this.form.submit()" class="w-full border-gray-300 rounded text-xs py-1 focus:border-blue-500 focus:ring-blue-500">
-                                                <option value="tidak menginap" {{ $log->keterangan == 'tidak menginap' ? 'selected' : '' }}>Tidak Menginap</option>
-                                                <option value="menginap" {{ $log->keterangan == 'Menginap' ? 'selected' : '' }}>Menginap</option>
-                                            </select>
-                                        </form>
-                                    @else
-                                        <p class="text-gray-700 font-semibold text-xs">{{ $log->keterangan }}</p>
-                                    @endif
-                                </div>
-
-                                {{-- Tombol Aksi --}}
-                                @if(Auth::user()->peran == 'komandan')
-                                    <div>
-                                        @if($log->kendaraan)
-                                            <div class="flex items-center justify-center gap-1 bg-green-50 text-green-700 font-bold py-1.5 rounded border border-green-300">
-                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                                                <span class="text-xs">Terdaftar</span>
-                                            </div>
-                                        @else
-                                            <button @click.prevent="showPromoteModal = true; promoteAction = '{{ route('komandan.kendaraan.log.promote', $log->id_log) }}'" 
-                                                    class="w-full bg-blue-500 text-white font-bold py-1.5 rounded text-xs hover:bg-blue-600 transition flex items-center justify-center gap-1">
-                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"></path></svg>
-                                                Daftarkan
-                                            </button>
-                                        @endif
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    <div class="bg-white rounded-lg shadow-sm p-6 text-center">
-                        <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                        </div>
-                        <p class="text-gray-500 text-sm font-semibold">Data tidak ditemukan.</p>
-                    </div>
-                @endforelse
+            <div id="riwayat-pagination-container">
+                @include('komandan.partials.riwayat-pagination', ['riwayat' => $riwayat])
             </div>
 
-            {{-- Pagination --}}
-            @if($riwayat->total() > 0)
-                <div class="flex justify-between items-center px-6 py-4 border-t border-gray-200">
-                    <div class="text-sm text-gray-600">
-                        Showing {{ $riwayat->firstItem() ?? 0 }} to {{ $riwayat->lastItem() ?? 0 }} of {{ $riwayat->total() }} entries
-                    </div>
-                    <div class="flex items-center gap-1">
-                        @if ($riwayat->onFirstPage())
-                            <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Previous</span>
-                        @else
-                            <a href="{{ $riwayat->appends(request()->except('page_riwayat'))->previousPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Previous</a>
-                        @endif
-                        @foreach(range(1, $riwayat->lastPage()) as $page)
-                            @if($page == $riwayat->currentPage())
-                                <span class="px-3 py-1 text-white bg-[#1e3a5f] rounded font-bold">{{ $page }}</span>
-                            @else
-                                <a href="{{ $riwayat->appends(request()->except('page_riwayat'))->url($page) }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
-                            @endif
-                        @endforeach
-                        @if ($riwayat->hasMorePages())
-                            <a href="{{ $riwayat->appends(request()->except('page_riwayat'))->nextPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
-                        @else
-                            <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
-                        @endif
-                    </div>
-                </div>
-            @endif
+
             </div>
         </div>
     </div>
@@ -365,7 +248,7 @@
                         <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
                         <div class="flex items-center gap-2">
                             <div class="relative">
-                                <select name="per_page_master" onchange="this.form.submit()" class="block h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                                <select name="per_page_master" class="block h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
                                     <option value="5" {{ $perPageMaster == 5 ? 'selected' : '' }}>5</option>
                                     <option value="10" {{ $perPageMaster == 10 ? 'selected' : '' }}>10</option>
                                     <option value="25" {{ $perPageMaster == 25 ? 'selected' : '' }}>25</option>
@@ -420,82 +303,11 @@
             @include('komandan.partials.master-table', ['kendaraanMaster' => $kendaraanMaster])
         </div>
 
-        {{-- CARD LAYOUT (Mobile) --}}
-        <div class="md:hidden space-y-2 p-3">
-            @forelse($kendaraanMaster as $index => $kendaraan)
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 master-card" data-tipe="{{ $kendaraan->tipe }}" data-searchtext="{{ strtolower($kendaraan->nomor_plat . ' ' . $kendaraan->pemilik) }}">
-                    <div class="flex gap-3 p-3">
-                        {{-- Info Kendaraan --}}
-                        <div class="flex-1 min-w-0">
-                            {{-- Nopol & Tipe Badge --}}
-                            <div class="flex justify-between items-start mb-2">
-                                <div>
-                                    <h4 class="font-bold text-gray-800 text-sm">{{ $kendaraan->nomor_plat }}</h4>
-                                    <p class="text-gray-600 text-xs">{{ $kendaraan->pemilik }}</p>
-                                </div>
-                                <span class="text-xs font-bold px-2 py-1 rounded-full 
-                                    {{ $kendaraan->tipe == 'Roda 4' ? 'bg-blue-500 text-white' : 'bg-green-500 text-white' }}">
-                                    {{ $kendaraan->tipe }}
-                                </span>
-                            </div>
-
-                            {{-- Tombol Aksi --}}
-                            @if(Auth::user()->peran == 'komandan')
-                                <div class="flex gap-1.5">
-                                    <button @click="showEditModal = true; editAction = '{{ route('komandan.kendaraan.master.update', $kendaraan->id_kendaraan) }}'; editPlat = '{{ $kendaraan->nomor_plat }}'; editPemilik = '{{ $kendaraan->pemilik }}'; editTipe = '{{ $kendaraan->tipe }}';" 
-                                            class="flex-1 bg-blue-500 text-white font-bold py-1.5 rounded text-xs hover:bg-blue-600 transition flex items-center justify-center gap-1">
-                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
-                                        Edit
-                                    </button>
-                                    <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('komandan.kendaraan.master.destroy', $kendaraan->id_kendaraan) }}'" 
-                                            class="flex-1 bg-red-500 text-white font-bold py-1.5 rounded text-xs hover:bg-red-600 transition flex items-center justify-center gap-1">
-                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                                        Hapus
-                                    </button>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            @empty
-                <div class="bg-white rounded-lg shadow-sm p-6 text-center">
-                    <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                    </div>
-                    <p class="text-gray-500 text-sm font-semibold">Tidak ada data.</p>
-                </div>
-            @endforelse
+        <div id="master-pagination-container">
+            @include('komandan.partials.master-pagination', ['kendaraanMaster' => $kendaraanMaster])
         </div>
-        
-        {{-- Pagination --}}
-        @if($kendaraanMaster->total() > 0)
-            <div class="flex justify-between items-center px-6 py-4 border-t border-gray-200">
-                <div class="text-sm text-gray-600">
-                    Showing {{ $kendaraanMaster->firstItem() ?? 0 }} to {{ $kendaraanMaster->lastItem() ?? 0 }} of {{ $kendaraanMaster->total() }} entries
-                </div>
-                <div class="flex items-center gap-1">
-                    @if ($kendaraanMaster->onFirstPage())
-                        <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Previous</span>
-                    @else
-                        <a href="{{ $kendaraanMaster->appends(request()->except('page_master'))->previousPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Previous</a>
-                    @endif
-                    @foreach(range(1, $kendaraanMaster->lastPage()) as $page)
-                        @if($page == $kendaraanMaster->currentPage())
-                            <span class="px-3 py-1 text-white bg-[#1e3a5f] rounded font-bold">{{ $page }}</span>
-                        @else
-                            <a href="{{ $kendaraanMaster->appends(request()->except('page_master'))->url($page) }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
-                        @endif
-                    @endforeach
-                    @if ($kendaraanMaster->hasMorePages())
-                        <a href="{{ $kendaraanMaster->appends(request()->except('page_master'))->nextPageUrl() }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
-                    @else
-                        <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
-                    @endif
-                </div>
-            </div>
-        @endif
+
+
         </div>
     </div>
 
@@ -643,7 +455,7 @@ if (searchInput) {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
             loadRiwayatData();
-        }, 300);
+        }, 500);
     });
 }
 
