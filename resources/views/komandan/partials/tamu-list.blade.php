@@ -131,9 +131,9 @@
             </div>
             <div class="flex gap-1">
                 @if($riwayatTamu->onFirstPage())
-                    <span class="px-3 py-2 text-sm text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">Previous</span>
+                    <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Previous</span>
                 @else
-                    <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date'), 'cari' => request('cari')])->previousPageUrl() }}" class="pagination-link px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Previous</a>
+                    <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date'), 'cari' => request('cari')])->previousPageUrl() }}" class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Previous</a>
                 @endif
 
                 @php
@@ -144,31 +144,31 @@
                 @endphp
                 
                 @if($start > 1)
-                    <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date'), 'cari' => request('cari')])->url(1) }}" class="pagination-link px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">1</a>
+                    <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date'), 'cari' => request('cari')])->url(1) }}" class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">1</a>
                     @if($start > 2)
-                        <span class="px-3 py-2 text-sm text-gray-500">...</span>
+                        <span class="px-3 py-1 text-gray-500">...</span>
                     @endif
                 @endif
                 
                 @for($page = $start; $page <= $end; $page++)
                     @if($page == $current)
-                        <span class="px-3 py-2 text-sm text-white bg-[#1e3a5f] rounded-lg">{{ $page }}</span>
+                        <span class="px-3 py-1 text-white bg-[#1e3a5f] rounded font-bold">{{ $page }}</span>
                     @else
-                        <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date'), 'cari' => request('cari')])->url($page) }}" class="pagination-link px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">{{ $page }}</a>
+                        <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date'), 'cari' => request('cari')])->url($page) }}" class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
                     @endif
                 @endfor
                 
                 @if($end < $last)
                     @if($end < $last - 1)
-                        <span class="px-3 py-2 text-sm text-gray-500">...</span>
+                        <span class="px-3 py-1 text-gray-500">...</span>
                     @endif
-                    <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date'), 'cari' => request('cari')])->url($last) }}" class="pagination-link px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">{{ $last }}</a>
+                    <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date'), 'cari' => request('cari')])->url($last) }}" class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $last }}</a>
                 @endif
 
                 @if($riwayatTamu->hasMorePages())
-                    <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date'), 'cari' => request('cari')])->nextPageUrl() }}" class="pagination-link px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Next</a>
+                    <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date'), 'cari' => request('cari')])->nextPageUrl() }}" class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
                 @else
-                    <span class="px-3 py-2 text-sm text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">Next</span>
+                    <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
                 @endif
             </div>
         </div>
@@ -179,37 +179,37 @@
             </div>
             <div class="flex gap-1">
                 @if($riwayatTamu->onFirstPage())
-                    <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Prev</span>
+                    <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Prev</span>
                 @else
-                    <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date'), 'cari' => request('cari')])->previousPageUrl() }}" class="pagination-link px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Prev</a>
+                    <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date'), 'cari' => request('cari')])->previousPageUrl() }}" class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Prev</a>
                 @endif
 
                 @if($start > 1)
-                    <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date'), 'cari' => request('cari')])->url(1) }}" class="pagination-link px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">1</a>
+                    <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date'), 'cari' => request('cari')])->url(1) }}" class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">1</a>
                     @if($start > 2)
-                        <span class="px-2 py-1 text-xs text-gray-500">...</span>
+                        <span class="px-3 py-1 text-gray-500">...</span>
                     @endif
                 @endif
                 
                 @for($page = $start; $page <= $end; $page++)
                     @if($page == $current)
-                        <span class="px-2 py-1 text-xs text-white bg-[#1e3a5f] rounded">{{ $page }}</span>
+                        <span class="px-3 py-1 text-white bg-[#1e3a5f] rounded font-bold">{{ $page }}</span>
                     @else
-                        <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date'), 'cari' => request('cari')])->url($page) }}" class="pagination-link px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
+                        <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date'), 'cari' => request('cari')])->url($page) }}" class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
                     @endif
                 @endfor
                 
                 @if($end < $last)
                     @if($end < $last - 1)
-                        <span class="px-2 py-1 text-xs text-gray-500">...</span>
+                        <span class="px-3 py-1 text-gray-500">...</span>
                     @endif
-                    <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date'), 'cari' => request('cari')])->url($last) }}" class="pagination-link px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $last }}</a>
+                    <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date'), 'cari' => request('cari')])->url($last) }}" class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $last }}</a>
                 @endif
 
                 @if($riwayatTamu->hasMorePages())
-                    <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date'), 'cari' => request('cari')])->nextPageUrl() }}" class="pagination-link px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
+                    <a href="{{ $riwayatTamu->appends(['per_page' => request('per_page'), 'start_date' => request('start_date'), 'end_date' => request('end_date'), 'cari' => request('cari')])->nextPageUrl() }}" class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
                 @else
-                    <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
+                    <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
                 @endif
             </div>
         </div>

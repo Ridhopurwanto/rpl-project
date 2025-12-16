@@ -132,21 +132,21 @@
             <div class="text-sm text-gray-600">Showing {{ $barangTemuan->firstItem() ?? 0 }} to {{ $barangTemuan->lastItem() ?? 0 }} of {{ $barangTemuan->total() }} entries</div>
             <div class="flex gap-1">
                 @if($barangTemuan->onFirstPage())
-                    <span class="px-3 py-2 text-sm text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">Previous</span>
+                    <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Previous</span>
                 @else
-                    <a href="{{ $barangTemuan->appends(request()->except('page_temuan'))->previousPageUrl() }}" class="pagination-link px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Previous</a>
+                    <a href="{{ $barangTemuan->appends(request()->except('page_temuan'))->previousPageUrl() }}" class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Previous</a>
                 @endif
                 @foreach($barangTemuan->getUrlRange(1, $barangTemuan->lastPage()) as $page => $url)
                     @if($page == $barangTemuan->currentPage())
-                        <span class="px-3 py-2 text-sm text-white bg-[#1e3a5f] rounded-lg">{{ $page }}</span>
+                        <span class="px-3 py-1 text-white bg-[#1e3a5f] rounded font-bold">{{ $page }}</span>
                     @else
-                        <a href="{{ $barangTemuan->appends(request()->except('page_temuan'))->url($page) }}" class="pagination-link px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">{{ $page }}</a>
+                        <a href="{{ $barangTemuan->appends(request()->except('page_temuan'))->url($page) }}" class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
                     @endif
                 @endforeach
                 @if($barangTemuan->hasMorePages())
-                    <a href="{{ $barangTemuan->appends(request()->except('page_temuan'))->nextPageUrl() }}" class="pagination-link px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Next</a>
+                    <a href="{{ $barangTemuan->appends(request()->except('page_temuan'))->nextPageUrl() }}" class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
                 @else
-                    <span class="px-3 py-2 text-sm text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">Next</span>
+                    <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
                 @endif
             </div>
         </div>
@@ -156,21 +156,21 @@
             <div class="text-xs text-gray-600">{{ $barangTemuan->firstItem() ?? 0 }}-{{ $barangTemuan->lastItem() ?? 0 }} of {{ $barangTemuan->total() }}</div>
             <div class="flex gap-1">
                 @if($barangTemuan->onFirstPage())
-                    <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Prev</span>
+                    <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Prev</span>
                 @else
-                    <a href="{{ $barangTemuan->appends(request()->except('page_temuan'))->previousPageUrl() }}" class="pagination-link px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Prev</a>
+                    <a href="{{ $barangTemuan->appends(request()->except('page_temuan'))->previousPageUrl() }}" class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Prev</a>
                 @endif
                 @foreach($barangTemuan->getUrlRange(1, $barangTemuan->lastPage()) as $page => $url)
                     @if($page == $barangTemuan->currentPage())
-                        <span class="px-2 py-1 text-xs text-white bg-[#1e3a5f] rounded">{{ $page }}</span>
+                        <span class="px-3 py-1 text-white bg-[#1e3a5f] rounded font-bold">{{ $page }}</span>
                     @else
-                        <a href="{{ $barangTemuan->appends(request()->except('page_temuan'))->url($page) }}" class="pagination-link px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
+                        <a href="{{ $barangTemuan->appends(request()->except('page_temuan'))->url($page) }}" class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
                     @endif
                 @endforeach
                 @if($barangTemuan->hasMorePages())
-                    <a href="{{ $barangTemuan->appends(request()->except('page_temuan'))->nextPageUrl() }}" class="pagination-link px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
+                    <a href="{{ $barangTemuan->appends(request()->except('page_temuan'))->nextPageUrl() }}" class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
                 @else
-                    <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
+                    <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
                 @endif
             </div>
         </div>
@@ -311,21 +311,21 @@
             <div class="text-sm text-gray-600">Showing {{ $barangTitipan->firstItem() ?? 0 }} to {{ $barangTitipan->lastItem() ?? 0 }} of {{ $barangTitipan->total() }} entries</div>
             <div class="flex gap-1">
                 @if($barangTitipan->onFirstPage())
-                    <span class="px-3 py-2 text-sm text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">Previous</span>
+                    <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Previous</span>
                 @else
-                    <a href="{{ $barangTitipan->appends(request()->except('page_titipan'))->previousPageUrl() }}" class="pagination-link px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Previous</a>
+                    <a href="{{ $barangTitipan->appends(request()->except('page_titipan'))->previousPageUrl() }}" class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Previous</a>
                 @endif
                 @foreach($barangTitipan->getUrlRange(1, $barangTitipan->lastPage()) as $page => $url)
                     @if($page == $barangTitipan->currentPage())
-                        <span class="px-3 py-2 text-sm text-white bg-[#1e3a5f] rounded-lg">{{ $page }}</span>
+                        <span class="px-3 py-1 text-white bg-[#1e3a5f] rounded font-bold">{{ $page }}</span>
                     @else
-                        <a href="{{ $barangTitipan->appends(request()->except('page_titipan'))->url($page) }}" class="pagination-link px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">{{ $page }}</a>
+                        <a href="{{ $barangTitipan->appends(request()->except('page_titipan'))->url($page) }}" class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
                     @endif
                 @endforeach
                 @if($barangTitipan->hasMorePages())
-                    <a href="{{ $barangTitipan->appends(request()->except('page_titipan'))->nextPageUrl() }}" class="pagination-link px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Next</a>
+                    <a href="{{ $barangTitipan->appends(request()->except('page_titipan'))->nextPageUrl() }}" class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
                 @else
-                    <span class="px-3 py-2 text-sm text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">Next</span>
+                    <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
                 @endif
             </div>
         </div>
@@ -335,21 +335,21 @@
             <div class="text-xs text-gray-600">{{ $barangTitipan->firstItem() ?? 0 }}-{{ $barangTitipan->lastItem() ?? 0 }} of {{ $barangTitipan->total() }}</div>
             <div class="flex gap-1">
                 @if($barangTitipan->onFirstPage())
-                    <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Prev</span>
+                    <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Prev</span>
                 @else
-                    <a href="{{ $barangTitipan->appends(request()->except('page_titipan'))->previousPageUrl() }}" class="pagination-link px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Prev</a>
+                    <a href="{{ $barangTitipan->appends(request()->except('page_titipan'))->previousPageUrl() }}" class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Prev</a>
                 @endif
                 @foreach($barangTitipan->getUrlRange(1, $barangTitipan->lastPage()) as $page => $url)
                     @if($page == $barangTitipan->currentPage())
-                        <span class="px-2 py-1 text-xs text-white bg-[#1e3a5f] rounded">{{ $page }}</span>
+                        <span class="px-3 py-1 text-white bg-[#1e3a5f] rounded font-bold">{{ $page }}</span>
                     @else
-                        <a href="{{ $barangTitipan->appends(request()->except('page_titipan'))->url($page) }}" class="pagination-link px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
+                        <a href="{{ $barangTitipan->appends(request()->except('page_titipan'))->url($page) }}" class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
                     @endif
                 @endforeach
                 @if($barangTitipan->hasMorePages())
-                    <a href="{{ $barangTitipan->appends(request()->except('page_titipan'))->nextPageUrl() }}" class="pagination-link px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
+                    <a href="{{ $barangTitipan->appends(request()->except('page_titipan'))->nextPageUrl() }}" class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
                 @else
-                    <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
+                    <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
                 @endif
             </div>
         </div>

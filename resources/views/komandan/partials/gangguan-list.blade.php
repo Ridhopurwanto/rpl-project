@@ -162,24 +162,24 @@
         <div class="flex gap-1">
             @if($riwayatGangguan->onFirstPage())
                 <span
-                    class="px-3 py-2 text-sm text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">Previous</span>
+                    class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Previous</span>
             @else
                 <a href="{{ $riwayatGangguan->appends(request()->query())->previousPageUrl() }}"
-                    class="pagination-link px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Previous</a>
+                    class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Previous</a>
             @endif
             @foreach($riwayatGangguan->getUrlRange(1, $riwayatGangguan->lastPage()) as $page => $url)
                 @if($page == $riwayatGangguan->currentPage())
-                    <span class="px-3 py-2 text-sm text-white bg-[#1e3a5f] rounded-lg">{{ $page }}</span>
+                    <span class="px-3 py-1 text-white bg-[#1e3a5f] rounded font-bold">{{ $page }}</span>
                 @else
                     <a href="{{ $riwayatGangguan->appends(request()->query())->url($page) }}"
-                        class="pagination-link px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">{{ $page }}</a>
+                        class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
                 @endif
             @endforeach
             @if($riwayatGangguan->hasMorePages())
                 <a href="{{ $riwayatGangguan->appends(request()->query())->nextPageUrl() }}"
-                    class="pagination-link px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Next</a>
+                    class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
             @else
-                <span class="px-3 py-2 text-sm text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">Next</span>
+                <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
             @endif
         </div>
     </div>
@@ -193,24 +193,24 @@
             {{ $riwayatGangguan->total() }}</div>
         <div class="flex gap-1">
             @if($riwayatGangguan->onFirstPage())
-                <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Prev</span>
+                <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Prev</span>
             @else
                 <a href="{{ $riwayatGangguan->appends(request()->query())->previousPageUrl() }}"
-                    class="pagination-link px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Prev</a>
+                    class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Prev</a>
             @endif
             @foreach($riwayatGangguan->getUrlRange(1, $riwayatGangguan->lastPage()) as $page => $url)
                 @if($page == $riwayatGangguan->currentPage())
-                    <span class="px-2 py-1 text-xs text-white bg-[#1e3a5f] rounded">{{ $page }}</span>
+                    <span class="px-3 py-1 text-white bg-[#1e3a5f] rounded font-bold">{{ $page }}</span>
                 @else
                     <a href="{{ $riwayatGangguan->appends(request()->query())->url($page) }}"
-                        class="pagination-link px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
+                        class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
                 @endif
             @endforeach
             @if($riwayatGangguan->hasMorePages())
                 <a href="{{ $riwayatGangguan->appends(request()->query())->nextPageUrl() }}"
-                    class="pagination-link px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
+                    class="pagination-link px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
             @else
-                <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
+                <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
             @endif
         </div>
     </div>
