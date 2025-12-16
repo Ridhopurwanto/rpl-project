@@ -1,8 +1,12 @@
 @forelse($riwayat_barang as $barang)
     <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-300 relative">
-        {{-- Badge Status di Pojok Kanan Atas --}}
+        {{-- Badge Jenis Barang di Pojok Kanan Atas --}}
         <div class="absolute top-3 right-3 z-10">
-            <span class="inline-block bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">SELESAI</span>
+            @if($barang instanceof \App\Models\BarangTitipan)
+                <span class="inline-block bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">TITIPAN</span>
+            @else
+                <span class="inline-block bg-yellow-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">TEMUAN</span>
+            @endif
         </div>
         
         <div class="p-4">
@@ -50,21 +54,32 @@
                             </p>
                         </div>
                         
-                        <div class="flex items-center gap-1 mb-1">
-                            <svg class="w-3.5 h-3.5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <p class="text-gray-700 font-semibold text-xs">
-                                @if($barang instanceof \App\Models\BarangTitipan)
-                                    {{ $barang->waktu_titip->format('d/m/Y H:i') }}
-                                @else
-                                    {{ $barang->waktu_lapor->format('d/m/Y H:i') }}
-                                @endif
-                            </p>
-                        </div>
-                        
                         <div class="text-xs text-gray-500">
                             <span class="font-semibold">Penerima:</span> {{ Str::limit($barang->nama_penerima, 30) }}
+                        </div>
+                        
+                        @if($barang->catatan)
+                            <div class="text-xs text-gray-500 mt-1">
+                                <span class="font-semibold">Catatan:</span> {{ $barang->catatan }}
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                {{-- Informasi Tanggal --}}
+                <div class="mt-3 pt-3 border-t border-gray-100">
+                    <div class="flex gap-6 text-xs text-gray-600">
+                        <div>
+                            <span class="font-semibold">Masuk:</span>
+                            @if($barang instanceof \App\Models\BarangTitipan)
+                                {{ $barang->waktu_titip->format('d/m/Y H:i') }}
+                            @else
+                                {{ $barang->waktu_lapor->format('d/m/Y H:i') }}
+                            @endif
+                        </div>
+                        <div>
+                            <span class="font-semibold">Selesai:</span>
+                            {{ $barang->waktu_selesai->format('d/m/Y H:i') }}
                         </div>
                     </div>
                 </div>
