@@ -121,92 +121,83 @@
 
 
         {{-- 1. BAGIAN BARANG TITIPAN (AKTIF) --}}
-        <div class="mb-4" x-data="{ isOpen: false }">
-            <div @click="isOpen = !isOpen"
-                class="text-lg font-bold text-slate-700 uppercase cursor-pointer list-none flex items-center select-none">
-                <svg class="w-5 h-5 mr-2 transition-transform duration-300 ease-in-out"
-                    :class="isOpen ? 'rotate-0' : '-rotate-90'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
-                BARANG TITIPAN :
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ isOpen: false }">
+            <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] p-3 border-b border-gray-200 cursor-pointer hover:opacity-90 transition" @click="isOpen = !isOpen">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                        </svg>
+                        <h3 class="font-bold text-white">BARANG TITIPAN</h3>
+                    </div>
+                    <svg class="w-5 h-5 text-white transition-transform" :class="{ 'rotate-180': !isOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
             </div>
 
-            <div x-show="isOpen" x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 transform -translate-y-2"
-                x-transition:enter-end="opacity-100 transform translate-y-0"
-                x-transition:leave="transition ease-in duration-200"
-                x-transition:leave-start="opacity-100 transform translate-y-0"
-                x-transition:leave-end="opacity-0 transform -translate-y-2" class="mt-2 space-y-3">
+            <div x-show="isOpen" x-collapse>
+                <div class="p-3 space-y-3">
 
                 @forelse($barang_titipan as $barang)
-                    <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
-                        {{-- Header Card --}}
-                        <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] px-4 py-2.5 flex justify-between items-center">
-                            <div>
-                                <p class="text-xs text-blue-200 font-semibold uppercase">Tanggal</p>
-                                <p class="text-white font-bold text-base">{{ $barang->waktu_titip->format('d/m/Y') }}</p>
-                            </div>
-                            <span class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                                TITIPAN
-                            </span>
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-300 relative">
+                        {{-- Badge Status di Pojok Kanan Atas --}}
+                        <div class="absolute top-3 right-3 z-10">
+                            <span class="inline-block bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">TITIPAN</span>
                         </div>
-
-                        {{-- Body Card dengan Foto di Kiri & Info Sejajar --}}
+                        
                         <div class="p-4">
-                            <div class="flex gap-4 mb-4">
-                                {{-- Foto Barang di Kiri --}}
-                                <div class="flex-shrink-0">
+                            <div class="w-full">
+                                {{-- Nama Barang sebagai judul utama --}}
+                                <h4 class="font-bold text-gray-800 text-sm mb-3 pr-20">{{ $barang->nama_barang }}</h4>
+
+                                {{-- Info Foto & Detail --}}
+                                <div class="flex gap-4 mb-4">
+                                    {{-- Foto di Kiri --}}
                                     @if($barang->foto)
-                                        <div @click="photoModalOpen = true; photos = ['{{ Storage::url($barang->foto) }}']; currentPhotoIndex = 0;"
-                                            class="w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors">
-                                            <img src="{{ Storage::url($barang->foto) }}" alt="Foto Barang"
-                                                class="w-full h-full object-cover">
-                                        </div>
-                                    @else
-                                        <div
-                                            class="w-24 h-24 rounded-lg bg-gray-100 flex items-center justify-center border-2 border-gray-200">
-                                            <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                                </path>
-                                            </svg>
+                                        <div class="flex-shrink-0">
+                                            <div @click="photoModalOpen = true; photos = ['{{ Storage::url($barang->foto) }}']; currentPhotoIndex = 0" 
+                                                 class="w-16 h-16 rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors">
+                                                <img src="{{ Storage::url($barang->foto) }}" 
+                                                     alt="Foto Barang" 
+                                                     class="w-full h-full object-cover">
+                                            </div>
                                         </div>
                                     @endif
+                                    
+                                    {{-- Info di Kanan --}}
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-1 mb-1">
+                                            <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                            </svg>
+                                            <p class="text-gray-700 font-semibold text-xs">{{ $barang->nama_penitip }}</p>
+                                        </div>
+                                        
+                                        <div class="flex items-center gap-1 mb-1">
+                                            <svg class="w-3.5 h-3.5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <p class="text-gray-700 font-semibold text-xs">{{ $barang->waktu_titip->format('d/m/Y H:i') }}</p>
+                                        </div>
+                                        
+                                        <div class="text-xs text-gray-500">
+                                            <span class="font-semibold">Tujuan:</span> {{ Str::limit($barang->tujuan, 30) }}
+                                        </div>
+                                    </div>
                                 </div>
 
-                                {{-- Info Barang di Kanan (Sejajar dengan Foto) --}}
-                                <div class="flex-1 flex flex-col justify-center space-y-2">
-                                    {{-- Nama Barang --}}
-                                    <div>
-                                        <p class="text-xs text-gray-500 font-semibold uppercase">Nama Barang</p>
-                                        <p class="text-gray-900 font-bold text-base">{{ $barang->nama_barang }}</p>
-                                    </div>
-
-                                    {{-- Penitip --}}
-                                    <div>
-                                        <p class="text-xs text-gray-500 font-semibold uppercase">Penitip</p>
-                                        <p class="text-gray-800 font-semibold">{{ $barang->nama_penitip }}</p>
-                                    </div>
-
-                                    {{-- Tujuan --}}
-                                    <div>
-                                        <p class="text-xs text-gray-500 font-semibold uppercase">Tujuan</p>
-                                        <p class="text-gray-800 font-semibold">{{ $barang->tujuan }}</p>
-                                    </div>
-                                </div>
+                                {{-- Tombol Selesai Full Width --}}
+                                <button
+                                    @click.prevent="selesaiModalOpen = true; selesaiFormAction = '{{ route('anggota.barang.selesaiTitipan', $barang->id_barang) }}'; minTanggalSelesai = '{{ $barang->waktu_titip->format('Y-m-d') }}';"
+                                    class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition-all">
+                                    SELESAI
+                                </button>
                             </div>
-
-                            {{-- Tombol Selesai Full Width --}}
-                            <button
-                                @click.prevent="selesaiModalOpen = true; selesaiFormAction = '{{ route('anggota.barang.selesaiTitipan', $barang->id_barang) }}'; minTanggalSelesai = '{{ $barang->waktu_titip->format('Y-m-d') }}';"
-                                class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition-all">
-                                SELESAI
-                            </button>
                         </div>
                     </div>
                 @empty
-                    <div class="bg-white rounded-xl shadow-md p-8 text-center">
+                    <div class="bg-white rounded-xl shadow-md p-8 text-center border-2 border-gray-300">
                         <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
                             <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -217,96 +208,88 @@
                         <p class="text-gray-500 font-semibold">Tidak ada barang titipan aktif.</p>
                     </div>
                 @endforelse
+                </div>
             </div>
         </div>
 
         {{-- 2. BAGIAN BARANG TEMUAN (AKTIF) --}}
-        <div class="mb-4" x-data="{ isOpen: false }">
-            <div @click="isOpen = !isOpen"
-                class="text-lg font-bold text-slate-700 uppercase cursor-pointer list-none flex items-center select-none">
-                <svg class="w-5 h-5 mr-2 transition-transform duration-300 ease-in-out"
-                    :class="isOpen ? 'rotate-0' : '-rotate-90'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
-                BARANG TEMUAN :
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ isOpen: false }">
+            <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] p-3 border-b border-gray-200 cursor-pointer hover:opacity-90 transition" @click="isOpen = !isOpen">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <h3 class="font-bold text-white">BARANG TEMUAN</h3>
+                    </div>
+                    <svg class="w-5 h-5 text-white transition-transform" :class="{ 'rotate-180': !isOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
             </div>
 
-            <div x-show="isOpen" x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 transform -translate-y-2"
-                x-transition:enter-end="opacity-100 transform translate-y-0"
-                x-transition:leave="transition ease-in duration-200"
-                x-transition:leave-start="opacity-100 transform translate-y-0"
-                x-transition:leave-end="opacity-0 transform -translate-y-2" class="mt-2 space-y-3">
+            <div x-show="isOpen" x-collapse>
+                <div class="p-3 space-y-3">
 
                 @forelse($barang_temuan as $barang)
-                    <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
-                        {{-- Header Card --}}
-                        <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] px-4 py-2.5 flex justify-between items-center">
-                            <div>
-                                <p class="text-xs text-blue-200 font-semibold uppercase">Tanggal</p>
-                                <p class="text-white font-bold text-base">{{ $barang->waktu_lapor->format('d/m/Y') }}</p>
-                            </div>
-                            <span class="bg-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                                TEMUAN
-                            </span>
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-300 relative">
+                        {{-- Badge Status di Pojok Kanan Atas --}}
+                        <div class="absolute top-3 right-3 z-10">
+                            <span class="inline-block bg-yellow-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">TEMUAN</span>
                         </div>
-
-                        {{-- Body Card dengan Foto di Kiri & Info Sejajar --}}
+                        
                         <div class="p-4">
-                            <div class="flex gap-4 mb-4">
-                                {{-- Foto Barang di Kiri --}}
-                                <div class="flex-shrink-0">
+                            <div class="w-full">
+                                {{-- Nama Barang sebagai judul utama --}}
+                                <h4 class="font-bold text-gray-800 text-sm mb-3 pr-20">{{ $barang->nama_barang }}</h4>
+
+                                {{-- Info Foto & Detail --}}
+                                <div class="flex gap-4 mb-4">
+                                    {{-- Foto di Kiri --}}
                                     @if($barang->foto)
-                                        <div @click="photoModalOpen = true; photos = ['{{ Storage::url($barang->foto) }}']; currentPhotoIndex = 0;"
-                                            class="w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors">
-                                            <img src="{{ Storage::url($barang->foto) }}" alt="Foto Barang"
-                                                class="w-full h-full object-cover">
-                                        </div>
-                                    @else
-                                        <div
-                                            class="w-24 h-24 rounded-lg bg-gray-100 flex items-center justify-center border-2 border-gray-200">
-                                            <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                                </path>
-                                            </svg>
+                                        <div class="flex-shrink-0">
+                                            <div @click="photoModalOpen = true; photos = ['{{ Storage::url($barang->foto) }}']; currentPhotoIndex = 0" 
+                                                 class="w-16 h-16 rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors">
+                                                <img src="{{ Storage::url($barang->foto) }}" 
+                                                     alt="Foto Barang" 
+                                                     class="w-full h-full object-cover">
+                                            </div>
                                         </div>
                                     @endif
+                                    
+                                    {{-- Info di Kanan --}}
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-1 mb-1">
+                                            <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                            </svg>
+                                            <p class="text-gray-700 font-semibold text-xs">{{ $barang->nama_pelapor }}</p>
+                                        </div>
+                                        
+                                        <div class="flex items-center gap-1 mb-1">
+                                            <svg class="w-3.5 h-3.5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <p class="text-gray-700 font-semibold text-xs">{{ $barang->waktu_lapor->format('d/m/Y H:i') }}</p>
+                                        </div>
+                                        
+                                        <div class="text-xs text-gray-500">
+                                            <span class="font-semibold">Lokasi:</span> {{ Str::limit($barang->lokasi_penemuan, 30) }}
+                                        </div>
+                                    </div>
                                 </div>
 
-                                {{-- Info Barang di Kanan (Sejajar dengan Foto) --}}
-                                <div class="flex-1 flex flex-col justify-center space-y-2">
-                                    {{-- Nama Barang --}}
-                                    <div>
-                                        <p class="text-xs text-gray-500 font-semibold uppercase">Nama Barang</p>
-                                        <p class="text-gray-900 font-bold text-base">{{ $barang->nama_barang }}</p>
-                                    </div>
-
-                                    {{-- Pelapor --}}
-                                    <div>
-                                        <p class="text-xs text-gray-500 font-semibold uppercase">Pelapor</p>
-                                        <p class="text-gray-800 font-semibold">{{ $barang->nama_pelapor }}</p>
-                                    </div>
-
-                                    {{-- Lokasi Penemuan --}}
-                                    <div>
-                                        <p class="text-xs text-gray-500 font-semibold uppercase">Lokasi Penemuan</p>
-                                        <p class="text-gray-800 font-semibold">{{ $barang->lokasi_penemuan }}</p>
-                                    </div>
-                                </div>
+                                {{-- Tombol Selesai Full Width --}}
+                                <button
+                                    @click.prevent="selesaiModalOpen = true; selesaiFormAction = '{{ route('anggota.barang.selesaiTemuan', $barang->id_barang) }}'; minTanggalSelesai = '{{ $barang->waktu_lapor->format('Y-m-d') }}';"
+                                    class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition-all">
+                                    SELESAI
+                                </button>
                             </div>
-
-                            {{-- Tombol Selesai Full Width --}}
-                            <button
-                                @click.prevent="selesaiModalOpen = true; selesaiFormAction = '{{ route('anggota.barang.selesaiTemuan', $barang->id_barang) }}'; minTanggalSelesai = '{{ $barang->waktu_lapor->format('Y-m-d') }}';"
-                                class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition-all">
-                                SELESAI
-                            </button>
                         </div>
                     </div>
                 @empty
-                    <div class="bg-white rounded-xl shadow-md p-8 text-center">
+                    <div class="bg-white rounded-xl shadow-md p-8 text-center border-2 border-gray-300">
                         <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
                             <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -316,28 +299,31 @@
                         <p class="text-gray-500 font-semibold">Tidak ada barang temuan aktif.</p>
                     </div>
                 @endforelse
+                </div>
             </div>
         </div>
 
         {{-- 3. RIWAYAT dengan HYBRID SEARCH + FILTER MULTI-KATEGORI --}}
-        <div class="mb-4" x-data="{ isOpen: true }">
-            <div @click="isOpen = !isOpen"
-                class="text-lg font-bold text-slate-700 uppercase cursor-pointer list-none flex items-center select-none">
-                <svg class="w-5 h-5 mr-2 transition-transform duration-300 ease-in-out"
-                    :class="isOpen ? 'rotate-0' : '-rotate-90'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
-                RIWAYAT :
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ isOpen: true }">
+            <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] p-3 border-b border-gray-200 cursor-pointer hover:opacity-90 transition" @click="isOpen = !isOpen">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <h3 class="font-bold text-white">RIWAYAT BARANG</h3>
+                    </div>
+                    <svg class="w-5 h-5 text-white transition-transform" :class="{ 'rotate-180': !isOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
             </div>
 
-            <div x-show="isOpen" x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
-                x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0"
-                x-transition:leave-end="opacity-0 -translate-y-2">
+            <div x-show="isOpen" x-collapse>
 
                 {{-- Form Filter dengan HYBRID: Suggestion + Live Search --}}
-                <form action="{{ route('anggota.barang.index') }}" method="GET" id="searchBarangForm"
-                    class="bg-white px-6 py-5 rounded-xl shadow-sm mt-2 mb-4 border border-gray-200" x-data="{}">
+                <div class="p-4 border-b border-gray-200">
+                <form action="{{ route('anggota.barang.index') }}" method="GET" id="searchBarangForm" x-data="{}">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                         {{-- Filter Tanggal --}}
@@ -554,9 +540,10 @@
                         </div>
                     </div>
                 </form>
+                </div>
 
                 {{-- Container Riwayat dengan Initial Data --}}
-                <div id="riwayat-container" class="space-y-3">
+                <div id="riwayat-container" class="p-3 space-y-3">
                     @include('anggota.barang-riwayat-cards', ['riwayat_barang' => $riwayat_barang])
                 </div>
             </div>
