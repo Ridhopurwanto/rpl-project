@@ -105,11 +105,11 @@
 
 
     <div class="w-full min-h-screen bg-slate-100 p-4 pb-32" x-data="{ 
-            photoModalOpen: false, 
+            showPhotoModal: false,
+            photoUrl: '',
+            photoModalOpen: false,
             photos: [],
             currentPhotoIndex: 0,
-            touchStartX: 0,
-            touchEndX: 0,
             selesaiModalOpen: false,
             selesaiFormAction: '',
             namaPenerima: '',
@@ -156,7 +156,7 @@
                                     {{-- Foto di Kiri --}}
                                     @if($barang->foto)
                                         <div class="flex-shrink-0">
-                                            <div @click="photoModalOpen = true; photos = ['{{ Storage::url($barang->foto) }}']; currentPhotoIndex = 0" 
+                                            <div @click="showPhotoModal = true; photoUrl = '{{ Storage::url($barang->foto) }}'" 
                                                  class="w-16 h-16 rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors">
                                                 <img src="{{ Storage::url($barang->foto) }}" 
                                                      alt="Foto Barang" 
@@ -248,7 +248,7 @@
                                     {{-- Foto di Kiri --}}
                                     @if($barang->foto)
                                         <div class="flex-shrink-0">
-                                            <div @click="photoModalOpen = true; photos = ['{{ Storage::url($barang->foto) }}']; currentPhotoIndex = 0" 
+                                            <div @click="showPhotoModal = true; photoUrl = '{{ Storage::url($barang->foto) }}'" 
                                                  class="w-16 h-16 rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors">
                                                 <img src="{{ Storage::url($barang->foto) }}" 
                                                      alt="Foto Barang" 
@@ -788,66 +788,44 @@
             </div>
         </div>
 
-        {{-- 6. MODAL LIHAT FOTO dengan SLIDER --}}
+        {{-- 6. MODAL FOTO BARANG SIMPLE --}}
+        <div x-show="showPhotoModal" 
+             class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
+             @click.away="showPhotoModal = false"
+             style="display: none;">
+            <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-4 relative" @click.stop>
+                <div class="flex justify-between items-center pb-3 border-b">
+                    <h3 class="text-xl font-bold text-gray-800">FOTO BARANG</h3>
+                    <button @click="showPhotoModal = false" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+                </div>
+                <div class="mt-4">
+                    <img :src="photoUrl" alt="Foto Barang" class="w-full h-auto rounded">
+                </div>
+            </div>
+        </div>
+
+        {{-- 7. MODAL FOTO SLIDER --}}
         <div x-show="photoModalOpen" style="display: none;"
-            class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-[60]" x-transition
-            @touchstart="touchStartX = $event.changedTouches[0].screenX" @touchend="
-                touchEndX = $event.changedTouches[0].screenX;
-                if (touchStartX - touchEndX > 50 && currentPhotoIndex < photos.length - 1) currentPhotoIndex++;
-                if (touchEndX - touchStartX > 50 && currentPhotoIndex > 0) currentPhotoIndex--;
-            ">
-
-            <div @click.outside="photoModalOpen = false" class="relative max-w-4xl w-full">
-
-                {{-- Header Modal --}}
-                <div class="flex justify-between items-center mb-4">
-                    <div class="text-white">
-                        <p class="text-sm text-gray-300">Foto <span x-text="currentPhotoIndex + 1"></span> dari <span
-                                x-text="photos.length"></span></p>
-                        <p class="text-xs text-gray-400 mt-1"
-                            x-text="currentPhotoIndex === 0 ? 'Foto Barang' : 'Foto Penerima'"></p>
-                    </div>
-                    <button @click="photoModalOpen = false"
-                        class="text-white hover:text-gray-300 text-2xl font-bold bg-gray-800 hover:bg-gray-700 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
-                        ×
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
+             @click.away="photoModalOpen = false">
+            <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-4 relative" @click.stop>
+                <div class="flex justify-between items-center pb-3 border-b">
+                    <h3 class="text-xl font-bold text-gray-800" x-text="currentPhotoIndex === 0 ? 'FOTO BARANG' : 'FOTO PENERIMA'"></h3>
+                    <button @click="photoModalOpen = false" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+                </div>
+                <div class="mt-4 relative">
+                    <img :src="photos[currentPhotoIndex]" alt="Foto" class="w-full h-auto rounded">
+                    <button x-show="currentPhotoIndex > 0" @click="currentPhotoIndex--" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                    <button x-show="currentPhotoIndex < photos.length - 1" @click="currentPhotoIndex++" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                     </button>
                 </div>
-
-                {{-- Image Container --}}
-                <div class="relative">
-                    <img :src="photos[currentPhotoIndex]"
-                        class="w-full h-auto max-h-[70vh] object-contain rounded-lg border-4 border-gray-700">
-
-                    {{-- Previous Button --}}
-                    <button x-show="currentPhotoIndex > 0" @click="currentPhotoIndex--"
-                        class="absolute left-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
-                            </path>
-                        </svg>
-                    </button>
-
-                    {{-- Next Button --}}
-                    <button x-show="currentPhotoIndex < photos.length - 1" @click="currentPhotoIndex++"
-                        class="absolute right-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                    </button>
-                </div>
-
-                {{-- Indicator Dots --}}
-                <div class="flex justify-center gap-2 mt-4" x-show="photos.length > 1">
+                <div class="flex justify-center gap-2 mt-3" x-show="photos.length > 1">
                     <template x-for="(photo, index) in photos" :key="index">
-                        <button @click="currentPhotoIndex = index"
-                            :class="currentPhotoIndex === index ? 'bg-white w-8' : 'bg-gray-500 w-2'"
-                            class="h-2 rounded-full transition-all"></button>
+                        <button @click="currentPhotoIndex = index" :class="currentPhotoIndex === index ? 'bg-gray-800 w-6' : 'bg-gray-400 w-2'" class="h-2 rounded-full transition-all"></button>
                     </template>
-                </div>
-
-                {{-- Hint --}}
-                <div class="text-center mt-4 text-gray-400 text-xs" x-show="photos.length > 1">
-                    Swipe atau gunakan tombol panah untuk navigasi
                 </div>
             </div>
         </div>

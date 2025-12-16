@@ -15,7 +15,7 @@
                     {{-- Foto di Kiri --}}
                     <div class="flex-shrink-0">
                         @if($barang->foto)
-                            <div @click="showPhotoModal = true; photoUrl = '{{ Storage::url($barang->foto) }}'" 
+                            <div @click="photoModalOpen = true; photos = ['{{ Storage::url($barang->foto) }}'@if($barang->foto_penerima), '{{ Storage::url($barang->foto_penerima) }}'@endif]; currentPhotoIndex = 0" 
                                  class="w-16 h-16 rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors relative">
                                 <img src="{{ Storage::url($barang->foto) }}" 
                                      alt="Foto Barang" 
