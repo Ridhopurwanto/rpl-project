@@ -121,7 +121,28 @@
 
 
         {{-- 1. BAGIAN BARANG TITIPAN (AKTIF) --}}
-        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ isOpen: false }">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ 
+            isOpen: false,
+            loading: false,
+            async loadPage(url) {
+                this.loading = true;
+                try {
+                    const response = await fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    const html = await response.text();
+                    document.getElementById('titipan-container').innerHTML = html;
+                    
+                    window.history.pushState({}, '', url);
+                } catch (error) {
+                    console.error('Error loading page:', error);
+                } finally {
+                    this.loading = false;
+                }
+            }
+        }">
             <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] p-3 border-b border-gray-200 cursor-pointer hover:opacity-90 transition" @click="isOpen = !isOpen">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center">
@@ -137,13 +158,42 @@
             </div>
 
             <div x-show="isOpen" x-collapse>
+                <div x-show="loading" class="p-8 text-center">
+                    <svg class="animate-spin h-8 w-8 text-blue-600 mx-auto" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="text-sm text-gray-500 mt-2">Loading...</p>
+                </div>
+                
+                <div id="titipan-container" x-show="!loading">
+                    {{-- Per Page Controls --}}
+                    @if($barang_titipan->total() > 0)
+                        <div class="p-3 border-b border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Show:</span>
+                                    <select onchange="loadPage(this.value)" class="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]">
+                                        <option value="{{ request()->fullUrlWithQuery(['per_page' => 5, 'titipan_page' => 1]) }}" @if($per_page == 5) selected @endif>5</option>
+                                        <option value="{{ request()->fullUrlWithQuery(['per_page' => 10, 'titipan_page' => 1]) }}" @if($per_page == 10) selected @endif>10</option>
+                                        <option value="{{ request()->fullUrlWithQuery(['per_page' => 15, 'titipan_page' => 1]) }}" @if($per_page == 15) selected @endif>15</option>
+                                        <option value="{{ request()->fullUrlWithQuery(['per_page' => 20, 'titipan_page' => 1]) }}" @if($per_page == 20) selected @endif>20</option>
+                                    </select>
+                                </div>
+                                <div class="text-xs text-gray-600">
+                                    Showing {{ $barang_titipan->firstItem() ?? 0 }} to {{ $barang_titipan->lastItem() ?? 0 }} of {{ $barang_titipan->total() }} entries
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                
                 <div class="p-3 space-y-3">
 
                 @forelse($barang_titipan as $barang)
                     <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-300 relative">
                         {{-- Badge Status di Pojok Kanan Atas --}}
                         <div class="absolute top-3 right-3 z-10">
-                            <span class="inline-block bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">TITIPAN</span>
+                            <span class="inline-block bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">{{ $barang->waktu_titip->format('d/m/y') }}</span>
                         </div>
                         
                         <div class="p-4">
@@ -178,7 +228,7 @@
                                             <svg class="w-3.5 h-3.5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                             </svg>
-                                            <p class="text-gray-700 font-semibold text-xs">{{ $barang->waktu_titip->format('d/m/Y H:i') }}</p>
+                                            <p class="text-gray-700 font-semibold text-xs">{{ $barang->waktu_titip->format('H:i') }}</p>
                                         </div>
                                         
                                         <div class="text-xs text-gray-500">
@@ -186,6 +236,15 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                {{-- Catatan --}}
+                                @if($barang->catatan)
+                                    <div class="mb-4">
+                                        <div class="text-xs text-gray-500">
+                                            <span class="font-semibold">Catatan:</span> {{ $barang->catatan }}
+                                        </div>
+                                    </div>
+                                @endif
 
                                 {{-- Tombol Selesai Full Width --}}
                                 <button
@@ -209,6 +268,102 @@
                     </div>
                 @endforelse
                 </div>
+                
+                {{-- Pagination Desktop --}}
+                @if($barang_titipan->total() > 0 && $barang_titipan->hasPages())
+                    <div class="hidden md:flex justify-between items-center px-6 py-4 border-t border-gray-200">
+                        <div class="text-sm text-gray-600">
+                            Showing {{ $barang_titipan->firstItem() ?? 0 }} to {{ $barang_titipan->lastItem() ?? 0 }} of {{ $barang_titipan->total() }} entries
+                        </div>
+                        <div class="flex items-center gap-1">
+                            @if ($barang_titipan->onFirstPage())
+                                <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Previous</span>
+                            @else
+                                <button onclick="loadPage('{{ $barang_titipan->appends(request()->except('titipan_page'))->previousPageUrl() }}')" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Previous</button>
+                            @endif
+                            
+                            @php
+                                $current = $barang_titipan->currentPage();
+                                $last = $barang_titipan->lastPage();
+                                $start = max(1, $current - 2);
+                                $end = min($last, $current + 2);
+                            @endphp
+                            
+                            @if($start > 1)
+                                <a href="{{ $barang_titipan->appends(request()->except('titipan_page'))->url(1) }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">1</a>
+                                @if($start > 2)
+                                    <span class="px-3 py-1 text-gray-500">...</span>
+                                @endif
+                            @endif
+                            
+                            @for($page = $start; $page <= $end; $page++)
+                                @if($page == $current)
+                                    <span class="px-3 py-1 text-white bg-[#1e3a5f] rounded font-bold">{{ $page }}</span>
+                                @else
+                                    <button onclick="loadPage('{{ $barang_titipan->appends(request()->except('titipan_page'))->url($page) }}')" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</button>
+                                @endif
+                            @endfor
+                            
+                            @if($end < $last)
+                                @if($end < $last - 1)
+                                    <span class="px-3 py-1 text-gray-500">...</span>
+                                @endif
+                                <a href="{{ $barang_titipan->appends(request()->except('titipan_page'))->url($last) }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $last }}</a>
+                            @endif
+                            
+                            @if ($barang_titipan->hasMorePages())
+                                <button onclick="loadPage('{{ $barang_titipan->appends(request()->except('titipan_page'))->nextPageUrl() }}')" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</button>
+                            @else
+                                <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- Pagination Mobile --}}
+                    <div class="md:hidden flex justify-between items-center px-3 py-4 border-t border-gray-200">
+                        <div class="text-xs text-gray-600">
+                            {{ $barang_titipan->firstItem() ?? 0 }}-{{ $barang_titipan->lastItem() ?? 0 }} of {{ $barang_titipan->total() }}
+                        </div>
+                        <div class="flex gap-1">
+                            @if ($barang_titipan->onFirstPage())
+                                <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Prev</span>
+                            @else
+                                <button onclick="loadPage('{{ $barang_titipan->appends(request()->except('titipan_page'))->previousPageUrl() }}')" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Prev</button>
+                            @endif
+                            
+                            @if($start > 1)
+                                <a href="{{ $barang_titipan->appends(request()->except('titipan_page'))->url(1) }}" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">1</a>
+                                @if($start > 2)
+                                    <span class="px-2 py-1 text-xs text-gray-500">...</span>
+                                @endif
+                            @endif
+                            
+                            @for($page = $start; $page <= $end; $page++)
+                                @if($page == $current)
+                                    <span class="px-2 py-1 text-xs text-white bg-[#1e3a5f] rounded">{{ $page }}</span>
+                                @else
+                                    <button onclick="loadPage('{{ $barang_titipan->appends(request()->except('titipan_page'))->url($page) }}')" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</button>
+                                @endif
+                            @endfor
+                            
+                            @if($end < $last)
+                                @if($end < $last - 1)
+                                    <span class="px-2 py-1 text-xs text-gray-500">...</span>
+                                @endif
+                                <a href="{{ $barang_titipan->appends(request()->except('titipan_page'))->url($last) }}" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $last }}</a>
+                            @endif
+                            
+                            @if ($barang_titipan->hasMorePages())
+                                <button onclick="loadPage('{{ $barang_titipan->appends(request()->except('titipan_page'))->nextPageUrl() }}')" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</button>
+                            @else
+                                <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+                </div>
+                
+
             </div>
         </div>
 
@@ -235,7 +390,7 @@
                     <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-300 relative">
                         {{-- Badge Status di Pojok Kanan Atas --}}
                         <div class="absolute top-3 right-3 z-10">
-                            <span class="inline-block bg-yellow-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">TEMUAN</span>
+                            <span class="inline-block bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">{{ $barang->waktu_lapor->format('d/m/y') }}</span>
                         </div>
                         
                         <div class="p-4">
@@ -270,7 +425,7 @@
                                             <svg class="w-3.5 h-3.5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                             </svg>
-                                            <p class="text-gray-700 font-semibold text-xs">{{ $barang->waktu_lapor->format('d/m/Y H:i') }}</p>
+                                            <p class="text-gray-700 font-semibold text-xs">{{ $barang->waktu_lapor->format('H:i') }}</p>
                                         </div>
                                         
                                         <div class="text-xs text-gray-500">
@@ -278,6 +433,15 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                {{-- Catatan --}}
+                                @if($barang->catatan)
+                                    <div class="mb-4">
+                                        <div class="text-xs text-gray-500">
+                                            <span class="font-semibold">Catatan:</span> {{ $barang->catatan }}
+                                        </div>
+                                    </div>
+                                @endif
 
                                 {{-- Tombol Selesai Full Width --}}
                                 <button
