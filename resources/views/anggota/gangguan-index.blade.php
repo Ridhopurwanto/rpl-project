@@ -35,6 +35,8 @@
                         selectedVehicleNopol: '',
                         selectedVehicleStatus: '',
                         showCreateModal: false,
+                        showPhotoModal: false,
+                        photoUrl: '',
                         showSuccessNotif: {{ session('success') ? 'true' : 'false' }},
                         showErrorNotif: {{ session('error') ? 'true' : 'false' }}
                      }">
@@ -104,187 +106,261 @@
             </button>
         </div>
 
-<div class="w-full min-h-screen bg-slate-100 p-4 pb-32" 
-     x-data="{ 
-        showCreateModal: false, 
-        showPhotoModal: false, 
-        photoUrl: '' 
-     }">
-
-    {{-- KOTAK FILTER --}}
-    <form action="{{ route('anggota.gangguan.index') }}" method="GET" x-data="{}" id="filterForm">
-        <div class="bg-white px-6 py-5 rounded-xl shadow-sm mb-6 border border-gray-200">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
-                {{-- Filter Bulan (Custom Picker) --}}
-                <div class="w-full md:flex-1" x-data="{
-                    showPicker: false,
-                    month: parseInt('{{ \Carbon\Carbon::parse($bulan_terpilih)->format('m') }}'),
-                    year: parseInt('{{ \Carbon\Carbon::parse($bulan_terpilih)->format('Y') }}'),
-                    months: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
-                    shortMonths: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'],
-                    
-                    get displayValue() {
-                        return this.months[this.month - 1] + ' ' + this.year;
-                    },
-                    
-                    selectMonth(m) {
-                        this.month = m;
-                        this.submitForm();
-                    },
-                    
-                    changeYear(delta) {
-                        this.year += delta;
-                    },
-                    
-                    submitForm() {
-                        let m = this.month.toString().padStart(2, '0');
-                        this.$refs.hiddenBulan.value = this.year + '-' + m;
-                        document.getElementById('filterForm').submit();
-                    }
-                }" @click.away="showPicker = false">
-                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Bulan</label>
-                    <div class="relative">
-                        {{-- Hidden Input --}}
-                        <input type="hidden" name="bulan" x-ref="hiddenBulan" value="{{ $bulan_terpilih }}">
-
-                        {{-- Trigger Button (Looks like Input) --}}
-                        <div @click="showPicker = !showPicker" 
-                             class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg hover:border-[#1e3a5f] cursor-pointer flex items-center justify-between">
-                            <span x-text="displayValue"></span>
-                            <svg class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-
-                        {{-- Dropdown Picker --}}
-                        <div x-show="showPicker" 
-                             style="display: none;"
-                             class="absolute z-50 top-full left-0 mt-1 w-64 bg-white rounded-lg shadow-xl border border-gray-200 p-4">
-                            
-                            {{-- Year Navigator --}}
-                            <div class="flex justify-between items-center mb-4">
-                                <button type="button" @click.stop="changeYear(-1)" class="p-1 hover:bg-gray-100 rounded-full">
-                                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                                </button>
-                                <span class="font-bold text-gray-800" x-text="year"></span>
-                                <button type="button" @click.stop="changeYear(1)" class="p-1 hover:bg-gray-100 rounded-full">
-                                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                                </button>
-                            </div>
-
-                            {{-- Months Grid --}}
-                            <div class="grid grid-cols-4 gap-2">
-                                <template x-for="(mName, index) in shortMonths">
-                                    <button type="button"
-                                            @click.stop="selectMonth(index + 1)"
-                                            :class="{'bg-[#1e3a5f] text-white': month === (index + 1), 'hover:bg-blue-50 text-gray-700': month !== (index + 1)}"
-                                            class="text-xs font-medium py-2 rounded-md transition-colors"
-                                            x-text="mName">
-                                    </button>
-                                </template>
-                            </div>
-                        </div>
+        {{-- BAGIAN RIWAYAT GANGGUAN KAMTIBMAS --}}
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ isOpen: true }">
+            <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] p-3 border-b border-gray-200 cursor-pointer hover:opacity-90 transition" @click="isOpen = !isOpen">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                        <h3 class="font-bold text-white">RIWAYAT GANGGUAN KAMTIBMAS</h3>
                     </div>
-                </div>
-
-                {{-- Filter Kategori --}}
-                <div class="w-full">
-                    <label for="kategori" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                        Kategori
-                    </label>
-                    <div class="relative">
-                        <select id="kategori" name="kategori" 
-                                onchange="this.form.submit()"
-                                class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
-                            <option value="semua" @if($kategori_terpilih == 'semua') selected @endif>Semua Kategori</option>
-                            @foreach($kategori_list as $kategori)
-                                <option value="{{ $kategori }}" @if($kategori_terpilih == $kategori) selected @endif>{{ $kategori }}</option>
-                            @endforeach
-                        </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                            <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
-
-    {{-- CARD LAYOUT GANGGUAN KAMTIBMAS --}}
-    <div class="space-y-3">
-        @forelse($laporan_gangguan as $laporan)
-            <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
-                {{-- Header Card --}}
-                <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] px-4 py-2.5 flex justify-between items-center">
-                    <div>
-                        <p class="text-xs text-blue-200 font-semibold uppercase">Waktu Lapor</p>
-                        <p class="text-white font-bold text-base">{{ $laporan->waktu_lapor->format('d/m/Y H:i') }}</p>
-                    </div>
-                    
-                    {{-- Badge Kategori dengan Warna Dinamis --}}
-                    <span class="
-                        @if($laporan->kategori == 'Curat') bg-red-500
-                        @elseif($laporan->kategori == 'Curas') bg-orange-500
-                        @elseif($laporan->kategori == 'Curanmor') bg-yellow-500
-                        @elseif($laporan->kategori == 'Narkoba') bg-purple-500
-                        @elseif($laporan->kategori == 'Laka Lantas') bg-pink-500
-                        @elseif($laporan->kategori == 'Pembunuhan') bg-red-700
-                        @elseif($laporan->kategori == 'Perkelahian') bg-orange-600
-                        @elseif($laporan->kategori == 'Mabok') bg-indigo-500
-                        @elseif($laporan->kategori == 'Unjuk Rasa') bg-blue-500
-                        @elseif($laporan->kategori == 'Penyerobotan Tanah') bg-green-600
-                        @elseif($laporan->kategori == 'Kenakalan Remaja') bg-teal-500
-                        @elseif($laporan->kategori == 'Kebakaran') bg-red-600
-                        @elseif($laporan->kategori == 'Bencana Alam') bg-gray-600
-                        @else bg-gray-500
-                        @endif
-                        text-white text-xs font-bold px-3 py-1 rounded-full">
-                        {{ $laporan->kategori }}
-                    </span>
-                </div>
-
-                {{-- Body Card dengan Foto di Kiri --}}
-                <div class="p-4 flex gap-4">
-                    {{-- Foto di Kiri --}}
-                    <div class="flex-shrink-0">
-                        <div @click="showPhotoModal = true; photoUrl = '{{ Storage::url($laporan->foto) }}'" 
-                             class="w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors">
-                            <img src="{{ Storage::url($laporan->foto) }}" 
-                                 alt="Foto Gangguan" 
-                                 class="w-full h-full object-cover">
-                        </div>
-                    </div>
-
-                    {{-- Info di Kanan --}}
-                    <div class="flex-1 space-y-2">
-                        {{-- Lokasi --}}
-                        <div>
-                            <p class="text-xs text-gray-500 font-semibold uppercase">Lokasi</p>
-                            <p class="text-gray-900 font-bold text-base">{{ $laporan->lokasi }}</p>
-                        </div>
-
-                        {{-- Keterangan --}}
-                        <div>
-                            <p class="text-xs text-gray-500 font-semibold uppercase">Keterangan</p>
-                            <p class="text-gray-800 text-sm leading-relaxed">{{ $laporan->deskripsi }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @empty
-            <div class="bg-white rounded-xl shadow-md p-8 text-center">
-                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    <svg class="w-5 h-5 text-white transition-transform" :class="{ 'rotate-180': !isOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </div>
-                <p class="text-gray-500 font-semibold">Tidak ada laporan gangguan pada bulan & kategori ini.</p>
             </div>
-        @endforelse
-    </div>
+
+            <div x-show="isOpen" x-collapse>
+                {{-- Filter --}}
+                <div class="p-4 border-b border-gray-200">
+                    <form action="{{ route('anggota.gangguan.index') }}" method="GET" id="filterForm">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            
+                            {{-- Show Per Page --}}
+                            <div class="w-full md:w-auto">
+                                <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
+                                <div class="flex items-center gap-2">
+                                    <select name="per_page" onchange="this.form.submit()" class="h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm appearance-none cursor-pointer" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em;">
+                                        <option value="5" {{ request('per_page', 5) == 5 ? 'selected' : '' }}>5</option>
+                                        <option value="10" {{ request('per_page', 5) == 10 ? 'selected' : '' }}>10</option>
+                                        <option value="25" {{ request('per_page', 5) == 25 ? 'selected' : '' }}>25</option>
+                                        <option value="50" {{ request('per_page', 5) == 50 ? 'selected' : '' }}>50</option>
+                                    </select>
+                                    <span class="text-sm text-gray-600">rows</span>
+                                </div>
+                            </div>
+                            
+                            {{-- Filter Bulan (Custom Picker) --}}
+                            <div class="w-full md:flex-1" x-data="{
+                                showPicker: false,
+                                month: parseInt('{{ \Carbon\Carbon::parse($bulan_terpilih)->format('m') }}'),
+                                year: parseInt('{{ \Carbon\Carbon::parse($bulan_terpilih)->format('Y') }}'),
+                                months: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+                                shortMonths: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'],
+                                
+                                get displayValue() {
+                                    return this.months[this.month - 1] + ' ' + this.year;
+                                },
+                                
+                                selectMonth(m) {
+                                    this.month = m;
+                                    this.submitForm();
+                                },
+                                
+                                changeYear(delta) {
+                                    this.year += delta;
+                                },
+                                
+                                submitForm() {
+                                    let m = this.month.toString().padStart(2, '0');
+                                    this.$refs.hiddenBulan.value = this.year + '-' + m;
+                                    document.getElementById('filterForm').submit();
+                                }
+                            }" @click.away="showPicker = false">
+                                <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Bulan</label>
+                                <div class="relative">
+                                    {{-- Hidden Input --}}
+                                    <input type="hidden" name="bulan" x-ref="hiddenBulan" value="{{ $bulan_terpilih }}">
+
+                                    {{-- Trigger Button (Looks like Input) --}}
+                                    <div @click="showPicker = !showPicker" 
+                                         class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg hover:border-[#1e3a5f] cursor-pointer flex items-center justify-between">
+                                        <span x-text="displayValue"></span>
+                                        <svg class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+
+                                    {{-- Dropdown Picker --}}
+                                    <div x-show="showPicker" 
+                                         style="display: none;"
+                                         class="absolute z-50 top-full left-0 mt-1 w-64 bg-white rounded-lg shadow-xl border border-gray-200 p-4">
+                                        
+                                        {{-- Year Navigator --}}
+                                        <div class="flex justify-between items-center mb-4">
+                                            <button type="button" @click.stop="changeYear(-1)" class="p-1 hover:bg-gray-100 rounded-full">
+                                                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                                            </button>
+                                            <span class="font-bold text-gray-800" x-text="year"></span>
+                                            <button type="button" @click.stop="changeYear(1)" class="p-1 hover:bg-gray-100 rounded-full">
+                                                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                            </button>
+                                        </div>
+
+                                        {{-- Months Grid --}}
+                                        <div class="grid grid-cols-4 gap-2">
+                                            <template x-for="(mName, index) in shortMonths">
+                                                <button type="button"
+                                                        @click.stop="selectMonth(index + 1)"
+                                                        :class="{'bg-[#1e3a5f] text-white': month === (index + 1), 'hover:bg-blue-50 text-gray-700': month !== (index + 1)}"
+                                                        class="text-xs font-medium py-2 rounded-md transition-colors"
+                                                        x-text="mName">
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Filter Kategori --}}
+                            <div class="w-full">
+                                <label for="kategori" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                                    Kategori
+                                </label>
+                                <div class="relative">
+                                    <select id="kategori" name="kategori" 
+                                            onchange="this.form.submit()"
+                                            class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                                        <option value="semua" @if($kategori_terpilih == 'semua') selected @endif>Semua Kategori</option>
+                                        @foreach($kategori_list as $kategori)
+                                            <option value="{{ $kategori }}" @if($kategori_terpilih == $kategori) selected @endif>{{ $kategori }}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                {{-- Card Layout Gangguan Kamtibmas --}}
+                <div class="p-3 space-y-3">
+                    @forelse($laporan_gangguan as $laporan)
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-300 relative">
+                            {{-- Badge Kategori di Pojok Kanan Atas --}}
+                            <div class="absolute top-3 right-3 z-10">
+                                <span class="inline-block 
+                                    @if($laporan->kategori == 'Curat') bg-red-500
+                                    @elseif($laporan->kategori == 'Curas') bg-orange-500
+                                    @elseif($laporan->kategori == 'Curanmor') bg-yellow-500
+                                    @elseif($laporan->kategori == 'Narkoba') bg-purple-500
+                                    @elseif($laporan->kategori == 'Laka Lantas') bg-pink-500
+                                    @elseif($laporan->kategori == 'Pembunuhan') bg-red-700
+                                    @elseif($laporan->kategori == 'Perkelahian') bg-orange-600
+                                    @elseif($laporan->kategori == 'Mabok') bg-indigo-500
+                                    @elseif($laporan->kategori == 'Unjuk Rasa') bg-blue-500
+                                    @elseif($laporan->kategori == 'Penyerobotan Tanah') bg-green-600
+                                    @elseif($laporan->kategori == 'Kenakalan Remaja') bg-teal-500
+                                    @elseif($laporan->kategori == 'Kebakaran') bg-red-600
+                                    @elseif($laporan->kategori == 'Bencana Alam') bg-gray-600
+                                    @else bg-gray-500
+                                    @endif
+                                    text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">{{ $laporan->kategori }}</span>
+                            </div>
+                            
+                            <div class="p-4">
+                                <div class="w-full">
+                                    {{-- Lokasi sebagai judul utama --}}
+                                    <h4 class="font-bold text-gray-800 text-sm mb-3 pr-20">{{ $laporan->lokasi }}</h4>
+
+                                    {{-- Info Foto & Waktu --}}
+                                    <div class="flex gap-4 mb-2">
+                                        {{-- Foto di Kiri --}}
+                                        <div class="flex-shrink-0">
+                                            <div @click="showPhotoModal = true; photoUrl = '{{ Storage::url($laporan->foto) }}'" 
+                                                 class="w-16 h-16 rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors">
+                                                <img src="{{ Storage::url($laporan->foto) }}" 
+                                                     alt="Foto Gangguan" 
+                                                     class="w-full h-full object-cover">
+                                            </div>
+                                        </div>
+                                        
+                                        {{-- Info di Kanan --}}
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-1 mb-1">
+                                                <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                                <p class="text-gray-700 font-semibold text-xs">{{ $laporan->waktu_lapor->format('d/m/Y H:i') }}</p>
+                                            </div>
+                                            
+                                            <div class="text-xs text-gray-500">
+                                                <span class="font-semibold">Keterangan:</span> {{ Str::limit($laporan->deskripsi, 50) }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="bg-white rounded-xl shadow-md p-8 text-center border-2 border-gray-300">
+                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-gray-500 font-semibold">Tidak ada laporan gangguan pada bulan & kategori ini.</p>
+                        </div>
+                    @endforelse
+                </div>
+                
+                {{-- Pagination Desktop --}}
+                @if(method_exists($laporan_gangguan, 'hasPages') && $laporan_gangguan->hasPages())
+                <div class="hidden md:flex justify-between items-center px-6 py-4 border-t border-gray-200">
+                    <div class="text-sm text-gray-600">Showing {{ $laporan_gangguan->firstItem() ?? 0 }} to {{ $laporan_gangguan->lastItem() ?? 0 }} of {{ $laporan_gangguan->total() }} entries</div>
+                    <div class="flex gap-1">
+                        @if($laporan_gangguan->onFirstPage())
+                            <span class="px-3 py-2 text-sm text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">Previous</span>
+                        @else
+                            <a href="{{ $laporan_gangguan->appends(request()->query())->previousPageUrl() }}" class="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Previous</a>
+                        @endif
+                        @foreach($laporan_gangguan->getUrlRange(1, $laporan_gangguan->lastPage()) as $page => $url)
+                            @if($page == $laporan_gangguan->currentPage())
+                                <span class="px-3 py-2 text-sm text-white bg-[#1e3a5f] rounded-lg">{{ $page }}</span>
+                            @else
+                                <a href="{{ $laporan_gangguan->appends(request()->query())->url($page) }}" class="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">{{ $page }}</a>
+                            @endif
+                        @endforeach
+                        @if($laporan_gangguan->hasMorePages())
+                            <a href="{{ $laporan_gangguan->appends(request()->query())->nextPageUrl() }}" class="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Next</a>
+                        @else
+                            <span class="px-3 py-2 text-sm text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">Next</span>
+                        @endif
+                    </div>
+                </div>
+                
+                {{-- Pagination Mobile --}}
+                <div class="md:hidden flex justify-between items-center px-3 py-4 border-t border-gray-200">
+                    <div class="text-xs text-gray-600">{{ $laporan_gangguan->firstItem() ?? 0 }}-{{ $laporan_gangguan->lastItem() ?? 0 }} of {{ $laporan_gangguan->total() }}</div>
+                    <div class="flex gap-1">
+                        @if($laporan_gangguan->onFirstPage())
+                            <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Prev</span>
+                        @else
+                            <a href="{{ $laporan_gangguan->appends(request()->query())->previousPageUrl() }}" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Prev</a>
+                        @endif
+                        @foreach($laporan_gangguan->getUrlRange(1, $laporan_gangguan->lastPage()) as $page => $url)
+                            @if($page == $laporan_gangguan->currentPage())
+                                <span class="px-2 py-1 text-xs text-white bg-[#1e3a5f] rounded">{{ $page }}</span>
+                            @else
+                                <a href="{{ $laporan_gangguan->appends(request()->query())->url($page) }}" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
+                            @endif
+                        @endforeach
+                        @if($laporan_gangguan->hasMorePages())
+                            <a href="{{ $laporan_gangguan->appends(request()->query())->nextPageUrl() }}" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
+                        @else
+                            <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
+                        @endif
+                    </div>
+                </div>
+                @endif
+            </div>
+        </div>
 
     {{-- TOMBOL FAB --}}
     <button @click.prevent="showCreateModal = true" 
@@ -497,17 +573,19 @@
         </div>
     </div>
 
-    {{-- ================= MODAL LIHAT FOTO RIWAYAT ================= --}}
+    {{-- MODAL FOTO GANGGUAN --}}
     <div x-show="showPhotoModal" 
-         class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-[60]"
-         style="display: none;"
-         x-transition:enter="ease-out duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100">
-        
-        <div @click.away="showPhotoModal = false" class="relative max-w-3xl w-full">
-            <button @click="showPhotoModal = false" class="absolute -top-10 right-0 text-white text-xl font-bold">TUTUP [X]</button>
-            <img :src="photoUrl" class="w-full h-auto max-h-[80vh] object-contain rounded-lg border border-gray-600">
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
+         @click.away="showPhotoModal = false"
+         style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-4 relative" @click.stop>
+            <div class="flex justify-between items-center pb-3 border-b">
+                <h3 class="text-xl font-bold text-gray-800">FOTO GANGGUAN</h3>
+                <button @click="showPhotoModal = false" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+            </div>
+            <div class="mt-4">
+                <img :src="photoUrl" alt="Foto Gangguan" class="w-full h-auto rounded">
+            </div>
         </div>
     </div>
 

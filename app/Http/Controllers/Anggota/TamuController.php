@@ -23,12 +23,13 @@ class TamuController extends Controller
         // 2. Ambil input dari request, jika tidak ada gunakan default
         $startDate = $request->input('start_date', $defaultStartDate);
         $endDate = $request->input('end_date', $defaultEndDate);
+        $perPage = $request->input('per_page', 5);
 
-        // 3. Query dengan filter range tanggal
+        // 3. Query dengan filter range tanggal dan pagination
         $riwayat_tamu = Tamu::whereDate('waktu_datang', '>=', $startDate)
                             ->whereDate('waktu_datang', '<=', $endDate)
                             ->orderBy('waktu_datang', 'desc')
-                            ->get();
+                            ->paginate($perPage);
 
         // 4. Kirim data ke view (termasuk variabel tanggal untuk mengisi value input)
         return view('anggota.tamu-index', [

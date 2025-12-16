@@ -41,53 +41,73 @@
             </div>
         @endif
 
-        {{-- Filter Tanggal --}}
-        <div class="bg-white px-6 py-5 rounded-xl shadow-sm mt-4 mb-6 border border-gray-200">
-            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-700 uppercase tracking-wide">RIWAYAT PATROLI</h3>
-                    <p class="text-xs text-gray-500 mt-1">Pilih tanggal untuk melihat detail catatan patroli.</p>
-                </div>
-                <form action="{{ route('anggota.patroli.index') }}" method="GET" class="w-full md:w-auto">
-                    <div class="w-full md:w-64">
-                        <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Tanggal</label>
-                        <input type="date" name="tanggal" value="{{ $tanggalTerpilih->format('Y-m-d') }}" max="{{ date('Y-m-d') }}" onchange="this.form.submit()"
-                            class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg shadow-sm cursor-pointer">
+        {{-- BAGIAN RIWAYAT PATROLI --}}
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6 mt-4" x-data="{ isOpen: true }">
+            <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] p-3 border-b border-gray-200 cursor-pointer hover:opacity-90 transition" @click="isOpen = !isOpen">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <h3 class="font-bold text-white">RIWAYAT PATROLI</h3>
                     </div>
-                </form>
-            </div>
-        </div>
-
-        {{-- LIST PATROLI --}}
-        <div class="mt-4 mb-32 space-y-3">
-            @if ($displayData->isEmpty())
-                <div class="bg-white rounded-xl shadow-md p-8 text-center">
-                    <p class="text-gray-500 font-semibold">Tidak ada jadwal patroli aktif atau data tidak ditemukan.</p>
+                    <svg class="w-5 h-5 text-white transition-transform" :class="{ 'rotate-180': !isOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
                 </div>
-            @else
+            </div>
+
+            <div x-show="isOpen" x-collapse>
+                {{-- Filter Tanggal --}}
+                <div class="p-4 border-b border-gray-200">
+                    <form action="{{ route('anggota.patroli.index') }}" method="GET">
+                        <div class="w-full md:w-64">
+                            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Tanggal</label>
+                            <input type="date" name="tanggal" value="{{ $tanggalTerpilih->format('Y-m-d') }}" max="{{ date('Y-m-d') }}" onchange="this.form.submit()"
+                                class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
+                        </div>
+                    </form>
+                </div>
+
+                {{-- List Patroli --}}
+                @if ($displayData->isEmpty())
+                    <div class="p-6 text-center">
+                        <div class="flex flex-col items-center justify-center py-8">
+                            <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p class="text-gray-500 font-semibold text-lg mb-2">Tidak Ada Riwayat Patroli</p>
+                            <p class="text-gray-400 text-sm">Belum ada aktivitas patroli pada tanggal ini</p>
+                        </div>
+                    </div>
+                @else
+                    <div class="p-3 space-y-3">
                 @foreach($displayData as $item)
                     
                     {{-- CARD 1: EXPIRED (TERLEWAT) --}}
                     @if($item['is_expired'])
-                        <div class="bg-white rounded-xl shadow-md overflow-hidden border-2 border-red-300">
-                            <div class="bg-gradient-to-r from-red-500 to-red-600 px-4 py-2.5 flex justify-between items-center">
-                                <div>
-                                    <p class="text-xs text-red-100 font-semibold uppercase">Jenis Patroli</p>
-                                    <p class="text-white font-bold text-base">{{ $item['jenis_patroli'] }}</p>
-                                </div>
-                                <span class="bg-red-700 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg uppercase flex items-center gap-1">
-                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293z" clip-rule="evenodd"></path></svg>
-                                    Terlewat
-                                </span>
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-red-300 relative">
+                            {{-- Badge Terlewat di Pojok Kanan Atas --}}
+                            <div class="absolute top-2 right-2 z-10">
+                                <span class="inline-block bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">Terlewat</span>
                             </div>
-                            <div class="p-4 bg-red-50">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-red-200 rounded-full flex items-center justify-center flex-shrink-0">
-                                        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            
+                            <div class="p-3">
+                                <div class="w-full">
+                                    {{-- Jenis Patroli --}}
+                                    <h4 class="font-bold text-gray-800 text-sm mb-1">{{ $item['jenis_patroli'] }}</h4>
+                                    
+                                    {{-- Info Batas Waktu --}}
+                                    <div class="flex items-center gap-1 mb-2">
+                                        <svg class="w-3.5 h-3.5 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <p class="text-red-700 font-semibold text-xs">Batas: {{ $item['waktu_batas'] }} WIB</p>
                                     </div>
-                                    <div class="flex-1">
-                                        <p class="text-sm font-bold text-red-800">Patroli Belum Dilaksanakan</p>
-                                        <p class="text-xs text-red-600">Batas waktu: {{ $item['waktu_batas'] }} WIB</p>
+
+                                    {{-- Status Message --}}
+                                    <div class="text-xs text-red-600 bg-red-50 p-2 rounded">
+                                        Patroli belum dilaksanakan dalam batas waktu yang ditentukan
                                     </div>
                                 </div>
                             </div>
@@ -95,72 +115,78 @@
 
                     {{-- CARD 2: PROSES / SELESAI / AVAILABLE --}}
                     @else
-                        <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
-                            {{-- Header --}}
-                            <div class="bg-gradient-to-b from-[#243a5e] via-[#2a4a6f] to-[#365c82] px-4 py-2.5 flex justify-between items-center">
-                                <div>
-                                    <p class="text-xs text-blue-200 font-semibold uppercase">Jenis Patroli</p>
-                                    <p class="text-white font-bold text-base">{{ $item['jenis_patroli'] }}</p>
-                                </div>
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-300 relative">
+                            {{-- Badge Status di Pojok Kanan Atas --}}
+                            <div class="absolute top-2 right-2 z-10">
                                 @if($item['is_completed'])
-                                    <span class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg uppercase flex items-center gap-1">
-                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                                        Selesai
-                                    </span>
+                                    <span class="inline-block bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">Selesai</span>
                                 @elseif($item['id_claim'])
-                                    <span class="bg-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg uppercase">Proses</span>
+                                    <span class="inline-block bg-yellow-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">Proses</span>
                                 @else
-                                    <span class="bg-gray-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg uppercase">Belum Diambil</span>
+                                    <span class="inline-block bg-gray-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">Belum Diambil</span>
                                 @endif
                             </div>
-
-                            {{-- Body --}}
-                            <div class="p-4 space-y-3">
-                                {{-- Petugas info --}}
-                                <div class="flex items-center gap-3 pb-3 border-b border-gray-100">
-                                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                        <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                    </div>
-                                    <div class="flex-1">
-                                        <p class="text-[10px] text-gray-500 font-semibold uppercase">Petugas</p>
-                                        <p class="text-gray-800 font-bold text-base">{{ $item['nama_petugas'] }}</p>
-                                    </div>
+                            
+                            <div class="flex gap-3 p-3">
+                                {{-- Foto Area Pertama di Sebelah Kiri --}}
+                                <div class="flex-shrink-0">
+                                    @if($item['has_checkpoints'] && $item['checkpoints']->first())
+                                        <div @click="showModal = true; modalGroup = {{ $item['checkpoints']->values() }}; selectedCheckpointIndex = 0;"
+                                             class="w-20 h-20 rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors">
+                                            <img src="{{ asset('storage/' . $item['checkpoints']->first()['foto']) }}" alt="Foto Patroli" class="w-full h-full object-cover">
+                                        </div>
+                                    @else
+                                        <div class="w-20 h-20 rounded-lg bg-gray-100 flex items-center justify-center border-2 border-gray-200">
+                                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
+                                        </div>
+                                    @endif
                                 </div>
 
-                                {{-- Progress --}}
-                                <div>
-                                    <div class="flex justify-between items-center mb-2">
-                                        <p class="text-xs text-gray-600 font-semibold">Progress Checkpoint</p>
-                                        <span class="text-xs font-bold {{ $item['is_completed'] ? 'text-green-600' : 'text-orange-600' }}">
-                                            {{ $item['progress'] }} / 17
-                                        </span>
-                                    </div>
-                                    <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                                        <div class="h-full rounded-full transition-all {{ $item['is_completed'] ? 'bg-green-500' : 'bg-yellow-500' }}"
-                                            style="width: {{ ($item['progress'] / 17) * 100 }}%">
+                                {{-- Info di Sebelah Kanan --}}
+                                <div class="flex-1 min-w-0 flex flex-col justify-between h-20">
+                                    {{-- Jenis Patroli --}}
+                                    {{-- Jenis Patroli --}}
+                                    <h4 class="font-bold text-gray-800 text-lg leading-tight">{{ $item['jenis_patroli'] }}</h4>
+                                    
+                                    <div class="mt-auto">
+                                        {{-- Info Petugas --}}
+                                        <div class="flex items-center gap-1 mb-1">
+                                            <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            <p class="text-gray-700 font-semibold text-xs">{{ $item['nama_petugas'] }}</p>
+                                        </div>
+                                        
+                                        {{-- Progress --}}
+                                        <div class="flex items-center gap-1 mb-2">
+                                            <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <p class="text-gray-700 font-semibold text-xs">Progress {{ $item['progress'] }}/17</p>
+                                        </div>
+
+                                        {{-- Progress Bar --}}
+                                        <div>
+                                            <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                                                <div class="h-full rounded-full transition-all {{ $item['is_completed'] ? 'bg-green-500' : 'bg-yellow-500' }}"
+                                                    style="width: {{ ($item['progress'] / 17) * 100 }}%">
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                {{-- Action Button --}}
-                                @if($item['has_checkpoints'])
-                                    <button @click.prevent="showModal = true; modalGroup = {{ $item['checkpoints']->values() }}; selectedCheckpointIndex = 0;"
-                                        class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                        <span class="text-sm">LIHAT DETAIL</span>
-                                    </button>
-                                @else
-                                    <div class="w-full bg-gray-100 text-gray-500 font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                        <span class="text-sm">Belum ada foto</span>
-                                    </div>
-                                @endif
+
+                                </div>
                             </div>
                         </div>
                     @endif
 
-                @endforeach
-            @endif
+                    @endforeach
+                    </div>
+                @endif
+            </div>
         </div>
 
         {{-- FAB & MODALS TETAP SAMA (Tidak perlu diubah logic-nya) --}}
@@ -182,21 +208,42 @@
             @endif
         @endif
 
-        {{-- Modal Detail & Modal Off (Copy dari file lama Anda) --}}
+        {{-- Modal Detail Foto Patroli --}}
         <div x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4" style="display: none;">
-             {{-- ... Isi Modal Detail ... --}}
-             <div @click.outside="showModal = false" class="bg-white rounded-lg shadow-xl w-full max-w-xs">
-                <div class="flex justify-between items-center p-4 border-b">
-                    <h3 class="text-lg font-bold text-gray-800" x-text="modalTitle"></h3>
-                    <button @click="showModal = false" class="text-gray-500 hover:text-gray-800"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            <div @click.outside="showModal = false" class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+                {{-- Header Modal --}}
+                <div class="bg-[#1e3a5f] px-6 py-4 flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-white" x-text="modalTitle"></h3>
+                    <button @click="showModal = false" class="text-gray-300 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 </div>
-                <div class="p-4 space-y-4">
-                    <img :src="modalPhoto" class="w-full h-auto rounded-lg bg-gray-200">
-                    <div>
-                        <label class="text-xs font-semibold text-gray-500">Wilayah</label>
-                        <select x-model.number="selectedCheckpointIndex" class="w-full bg-slate-200 rounded-lg p-2"><template x-for="(checkpoint, index) in modalGroup" :key="index"><option :value="index" x-text="checkpoint.wilayah"></option></template></select>
+
+                {{-- Body Modal --}}
+                <div class="p-6 space-y-4">
+                    {{-- Foto --}}
+                    <div class="w-full">
+                        <img :src="modalPhoto" alt="Foto Patroli" class="w-full h-64 object-cover rounded-lg bg-gray-200 border">
                     </div>
-                    <div><label class="text-xs font-semibold text-gray-500">Waktu</label><div class="w-full bg-slate-800 text-white rounded-lg p-2 text-center" x-text="modalWaktu"></div></div>
+
+                    {{-- Selector Area Patroli --}}
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Area Patroli:</label>
+                        <select x-model.number="selectedCheckpointIndex" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <template x-for="(checkpoint, index) in modalGroup" :key="index">
+                                <option :value="index" x-text="checkpoint.wilayah"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    {{-- Info Waktu --}}
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Waktu Patroli:</label>
+                        <div class="w-full bg-gray-800 text-white rounded-lg p-3 text-center font-mono" x-text="modalWaktu"></div>
+                    </div>
                 </div>
             </div>
         </div>

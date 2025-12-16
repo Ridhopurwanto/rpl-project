@@ -105,124 +105,192 @@
             </button>
         </div>
 
-    <div class="w-full min-h-screen bg-slate-100 p-4 pb-32" x-data="{ showCreateModal: false }">
-
-        {{-- KOTAK FILTER RENTANG TANGGAL --}}
-        <div class="bg-white px-6 py-5 rounded-xl shadow-sm mb-6 border border-gray-200">
-            <form action="{{ route('anggota.tamu.index') }}" method="GET" id="filterForm"
-                x-data="{ 
-                      start: '{{ $startDate }}', 
-                      end: '{{ $endDate }}',
-                      
-                      // Logika Validasi sebelum Submit
-                      validateAndSubmit() {
-                          if (this.start > this.end) {
-                              // Panggil fungsi error dari parent component (x-data utama)
-                              $data.triggerError('Tanggal awal tidak boleh melebihi tanggal akhir!');
-                              return; // Batalkan submit
-                          }
-                          document.getElementById('filterForm').submit();
-                      }
-                  }">
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
-                    
-                    {{-- Filter Dari Tanggal --}}
-                    <div class="w-full">
-                        <label for="start_date" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                            Dari Tanggal
-                        </label>
-                        <div class="cursor-pointer" @click="$refs.dateStart.showPicker()">
-                            <input 
-                                @change="validateAndSubmit()"
-                                type="date" 
-                                id="start_date"
-                                name="start_date"
-                                x-ref="dateStart"
-                                x-model="start"
-                                class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
-                        </div>
-                    </div>
-
-                    {{-- Filter Sampai Tanggal --}}
-                    <div class="w-full">
-                        <label for="end_date" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                            Sampai Tanggal
-                        </label>
-                        <div class="cursor-pointer" @click="$refs.dateEnd.showPicker()">
-                            <input 
-                                @change="validateAndSubmit()"
-                                type="date" 
-                                id="end_date"
-                                name="end_date"
-                                x-ref="dateEnd"
-                                x-model="end"
-                                class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-
-        {{-- CARD LAYOUT RIWAYAT TAMU --}}
-        <div class="space-y-3">
-            @forelse($riwayat_tamu as $tamu)
-                <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
-                    
-                    {{-- Header: Nama Tamu & Tanggal --}}
-                    <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] px-4 py-2.5 flex justify-between items-center">
-                        <div>
-                            <p class="text-xs text-blue-200 font-semibold uppercase">Nama Tamu</p>
-                            <p class="text-white font-bold text-base">{{ $tamu->nama_tamu }}</p>
-                        </div>
-                        <span class="bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-                            {{ $tamu->waktu_datang->format('d/m/Y') }}
-                        </span>
-                    </div>
-
-                    {{-- Body: Info Detail --}}
-                    <div class="p-4 space-y-3">
-                        
-                        {{-- Instansi --}}
-                        <div class="flex items-center gap-2 pb-2 border-b border-gray-100">
-                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                            </svg>
-                            <div class="flex-1">
-                                <p class="text-[10px] text-gray-500 font-semibold uppercase">Instansi</p>
-                                <p class="text-gray-800 font-bold text-sm">{{ $tamu->instansi }}</p>
-                            </div>
-                        </div>
-
-                        {{-- Waktu & No Identitas --}}
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <p class="text-[10px] text-gray-500 font-semibold uppercase mb-1">Waktu</p>
-                                <p class="text-gray-800 font-bold text-sm">{{ $tamu->waktu_datang->format('H:i') }}</p>
-                            </div>
-                            <div>
-                                <p class="text-[10px] text-gray-500 font-semibold uppercase mb-1">No. Identitas</p>
-                                <p class="text-gray-800 font-bold text-sm">{{ !empty($tamu->no_identitas) ? $tamu->no_identitas : '-' }}</p>
-                            </div>
-                        </div>
-
-                        {{-- Tujuan --}}
-                        <div class="pt-2 border-t border-gray-100">
-                            <p class="text-[10px] text-gray-500 font-semibold uppercase mb-1">Tujuan Kunjungan</p>
-                            <p class="text-gray-800 text-sm leading-relaxed">{{ $tamu->tujuan }}</p>
-                        </div>
-                    </div>
-                </div>
-            @empty
-                <div class="bg-white rounded-xl shadow-md p-8 text-center">
-                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        {{-- BAGIAN RIWAYAT TAMU --}}
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ isOpen: true }">
+            <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] p-3 border-b border-gray-200 cursor-pointer hover:opacity-90 transition" @click="isOpen = !isOpen">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                         </svg>
+                        <h3 class="font-bold text-white">RIWAYAT TAMU</h3>
                     </div>
-                    <p class="text-gray-500 font-semibold">Tidak ada riwayat tamu pada rentang tanggal ini.</p>
+                    <svg class="w-5 h-5 text-white transition-transform" :class="{ 'rotate-180': !isOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
                 </div>
-            @endforelse
+            </div>
+
+            <div x-show="isOpen" x-collapse>
+                {{-- Filter Rentang Tanggal --}}
+                <div class="p-4 border-b border-gray-200">
+                    <form action="{{ route('anggota.tamu.index') }}" method="GET" id="filterForm"
+                        x-data="{ 
+                              start: '{{ $startDate }}', 
+                              end: '{{ $endDate }}',
+                              
+                              validateAndSubmit() {
+                                  if (this.start > this.end) {
+                                      $data.triggerError('Tanggal awal tidak boleh melebihi tanggal akhir!');
+                                      return;
+                                  }
+                                  document.getElementById('filterForm').submit();
+                              }
+                          }">
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="w-full md:w-auto">
+                                <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
+                                <div class="flex items-center gap-2">
+                                    <select name="per_page" onchange="this.form.submit()" class="h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm appearance-none cursor-pointer" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em;">
+                                        <option value="5" {{ request('per_page', 5) == 5 ? 'selected' : '' }}>5</option>
+                                        <option value="10" {{ request('per_page', 5) == 10 ? 'selected' : '' }}>10</option>
+                                        <option value="25" {{ request('per_page', 5) == 25 ? 'selected' : '' }}>25</option>
+                                        <option value="50" {{ request('per_page', 5) == 50 ? 'selected' : '' }}>50</option>
+                                    </select>
+                                    <span class="text-sm text-gray-600">rows</span>
+                                </div>
+                            </div>
+                            <div class="w-full">
+                                <label for="start_date" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                                    Dari Tanggal
+                                </label>
+                                <div class="cursor-pointer" @click="$refs.dateStart.showPicker()">
+                                    <input 
+                                        @change="validateAndSubmit()"
+                                        type="date" 
+                                        id="start_date"
+                                        name="start_date"
+                                        x-ref="dateStart"
+                                        x-model="start"
+                                        class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
+                                </div>
+                            </div>
+
+                            <div class="w-full">
+                                <label for="end_date" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                                    Sampai Tanggal
+                                </label>
+                                <div class="cursor-pointer" @click="$refs.dateEnd.showPicker()">
+                                    <input 
+                                        @change="validateAndSubmit()"
+                                        type="date" 
+                                        id="end_date"
+                                        name="end_date"
+                                        x-ref="dateEnd"
+                                        x-model="end"
+                                        class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                {{-- Card Layout Riwayat Tamu --}}
+                <div class="p-3 space-y-3">
+                    @forelse($riwayat_tamu as $tamu)
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-300">
+                            <div class="p-3">
+                                <div class="w-full">
+                                    {{-- Header dengan Nama dan Badge --}}
+                                    <div class="flex justify-between items-start gap-2 mb-2">
+                                        <h4 class="font-bold text-gray-800 text-sm flex-1 break-words">{{ $tamu->nama_tamu }}</h4>
+                                        <span class="inline-block bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md flex-shrink-0">{{ $tamu->waktu_datang->format('d/m/Y') }}</span>
+                                    </div>
+
+                                    {{-- Info Instansi & Waktu --}}
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <div class="flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                            </svg>
+                                            <p class="text-gray-700 font-semibold text-xs">{{ $tamu->instansi }}</p>
+                                        </div>
+                                        
+                                        <div class="flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <p class="text-gray-700 font-semibold text-xs">{{ $tamu->waktu_datang->format('H:i') }}</p>
+                                        </div>
+                                    </div>
+
+                                    {{-- Tujuan & No Identitas --}}
+                                    <div class="text-xs text-gray-500">
+                                        <div class="mb-1">
+                                            <span class="font-semibold">Tujuan:</span> {{ $tamu->tujuan }}
+                                        </div>
+                                        @if(!empty($tamu->no_identitas))
+                                        <div>
+                                            <span class="font-semibold">No. Identitas:</span> {{ $tamu->no_identitas }}
+                                        </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="bg-white rounded-xl shadow-md p-8 text-center border-2 border-gray-300">
+                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-gray-500 font-semibold">Tidak ada riwayat tamu pada rentang tanggal ini.</p>
+                        </div>
+                    @endforelse
+                </div>
+                
+                {{-- Pagination Desktop --}}
+                @if(method_exists($riwayat_tamu, 'hasPages') && $riwayat_tamu->hasPages())
+                <div class="hidden md:flex justify-between items-center px-6 py-4 border-t border-gray-200">
+                    <div class="text-sm text-gray-600">Showing {{ $riwayat_tamu->firstItem() ?? 0 }} to {{ $riwayat_tamu->lastItem() ?? 0 }} of {{ $riwayat_tamu->total() }} entries</div>
+                    <div class="flex gap-1">
+                        @if($riwayat_tamu->onFirstPage())
+                            <span class="px-3 py-2 text-sm text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">Previous</span>
+                        @else
+                            <a href="{{ $riwayat_tamu->appends(request()->query())->previousPageUrl() }}" class="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Previous</a>
+                        @endif
+                        @foreach($riwayat_tamu->getUrlRange(1, $riwayat_tamu->lastPage()) as $page => $url)
+                            @if($page == $riwayat_tamu->currentPage())
+                                <span class="px-3 py-2 text-sm text-white bg-[#1e3a5f] rounded-lg">{{ $page }}</span>
+                            @else
+                                <a href="{{ $riwayat_tamu->appends(request()->query())->url($page) }}" class="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">{{ $page }}</a>
+                            @endif
+                        @endforeach
+                        @if($riwayat_tamu->hasMorePages())
+                            <a href="{{ $riwayat_tamu->appends(request()->query())->nextPageUrl() }}" class="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Next</a>
+                        @else
+                            <span class="px-3 py-2 text-sm text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">Next</span>
+                        @endif
+                    </div>
+                </div>
+                
+                {{-- Pagination Mobile --}}
+                <div class="md:hidden flex justify-between items-center px-3 py-4 border-t border-gray-200">
+                    <div class="text-xs text-gray-600">{{ $riwayat_tamu->firstItem() ?? 0 }}-{{ $riwayat_tamu->lastItem() ?? 0 }} of {{ $riwayat_tamu->total() }}</div>
+                    <div class="flex gap-1">
+                        @if($riwayat_tamu->onFirstPage())
+                            <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Prev</span>
+                        @else
+                            <a href="{{ $riwayat_tamu->appends(request()->query())->previousPageUrl() }}" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Prev</a>
+                        @endif
+                        @foreach($riwayat_tamu->getUrlRange(1, $riwayat_tamu->lastPage()) as $page => $url)
+                            @if($page == $riwayat_tamu->currentPage())
+                                <span class="px-2 py-1 text-xs text-white bg-[#1e3a5f] rounded">{{ $page }}</span>
+                            @else
+                                <a href="{{ $riwayat_tamu->appends(request()->query())->url($page) }}" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
+                            @endif
+                        @endforeach
+                        @if($riwayat_tamu->hasMorePages())
+                            <a href="{{ $riwayat_tamu->appends(request()->query())->nextPageUrl() }}" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
+                        @else
+                            <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
+                        @endif
+                    </div>
+                </div>
+                @endif
+            </div>
         </div>
 
         {{-- Tombol FAB Tambah --}}
