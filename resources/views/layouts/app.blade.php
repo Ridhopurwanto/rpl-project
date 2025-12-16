@@ -36,8 +36,8 @@
                                     $homeRoute = 'komandan.dashboard';
                                 } elseif ($currentRole == 'anggota') {
                                     $homeRoute = 'anggota.dashboard';
-                                } elseif ($currentRole == 'bau') {
-                                    $homeRoute = 'bau.dashboard';
+                                } elseif ($currentRole == 'supervisor') {
+                                    $homeRoute = 'supervisor.dashboard';
                                 }
                             }
                     @endphp

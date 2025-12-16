@@ -1,0 +1,102 @@
+<?php
+
+namespace App\Http\Controllers\Supervisor;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Tamu; 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Carbon;
+
+class TamuController extends Controller
+{
+    /**
+     * Menampilkan halaman Laporan Tamu (untuk Supervisor).
+     * Menggunakan nama 'index' sesuai permintaan.
+     */
+    public function index(Request $request)
+    {
+        $startDate = $request->input('start_date', now()->format('Y-m-d'));
+        $endDate = $request->input('end_date', now()->format('Y-m-d'));
+        $perPage = $request->input('per_page', 10);
+        
+        $cari = $request->input('cari');
+        
+        $riwayatTamu = Tamu::whereDate('waktu_datang', '>=', $startDate)
+                           ->whereDate('waktu_datang', '<=', $endDate)
+                           ->when($cari, function ($query, $cari) {
+                               $query->where(function ($q) use ($cari) {
+                                   $q->where('nama_tamu', 'like', "%{$cari}%")
+                                     ->orWhere('instansi', 'like', "%{$cari}%");
+                               });
+                           })
+                           ->orderBy('waktu_datang', 'desc')
+                           ->paginate($perPage);
+        
+        if ($request->ajax()) {
+            return view('supervisor.partials.tamu-list', compact('riwayatTamu'));
+        }
+        
+        return view('supervisor.tamu', [
+            'riwayatTamu' => $riwayatTamu,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'perPage' => $perPage,
+        ]);
+    }
+
+    /**
+     * Update data tamu (HANYA UNTUK SUPERVISOR).
+     */
+    public function update(Request $request, $id_tamu)
+    {
+        // Pengecekan keamanan: Hanya Supervisor
+        if (Auth::user()->peran !== 'supervisor') {
+            return redirect()->route('bau.tamu.index')->with('error', 'Anda tidak memiliki hak akses.');
+        }
+
+        $request->validate([
+            'nama_tamu' => 'required|string|max:255',
+            'instansi' => 'required|string|max:255',
+            'tujuan' => 'required|string|max:255',
+            'waktu_datang' => 'required|date',
+        ]);
+
+        try {
+            $tamu = Tamu::findOrFail($id_tamu);
+            
+            $tamu->update([
+                'nama_tamu' => $request->nama_tamu,
+                'instansi' => $request->instansi,
+                'tujuan' => $request->tujuan,
+                'waktu_datang' => $request->waktu_datang,
+            ]);
+
+            return redirect()->back()->with('success', 'Data tamu berhasil diperbarui.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal memperbarui data.');
+        }
+    }
+
+    /**
+     * Menghapus data tamu (HANYA UNTUK SUPERVISOR).
+     */
+    public function destroy($id_tamu)
+    {
+        // Pengecekan keamanan: Hanya Supervisor
+        if (Auth::user()->peran !== 'supervisor') {
+            return redirect()->route('bau.tamu.index')->with('error', 'Anda tidak memiliki hak akses.');
+        }
+
+        try {
+            $tamu = Tamu::findOrFail($id_tamu);
+            $tamu->delete();
+            
+            return redirect()->back()->with('success', 'Data tamu berhasil dihapus.');
+        
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal menghapus data.');
+        }
+    }
+}

@@ -40,8 +40,8 @@ Route::get('/', function () {
             return redirect()->route('komandan.pilih-role');
         } elseif ($peran == 'anggota') {
             return redirect()->route('anggota.dashboard');
-        } elseif ($peran == 'bau') {
-            return redirect()->route('bau.dashboard');
+        } elseif ($peran == 'supervisor') {
+            return redirect()->route('supervisor.dashboard');
         } else {
             Auth::logout();
             return redirect()->route('login')->with('error', 'Peran tidak dikenal.');
@@ -264,24 +264,55 @@ Route::middleware('auth')->group(function () {
     });
 
     // --- RUTE UNTUK BAU ---
-    Route::prefix('bau')->name('bau.')->group(function () {
+    // --- RUTE UNTUK BAU ---
+    Route::prefix('supervisor')->name('supervisor.')->group(function () {
         Route::get('/dashboard', function () {
-            return view('bau.dashboard');
+            // Note: Updated view path to 'supervisor'
+            return view('supervisor.dashboard');
         })->name('dashboard');
 
-        Route::resource('akun', App\Http\Controllers\Bau\AkunController::class)->only(['index']);
-        Route::get('akun/{id_pengguna}/shift', [App\Http\Controllers\Bau\ShiftController::class, 'index'])->name('akun.shift');
-        Route::resource('presensi', App\Http\Controllers\Bau\PresensiController::class)->only(['index']);
-        Route::resource('patroli', App\Http\Controllers\Bau\PatroliController::class)->only(['index']);
-        Route::resource('kendaraan', App\Http\Controllers\Bau\KendaraanController::class)->only(['index']);
-        Route::get('/kendaraan/search-riwayat', [App\Http\Controllers\Bau\KendaraanController::class, 'searchRiwayat'])->name('kendaraan.searchRiwayat');
-        Route::get('/kendaraan/search-master', [App\Http\Controllers\Bau\KendaraanController::class, 'searchMaster'])->name('kendaraan.searchMaster');
-        Route::resource('tamu', App\Http\Controllers\Bau\TamuController::class)->only(['index']);
-        Route::resource('barang', App\Http\Controllers\Bau\BarangController::class)->only(['index']);
-        Route::resource('gangguan', App\Http\Controllers\Bau\GangguanController::class)->only(['index']);
-        Route::get('/unduh', [App\Http\Controllers\Bau\UnduhController::class, 'index'])->name('unduh');
-        Route::post('/laporan/download', [App\Http\Controllers\Bau\UnduhController::class, 'download'])->name('laporan.download');
-        Route::get('/laporan/download-single', [App\Http\Controllers\Bau\UnduhController::class, 'downloadSatuan'])->name('laporan.download-single');
+        // Menggunakan Controller dari folder Supervisor (hasil copy logika Komandan)
+        // Nama route tetap 'bau.*' sesuai request user
+        
+        // Manajemen Akun
+        Route::resource('akun', App\Http\Controllers\Supervisor\ManajemenAkunController::class);
+        Route::get('akun/{id_pengguna}/shift', [App\Http\Controllers\Supervisor\ManajemenShiftController::class, 'index'])->name('akun.shift');
+        Route::post('akun/shift/update', [App\Http\Controllers\Supervisor\ManajemenShiftController::class, 'update'])->name('akun.shift.update');
+        Route::post('akun/shift/reset', [App\Http\Controllers\Supervisor\ManajemenShiftController::class, 'reset'])->name('akun.shift.reset');
+
+        // Presensi
+        Route::resource('presensi', App\Http\Controllers\Supervisor\PresensiController::class)->only(['index', 'destroy', 'update']);
+        Route::put('/presensi/update-rules', [App\Http\Controllers\Supervisor\PresensiController::class, 'updateRules'])->name('presensi.updateRules');
+
+        // Patroli
+        // Perlu method lengkap (index, destroy, update, dll) seperti komandan
+        Route::resource('patroli', App\Http\Controllers\Supervisor\PatroliController::class)->only(['index', 'destroy', 'update']);
+        Route::post('/patroli/update-rules', [App\Http\Controllers\Supervisor\PatroliRuleController::class, 'updateRules'])->name('patroli.updateRules');
+
+        // Kendaraan
+        Route::resource('kendaraan', App\Http\Controllers\Supervisor\KendaraanController::class)->only(['index']);
+        Route::get('/kendaraan/search-riwayat', [App\Http\Controllers\Supervisor\KendaraanController::class, 'searchRiwayat'])->name('kendaraan.searchRiwayat');
+        Route::get('/kendaraan/search-master', [App\Http\Controllers\Supervisor\KendaraanController::class, 'searchMaster'])->name('kendaraan.searchMaster');
+        Route::put('/kendaraan/log/{id_log}/update-keterangan', [App\Http\Controllers\Supervisor\KendaraanController::class, 'updateKeterangan'])->name('kendaraan.log.updateKeterangan');
+        Route::get('/kendaraan/master/{id_kendaraan}/edit', [App\Http\Controllers\Supervisor\KendaraanController::class, 'editMaster'])->name('kendaraan.master.edit');
+        Route::put('/kendaraan/master/{id_kendaraan}', [App\Http\Controllers\Supervisor\KendaraanController::class, 'updateMaster'])->name('kendaraan.master.update');
+        Route::delete('/kendaraan/master/{id_kendaraan}', [App\Http\Controllers\Supervisor\KendaraanController::class, 'destroyMaster'])->name('kendaraan.master.destroy');
+        Route::post('/kendaraan/log/{id_log}/promote', [App\Http\Controllers\Supervisor\KendaraanController::class, 'promoteLogToMaster'])->name('kendaraan.log.promote');
+
+
+        // Tamu
+        Route::resource('tamu', App\Http\Controllers\Supervisor\TamuController::class)->only(['index', 'update', 'destroy']);
+
+        // Barang
+        Route::resource('barang', App\Http\Controllers\Supervisor\BarangController::class)->only(['index']);
+
+        // Gangguan
+        Route::resource('gangguan', App\Http\Controllers\Supervisor\GangguanKamtibmasController::class)->parameters(['gangguan' => 'gangguan']); // Pastikan parameter sesuai
+
+        // Unduh Laporan
+        Route::get('/unduh', [App\Http\Controllers\Supervisor\LaporanUnduhController::class, 'index'])->name('unduh');
+        Route::post('/laporan/download', [App\Http\Controllers\Supervisor\LaporanUnduhController::class, 'download'])->name('laporan.download');
+        Route::get('/laporan/download-single', [App\Http\Controllers\Supervisor\LaporanUnduhController::class, 'downloadSatuan'])->name('laporan.download-single');
     });
 
     // --- RUTE LOGOUT ---

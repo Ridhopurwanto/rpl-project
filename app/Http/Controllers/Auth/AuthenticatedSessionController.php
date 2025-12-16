@@ -76,8 +76,8 @@ class AuthenticatedSessionController extends Controller
                 return redirect()->route('anggota.dashboard');
             case 'komandan':
                 return redirect()->route('komandan.pilih-role');
-            case 'bau':
-                return redirect()->route('bau.dashboard');
+            case 'supervisor':
+                return redirect()->route('supervisor.dashboard');
             default:
                 Auth::logout();
                 return redirect('/login')->withErrors(['username' => 'Role tidak valid.']);
