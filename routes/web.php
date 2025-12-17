@@ -292,8 +292,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/kendaraan/search-master', [App\Http\Controllers\Supervisor\KendaraanController::class, 'searchMaster'])->name('kendaraan.searchMaster');
 
 
-        // Tamu
-        Route::resource('tamu', App\Http\Controllers\Supervisor\TamuController::class)->only(['index', 'update', 'destroy']);
+        // Tamu (View Only)
+        Route::get('/tamu', [App\Http\Controllers\Supervisor\TamuController::class, 'index'])->name('tamu.index');
 
         // Barang
         Route::resource('barang', App\Http\Controllers\Supervisor\BarangController::class)->only(['index']);

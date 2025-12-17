@@ -8,9 +8,7 @@
                         <th class="py-3 px-4 text-center w-[20%]">Instansi</th>
                         <th class="py-3 px-4 text-center w-[16%]">Waktu Kunjungan</th>
                         <th class="py-3 px-4 text-center w-[22%]">Tujuan</th>
-                        @if(Auth::user()->peran == 'supervisor')
-                            <th class="py-3 px-4 text-center w-[14%]">Aksi</th>
-                        @endif
+
                     </tr>
                 </thead>
                 <tbody class="text-sm divide-y divide-gray-200" id="tamu-table-body">
@@ -23,32 +21,11 @@
                             {{ $tamu->waktu_datang->format('d/m/Y H:i') }}
                         </td>
                         <td class="py-2 px-4">{{ $tamu->tujuan }}</td>
-                        @if(Auth::user()->peran == 'supervisor')
-                            <td class="py-2 px-4">
-                                <div class="flex justify-center space-x-3">
-                                    <button @click="
-                                        showEditModal = true; 
-                                        editAction = '{{ route('supervisor.tamu.update', $tamu->id_tamu) }}';
-                                        editNama = '{{ $tamu->nama_tamu }}';
-                                        editInstansi = '{{ $tamu->instansi }}';
-                                        editTujuan = '{{ $tamu->tujuan }}';
-                                        editWaktuDatang = '{{ $tamu->waktu_datang->format('Y-m-d\TH:i') }}';
-                                        " class="text-blue-500 hover:text-blue-700" title="Edit">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
-                                    </button>
-                                    <button @click.prevent="
-                                        showDeleteModal = true; 
-                                        deleteAction = '{{ route(supervisor.tamu.destroy', $tamu->id_tamu) }}'
-                                    " class="text-red-500 hover:text-red-700" title="Hapus">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                                    </button>
-                                </div>
-                            </td>
-                        @endif
+
                     </tr>
                     @empty
                     <tr id="no-data-row">
-                        <td colspan="{{ Auth::user()->peran == 'supervisor' ? '6' : '5' }}" class="py-4 px-4 text-center text-gray-500">
+                        <td colspan="5" class="py-4 px-4 text-center text-gray-500">
                             Tidak ada data kunjungan tamu pada tanggal ini.
                         </td>
                     </tr>
@@ -83,34 +60,7 @@
                                 </div>
                             </div>
                         </div>
-                        @if(Auth::user()->peran == 'supervisor')
-                            <div class="flex border-t border-gray-200">
-                                <button @click="
-                                            showEditModal = true; 
-                                            editAction = '{{ route('supervisor.tamu.update', $tamu->id_tamu) }}';
-                                            editNama = '{{ $tamu->nama_tamu }}';
-                                            editInstansi = '{{ $tamu->instansi }}';
-                                            editTujuan = '{{ $tamu->tujuan }}';
-                                            editWaktuDatang = '{{ $tamu->waktu_datang->format('Y-m-d\TH:i') }}';
-                                        " 
-                                        class="flex-1 bg-blue-500 text-white py-2 hover:bg-blue-600 transition flex items-center justify-center gap-1">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path>
-                                    </svg>
-                                    <span class="text-xs font-bold">Edit</span>
-                                </button>
-                                <button @click.prevent="
-                                            showDeleteModal = true; 
-                                            deleteAction = '{{ route('supervisor.tamu.destroy', $tamu->id_tamu) }}'
-                                        " 
-                                        class="flex-1 bg-red-500 text-white py-2 hover:bg-red-600 transition flex items-center justify-center gap-1">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                                    </svg>
-                                    <span class="text-xs font-bold">Hapus</span>
-                                </button>
-                            </div>
-                        @endif
+
                     </div>
                 @empty
                     <div class="bg-white rounded-lg shadow-sm p-6 text-center" id="no-data-card">
