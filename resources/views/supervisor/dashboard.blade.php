@@ -85,7 +85,7 @@
         {!! renderMenuButton('TAMU', href: route('supervisor.tamu.index')) !!}
         {!! renderMenuButton('BARANG', href: route('supervisor.barang.index')) !!}
         {!! renderMenuButton('GANGGUAN KAMTIBMAS', href: route('supervisor.gangguan.index')) !!}
-        {!! renderMenuButton('MANAJEMEN AKUN', href: route('supervisor.akun.index')) !!}
+        {!! renderMenuButton('DAFTAR AKUN', href: route('supervisor.akun.index')) !!}
         {!! renderMenuButton('UNDUH LAPORAN', href: route('supervisor.unduh')) !!}
 
     </div>
