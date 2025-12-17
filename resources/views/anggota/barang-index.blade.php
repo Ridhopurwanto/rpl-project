@@ -124,15 +124,60 @@
         <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ 
             isOpen: false,
             allBarangTitipan: @js($barang_titipan),
+            searchQuery: '',
+            suggestions: [],
+            loading: false,
+            showSuggestions: false,
+            selectedBarang: null,
             itemsPerPage: 5,
             currentPage: 1,
-            get totalPages() {
-                return Math.ceil(this.allBarangTitipan.length / this.itemsPerPage);
+            
+            getSuggestions() {
+                if (!this.searchQuery || this.searchQuery.length < 1) {
+                    this.suggestions = [];
+                    this.showSuggestions = false;
+                    this.selectedBarang = null;
+                    return;
+                }
+                
+                this.loading = true;
+                this.showSuggestions = true;
+                
+                const query = this.searchQuery.toLowerCase();
+                this.suggestions = this.allBarangTitipan.filter(barang => 
+                    barang.nama_barang.toLowerCase().includes(query) ||
+                    barang.nama_penitip.toLowerCase().includes(query) ||
+                    (barang.tujuan && barang.tujuan.toLowerCase().includes(query)) ||
+                    (barang.catatan && barang.catatan.toLowerCase().includes(query))
+                ).slice(0, 5);
+                
+                this.loading = false;
             },
+            
+            selectBarang(barang) {
+                this.selectedBarang = barang;
+                this.searchQuery = barang.nama_barang;
+                this.showSuggestions = false;
+                this.currentPage = 1;
+            },
+            
+            get filteredBarang() {
+                if (!this.searchQuery || this.searchQuery.length === 0) {
+                    this.selectedBarang = null;
+                    return this.allBarangTitipan;
+                }
+                if (this.selectedBarang) return [this.selectedBarang];
+                return this.allBarangTitipan;
+            },
+            
+            get totalPages() {
+                return Math.ceil(this.filteredBarang.length / this.itemsPerPage);
+            },
+            
             get paginatedBarang() {
                 const start = (this.currentPage - 1) * this.itemsPerPage;
                 const end = start + this.itemsPerPage;
-                return this.allBarangTitipan.slice(start, end);
+                return this.filteredBarang.slice(start, end);
             }
         }">
             <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] p-3 border-b border-gray-200 cursor-pointer hover:opacity-90 transition" @click="isOpen = !isOpen">
@@ -150,16 +195,61 @@
             </div>
 
             <div x-show="isOpen" x-collapse>
-                {{-- Per Page Controls --}}
+                {{-- Search & Per Page Controls --}}
                 <div class="p-3 border-b border-gray-200" x-show="allBarangTitipan.length > 0">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Show:</span>
-                        <select x-model="itemsPerPage" @change="currentPage = 1" class="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]">
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                            <option value="15">15</option>
-                            <option value="20">20</option>
-                        </select>
+                    <div class="flex flex-col md:flex-row gap-3">
+                        <div class="flex-1 relative">
+                            <input type="text" x-model="searchQuery" 
+                                   @input="getSuggestions()" 
+                                   @focus="if(searchQuery && searchQuery.length >= 1) getSuggestions()"
+                                   placeholder="Cari nama barang, penitip, tujuan..." 
+                                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f]">
+                            
+                            {{-- Dropdown Suggestions --}}
+                            <div x-show="showSuggestions" @click.away="showSuggestions = false" x-transition
+                                class="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-2xl mt-1 z-50 max-h-60 overflow-y-auto"
+                                style="display: none;">
+                                
+                                <div x-show="loading" class="px-4 py-3 text-center">
+                                    <svg class="animate-spin h-4 w-4 text-blue-600 mx-auto" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <p class="text-xs text-gray-500 mt-1">Mencari...</p>
+                                </div>
+                                
+                                <template x-for="suggestion in suggestions" :key="suggestion.id_barang">
+                                    <div @click="selectBarang(suggestion)"
+                                        class="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-0 transition-colors">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex-1">
+                                                <p class="font-bold text-gray-900 text-sm" x-text="suggestion.nama_barang"></p>
+                                                <p class="text-xs text-gray-600">
+                                                    <span x-text="suggestion.nama_penitip"></span>
+                                                    <span x-show="suggestion.tujuan"> • <span x-text="suggestion.tujuan"></span></span>
+                                                </p>
+                                            </div>
+                                            <span class="px-2 py-1 text-xs font-semibold rounded-full ml-2 bg-blue-100 text-blue-700">TITIPAN</span>
+                                        </div>
+                                    </div>
+                                </template>
+                                
+                                <div x-show="!loading && suggestions.length === 0 && searchQuery && searchQuery.length >= 1"
+                                    class="px-4 py-4 text-center text-gray-500">
+                                    <p class="text-sm font-semibold mb-1">Tidak ditemukan</p>
+                                    <p class="text-xs text-gray-400">Coba kata kunci lain</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Show:</span>
+                            <select x-model="itemsPerPage" @change="currentPage = 1" class="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]">
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                                <option value="15">15</option>
+                                <option value="20">20</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 
@@ -240,17 +330,28 @@
                         <p class="text-gray-500 font-semibold">Tidak ada barang titipan aktif.</p>
                     </div>
                 </div>
+                
+                <div x-show="allBarangTitipan.length > 0 && filteredBarang.length === 0">
+                    <div class="bg-white rounded-xl shadow-md p-8 text-center border-2 border-gray-300">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        <p class="text-gray-500 font-semibold">Tidak ditemukan barang titipan yang sesuai.</p>
+                    </div>
+                </div>
                 </div>
                 
                 {{-- Pagination --}}
-                <div class="mt-6 px-3 md:px-6 py-4 border-t border-gray-200" x-show="allBarangTitipan.length > 0 && totalPages > 1">
+                <div class="mt-6 px-3 md:px-6 py-4 border-t border-gray-200" x-show="filteredBarang.length > 0 && totalPages > 1">
                     {{-- Desktop Layout --}}
                     <div class="hidden md:flex justify-between items-center">
                         <div class="text-sm text-gray-600">
                             Showing
                             <span x-text="(currentPage - 1) * itemsPerPage + 1"></span> to
-                            <span x-text="Math.min(currentPage * itemsPerPage, allBarangTitipan.length)"></span>
-                            of <span x-text="allBarangTitipan.length"></span> entries
+                            <span x-text="Math.min(currentPage * itemsPerPage, filteredBarang.length)"></span>
+                            of <span x-text="filteredBarang.length"></span> entries
                         </div>
                         <div class="flex space-x-1">
                             <button
@@ -346,15 +447,60 @@
         <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ 
             isOpen: false,
             allBarangTemuan: @js($barang_temuan),
+            searchQuery: '',
+            suggestions: [],
+            loading: false,
+            showSuggestions: false,
+            selectedBarang: null,
             itemsPerPage: 5,
             currentPage: 1,
-            get totalPages() {
-                return Math.ceil(this.allBarangTemuan.length / this.itemsPerPage);
+            
+            getSuggestions() {
+                if (!this.searchQuery || this.searchQuery.length < 1) {
+                    this.suggestions = [];
+                    this.showSuggestions = false;
+                    this.selectedBarang = null;
+                    return;
+                }
+                
+                this.loading = true;
+                this.showSuggestions = true;
+                
+                const query = this.searchQuery.toLowerCase();
+                this.suggestions = this.allBarangTemuan.filter(barang => 
+                    barang.nama_barang.toLowerCase().includes(query) ||
+                    barang.nama_pelapor.toLowerCase().includes(query) ||
+                    (barang.lokasi_penemuan && barang.lokasi_penemuan.toLowerCase().includes(query)) ||
+                    (barang.catatan && barang.catatan.toLowerCase().includes(query))
+                ).slice(0, 5);
+                
+                this.loading = false;
             },
+            
+            selectBarang(barang) {
+                this.selectedBarang = barang;
+                this.searchQuery = barang.nama_barang;
+                this.showSuggestions = false;
+                this.currentPage = 1;
+            },
+            
+            get filteredBarang() {
+                if (!this.searchQuery || this.searchQuery.length === 0) {
+                    this.selectedBarang = null;
+                    return this.allBarangTemuan;
+                }
+                if (this.selectedBarang) return [this.selectedBarang];
+                return this.allBarangTemuan;
+            },
+            
+            get totalPages() {
+                return Math.ceil(this.filteredBarang.length / this.itemsPerPage);
+            },
+            
             get paginatedBarang() {
                 const start = (this.currentPage - 1) * this.itemsPerPage;
                 const end = start + this.itemsPerPage;
-                return this.allBarangTemuan.slice(start, end);
+                return this.filteredBarang.slice(start, end);
             }
         }">
             <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] p-3 border-b border-gray-200 cursor-pointer hover:opacity-90 transition" @click="isOpen = !isOpen">
@@ -372,16 +518,61 @@
             </div>
 
             <div x-show="isOpen" x-collapse>
-                {{-- Per Page Controls --}}
+                {{-- Search & Per Page Controls --}}
                 <div class="p-3 border-b border-gray-200" x-show="allBarangTemuan.length > 0">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Show:</span>
-                        <select x-model="itemsPerPage" @change="currentPage = 1" class="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]">
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                            <option value="15">15</option>
-                            <option value="20">20</option>
-                        </select>
+                    <div class="flex flex-col md:flex-row gap-3">
+                        <div class="flex-1 relative">
+                            <input type="text" x-model="searchQuery" 
+                                   @input="getSuggestions()" 
+                                   @focus="if(searchQuery && searchQuery.length >= 1) getSuggestions()"
+                                   placeholder="Cari nama barang, pelapor, lokasi..." 
+                                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f]">
+                            
+                            {{-- Dropdown Suggestions --}}
+                            <div x-show="showSuggestions" @click.away="showSuggestions = false" x-transition
+                                class="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-2xl mt-1 z-50 max-h-60 overflow-y-auto"
+                                style="display: none;">
+                                
+                                <div x-show="loading" class="px-4 py-3 text-center">
+                                    <svg class="animate-spin h-4 w-4 text-blue-600 mx-auto" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <p class="text-xs text-gray-500 mt-1">Mencari...</p>
+                                </div>
+                                
+                                <template x-for="suggestion in suggestions" :key="suggestion.id_barang">
+                                    <div @click="selectBarang(suggestion)"
+                                        class="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-0 transition-colors">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex-1">
+                                                <p class="font-bold text-gray-900 text-sm" x-text="suggestion.nama_barang"></p>
+                                                <p class="text-xs text-gray-600">
+                                                    <span x-text="suggestion.nama_pelapor"></span>
+                                                    <span x-show="suggestion.lokasi_penemuan"> • <span x-text="suggestion.lokasi_penemuan"></span></span>
+                                                </p>
+                                            </div>
+                                            <span class="px-2 py-1 text-xs font-semibold rounded-full ml-2 bg-yellow-100 text-yellow-700">TEMUAN</span>
+                                        </div>
+                                    </div>
+                                </template>
+                                
+                                <div x-show="!loading && suggestions.length === 0 && searchQuery && searchQuery.length >= 1"
+                                    class="px-4 py-4 text-center text-gray-500">
+                                    <p class="text-sm font-semibold mb-1">Tidak ditemukan</p>
+                                    <p class="text-xs text-gray-400">Coba kata kunci lain</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Show:</span>
+                            <select x-model="itemsPerPage" @change="currentPage = 1" class="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]">
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                                <option value="15">15</option>
+                                <option value="20">20</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 
@@ -461,17 +652,28 @@
                         <p class="text-gray-500 font-semibold">Tidak ada barang temuan aktif.</p>
                     </div>
                 </div>
+                
+                <div x-show="allBarangTemuan.length > 0 && filteredBarang.length === 0">
+                    <div class="bg-white rounded-xl shadow-md p-8 text-center border-2 border-gray-300">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        <p class="text-gray-500 font-semibold">Tidak ditemukan barang temuan yang sesuai.</p>
+                    </div>
+                </div>
                 </div>
                 
                 {{-- Pagination --}}
-                <div class="mt-6 px-3 md:px-6 py-4 border-t border-gray-200" x-show="allBarangTemuan.length > 0 && totalPages > 1">
+                <div class="mt-6 px-3 md:px-6 py-4 border-t border-gray-200" x-show="filteredBarang.length > 0 && totalPages > 1">
                     {{-- Desktop Layout --}}
                     <div class="hidden md:flex justify-between items-center">
                         <div class="text-sm text-gray-600">
                             Showing
                             <span x-text="(currentPage - 1) * itemsPerPage + 1"></span> to
-                            <span x-text="Math.min(currentPage * itemsPerPage, allBarangTemuan.length)"></span>
-                            of <span x-text="allBarangTemuan.length"></span> entries
+                            <span x-text="Math.min(currentPage * itemsPerPage, filteredBarang.length)"></span>
+                            of <span x-text="filteredBarang.length"></span> entries
                         </div>
                         <div class="flex space-x-1">
                             <button
@@ -563,7 +765,59 @@
         </div>
 
         {{-- 3. RIWAYAT dengan HYBRID SEARCH + FILTER MULTI-KATEGORI --}}
-        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ isOpen: true }">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ 
+            isOpen: true,
+            allRiwayatBarang: @js($riwayat_barang),
+            riwayatSearch: '',
+            riwayatSuggestions: [],
+            showRiwayatSuggestions: false,
+            selectedRiwayatBarang: null,
+            itemsPerPage: 5,
+            currentPage: 1,
+            
+            getRiwayatSuggestions() {
+                if (!this.riwayatSearch || this.riwayatSearch.length < 1) {
+                    this.riwayatSuggestions = [];
+                    this.showRiwayatSuggestions = false;
+                    this.selectedRiwayatBarang = null;
+                    return;
+                }
+                
+                const query = this.riwayatSearch.toLowerCase();
+                this.riwayatSuggestions = this.allRiwayatBarang.filter(barang => 
+                    barang.nama_barang.toLowerCase().includes(query) ||
+                    (barang.kategori === 'titipan' ? barang.nama_penitip : barang.nama_pelapor).toLowerCase().includes(query) ||
+                    (barang.nama_penerima && barang.nama_penerima.toLowerCase().includes(query)) ||
+                    (barang.catatan && barang.catatan.toLowerCase().includes(query))
+                ).slice(0, 5);
+            },
+            
+            selectRiwayatBarang(barang) {
+                this.selectedRiwayatBarang = barang;
+                this.riwayatSearch = barang.nama_barang;
+                this.showRiwayatSuggestions = false;
+                this.currentPage = 1;
+            },
+            
+            get filteredRiwayat() {
+                if (!this.riwayatSearch || this.riwayatSearch.length === 0) {
+                    this.selectedRiwayatBarang = null;
+                    return this.allRiwayatBarang;
+                }
+                if (this.selectedRiwayatBarang) return [this.selectedRiwayatBarang];
+                return this.allRiwayatBarang;
+            },
+            
+            get totalPages() {
+                return Math.ceil(this.filteredRiwayat.length / this.itemsPerPage);
+            },
+            
+            get paginatedRiwayat() {
+                const start = (this.currentPage - 1) * this.itemsPerPage;
+                const end = start + this.itemsPerPage;
+                return this.filteredRiwayat.slice(start, end);
+            }
+        }">
             <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] p-3 border-b border-gray-200 cursor-pointer hover:opacity-90 transition" @click="isOpen = !isOpen">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center">
@@ -579,6 +833,18 @@
             </div>
 
             <div x-show="isOpen" x-collapse>
+                {{-- Per Page Controls --}}
+                <div class="p-3 border-b border-gray-200" x-show="allRiwayatBarang.length > 0">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Show:</span>
+                        <select x-model="itemsPerPage" @change="currentPage = 1" class="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                        </select>
+                    </div>
+                </div>
 
                 {{-- Form Filter dengan HYBRID: Suggestion + Live Search --}}
                 <div class="p-4 border-b border-gray-200">
@@ -619,171 +885,43 @@
                             </div>
                         </div>
 
-                        {{-- Search dengan Hybrid (Suggestion + Live Search) --}}
-                        <div class="w-full" x-data="{
-                            searchQuery: '{{ $search_filter ?? '' }}',
-                            tanggalFilter: '{{ $tanggal_terpilih }}',
-                            kategoriFilter: '{{ $kategori_terpilih }}',
-                            suggestions: [],
-                            loading: false,
-                            showSuggestions: false,
-                            liveSearchTimeout: null,
-                            liveSearching: false,
-
-                            async getSuggestions() {
-                                if (!this.searchQuery || this.searchQuery.length < 1) {
-                                    this.suggestions = [];
-                                    this.showSuggestions = false;
-                                    return;
-                                }
-
-                                this.loading = true;
-                                this.showSuggestions = true;
-
-                                try {
-                                    const response = await fetch(`{{ route('anggota.barang.search') }}?search=${encodeURIComponent(this.searchQuery)}&tanggal=${this.tanggalFilter}&kategori=${this.kategoriFilter}`);
-                                    const data = await response.json();
-                                    this.suggestions = data;
-                                } catch (error) {
-                                    console.error('Error:', error);
-                                    this.suggestions = [];
-                                } finally {
-                                    this.loading = false;
-                                }
-                            },
-
-                            selectBarang(idBarang, kategoriBarang, namaBarang) {
-                                this.searchQuery = namaBarang;
-                                this.showSuggestions = false;
-                                this.triggerLiveSearchById(idBarang, kategoriBarang);
-                            },
-
-                            async triggerLiveSearchById(idBarang, kategoriBarang) {
-                                this.liveSearching = true;
-
-                                try {
-                                    const url = new URL(window.location);
-                                    url.searchParams.set('search', this.searchQuery);
-                                    url.searchParams.set('tanggal', this.tanggalFilter);
-                                    url.searchParams.set('kategori', this.kategoriFilter);
-                                    window.history.pushState({}, '', url);
-
-                                    const response = await fetch(`{{ route('anggota.barang.getRiwayat') }}?id_barang=${idBarang}&kategori_barang=${kategoriBarang}&tanggal=${this.tanggalFilter}`);
-                                    const html = await response.text();
-
-                                    document.getElementById('riwayat-container').innerHTML = html;
-                                } catch (error) {
-                                    console.error('Live search error:', error);
-                                } finally {
-                                    this.liveSearching = false;
-                                }
-                            },
-
-                            triggerLiveSearch() {
-                                clearTimeout(this.liveSearchTimeout);
-                                this.liveSearchTimeout = setTimeout(() => {
-                                    if (this.searchQuery.length === 0) {
-                                        this.performLiveSearch();
-                                    }
-                                }, 1000);
-                            },
-
-                            triggerLiveSearchNow() {
-                                clearTimeout(this.liveSearchTimeout);
-                                this.performLiveSearch();
-                            },
-
-                            async performLiveSearch() {
-                                this.liveSearching = true;
-
-                                try {
-                                    const url = new URL(window.location);
-                                    url.searchParams.set('search', this.searchQuery);
-                                    url.searchParams.set('tanggal', this.tanggalFilter);
-                                    url.searchParams.set('kategori', this.kategoriFilter);
-                                    window.history.pushState({}, '', url);
-
-                                    const response = await fetch(`{{ route('anggota.barang.getRiwayat') }}?search=${encodeURIComponent(this.searchQuery)}&tanggal=${this.tanggalFilter}&kategori=${this.kategoriFilter}`);
-                                    const html = await response.text();
-
-                                    document.getElementById('riwayat-container').innerHTML = html;
-                                } catch (error) {
-                                    console.error('Live search error:', error);
-                                } finally {
-                                    this.liveSearching = false;
-                                }
-                            }
-                        }">
-
+                        {{-- Search dengan Client-side Filtering --}}
+                        <div class="w-full">
                             <label for="search" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                                 Cari Barang
                             </label>
                             <div class="relative">
-                                <input type="text" id="search" name="search" x-model="searchQuery"
-                                    @input="getSuggestions(); triggerLiveSearch();"
-                                    @focus="if(searchQuery && searchQuery.length >= 1) getSuggestions()"
-                                    @keydown.enter.prevent="triggerLiveSearchNow()"
+                                <input type="text" id="search" name="search" x-model="riwayatSearch"
+                                    @input="getRiwayatSuggestions(); showRiwayatSuggestions = riwayatSearch.length > 0"
+                                    @focus="if(riwayatSearch && riwayatSearch.length >= 1) { getRiwayatSuggestions(); showRiwayatSuggestions = true; }"
                                     placeholder="Ketik untuk mencari..." autocomplete="off"
                                     class="block w-full h-[42px] px-4 pr-12 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm placeholder-gray-400">
 
-                                {{-- Loading Indicator --}}
-                                <div x-show="liveSearching" class="absolute right-14 top-1/2 -translate-y-1/2">
-                                    <svg class="animate-spin h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                            stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                        </path>
-                                    </svg>
-                                </div>
-
-
-
                                 {{-- Dropdown Suggestions --}}
-                                <div x-show="showSuggestions" @click.away="showSuggestions = false" x-transition
+                                <div x-show="showRiwayatSuggestions" @click.away="showRiwayatSuggestions = false" x-transition
                                     class="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-2xl mt-1 z-50 max-h-80 overflow-y-auto"
                                     style="display: none;">
 
-                                    <div x-show="loading" class="px-4 py-3 text-center">
-                                        <svg class="animate-spin h-5 w-5 text-blue-600 mx-auto" fill="none"
-                                            viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                                stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor"
-                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                            </path>
-                                        </svg>
-                                        <p class="text-xs text-gray-500 mt-1">Mencari...</p>
-                                    </div>
-
-                                    <template x-for="suggestion in suggestions" :key="suggestion.id_barang">
-                                        <div @click="selectBarang(suggestion.id_barang, suggestion.kategori, suggestion.nama_barang)"
+                                    <template x-for="suggestion in riwayatSuggestions" :key="suggestion.id_barang">
+                                        <div @click="selectRiwayatBarang(suggestion)"
                                             class="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-0 transition-colors">
                                             <div class="flex items-center justify-between">
                                                 <div class="flex-1">
-                                                    <p class="font-bold text-gray-900 text-sm"
-                                                        x-text="suggestion.nama_barang"></p>
+                                                    <p class="font-bold text-gray-900 text-sm" x-text="suggestion.nama_barang"></p>
                                                     <p class="text-xs text-gray-600">
-                                                        <span x-text="suggestion.nama_pelapor"></span>
-                                                        <span x-show="suggestion.nama_penerima"> → <span
-                                                                x-text="suggestion.nama_penerima"></span></span>
+                                                        <span x-text="suggestion.kategori === 'titipan' ? suggestion.nama_penitip : suggestion.nama_pelapor"></span>
+                                                        <span x-show="suggestion.nama_penerima"> → <span x-text="suggestion.nama_penerima"></span></span>
                                                     </p>
                                                 </div>
                                                 <span class="px-2 py-1 text-xs font-semibold rounded-full ml-2"
-                                                    :class="suggestion.kategori === 'titipan' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'"
+                                                    :class="suggestion.kategori === 'titipan' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'"
                                                     x-text="suggestion.kategori === 'titipan' ? 'TITIPAN' : 'TEMUAN'"></span>
                                             </div>
                                         </div>
                                     </template>
 
-                                    <div x-show="!loading && suggestions.length === 0 && searchQuery && searchQuery.length >= 1"
+                                    <div x-show="riwayatSuggestions.length === 0 && riwayatSearch && riwayatSearch.length >= 1"
                                         class="px-4 py-4 text-center text-gray-500">
-                                        <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                                            </path>
-                                        </svg>
                                         <p class="text-sm font-semibold mb-1">Tidak ditemukan</p>
                                         <p class="text-xs text-gray-400">Coba kata kunci lain</p>
                                     </div>
@@ -794,9 +932,185 @@
                 </form>
                 </div>
 
-                {{-- Container Riwayat dengan Initial Data --}}
-                <div id="riwayat-container" class="p-1 md:p-3 space-y-2 md:space-y-3">
-                    @include('anggota.barang-riwayat-cards', ['riwayat_barang' => $riwayat_barang])
+                {{-- Container Riwayat dengan Client-side Pagination --}}
+                <div class="p-1 md:p-3 space-y-2 md:space-y-3">
+                    <template x-for="barang in paginatedRiwayat" :key="barang.id_barang">
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-300 relative">
+                            {{-- Badge Jenis Barang di Pojok Kanan Atas --}}
+                            <div class="absolute top-3 right-3 z-10">
+                                <span class="inline-block text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md"
+                                      :class="barang.kategori === 'titipan' ? 'bg-blue-500' : 'bg-yellow-500'"
+                                      x-text="barang.kategori === 'titipan' ? 'TITIPAN' : 'TEMUAN'"></span>
+                            </div>
+                            
+                            <div class="p-4">
+                                <div class="w-full">
+                                    {{-- Nama Barang sebagai judul utama --}}
+                                    <h4 class="font-bold text-gray-800 text-sm mb-3 pr-20" x-text="barang.nama_barang"></h4>
+
+                                    {{-- Info Foto & Detail --}}
+                                    <div class="flex gap-4 mb-2">
+                                        {{-- Foto di Kiri --}}
+                                        <div class="flex-shrink-0">
+                                            <div x-show="barang.foto" @click="photoModalOpen = true; photos = ['/storage/' + barang.foto]; if(barang.foto_penerima) photos.push('/storage/' + barang.foto_penerima); currentPhotoIndex = 0" 
+                                                 class="w-16 h-16 rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors relative">
+                                                <img :src="'/storage/' + barang.foto" 
+                                                     alt="Foto Barang" 
+                                                     class="w-full h-full object-cover">
+                                                <div x-show="barang.foto_penerima" class="absolute bottom-1 right-1 bg-blue-600 text-white text-[8px] font-bold px-1 py-0.5 rounded">
+                                                    2
+                                                </div>
+                                            </div>
+                                            <div x-show="!barang.foto" class="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center border-2 border-gray-200">
+                                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        
+                                        {{-- Info di Kanan --}}
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-1 mb-1">
+                                                <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                                </svg>
+                                                <p class="text-gray-700 font-semibold text-xs" x-text="barang.kategori === 'titipan' ? barang.nama_penitip : barang.nama_pelapor"></p>
+                                            </div>
+                                            
+                                            <div class="text-xs text-gray-500">
+                                                <span class="font-semibold">Penerima:</span> <span x-text="barang.nama_penerima && barang.nama_penerima.length > 30 ? barang.nama_penerima.substring(0, 30) + '...' : barang.nama_penerima"></span>
+                                            </div>
+                                            
+                                            <div x-show="barang.catatan" class="text-xs text-gray-500 mt-1">
+                                                <span class="font-semibold">Catatan:</span> <span x-text="barang.catatan"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {{-- Informasi Tanggal --}}
+                                    <div class="mt-3 pt-3 border-t border-gray-100">
+                                        <div class="flex gap-6 text-xs text-gray-600">
+                                            <div>
+                                                <span class="font-semibold">Masuk:</span>
+                                                <span x-text="new Date(barang.kategori === 'titipan' ? barang.waktu_titip : barang.waktu_lapor).toLocaleDateString('id-ID', {day: '2-digit', month: '2-digit', year: '2-digit'}) + ' ' + new Date(barang.kategori === 'titipan' ? barang.waktu_titip : barang.waktu_lapor).toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'})"></span>
+                                            </div>
+                                            <div>
+                                                <span class="font-semibold">Selesai:</span>
+                                                <span x-text="new Date(barang.waktu_selesai).toLocaleDateString('id-ID', {day: '2-digit', month: '2-digit', year: '2-digit'}) + ' ' + new Date(barang.waktu_selesai).toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'})"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    
+                    <div x-show="allRiwayatBarang.length === 0">
+                        <div class="bg-white rounded-xl shadow-md p-8 text-center border-2 border-gray-300">
+                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-gray-500 font-semibold">Tidak ada riwayat.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                {{-- Pagination --}}
+                <div class="mt-6 px-3 md:px-6 py-4 border-t border-gray-200" x-show="filteredRiwayat.length > 0 && totalPages > 1">
+                    {{-- Desktop Layout --}}
+                    <div class="hidden md:flex justify-between items-center">
+                        <div class="text-sm text-gray-600">
+                            Showing
+                            <span x-text="(currentPage - 1) * itemsPerPage + 1"></span> to
+                            <span x-text="Math.min(currentPage * itemsPerPage, filteredRiwayat.length)"></span>
+                            of <span x-text="filteredRiwayat.length"></span> entries
+                        </div>
+                        <div class="flex space-x-1">
+                            <button
+                                @click="currentPage--"
+                                :disabled="currentPage === 1"
+                                class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm"
+                            >
+                                Previous
+                            </button>
+                            <template x-if="totalPages <= 4">
+                                <template x-for="page in Array.from({length: totalPages}, (_, i) => i + 1)" :key="page">
+                                    <button
+                                        @click="currentPage = page"
+                                        :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-3 py-1 rounded text-sm"
+                                        x-text="page"
+                                    ></button>
+                                </template>
+                            </template>
+                            <template x-if="totalPages > 4">
+                                <div class="flex items-center space-x-1">
+                                    <template x-for="page in (() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return Array.from({length: 3}, (_, i) => start + i).filter(p => p <= totalPages);
+                                    })()" :key="page">
+                                        <button
+                                            @click="currentPage = page"
+                                            :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                            class="px-3 py-1 rounded text-sm"
+                                            x-text="page"
+                                        ></button>
+                                    </template>
+                                    <span x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()" class="text-sm text-gray-500">...</span>
+                                    <button x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()"
+                                        @click="currentPage = totalPages"
+                                        :class="currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-3 py-1 rounded text-sm"
+                                        x-text="totalPages"
+                                    ></button>
+                                </div>
+                            </template>
+                            <button
+                                @click="currentPage++"
+                                :disabled="currentPage >= totalPages"
+                                class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {{-- Mobile Layout --}}
+                    <div class="md:hidden">
+                        <div class="text-center text-xs text-gray-600 mb-3">
+                            Hal <span x-text="currentPage"></span> dari <span x-text="totalPages"></span>
+                        </div>
+                        <div class="flex justify-center space-x-2">
+                            <button
+                                @click="currentPage--"
+                                :disabled="currentPage === 1"
+                                class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm font-medium"
+                            >
+                                Previous
+                            </button>
+                            <button
+                                @click="currentPage++"
+                                :disabled="currentPage >= totalPages"
+                                class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm font-medium"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -93,8 +93,11 @@ class BarangController extends Controller
             $riwayat_barang = $riwayat_barang->merge($temuan->get());
         }
 
-        // Sort by waktu_selesai descending
-        $riwayat_barang = $riwayat_barang->sortByDesc('waktu_selesai');
+        // Sort by waktu_selesai descending dan tambahkan kategori
+        $riwayat_barang = $riwayat_barang->sortByDesc('waktu_selesai')->map(function ($item) {
+            $item->kategori = $item instanceof BarangTitipan ? 'titipan' : 'temuan';
+            return $item;
+        })->values();
 
         return view('anggota.barang-index', [
             'barang_titipan' => $barang_titipan,
