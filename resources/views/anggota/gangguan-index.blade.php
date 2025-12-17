@@ -245,23 +245,7 @@
                         <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-300 relative">
                             {{-- Badge Kategori di Pojok Kanan Atas --}}
                             <div class="absolute top-3 right-3 z-10">
-                                <span class="inline-block 
-                                    @if($laporan->kategori == 'Curat') bg-red-500
-                                    @elseif($laporan->kategori == 'Curas') bg-orange-500
-                                    @elseif($laporan->kategori == 'Curanmor') bg-yellow-500
-                                    @elseif($laporan->kategori == 'Narkoba') bg-purple-500
-                                    @elseif($laporan->kategori == 'Laka Lantas') bg-pink-500
-                                    @elseif($laporan->kategori == 'Pembunuhan') bg-red-700
-                                    @elseif($laporan->kategori == 'Perkelahian') bg-orange-600
-                                    @elseif($laporan->kategori == 'Mabok') bg-indigo-500
-                                    @elseif($laporan->kategori == 'Unjuk Rasa') bg-blue-500
-                                    @elseif($laporan->kategori == 'Penyerobotan Tanah') bg-green-600
-                                    @elseif($laporan->kategori == 'Kenakalan Remaja') bg-teal-500
-                                    @elseif($laporan->kategori == 'Kebakaran') bg-red-600
-                                    @elseif($laporan->kategori == 'Bencana Alam') bg-gray-600
-                                    @else bg-gray-500
-                                    @endif
-                                    text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">{{ $laporan->kategori }}</span>
+                                <span class="inline-block bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">{{ $laporan->kategori }}</span>
                             </div>
                             
                             <div class="p-4">
@@ -578,10 +562,15 @@
          class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
          @click.away="showPhotoModal = false"
          style="display: none;">
-        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-4 relative" @click.stop>
-            <div class="flex justify-between items-center pb-3 border-b">
-                <h3 class="text-xl font-bold text-gray-800">FOTO GANGGUAN</h3>
-                <button @click="showPhotoModal = false" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full relative overflow-hidden" @click.stop>
+            <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] flex justify-between items-center p-4">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <h3 class="text-xl font-bold text-white">FOTO GANGGUAN</h3>
+                </div>
+                <button @click="showPhotoModal = false" class="text-white hover:text-gray-200 text-3xl">&times;</button>
             </div>
             <div class="mt-4">
                 <img :src="photoUrl" alt="Foto Gangguan" class="w-full h-auto rounded">
