@@ -104,7 +104,58 @@
         </div>
 
         {{-- 1. BAGIAN KENDARAAN AKTIF --}}
-        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ isOpen: true }">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ 
+            isOpen: true,
+            allKendaraanAktif: @js($kendaraan_aktif),
+            searchQuery: '',
+            suggestions: [],
+            loading: false,
+            showSuggestions: false,
+            selectedKendaraan: null,
+            itemsPerPage: 5,
+            currentPage: 1,
+            
+            getSuggestions() {
+                if (!this.searchQuery || this.searchQuery.length < 1) {
+                    this.suggestions = [];
+                    this.showSuggestions = false;
+                    this.selectedKendaraan = null;
+                    return;
+                }
+                
+                const query = this.searchQuery.toLowerCase();
+                this.suggestions = this.allKendaraanAktif.filter(kendaraan => 
+                    kendaraan.nopol.toLowerCase().includes(query) ||
+                    kendaraan.pemilik.toLowerCase().includes(query)
+                ).slice(0, 5);
+            },
+            
+            selectKendaraan(kendaraan) {
+                this.selectedKendaraan = kendaraan;
+                this.searchQuery = kendaraan.nopol;
+                this.showSuggestions = false;
+                this.currentPage = 1;
+            },
+            
+            get filteredKendaraan() {
+                if (!this.searchQuery || this.searchQuery.length === 0) {
+                    this.selectedKendaraan = null;
+                    return this.allKendaraanAktif;
+                }
+                if (this.selectedKendaraan) return [this.selectedKendaraan];
+                return this.allKendaraanAktif;
+            },
+            
+            get totalPages() {
+                return Math.ceil(this.filteredKendaraan.length / this.itemsPerPage);
+            },
+            
+            get paginatedKendaraan() {
+                const start = (this.currentPage - 1) * this.itemsPerPage;
+                const end = start + this.itemsPerPage;
+                return this.filteredKendaraan.slice(start, end);
+            }
+        }">
             <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] p-3 border-b border-gray-200 cursor-pointer hover:opacity-90 transition" @click="isOpen = !isOpen">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center">
@@ -121,74 +172,328 @@
 
             <div x-show="isOpen" x-collapse>
 
-                <div class="p-3 space-y-3">
-
-                @forelse($kendaraan_aktif as $log)
-                    <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-300 relative">
-                        {{-- Badge Tipe di Pojok Kanan Atas --}}
-                        <div class="absolute top-2 right-2 z-10">
-                            <span class="inline-block @if($log->tipe == 'Roda 4') bg-blue-500 @else bg-yellow-500 @endif text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">{{ $log->tipe }}</span>
-                        </div>
+                {{-- Per Page Controls --}}
+                <div class="p-3 border-b border-gray-200" x-show="allKendaraanAktif.length > 0">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Show:</span>
+                        <select x-model="itemsPerPage" @change="currentPage = 1" class="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                        </select>
+                    </div>
+                </div>
+                
+                {{-- Search Controls --}}
+                <div class="p-3 border-b border-gray-200" x-show="allKendaraanAktif.length > 0">
+                    <div class="relative">
+                        <input type="text" x-model="searchQuery" 
+                               @input="getSuggestions(); showSuggestions = searchQuery.length > 0" 
+                               @focus="if(searchQuery && searchQuery.length >= 1) { getSuggestions(); showSuggestions = true; }"
+                               placeholder="Cari nomor plat, pemilik..." 
+                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f]">
                         
-                        <div class="p-3">
-                            <div class="w-full">
-                                {{-- Nomor Plat --}}
-                                <h4 class="font-bold text-gray-800 text-sm mb-1 uppercase">{{ $log->nopol }}</h4>
-
-                                {{-- Info Pemilik & Waktu --}}
-                                <div class="flex items-center gap-3 mb-2">
-                                    <div class="flex items-center gap-1">
-                                        <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                                        </svg>
-                                        <p class="text-gray-700 font-semibold text-xs">{{ $log->pemilik }}</p>
-                                    </div>
-                                    
-                                    <div class="flex items-center gap-1">
-                                        <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                        <p class="text-gray-700 font-semibold text-xs">{{ $log->waktu_masuk->format('H:i') }}</p>
+                        {{-- Dropdown Suggestions --}}
+                        <div x-show="showSuggestions" @click.away="showSuggestions = false" x-transition
+                            class="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-2xl mt-1 z-50 max-h-60 overflow-y-auto"
+                            style="display: none;">
+                            
+                            <template x-for="suggestion in suggestions" :key="suggestion.id_log">
+                                <div @click="selectKendaraan(suggestion)"
+                                    class="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-0 transition-colors">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex-1">
+                                            <p class="font-bold text-gray-900 text-sm uppercase" x-text="suggestion.nopol"></p>
+                                            <p class="text-xs text-gray-600" x-text="suggestion.pemilik"></p>
+                                        </div>
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full ml-2" :class="suggestion.tipe === 'Roda 4' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'" x-text="suggestion.tipe"></span>
                                     </div>
                                 </div>
-
-                                {{-- Keterangan & Tombol --}}
-                                <div class="flex gap-1.5">
-                                    <form action="{{ route('anggota.kendaraan.updateKeterangan', ['id_kendaraan_log' => $log->id_log]) }}" method="POST" class="flex-1">
-                                        @csrf @method('PUT')
-                                        <select name="keterangan" onchange="this.form.submit()" class="w-full border border-gray-300 rounded text-xs py-1 focus:border-blue-500 focus:ring-blue-500">
-                                            <option value="Tidak Menginap" @if($log->keterangan == 'Tidak Menginap') selected @endif>Tidak Menginap</option>
-                                            <option value="Menginap" @if($log->keterangan == 'Menginap') selected @endif>Menginap</option>
-                                        </select>
-                                    </form>
-                                    <button @click.prevent="modalCheckoutOpen = true; selectedVehicleId = '{{ $log->id_log }}'; selectedVehicleNopol = '{{ $log->nopol }}'; selectedVehicleStatus = '{{ $log->keterangan }}';" class="bg-red-500 text-white font-bold py-1.5 px-3 rounded text-xs hover:bg-red-600 transition flex items-center gap-1">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                                        </svg>
-                                        Keluar
-                                    </button>
-                                </div>
+                            </template>
+                            
+                            <div x-show="suggestions.length === 0 && searchQuery && searchQuery.length >= 1"
+                                class="px-4 py-4 text-center text-gray-500">
+                                <p class="text-sm font-semibold mb-1">Tidak ditemukan</p>
+                                <p class="text-xs text-gray-400">Coba kata kunci lain</p>
                             </div>
                         </div>
                     </div>
-                @empty
-                    <div class="bg-white rounded-xl shadow-md p-8 text-center border-2 border-gray-300">
-                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
-                                </path>
-                            </svg>
+                </div>
+
+                {{-- Card Kendaraan Aktif dengan Client-side Pagination --}}
+                <div class="p-1 md:p-3 space-y-2 md:space-y-3">
+                    <template x-for="log in paginatedKendaraan" :key="log.id_log">
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-300 relative">
+                            {{-- Badge Tipe di Pojok Kanan Atas --}}
+                            <div class="absolute top-2 right-2 z-10">
+                                <span class="inline-block text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md" :class="log.tipe === 'Roda 4' ? 'bg-blue-500' : 'bg-yellow-500'" x-text="log.tipe"></span>
+                            </div>
+                            
+                            <div class="p-3">
+                                <div class="w-full">
+                                    {{-- Nomor Plat --}}
+                                    <h4 class="font-bold text-gray-800 text-sm mb-1 uppercase" x-text="log.nopol"></h4>
+
+                                    {{-- Info Pemilik & Waktu --}}
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <div class="flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            <p class="text-gray-700 font-semibold text-xs" x-text="log.pemilik"></p>
+                                        </div>
+                                        
+                                        <div class="flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <p class="text-gray-700 font-semibold text-xs" x-text="new Date(log.waktu_masuk).toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'})"></p>
+                                        </div>
+                                    </div>
+
+                                    {{-- Keterangan & Tombol --}}
+                                    <div class="flex gap-1.5">
+                                        <form :action="'/anggota/kendaraan/update-keterangan/' + log.id_log" method="POST" class="flex-1">
+                                            @csrf @method('PUT')
+                                            <select name="keterangan" onchange="this.form.submit()" class="w-full border border-gray-300 rounded text-xs py-1 focus:border-blue-500 focus:ring-blue-500">
+                                                <option value="Tidak Menginap" :selected="log.keterangan === 'Tidak Menginap'">Tidak Menginap</option>
+                                                <option value="Menginap" :selected="log.keterangan === 'Menginap'">Menginap</option>
+                                            </select>
+                                        </form>
+                                        <button @click.prevent="modalCheckoutOpen = true; selectedVehicleId = log.id_log; selectedVehicleNopol = log.nopol; selectedVehicleStatus = log.keterangan;" class="bg-red-500 text-white font-bold py-1.5 px-3 rounded text-xs hover:bg-red-600 transition flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                            </svg>
+                                            Keluar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <p class="text-gray-500 font-semibold">Tidak ada kendaraan di dalam.</p>
+                    </template>
+                                    
+                    <div x-show="allKendaraanAktif.length === 0">
+                        <div class="bg-white rounded-xl shadow-md p-8 text-center border-2 border-gray-300">
+                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                                </svg>
+                            </div>
+                            <p class="text-gray-500 font-semibold">Tidak ada kendaraan di dalam.</p>
+                        </div>
                     </div>
-                @endforelse
+                    
+                    <div x-show="allKendaraanAktif.length > 0 && filteredKendaraan.length === 0">
+                        <div class="bg-white rounded-xl shadow-md p-8 text-center border-2 border-gray-300">
+                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-gray-500 font-semibold">Tidak ditemukan kendaraan yang sesuai.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                {{-- Pagination --}}
+                <div class="mt-6 px-3 md:px-6 py-4 border-t border-gray-200" x-show="filteredKendaraan.length > 0">
+                    {{-- Desktop Layout --}}
+                    <div class="hidden md:flex justify-between items-center">
+                        <div class="text-sm text-gray-600">
+                            Showing
+                            <span x-text="(currentPage - 1) * itemsPerPage + 1"></span> to
+                            <span x-text="Math.min(currentPage * itemsPerPage, filteredKendaraan.length)"></span>
+                            of <span x-text="filteredKendaraan.length"></span> entries
+                        </div>
+                        <div class="flex space-x-1">
+                            <button
+                                @click="currentPage--"
+                                :disabled="currentPage === 1"
+                                class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm"
+                            >
+                                Previous
+                            </button>
+                            <template x-if="totalPages <= 4">
+                                <template x-for="page in Array.from({length: totalPages}, (_, i) => i + 1)" :key="page">
+                                    <button
+                                        @click="currentPage = page"
+                                        :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-3 py-1 rounded text-sm"
+                                        x-text="page"
+                                    ></button>
+                                </template>
+                            </template>
+                            <template x-if="totalPages > 4">
+                                <div class="flex items-center space-x-1">
+                                    <template x-for="page in (() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return Array.from({length: 3}, (_, i) => start + i).filter(p => p <= totalPages);
+                                    })()" :key="page">
+                                        <button
+                                            @click="currentPage = page"
+                                            :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                            class="px-3 py-1 rounded text-sm"
+                                            x-text="page"
+                                        ></button>
+                                    </template>
+                                    <span x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()" class="text-sm text-gray-500">...</span>
+                                    <button x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()"
+                                        @click="currentPage = totalPages"
+                                        :class="currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-3 py-1 rounded text-sm"
+                                        x-text="totalPages"
+                                    ></button>
+                                </div>
+                            </template>
+                            <button
+                                @click="currentPage++"
+                                :disabled="currentPage >= totalPages"
+                                class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {{-- Mobile Layout --}}
+                    <div class="md:hidden">
+                        <div class="text-center text-xs text-gray-600 mb-3">
+                            Showing
+                            <span x-text="(currentPage - 1) * itemsPerPage + 1"></span> to
+                            <span x-text="Math.min(currentPage * itemsPerPage, filteredKendaraan.length)"></span>
+                            of <span x-text="filteredKendaraan.length"></span> entries
+                        </div>
+                        <div class="flex justify-center space-x-1">
+                            <button
+                                @click="currentPage--"
+                                :disabled="currentPage === 1"
+                                class="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-xs"
+                            >
+                                Previous
+                            </button>
+                            <template x-if="totalPages <= 4">
+                                <template x-for="page in Array.from({length: totalPages}, (_, i) => i + 1)" :key="page">
+                                    <button
+                                        @click="currentPage = page"
+                                        :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-2 py-1 rounded text-xs"
+                                        x-text="page"
+                                    ></button>
+                                </template>
+                            </template>
+                            <template x-if="totalPages > 4">
+                                <div class="flex items-center space-x-1">
+                                    <template x-for="page in (() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return Array.from({length: 3}, (_, i) => start + i).filter(p => p <= totalPages);
+                                    })()" :key="page">
+                                        <button
+                                            @click="currentPage = page"
+                                            :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                            class="px-2 py-1 rounded text-xs"
+                                            x-text="page"
+                                        ></button>
+                                    </template>
+                                    <span x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()" class="text-xs text-gray-500">...</span>
+                                    <button x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()"
+                                        @click="currentPage = totalPages"
+                                        :class="currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-2 py-1 rounded text-xs"
+                                        x-text="totalPages"
+                                    ></button>
+                                </div>
+                            </template>
+                            <button
+                                @click="currentPage++"
+                                :disabled="currentPage >= totalPages"
+                                class="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-xs"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        {{-- 2. BAGIAN RIWAYAT KENDARAAN (HYBRID: SUGGESTION + LIVE SEARCH) --}}
-        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ isOpen: true }">
+        {{-- 2. BAGIAN RIWAYAT KENDARAAN (CLIENT-SIDE PAGINATION) --}}
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ 
+            isOpen: true,
+            allRiwayatKendaraan: @js($riwayat_kendaraan),
+            searchQuery: '',
+            suggestions: [],
+            loading: false,
+            showSuggestions: false,
+            selectedKendaraan: null,
+            itemsPerPage: 5,
+            currentPage: 1,
+            
+            getSuggestions() {
+                if (!this.searchQuery || this.searchQuery.length < 1) {
+                    this.suggestions = [];
+                    this.showSuggestions = false;
+                    this.selectedKendaraan = null;
+                    return;
+                }
+                
+                const query = this.searchQuery.toLowerCase();
+                this.suggestions = this.allRiwayatKendaraan.filter(kendaraan => 
+                    kendaraan.nopol.toLowerCase().includes(query) ||
+                    kendaraan.pemilik.toLowerCase().includes(query)
+                ).slice(0, 5);
+            },
+            
+            selectKendaraan(kendaraan) {
+                this.selectedKendaraan = kendaraan;
+                this.searchQuery = kendaraan.nopol;
+                this.showSuggestions = false;
+                this.currentPage = 1;
+            },
+            
+            get filteredKendaraan() {
+                if (!this.searchQuery || this.searchQuery.length === 0) {
+                    this.selectedKendaraan = null;
+                    return this.allRiwayatKendaraan;
+                }
+                if (this.selectedKendaraan) return [this.selectedKendaraan];
+                return this.allRiwayatKendaraan;
+            },
+            
+            get totalPages() {
+                return Math.ceil(this.filteredKendaraan.length / this.itemsPerPage);
+            },
+            
+            get paginatedKendaraan() {
+                const start = (this.currentPage - 1) * this.itemsPerPage;
+                const end = start + this.itemsPerPage;
+                return this.filteredKendaraan.slice(start, end);
+            }
+        }">
             <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] p-3 border-b border-gray-200 cursor-pointer hover:opacity-90 transition" @click="isOpen = !isOpen">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center">
@@ -205,8 +510,21 @@
 
             <div x-show="isOpen" x-collapse>
 
-                {{-- Filter dengan HYBRID: Suggestion + Live Search --}}
-                <div class="p-4 border-b border-gray-200" x-data="{}">
+                {{-- Per Page Controls --}}
+                <div class="p-3 border-b border-gray-200" x-show="allRiwayatKendaraan.length > 0">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Show:</span>
+                        <select x-model="itemsPerPage" @change="currentPage = 1" class="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                        </select>
+                    </div>
+                </div>
+                
+                {{-- Filter dengan Tanggal, Keterangan, dan Search --}}
+                <div class="p-4 border-b border-gray-200">
                     <form action="{{ route('anggota.kendaraan.index') }}" method="GET" id="searchForm">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
@@ -223,7 +541,7 @@
                                 </div>
                             </div>
 
-                            {{-- Filter Keterangan (BARU) --}}
+                            {{-- Filter Keterangan --}}
                             <div class="w-full">
                                 <label for="keterangan" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                                     Keterangan
@@ -244,170 +562,40 @@
                                 </div>
                             </div>
 
-                            {{-- Search Kendaraan: HYBRID AJAX (Suggestion + Live Search tanpa reload) --}}
-                            <div class="w-full" x-data="{
-                            nopolSearch: '{{ $nopol_filter ?? '' }}',
-                            tanggalFilter: '{{ $tanggal_terpilih }}',
-                            keteranganFilter: '{{ $keterangan_filter ?? '' }}',
-                            suggestions: [],
-                            loading: false,
-                            showSuggestions: false,
-                            liveSearchTimeout: null,
-                            liveSearching: false,
-
-                            async getSuggestions() {
-                                // console.log('Mencari suggestion:', this.nopolSearch);
-
-                                if (this.nopolSearch.length < 1) {
-                                    this.suggestions = [];
-                                    this.showSuggestions = false;
-                                    return;
-                                }
-
-                                this.loading = true;
-                                this.showSuggestions = true;
-
-                                try {
-                                    const response = await fetch(`{{ route('anggota.kendaraan.searchNopol') }}?search=${encodeURIComponent(this.nopolSearch)}&tanggal=${this.tanggalFilter}`);
-                                    const data = await response.json();
-                                    // console.log('Suggestions:', data);
-                                    this.suggestions = data;
-                                } catch (error) {
-                                    // console.error('Error:', error);
-                                    this.suggestions = [];
-                                } finally {
-                                    this.loading = false;
-                                }
-                            },
-
-                            selectNopol(nopol) {
-                                this.nopolSearch = nopol;
-                                this.showSuggestions = false;
-                                this.triggerLiveSearchNow(); // Langsung trigger live search
-                            },
-
-                            // Live Search dengan AJAX (tanpa reload page)
-                            triggerLiveSearch() {
-                                clearTimeout(this.liveSearchTimeout);
-
-                                this.liveSearchTimeout = setTimeout(() => {
-                                    if (this.nopolSearch.length === 0) {
-                                        // console.log('Live Search triggered');
-                                        this.performLiveSearch();
-                                    }
-                                }, 1000); // 1 detik delay
-                            },
-
-                            // Trigger instant (ketika user klik suggestion)
-                            triggerLiveSearchNow() {
-                                clearTimeout(this.liveSearchTimeout);
-                                this.performLiveSearch();
-                            },
-
-                            // AJAX Live Search
-                            async performLiveSearch() {
-                                this.liveSearching = true;
-
-                                try {
-                                    // Update URL tanpa reload
-                                    const url = new URL(window.location);
-                                    url.searchParams.set('nopol', this.nopolSearch);
-                                    url.searchParams.set('tanggal', this.tanggalFilter);
-                                    url.searchParams.set('keterangan', this.keteranganFilter);
-                                    window.history.pushState({}, '', url);
-
-                                    // Fetch hasil riwayat via AJAX
-                                    const response = await fetch(`{{ route('anggota.kendaraan.getRiwayat') }}?nopol=${encodeURIComponent(this.nopolSearch)}&tanggal=${this.tanggalFilter}&keterangan=${encodeURIComponent(this.keteranganFilter)}`);
-                                    const html = await response.text();
-
-                                    // Update container riwayat
-                                    document.getElementById('riwayat-container').innerHTML = html;
-
-                                    // console.log('Live search completed');
-                                } catch (error) {
-                                    // console.error('Live search error:', error);
-                                } finally {
-                                    this.liveSearching = false;
-                                }
-                            },
-
-                            updateTanggal(newDate) {
-                                this.tanggalFilter = newDate;
-                                if (this.nopolSearch.length > 0) {
-                                    this.getSuggestions();
-                                    this.triggerLiveSearch();
-                                }
-                            }
-                        }">
-
-                                <label for="nopol" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                            {{-- Search Kendaraan dengan Client-side --}}
+                            <div class="w-full">
+                                <label for="search" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                                     Cari Kendaraan
                                 </label>
                                 <div class="relative">
-                                    <input type="text" id="nopol" name="nopol" x-model="nopolSearch"
-                                        @input="triggerLiveSearch(); getSuggestions();"
-                                        @focus="if(nopolSearch.length >= 1) getSuggestions()"
-                                        @keydown.enter.prevent="triggerLiveSearchNow()"
+                                    <input type="text" id="search" x-model="searchQuery"
+                                        @input="getSuggestions(); showSuggestions = searchQuery.length > 0"
+                                        @focus="if(searchQuery && searchQuery.length >= 1) { getSuggestions(); showSuggestions = true; }"
                                         placeholder="Ketik untuk mencari..." autocomplete="off"
-                                        class="block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm placeholder-gray-400">
+                                        class="block w-full h-[42px] px-4 pr-12 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm placeholder-gray-400">
 
-                                    {{-- Loading Indicator untuk Live Search --}}
-                                    <div x-show="liveSearching" class="absolute right-3 top-1/2 -translate-y-1/2">
-                                        <svg class="animate-spin h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                                stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor"
-                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                            </path>
-                                        </svg>
-                                    </div>
-
-                                    {{-- Dropdown Suggestions (TETAP TAMPIL!) --}}
+                                    {{-- Dropdown Suggestions --}}
                                     <div x-show="showSuggestions" @click.away="showSuggestions = false" x-transition
                                         class="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-2xl mt-1 z-50 max-h-80 overflow-y-auto"
                                         style="display: none;">
 
-                                        {{-- Loading State --}}
-                                        <div x-show="loading" class="px-4 py-3 text-center">
-                                            <svg class="animate-spin h-5 w-5 text-blue-600 mx-auto" fill="none"
-                                                viewBox="0 0 24 24">
-                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                                    stroke-width="4"></circle>
-                                                <path class="opacity-75" fill="currentColor"
-                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                                </path>
-                                            </svg>
-                                            <p class="text-xs text-gray-500 mt-1">Mencari...</p>
-                                        </div>
-
-                                        {{-- Suggestion Items --}}
-                                        <template x-for="suggestion in suggestions" :key="suggestion.nopol">
-                                            <div @click="selectNopol(suggestion.nopol)"
+                                        <template x-for="suggestion in suggestions" :key="suggestion.id_log">
+                                            <div @click="selectKendaraan(suggestion)"
                                                 class="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-0 transition-colors">
                                                 <div class="flex items-center justify-between">
                                                     <div class="flex-1">
-                                                        <p class="font-bold text-gray-900 uppercase text-sm"
-                                                            x-text="suggestion.nopol"></p>
+                                                        <p class="font-bold text-gray-900 text-sm uppercase" x-text="suggestion.nopol"></p>
                                                         <p class="text-xs text-gray-600" x-text="suggestion.pemilik"></p>
                                                     </div>
-                                                    <span
-                                                        class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full ml-2"
-                                                        x-text="suggestion.tipe"></span>
+                                                    <span class="px-2 py-1 text-xs font-semibold rounded-full ml-2" :class="suggestion.tipe === 'Roda 4' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'" x-text="suggestion.tipe"></span>
                                                 </div>
                                             </div>
                                         </template>
 
-                                        {{-- No Results --}}
-                                        <div x-show="!loading && suggestions.length === 0 && nopolSearch.length >= 1"
+                                        <div x-show="suggestions.length === 0 && searchQuery && searchQuery.length >= 1"
                                             class="px-4 py-4 text-center text-gray-500">
-                                            <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none"
-                                                stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                                                </path>
-                                            </svg>
-                                            <p class="text-sm font-semibold mb-1">Tidak ditemukan pada tanggal ini</p>
-                                            <p class="text-xs text-gray-400">Coba kata kunci lain atau ganti tanggal</p>
+                                            <p class="text-sm font-semibold mb-1">Tidak ditemukan</p>
+                                            <p class="text-xs text-gray-400">Coba kata kunci lain</p>
                                         </div>
                                     </div>
                                 </div>
@@ -417,24 +605,23 @@
                     </form>
                 </div>
 
-                {{-- Card Riwayat (dengan ID untuk AJAX update + Initial Data) --}}
-                <div id="riwayat-container" class="p-3 space-y-3">
-                    {{-- ▼▼▼ INITIAL DATA dari controller index() ▼▼▼ --}}
-                    @forelse($riwayat_kendaraan as $log)
+                {{-- Card Riwayat dengan Client-side Pagination --}}
+                <div class="p-1 md:p-3 space-y-2 md:space-y-3">
+                    <template x-for="kendaraan in paginatedKendaraan" :key="kendaraan.id_log">
                         <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-300 relative">
                             {{-- Badge Tipe di Pojok Kanan Atas --}}
                             <div class="absolute top-2 right-2 z-10">
-                                <span class="inline-block @if($log->tipe == 'Roda 4') bg-blue-500 @else bg-yellow-500 @endif text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">{{ $log->tipe }}</span>
+                                <span class="inline-block text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md" :class="kendaraan.tipe === 'Roda 4' ? 'bg-blue-500' : 'bg-yellow-500'" x-text="kendaraan.tipe"></span>
                             </div>
                             
                             <div class="p-3">
                                 <div class="w-full">
                                     {{-- Nomor Plat --}}
-                                    <h4 class="font-bold text-gray-800 text-sm mb-1 uppercase">{{ $log->nopol }}</h4>
+                                    <h4 class="font-bold text-gray-800 text-sm mb-1 uppercase" x-text="kendaraan.nopol"></h4>
                                     
                                     {{-- Status Badge --}}
                                     <div class="mb-2">
-                                        <span class="inline-block @if($log->keterangan == 'Menginap') bg-red-500 text-white @else bg-blue-500 text-white @endif text-[10px] font-bold px-2 py-1 rounded-full">{{ $log->keterangan }}</span>
+                                        <span class="inline-block text-white text-[10px] font-bold px-2 py-1 rounded-full" :class="kendaraan.keterangan === 'Menginap' ? 'bg-red-500' : 'bg-blue-500'" x-text="kendaraan.keterangan"></span>
                                     </div>
 
                                     {{-- Info Pemilik & Waktu --}}
@@ -443,35 +630,197 @@
                                             <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
                                             </svg>
-                                            <p class="text-gray-700 font-semibold text-xs">{{ $log->pemilik }}</p>
+                                            <p class="text-gray-700 font-semibold text-xs" x-text="kendaraan.pemilik"></p>
                                         </div>
                                         
                                         <div class="flex items-center gap-1">
                                             <svg class="w-3.5 h-3.5 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                                             </svg>
-                                            <p class="text-gray-700 font-semibold text-xs">{{ $log->waktu_keluar->format('H:i') }}</p>
+                                            <p class="text-gray-700 font-semibold text-xs" x-text="new Date(kendaraan.waktu_keluar).toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'})"></p>
                                         </div>
                                     </div>
 
                                     {{-- Lama Parkir --}}
                                     <div class="text-xs text-gray-500">
-                                        Lama parkir: <span class="font-semibold text-gray-700">{{ $log->waktu_masuk->diffForHumans($log->waktu_keluar, true) }}</span>
+                                        Lama parkir: <span class="font-semibold text-gray-700" x-text="(() => {
+                                            const masuk = new Date(kendaraan.waktu_masuk);
+                                            const keluar = new Date(kendaraan.waktu_keluar);
+                                            const diff = keluar - masuk;
+                                            const hours = Math.floor(diff / (1000 * 60 * 60));
+                                            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                                            return hours > 0 ? hours + ' jam ' + minutes + ' menit' : minutes + ' menit';
+                                        })()"></span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    @empty
+                    </template>
+                    
+                    <div x-show="allRiwayatKendaraan.length === 0">
                         <div class="bg-white rounded-xl shadow-md p-8 text-center border-2 border-gray-300">
                             <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
                                 <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                             </div>
-                            <p class="text-gray-500 font-semibold">Tidak ada riwayat kendaraan pada tanggal ini.</p>
+                            <p class="text-gray-500 font-semibold">Tidak ada riwayat kendaraan.</p>
                         </div>
-                    @endforelse
+                    </div>
+                    
+                    <div x-show="allRiwayatKendaraan.length > 0 && filteredKendaraan.length === 0">
+                        <div class="bg-white rounded-xl shadow-md p-8 text-center border-2 border-gray-300">
+                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-gray-500 font-semibold">Tidak ditemukan kendaraan yang sesuai.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                {{-- Pagination --}}
+                <div class="mt-6 px-3 md:px-6 py-4 border-t border-gray-200" x-show="filteredKendaraan.length > 0">
+                    {{-- Desktop Layout --}}
+                    <div class="hidden md:flex justify-between items-center">
+                        <div class="text-sm text-gray-600">
+                            Showing
+                            <span x-text="(currentPage - 1) * itemsPerPage + 1"></span> to
+                            <span x-text="Math.min(currentPage * itemsPerPage, filteredKendaraan.length)"></span>
+                            of <span x-text="filteredKendaraan.length"></span> entries
+                        </div>
+                        <div class="flex space-x-1">
+                            <button
+                                @click="currentPage--"
+                                :disabled="currentPage === 1"
+                                class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm"
+                            >
+                                Previous
+                            </button>
+                            <template x-if="totalPages <= 4">
+                                <template x-for="page in Array.from({length: totalPages}, (_, i) => i + 1)" :key="page">
+                                    <button
+                                        @click="currentPage = page"
+                                        :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-3 py-1 rounded text-sm"
+                                        x-text="page"
+                                    ></button>
+                                </template>
+                            </template>
+                            <template x-if="totalPages > 4">
+                                <div class="flex items-center space-x-1">
+                                    <template x-for="page in (() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return Array.from({length: 3}, (_, i) => start + i).filter(p => p <= totalPages);
+                                    })()" :key="page">
+                                        <button
+                                            @click="currentPage = page"
+                                            :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                            class="px-3 py-1 rounded text-sm"
+                                            x-text="page"
+                                        ></button>
+                                    </template>
+                                    <span x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()" class="text-sm text-gray-500">...</span>
+                                    <button x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()"
+                                        @click="currentPage = totalPages"
+                                        :class="currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-3 py-1 rounded text-sm"
+                                        x-text="totalPages"
+                                    ></button>
+                                </div>
+                            </template>
+                            <button
+                                @click="currentPage++"
+                                :disabled="currentPage >= totalPages"
+                                class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {{-- Mobile Layout --}}
+                    <div class="md:hidden">
+                        <div class="text-center text-xs text-gray-600 mb-3">
+                            Showing
+                            <span x-text="(currentPage - 1) * itemsPerPage + 1"></span> to
+                            <span x-text="Math.min(currentPage * itemsPerPage, filteredKendaraan.length)"></span>
+                            of <span x-text="filteredKendaraan.length"></span> entries
+                        </div>
+                        <div class="flex justify-center space-x-1">
+                            <button
+                                @click="currentPage--"
+                                :disabled="currentPage === 1"
+                                class="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-xs"
+                            >
+                                Previous
+                            </button>
+                            <template x-if="totalPages <= 4">
+                                <template x-for="page in Array.from({length: totalPages}, (_, i) => i + 1)" :key="page">
+                                    <button
+                                        @click="currentPage = page"
+                                        :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-2 py-1 rounded text-xs"
+                                        x-text="page"
+                                    ></button>
+                                </template>
+                            </template>
+                            <template x-if="totalPages > 4">
+                                <div class="flex items-center space-x-1">
+                                    <template x-for="page in (() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return Array.from({length: 3}, (_, i) => start + i).filter(p => p <= totalPages);
+                                    })()" :key="page">
+                                        <button
+                                            @click="currentPage = page"
+                                            :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                            class="px-2 py-1 rounded text-xs"
+                                            x-text="page"
+                                        ></button>
+                                    </template>
+                                    <span x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()" class="text-xs text-gray-500">...</span>
+                                    <button x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()"
+                                        @click="currentPage = totalPages"
+                                        :class="currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-2 py-1 rounded text-xs"
+                                        x-text="totalPages"
+                                    ></button>
+                                </div>
+                            </template>
+                            <button
+                                @click="currentPage++"
+                                :disabled="currentPage >= totalPages"
+                                class="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-xs"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
