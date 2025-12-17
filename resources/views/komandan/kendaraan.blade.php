@@ -516,12 +516,27 @@ function loadRiwayatData(page = 1) {
     const formData = new FormData(document.getElementById('filterForm'));
     formData.append('page_riwayat', page);
     
-    const params = new URLSearchParams();
+    // 1. Params for API Call (Only form specific)
+    const apiParams = new URLSearchParams();
     for (let [key, value] of formData) {
-        params.append(key, value);
+        apiParams.append(key, value);
     }
     
-    fetch('{{ route("komandan.kendaraan.searchRiwayat") }}?' + params.toString())
+    // 2. Params for Browser URL (Merge with existing)
+    const urlParams = new URLSearchParams(window.location.search);
+    for (let [key, value] of formData) {
+        if (value) {
+            urlParams.set(key, value);
+        } else {
+            urlParams.delete(key);
+        }
+    }
+    urlParams.set('page_riwayat', page); // Ensure page is set
+
+    // Update Browser URL
+    window.history.pushState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
+
+    fetch('{{ route("komandan.kendaraan.searchRiwayat") }}?' + apiParams.toString())
         .then(response => response.json())
         .then(data => {
             document.getElementById('riwayat-table-container').innerHTML = data.html;
@@ -540,12 +555,29 @@ function loadMasterData(page = 1) {
     const formData = new FormData(document.getElementById('filterFormMaster'));
     formData.append('page_master', page);
     
-    const params = new URLSearchParams();
+    // 1. Params for API Call
+    const apiParams = new URLSearchParams();
     for (let [key, value] of formData) {
-        params.append(key, value);
+        apiParams.append(key, value);
     }
+
+    // 2. Params for Browser URL (Merge)
+    const urlParams = new URLSearchParams(window.location.search);
+    for (let [key, value] of formData) {
+        // filterFormMaster might have hidden inputs from previous request, 
+        // we trust the form data as the latest "truth" for these keys.
+        if (value) {
+            urlParams.set(key, value);
+        } else {
+            urlParams.delete(key);
+        }
+    }
+    urlParams.set('page_master', page);
+
+    // Update Browser URL
+    window.history.pushState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
     
-    fetch('{{ route("komandan.kendaraan.searchMaster") }}?' + params.toString())
+    fetch('{{ route("komandan.kendaraan.searchMaster") }}?' + apiParams.toString())
         .then(response => response.json())
         .then(data => {
             document.getElementById('master-table-container').innerHTML = data.html;

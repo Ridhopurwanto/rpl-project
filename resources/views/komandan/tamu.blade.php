@@ -370,6 +370,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (startDateInput.value) params.set('start_date', startDateInput.value);
             if (endDateInput.value) params.set('end_date', endDateInput.value);
             
+            // --- FIX: Reset Pagination to Page 1 on Filter Change ---
+            params.delete('page'); 
+
             url = `${window.location.pathname}?${params.toString()}`;
             
              // Update Browser URL

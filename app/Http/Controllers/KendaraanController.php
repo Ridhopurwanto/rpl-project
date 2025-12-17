@@ -188,7 +188,7 @@ class KendaraanController extends Controller
             $kendaraan = Kendaraan::findOrFail($id_kendaraan);
             $kendaraan->update($request->only('nomor_plat', 'pemilik', 'tipe'));
             
-            return redirect()->route('komandan.kendaraan')->with('success', 'Data kendaraan berhasil diperbarui.');
+            return redirect()->back()->with('success', 'Data kendaraan berhasil diperbarui.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal memperbarui data.');
         }
