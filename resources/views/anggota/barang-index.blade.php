@@ -253,7 +253,7 @@
                     </div>
                 </div>
                 
-                <div class="p-1 md:p-3 space-y-2 md:space-y-3">
+                <div class="p-3 md:p-4 space-y-3 md:space-y-4">
                 <template x-for="barang in paginatedBarang" :key="barang.id_barang">
                     <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-300 relative">
                         {{-- Badge Status di Pojok Kanan Atas --}}
@@ -622,7 +622,7 @@
                     </div>
                 </div>
                 
-                <div class="p-1 md:p-3 space-y-2 md:space-y-3">
+                <div class="p-3 md:p-4 space-y-3 md:space-y-4">
                 <template x-for="barang in paginatedBarang" :key="barang.id_barang">
                     <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-300 relative">
                         {{-- Badge Status di Pojok Kanan Atas --}}
@@ -1025,7 +1025,7 @@
                 </div>
 
                 {{-- Container Riwayat dengan Client-side Pagination --}}
-                <div class="p-1 md:p-3 space-y-2 md:space-y-3">
+                <div class="p-3 md:p-4 space-y-3 md:space-y-4">
                     <template x-for="barang in paginatedRiwayat" :key="barang.id_barang">
                         <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-300 relative">
                             {{-- Badge Jenis Barang di Pojok Kanan Atas --}}
@@ -1497,10 +1497,15 @@
              class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
              @click.away="showPhotoModal = false"
              style="display: none;">
-            <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-4 relative" @click.stop>
-                <div class="flex justify-between items-center pb-3 border-b">
-                    <h3 class="text-xl font-bold text-gray-800">FOTO BARANG</h3>
-                    <button @click="showPhotoModal = false" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+            <div class="bg-white rounded-lg shadow-xl max-w-lg w-full relative overflow-hidden" @click.stop>
+                <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] flex justify-between items-center p-4">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <h3 class="text-xl font-bold text-white">FOTO BARANG</h3>
+                    </div>
+                    <button @click="showPhotoModal = false" class="text-white hover:text-gray-200 text-3xl">&times;</button>
                 </div>
                 <div class="mt-4">
                     <img :src="photoUrl" alt="Foto Barang" class="w-full h-auto rounded">
@@ -1512,10 +1517,15 @@
         <div x-show="photoModalOpen" style="display: none;"
             class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
              @click.away="photoModalOpen = false">
-            <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-4 relative" @click.stop>
-                <div class="flex justify-between items-center pb-3 border-b">
-                    <h3 class="text-xl font-bold text-gray-800" x-text="currentPhotoIndex === 0 ? 'FOTO BARANG' : 'FOTO PENERIMA'"></h3>
-                    <button @click="photoModalOpen = false" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+            <div class="bg-white rounded-lg shadow-xl max-w-lg w-full relative overflow-hidden" @click.stop>
+                <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] flex justify-between items-center p-4">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <h3 class="text-xl font-bold text-white" x-text="currentPhotoIndex === 0 ? 'FOTO BARANG' : 'FOTO PENERIMA'"></h3>
+                    </div>
+                    <button @click="photoModalOpen = false" class="text-white hover:text-gray-200 text-3xl">&times;</button>
                 </div>
                 <div class="mt-4 relative">
                     <img :src="photos[currentPhotoIndex]" alt="Foto" class="w-full h-auto rounded">

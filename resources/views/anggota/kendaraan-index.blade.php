@@ -222,7 +222,7 @@
                 </div>
 
                 {{-- Card Kendaraan Aktif dengan Client-side Pagination --}}
-                <div class="p-1 md:p-3 space-y-2 md:space-y-3">
+                <div class="p-3 md:p-4 space-y-3 md:space-y-4">
                     <template x-for="log in paginatedKendaraan" :key="log.id_log">
                         <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-300 relative">
                             {{-- Badge Tipe di Pojok Kanan Atas --}}
@@ -606,7 +606,7 @@
                 </div>
 
                 {{-- Card Riwayat dengan Client-side Pagination --}}
-                <div class="p-1 md:p-3 space-y-2 md:space-y-3">
+                <div class="p-3 md:p-4 space-y-3 md:space-y-4">
                     <template x-for="kendaraan in paginatedKendaraan" :key="kendaraan.id_log">
                         <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-300 relative">
                             {{-- Badge Tipe di Pojok Kanan Atas --}}
