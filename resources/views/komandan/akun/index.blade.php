@@ -126,8 +126,8 @@
             @foreach ($users as $user) 
 
                 @php
-                    $isLocked = in_array(strtolower($user->peran), ['komandan', 'bau']);
-                    $isShiftLocked = (strtolower($user->peran) == 'bau');
+                    $isLocked = in_array(strtolower($user->peran), ['komandan', 'supervisor']);
+                    $isShiftLocked = (strtolower($user->peran) == 'supervisor');
                     // Menggunakan warna navy yang sama untuk background card aktif
                     $innerBg = $user->status == 'Tidak Aktif' ? 'bg-gray-500' : 'bg-[#1e3a5f]';
                 @endphp
