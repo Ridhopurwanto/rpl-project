@@ -104,7 +104,7 @@
         </div>
 
 
-    <div class="w-full min-h-screen bg-slate-100 p-4 pb-32" x-data="{ 
+    <div class="w-full min-h-screen bg-slate-100 p-2 md:p-4 pb-32" x-data="{ 
             showPhotoModal: false,
             photoUrl: '',
             photoModalOpen: false,
@@ -123,24 +123,16 @@
         {{-- 1. BAGIAN BARANG TITIPAN (AKTIF) --}}
         <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ 
             isOpen: false,
-            loading: false,
-            async loadPage(url) {
-                this.loading = true;
-                try {
-                    const response = await fetch(url, {
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    });
-                    const html = await response.text();
-                    document.getElementById('titipan-container').innerHTML = html;
-                    
-                    window.history.pushState({}, '', url);
-                } catch (error) {
-                    console.error('Error loading page:', error);
-                } finally {
-                    this.loading = false;
-                }
+            allBarangTitipan: @js($barang_titipan),
+            itemsPerPage: 5,
+            currentPage: 1,
+            get totalPages() {
+                return Math.ceil(this.allBarangTitipan.length / this.itemsPerPage);
+            },
+            get paginatedBarang() {
+                const start = (this.currentPage - 1) * this.itemsPerPage;
+                const end = start + this.itemsPerPage;
+                return this.allBarangTitipan.slice(start, end);
             }
         }">
             <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] p-3 border-b border-gray-200 cursor-pointer hover:opacity-90 transition" @click="isOpen = !isOpen">
@@ -158,62 +150,43 @@
             </div>
 
             <div x-show="isOpen" x-collapse>
-                <div x-show="loading" class="p-8 text-center">
-                    <svg class="animate-spin h-8 w-8 text-blue-600 mx-auto" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <p class="text-sm text-gray-500 mt-2">Loading...</p>
+                {{-- Per Page Controls --}}
+                <div class="p-3 border-b border-gray-200" x-show="allBarangTitipan.length > 0">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Show:</span>
+                        <select x-model="itemsPerPage" @change="currentPage = 1" class="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                        </select>
+                    </div>
                 </div>
                 
-                <div id="titipan-container" x-show="!loading">
-                    {{-- Per Page Controls --}}
-                    @if($barang_titipan->total() > 0)
-                        <div class="p-3 border-b border-gray-200">
-                            <div class="flex justify-between items-center">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Show:</span>
-                                    <select onchange="loadPage(this.value)" class="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]">
-                                        <option value="{{ request()->fullUrlWithQuery(['per_page' => 5, 'titipan_page' => 1]) }}" @if($per_page == 5) selected @endif>5</option>
-                                        <option value="{{ request()->fullUrlWithQuery(['per_page' => 10, 'titipan_page' => 1]) }}" @if($per_page == 10) selected @endif>10</option>
-                                        <option value="{{ request()->fullUrlWithQuery(['per_page' => 15, 'titipan_page' => 1]) }}" @if($per_page == 15) selected @endif>15</option>
-                                        <option value="{{ request()->fullUrlWithQuery(['per_page' => 20, 'titipan_page' => 1]) }}" @if($per_page == 20) selected @endif>20</option>
-                                    </select>
-                                </div>
-                                <div class="text-xs text-gray-600">
-                                    Showing {{ $barang_titipan->firstItem() ?? 0 }} to {{ $barang_titipan->lastItem() ?? 0 }} of {{ $barang_titipan->total() }} entries
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-                
-                <div class="p-3 space-y-3">
-
-                @forelse($barang_titipan as $barang)
+                <div class="p-1 md:p-3 space-y-2 md:space-y-3">
+                <template x-for="barang in paginatedBarang" :key="barang.id_barang">
                     <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-300 relative">
                         {{-- Badge Status di Pojok Kanan Atas --}}
-                        <div class="absolute top-3 right-3 z-10">
-                            <span class="inline-block bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">{{ $barang->waktu_titip->format('d/m/y') }}</span>
+                        <div class="absolute top-2 right-2 z-10">
+                            <span class="inline-block bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md" x-text="new Date(barang.waktu_titip).toLocaleDateString('id-ID', {day: '2-digit', month: '2-digit', year: '2-digit'})"></span>
                         </div>
                         
-                        <div class="p-4">
+                        <div class="p-3">
                             <div class="w-full">
                                 {{-- Nama Barang sebagai judul utama --}}
-                                <h4 class="font-bold text-gray-800 text-sm mb-3 pr-20">{{ $barang->nama_barang }}</h4>
+                                <h4 class="font-bold text-gray-800 text-sm mb-3 pr-20" x-text="barang.nama_barang"></h4>
 
                                 {{-- Info Foto & Detail --}}
                                 <div class="flex gap-4 mb-4">
                                     {{-- Foto di Kiri --}}
-                                    @if($barang->foto)
-                                        <div class="flex-shrink-0">
-                                            <div @click="showPhotoModal = true; photoUrl = '{{ Storage::url($barang->foto) }}'" 
-                                                 class="w-16 h-16 rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors">
-                                                <img src="{{ Storage::url($barang->foto) }}" 
-                                                     alt="Foto Barang" 
-                                                     class="w-full h-full object-cover">
-                                            </div>
+                                    <div class="flex-shrink-0" x-show="barang.foto">
+                                        <div @click="showPhotoModal = true; photoUrl = '/storage/' + barang.foto" 
+                                             class="w-16 h-16 rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors">
+                                            <img :src="'/storage/' + barang.foto" 
+                                                 alt="Foto Barang" 
+                                                 class="w-full h-full object-cover">
                                         </div>
-                                    @endif
+                                    </div>
                                     
                                     {{-- Info di Kanan --}}
                                     <div class="flex-1">
@@ -221,41 +194,41 @@
                                             <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                             </svg>
-                                            <p class="text-gray-700 font-semibold text-xs">{{ $barang->nama_penitip }}</p>
+                                            <p class="text-gray-700 font-semibold text-xs" x-text="barang.nama_penitip"></p>
                                         </div>
                                         
                                         <div class="flex items-center gap-1 mb-1">
                                             <svg class="w-3.5 h-3.5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                             </svg>
-                                            <p class="text-gray-700 font-semibold text-xs">{{ $barang->waktu_titip->format('H:i') }}</p>
+                                            <p class="text-gray-700 font-semibold text-xs" x-text="new Date(barang.waktu_titip).toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'})"></p>
                                         </div>
                                         
                                         <div class="text-xs text-gray-500">
-                                            <span class="font-semibold">Tujuan:</span> {{ Str::limit($barang->tujuan, 30) }}
+                                            <span class="font-semibold">Tujuan:</span> <span x-text="barang.tujuan && barang.tujuan.length > 30 ? barang.tujuan.substring(0, 30) + '...' : barang.tujuan"></span>
                                         </div>
                                     </div>
                                 </div>
 
                                 {{-- Catatan --}}
-                                @if($barang->catatan)
-                                    <div class="mb-4">
-                                        <div class="text-xs text-gray-500">
-                                            <span class="font-semibold">Catatan:</span> {{ $barang->catatan }}
-                                        </div>
+                                <div class="mb-4" x-show="barang.catatan">
+                                    <div class="text-xs text-gray-500">
+                                        <span class="font-semibold">Catatan:</span> <span x-text="barang.catatan"></span>
                                     </div>
-                                @endif
+                                </div>
 
                                 {{-- Tombol Selesai Full Width --}}
                                 <button
-                                    @click.prevent="selesaiModalOpen = true; selesaiFormAction = '{{ route('anggota.barang.selesaiTitipan', $barang->id_barang) }}'; minTanggalSelesai = '{{ $barang->waktu_titip->format('Y-m-d') }}';"
+                                    @click.prevent="selesaiModalOpen = true; selesaiFormAction = '/anggota/barang-titipan/' + barang.id_barang + '/selesai'; minTanggalSelesai = new Date(barang.waktu_titip).toISOString().split('T')[0];"
                                     class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition-all">
                                     SELESAI
                                 </button>
                             </div>
                         </div>
                     </div>
-                @empty
+                </template>
+                
+                <div x-show="allBarangTitipan.length === 0">
                     <div class="bg-white rounded-xl shadow-md p-8 text-center border-2 border-gray-300">
                         <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
                             <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -266,101 +239,103 @@
                         </div>
                         <p class="text-gray-500 font-semibold">Tidak ada barang titipan aktif.</p>
                     </div>
-                @endforelse
+                </div>
                 </div>
                 
-                {{-- Pagination Desktop --}}
-                @if($barang_titipan->total() > 0 && $barang_titipan->hasPages())
-                    <div class="hidden md:flex justify-between items-center px-6 py-4 border-t border-gray-200">
+                {{-- Pagination --}}
+                <div class="mt-6 px-3 md:px-6 py-4 border-t border-gray-200" x-show="allBarangTitipan.length > 0 && totalPages > 1">
+                    {{-- Desktop Layout --}}
+                    <div class="hidden md:flex justify-between items-center">
                         <div class="text-sm text-gray-600">
-                            Showing {{ $barang_titipan->firstItem() ?? 0 }} to {{ $barang_titipan->lastItem() ?? 0 }} of {{ $barang_titipan->total() }} entries
+                            Showing
+                            <span x-text="(currentPage - 1) * itemsPerPage + 1"></span> to
+                            <span x-text="Math.min(currentPage * itemsPerPage, allBarangTitipan.length)"></span>
+                            of <span x-text="allBarangTitipan.length"></span> entries
                         </div>
-                        <div class="flex items-center gap-1">
-                            @if ($barang_titipan->onFirstPage())
-                                <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Previous</span>
-                            @else
-                                <button onclick="loadPage('{{ $barang_titipan->appends(request()->except('titipan_page'))->previousPageUrl() }}')" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Previous</button>
-                            @endif
-                            
-                            @php
-                                $current = $barang_titipan->currentPage();
-                                $last = $barang_titipan->lastPage();
-                                $start = max(1, $current - 2);
-                                $end = min($last, $current + 2);
-                            @endphp
-                            
-                            @if($start > 1)
-                                <a href="{{ $barang_titipan->appends(request()->except('titipan_page'))->url(1) }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">1</a>
-                                @if($start > 2)
-                                    <span class="px-3 py-1 text-gray-500">...</span>
-                                @endif
-                            @endif
-                            
-                            @for($page = $start; $page <= $end; $page++)
-                                @if($page == $current)
-                                    <span class="px-3 py-1 text-white bg-[#1e3a5f] rounded font-bold">{{ $page }}</span>
-                                @else
-                                    <button onclick="loadPage('{{ $barang_titipan->appends(request()->except('titipan_page'))->url($page) }}')" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</button>
-                                @endif
-                            @endfor
-                            
-                            @if($end < $last)
-                                @if($end < $last - 1)
-                                    <span class="px-3 py-1 text-gray-500">...</span>
-                                @endif
-                                <a href="{{ $barang_titipan->appends(request()->except('titipan_page'))->url($last) }}" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $last }}</a>
-                            @endif
-                            
-                            @if ($barang_titipan->hasMorePages())
-                                <button onclick="loadPage('{{ $barang_titipan->appends(request()->except('titipan_page'))->nextPageUrl() }}')" class="px-3 py-1 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</button>
-                            @else
-                                <span class="px-3 py-1 text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
-                            @endif
-                        </div>
-                    </div>
-
-                    {{-- Pagination Mobile --}}
-                    <div class="md:hidden flex justify-between items-center px-3 py-4 border-t border-gray-200">
-                        <div class="text-xs text-gray-600">
-                            {{ $barang_titipan->firstItem() ?? 0 }}-{{ $barang_titipan->lastItem() ?? 0 }} of {{ $barang_titipan->total() }}
-                        </div>
-                        <div class="flex gap-1">
-                            @if ($barang_titipan->onFirstPage())
-                                <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Prev</span>
-                            @else
-                                <button onclick="loadPage('{{ $barang_titipan->appends(request()->except('titipan_page'))->previousPageUrl() }}')" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Prev</button>
-                            @endif
-                            
-                            @if($start > 1)
-                                <a href="{{ $barang_titipan->appends(request()->except('titipan_page'))->url(1) }}" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">1</a>
-                                @if($start > 2)
-                                    <span class="px-2 py-1 text-xs text-gray-500">...</span>
-                                @endif
-                            @endif
-                            
-                            @for($page = $start; $page <= $end; $page++)
-                                @if($page == $current)
-                                    <span class="px-2 py-1 text-xs text-white bg-[#1e3a5f] rounded">{{ $page }}</span>
-                                @else
-                                    <button onclick="loadPage('{{ $barang_titipan->appends(request()->except('titipan_page'))->url($page) }}')" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</button>
-                                @endif
-                            @endfor
-                            
-                            @if($end < $last)
-                                @if($end < $last - 1)
-                                    <span class="px-2 py-1 text-xs text-gray-500">...</span>
-                                @endif
-                                <a href="{{ $barang_titipan->appends(request()->except('titipan_page'))->url($last) }}" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $last }}</a>
-                            @endif
-                            
-                            @if ($barang_titipan->hasMorePages())
-                                <button onclick="loadPage('{{ $barang_titipan->appends(request()->except('titipan_page'))->nextPageUrl() }}')" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</button>
-                            @else
-                                <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
-                            @endif
+                        <div class="flex space-x-1">
+                            <button
+                                @click="currentPage--"
+                                :disabled="currentPage === 1"
+                                class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm"
+                            >
+                                Previous
+                            </button>
+                            <template x-if="totalPages <= 4">
+                                <template x-for="page in Array.from({length: totalPages}, (_, i) => i + 1)" :key="page">
+                                    <button
+                                        @click="currentPage = page"
+                                        :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-3 py-1 rounded text-sm"
+                                        x-text="page"
+                                    ></button>
+                                </template>
+                            </template>
+                            <template x-if="totalPages > 4">
+                                <div class="flex items-center space-x-1">
+                                    <template x-for="page in (() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return Array.from({length: 3}, (_, i) => start + i).filter(p => p <= totalPages);
+                                    })()" :key="page">
+                                        <button
+                                            @click="currentPage = page"
+                                            :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                            class="px-3 py-1 rounded text-sm"
+                                            x-text="page"
+                                        ></button>
+                                    </template>
+                                    <span x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()" class="text-sm text-gray-500">...</span>
+                                    <button x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()"
+                                        @click="currentPage = totalPages"
+                                        :class="currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-3 py-1 rounded text-sm"
+                                        x-text="totalPages"
+                                    ></button>
+                                </div>
+                            </template>
+                            <button
+                                @click="currentPage++"
+                                :disabled="currentPage >= totalPages"
+                                class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm"
+                            >
+                                Next
+                            </button>
                         </div>
                     </div>
-                @endif
+                    
+                    {{-- Mobile Layout --}}
+                    <div class="md:hidden">
+                        <div class="text-center text-xs text-gray-600 mb-3">
+                            Hal <span x-text="currentPage"></span> dari <span x-text="totalPages"></span>
+                        </div>
+                        <div class="flex justify-center space-x-2">
+                            <button
+                                @click="currentPage--"
+                                :disabled="currentPage === 1"
+                                class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm font-medium"
+                            >
+                                Previous
+                            </button>
+                            <button
+                                @click="currentPage++"
+                                :disabled="currentPage >= totalPages"
+                                class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm font-medium"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 
 
@@ -368,7 +343,20 @@
         </div>
 
         {{-- 2. BAGIAN BARANG TEMUAN (AKTIF) --}}
-        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ isOpen: false }">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ 
+            isOpen: false,
+            allBarangTemuan: @js($barang_temuan),
+            itemsPerPage: 5,
+            currentPage: 1,
+            get totalPages() {
+                return Math.ceil(this.allBarangTemuan.length / this.itemsPerPage);
+            },
+            get paginatedBarang() {
+                const start = (this.currentPage - 1) * this.itemsPerPage;
+                const end = start + this.itemsPerPage;
+                return this.allBarangTemuan.slice(start, end);
+            }
+        }">
             <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] p-3 border-b border-gray-200 cursor-pointer hover:opacity-90 transition" @click="isOpen = !isOpen">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center">
@@ -384,33 +372,43 @@
             </div>
 
             <div x-show="isOpen" x-collapse>
-                <div class="p-3 space-y-3">
-
-                @forelse($barang_temuan as $barang)
+                {{-- Per Page Controls --}}
+                <div class="p-3 border-b border-gray-200" x-show="allBarangTemuan.length > 0">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Show:</span>
+                        <select x-model="itemsPerPage" @change="currentPage = 1" class="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="p-1 md:p-3 space-y-2 md:space-y-3">
+                <template x-for="barang in paginatedBarang" :key="barang.id_barang">
                     <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-300 relative">
                         {{-- Badge Status di Pojok Kanan Atas --}}
-                        <div class="absolute top-3 right-3 z-10">
-                            <span class="inline-block bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">{{ $barang->waktu_lapor->format('d/m/y') }}</span>
+                        <div class="absolute top-2 right-2 z-10">
+                            <span class="inline-block bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md" x-text="new Date(barang.waktu_lapor).toLocaleDateString('id-ID', {day: '2-digit', month: '2-digit', year: '2-digit'})"></span>
                         </div>
                         
-                        <div class="p-4">
+                        <div class="p-3">
                             <div class="w-full">
                                 {{-- Nama Barang sebagai judul utama --}}
-                                <h4 class="font-bold text-gray-800 text-sm mb-3 pr-20">{{ $barang->nama_barang }}</h4>
+                                <h4 class="font-bold text-gray-800 text-sm mb-3 pr-20" x-text="barang.nama_barang"></h4>
 
                                 {{-- Info Foto & Detail --}}
                                 <div class="flex gap-4 mb-4">
                                     {{-- Foto di Kiri --}}
-                                    @if($barang->foto)
-                                        <div class="flex-shrink-0">
-                                            <div @click="showPhotoModal = true; photoUrl = '{{ Storage::url($barang->foto) }}'" 
-                                                 class="w-16 h-16 rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors">
-                                                <img src="{{ Storage::url($barang->foto) }}" 
-                                                     alt="Foto Barang" 
-                                                     class="w-full h-full object-cover">
-                                            </div>
+                                    <div class="flex-shrink-0" x-show="barang.foto">
+                                        <div @click="showPhotoModal = true; photoUrl = '/storage/' + barang.foto" 
+                                             class="w-16 h-16 rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors">
+                                            <img :src="'/storage/' + barang.foto" 
+                                                 alt="Foto Barang" 
+                                                 class="w-full h-full object-cover">
                                         </div>
-                                    @endif
+                                    </div>
                                     
                                     {{-- Info di Kanan --}}
                                     <div class="flex-1">
@@ -418,41 +416,41 @@
                                             <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                             </svg>
-                                            <p class="text-gray-700 font-semibold text-xs">{{ $barang->nama_pelapor }}</p>
+                                            <p class="text-gray-700 font-semibold text-xs" x-text="barang.nama_pelapor"></p>
                                         </div>
                                         
                                         <div class="flex items-center gap-1 mb-1">
                                             <svg class="w-3.5 h-3.5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                             </svg>
-                                            <p class="text-gray-700 font-semibold text-xs">{{ $barang->waktu_lapor->format('H:i') }}</p>
+                                            <p class="text-gray-700 font-semibold text-xs" x-text="new Date(barang.waktu_lapor).toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'})"></p>
                                         </div>
                                         
                                         <div class="text-xs text-gray-500">
-                                            <span class="font-semibold">Lokasi:</span> {{ Str::limit($barang->lokasi_penemuan, 30) }}
+                                            <span class="font-semibold">Lokasi:</span> <span x-text="barang.lokasi_penemuan && barang.lokasi_penemuan.length > 30 ? barang.lokasi_penemuan.substring(0, 30) + '...' : barang.lokasi_penemuan"></span>
                                         </div>
                                     </div>
                                 </div>
 
                                 {{-- Catatan --}}
-                                @if($barang->catatan)
-                                    <div class="mb-4">
-                                        <div class="text-xs text-gray-500">
-                                            <span class="font-semibold">Catatan:</span> {{ $barang->catatan }}
-                                        </div>
+                                <div class="mb-4" x-show="barang.catatan">
+                                    <div class="text-xs text-gray-500">
+                                        <span class="font-semibold">Catatan:</span> <span x-text="barang.catatan"></span>
                                     </div>
-                                @endif
+                                </div>
 
                                 {{-- Tombol Selesai Full Width --}}
                                 <button
-                                    @click.prevent="selesaiModalOpen = true; selesaiFormAction = '{{ route('anggota.barang.selesaiTemuan', $barang->id_barang) }}'; minTanggalSelesai = '{{ $barang->waktu_lapor->format('Y-m-d') }}';"
+                                    @click.prevent="selesaiModalOpen = true; selesaiFormAction = '/anggota/barang-temuan/' + barang.id_barang + '/selesai'; minTanggalSelesai = new Date(barang.waktu_lapor).toISOString().split('T')[0];"
                                     class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition-all">
                                     SELESAI
                                 </button>
                             </div>
                         </div>
                     </div>
-                @empty
+                </template>
+                
+                <div x-show="allBarangTemuan.length === 0">
                     <div class="bg-white rounded-xl shadow-md p-8 text-center border-2 border-gray-300">
                         <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
                             <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -462,8 +460,105 @@
                         </div>
                         <p class="text-gray-500 font-semibold">Tidak ada barang temuan aktif.</p>
                     </div>
-                @endforelse
                 </div>
+                </div>
+                
+                {{-- Pagination --}}
+                <div class="mt-6 px-3 md:px-6 py-4 border-t border-gray-200" x-show="allBarangTemuan.length > 0 && totalPages > 1">
+                    {{-- Desktop Layout --}}
+                    <div class="hidden md:flex justify-between items-center">
+                        <div class="text-sm text-gray-600">
+                            Showing
+                            <span x-text="(currentPage - 1) * itemsPerPage + 1"></span> to
+                            <span x-text="Math.min(currentPage * itemsPerPage, allBarangTemuan.length)"></span>
+                            of <span x-text="allBarangTemuan.length"></span> entries
+                        </div>
+                        <div class="flex space-x-1">
+                            <button
+                                @click="currentPage--"
+                                :disabled="currentPage === 1"
+                                class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm"
+                            >
+                                Previous
+                            </button>
+                            <template x-if="totalPages <= 4">
+                                <template x-for="page in Array.from({length: totalPages}, (_, i) => i + 1)" :key="page">
+                                    <button
+                                        @click="currentPage = page"
+                                        :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-3 py-1 rounded text-sm"
+                                        x-text="page"
+                                    ></button>
+                                </template>
+                            </template>
+                            <template x-if="totalPages > 4">
+                                <div class="flex items-center space-x-1">
+                                    <template x-for="page in (() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return Array.from({length: 3}, (_, i) => start + i).filter(p => p <= totalPages);
+                                    })()" :key="page">
+                                        <button
+                                            @click="currentPage = page"
+                                            :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                            class="px-3 py-1 rounded text-sm"
+                                            x-text="page"
+                                        ></button>
+                                    </template>
+                                    <span x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()" class="text-sm text-gray-500">...</span>
+                                    <button x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()"
+                                        @click="currentPage = totalPages"
+                                        :class="currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-3 py-1 rounded text-sm"
+                                        x-text="totalPages"
+                                    ></button>
+                                </div>
+                            </template>
+                            <button
+                                @click="currentPage++"
+                                :disabled="currentPage >= totalPages"
+                                class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {{-- Mobile Layout --}}
+                    <div class="md:hidden">
+                        <div class="text-center text-xs text-gray-600 mb-3">
+                            Hal <span x-text="currentPage"></span> dari <span x-text="totalPages"></span>
+                        </div>
+                        <div class="flex justify-center space-x-2">
+                            <button
+                                @click="currentPage--"
+                                :disabled="currentPage === 1"
+                                class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm font-medium"
+                            >
+                                Previous
+                            </button>
+                            <button
+                                @click="currentPage++"
+                                :disabled="currentPage >= totalPages"
+                                class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm font-medium"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -642,14 +737,7 @@
                                     </svg>
                                 </div>
 
-                                {{-- Tombol Search --}}
-                                <button type="button" @click="triggerLiveSearchNow()"
-                                    class="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-md transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                    </svg>
-                                </button>
+
 
                                 {{-- Dropdown Suggestions --}}
                                 <div x-show="showSuggestions" @click.away="showSuggestions = false" x-transition
@@ -707,7 +795,7 @@
                 </div>
 
                 {{-- Container Riwayat dengan Initial Data --}}
-                <div id="riwayat-container" class="p-3 space-y-3">
+                <div id="riwayat-container" class="p-1 md:p-3 space-y-2 md:space-y-3">
                     @include('anggota.barang-riwayat-cards', ['riwayat_barang' => $riwayat_barang])
                 </div>
             </div>

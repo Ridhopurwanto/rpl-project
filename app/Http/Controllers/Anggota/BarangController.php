@@ -17,13 +17,10 @@ class BarangController extends Controller
      */
     public function index(Request $request)
     {
-        // Pagination untuk barang titipan
-        $perPage = $request->input('per_page', 5);
-        
-        // Barang titipan aktif dengan pagination
+        // Barang titipan aktif
         $barang_titipan = BarangTitipan::where('status', 'belum selesai')
             ->orderBy('waktu_titip', 'desc')
-            ->paginate($perPage, ['*'], 'titipan_page');
+            ->get();
 
         // Barang temuan aktif
         $barang_temuan = BarangTemuan::where('status', 'belum selesai')
@@ -106,7 +103,6 @@ class BarangController extends Controller
             'tanggal_terpilih' => $tanggal_riwayat,
             'kategori_terpilih' => $kategori_filter,
             'search_filter' => $search_filter,
-            'per_page' => $perPage,
         ]);
     }
 
