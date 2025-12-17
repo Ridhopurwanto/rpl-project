@@ -283,10 +283,8 @@ Route::middleware('auth')->group(function () {
         // Presensi (View Only)
         Route::get('/presensi', [App\Http\Controllers\Supervisor\PresensiController::class, 'index'])->name('presensi.index');
 
-        // Patroli
-        // Perlu method lengkap (index, destroy, update, dll) seperti komandan
-        Route::resource('patroli', App\Http\Controllers\Supervisor\PatroliController::class)->only(['index', 'destroy', 'update']);
-        Route::post('/patroli/update-rules', [App\Http\Controllers\Supervisor\PatroliRuleController::class, 'updateRules'])->name('patroli.updateRules');
+        // Patroli (View Only)
+        Route::get('/patroli', [App\Http\Controllers\Supervisor\PatroliController::class, 'index'])->name('patroli.index');
 
         // Kendaraan
         Route::resource('kendaraan', App\Http\Controllers\Supervisor\KendaraanController::class)->only(['index']);

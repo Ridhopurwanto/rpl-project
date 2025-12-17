@@ -16,6 +16,8 @@ class PatroliController extends Controller
     {
         // 1. Ambil Tanggal (Default Hari Ini)
         $tanggalTerpilih = $request->input('tanggal', now()->format('Y-m-d'));
+        $tanggalTerpilihPagi = $request->input('tanggal_pagi', $tanggalTerpilih);
+        $tanggalTerpilihMalam = $request->input('tanggal_malam', $tanggalTerpilih);
         
         // 2. Definisikan Opsi Jenis Patroli (Untuk Dropdown Filter)
         $jenisPatroliOptions = collect([
@@ -32,7 +34,7 @@ class PatroliController extends Controller
 
         $queryPagi = Patroli::query()
             ->with(['claim.rule']) // Eager load relasi
-            ->whereDate('tanggal', $tanggalTerpilih)
+            ->whereDate('tanggal', $tanggalTerpilihPagi)
             ->whereHas('claim.rule', function ($q) {
                 // Filter hanya yang shift Pagi
                 $q->where('jenis_shift', 'Pagi'); 
@@ -57,7 +59,7 @@ class PatroliController extends Controller
 
         $queryMalam = Patroli::query()
             ->with(['claim.rule']) // Eager load relasi
-            ->whereDate('tanggal', $tanggalTerpilih)
+            ->whereDate('tanggal', $tanggalTerpilihMalam)
             ->whereHas('claim.rule', function ($q) {
                 // Filter hanya yang shift Malam
                 $q->where('jenis_shift', 'Malam'); 
@@ -74,12 +76,7 @@ class PatroliController extends Controller
         $dataPatroliMalam = $queryMalam->paginate($perPageMalam, ['*'], 'page_malam');
 
 
-        // ---------------------------------------------------------
-        // DATA PENDUKUNG (Rules untuk Modal Edit Jam)
-        // ---------------------------------------------------------
-        // Mengambil semua rules dan mengelompokkan berdasarkan shift (Pagi/Malam)
-        // Agar mudah ditampilkan di modal setting jam
-        $patroliRules = PatroliRule::all()->groupBy('jenis_shift');
+
         
         if ($request->ajax()) {
             return response()->json([
@@ -101,99 +98,21 @@ class PatroliController extends Controller
             
             // Filter State
             'tanggalTerpilih' => $tanggalTerpilih,
+            'tanggalTerpilihPagi' => $tanggalTerpilihPagi,
+            'tanggalTerpilihMalam' => $tanggalTerpilihMalam,
             'jenisPatroliTerpilihPagi' => $jenisPatroliTerpilihPagi,
             'jenisPatroliTerpilihMalam' => $jenisPatroliTerpilihMalam,
             
             // Options & Config
             'jenisPatroliOptions' => $jenisPatroliOptions,
-            'patroliRules' => $patroliRules,
             'perPagePagi' => $perPagePagi,
             'perPageMalam' => $perPageMalam,
         ]);
     }
 
-    /**
-     * Mengupdate data wilayah patroli (dari modal edit).
-     */
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'wilayah' => 'required|string|max:255',
-        ]);
 
-        try {
-            $patroli = Patroli::findOrFail($id);
-            $patroli->wilayah = $request->wilayah;
-            $patroli->save();
 
-            return back()->with('success', 'Data patroli berhasil diperbarui.');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
-        }
-    }
 
-    /**
-     * Menghapus data patroli.
-     */
-    public function destroy($id)
-    {
-        try {
-            $patroli = Patroli::findOrFail($id);
-            
-            // Hapus foto dari storage jika ada
-            if ($patroli->foto) {
-                Storage::delete('public/' . $patroli->foto);
-            }
-            
-            $patroli->delete();
 
-            return back()->with('success', 'Data patroli berhasil dihapus.');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Gagal menghapus data: ' . $e->getMessage());
-        }
-    }
 
-    /**
-     * Update aturan jam patroli
-     */
-    public function updateRules(Request $request)
-    {
-        try {
-            // Proses Shift Pagi
-            if ($request->has('shift_pagi')) {
-                foreach ($request->shift_pagi as $jenisPatroli => $waktu) {
-                    PatroliRule::updateOrCreate(
-                        [
-                            'jenis_shift' => 'Pagi',
-                            'jenis_patroli' => $jenisPatroli
-                        ],
-                        [
-                            'jam_mulai' => $waktu['jam_mulai'],
-                            'jam_selesai' => $waktu['jam_selesai']
-                        ]
-                    );
-                }
-            }
-
-            // Proses Shift Malam
-            if ($request->has('shift_malam')) {
-                foreach ($request->shift_malam as $jenisPatroli => $waktu) {
-                    PatroliRule::updateOrCreate(
-                        [
-                            'jenis_shift' => 'Malam',
-                            'jenis_patroli' => $jenisPatroli
-                        ],
-                        [
-                            'jam_mulai' => $waktu['jam_mulai'],
-                            'jam_selesai' => $waktu['jam_selesai']
-                        ]
-                    );
-                }
-            }
-
-            return back()->with('success', 'Pengaturan jam patroli berhasil diperbarui.');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Gagal memperbarui pengaturan: ' . $e->getMessage());
-        }
-    }
 }
