@@ -231,6 +231,15 @@
                     // Jika URL tidak diberikan, gunakan URL form default
                     const fetchUrl = url || filterForm.action + '?' + new URLSearchParams(formData).toString();
 
+                    // --- IMPLEMENTASI PERSISTENSI URL ---
+                    // Mengubah URL browser tanpa reload agar saat refresh/back tetap di tanggal yang sama
+                    if (!url) { // Hanya update jika trigger dari filter change, bukan pagination click (opsional, tapi lebih rapi)
+                         history.pushState(null, '', fetchUrl);
+                    } else {
+                         // Jika pagination, kita juga update URL biar rapi
+                         history.pushState(null, '', url);
+                    }
+
                     fetch(fetchUrl, {
                         headers: {
                             'X-Requested-With': 'XMLHttpRequest'
@@ -252,6 +261,13 @@
                         loadingComponent.classList.add('hidden');
                     });
                 }
+
+                // Handle Browser Back/Forward Button
+                window.addEventListener('popstate', function() {
+                    // Reload page to ensure server renders correct state or re-fetch via AJAX
+                    // Simplest approach: Reload
+                    window.location.reload(); 
+                });
 
                 // Handle Filter Changes
                 inputs.forEach(input => {

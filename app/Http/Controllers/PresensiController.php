@@ -49,12 +49,14 @@ class PresensiController extends Controller
         // Ambil data PRESENSI MASUK dengan pagination
         $dataMasuk = $queryMasuk->where('presensi.jenis_presensi', 'Masuk')
                                ->orderBy('presensi.waktu', 'asc')
-                               ->paginate($perPage, ['*'], 'page_masuk');
+                               ->paginate($perPage, ['*'], 'page_masuk')
+                               ->appends($request->query()); // Append query params
 
         // Ambil data PRESENSI PULANG dengan pagination
         $dataPulang = $queryPulang->where('presensi.jenis_presensi', 'Pulang')
                                  ->orderBy('presensi.waktu', 'asc')
-                                 ->paginate($perPage, ['*'], 'page_pulang');
+                                 ->paginate($perPage, ['*'], 'page_pulang')
+                                 ->appends($request->query()); // Append query params
 
         // --- TAMBAHAN BARU: Ambil Data Shift Rule ---
         // Kita ambil data rule untuk Pagi, Malam, dan Non Shift agar bisa ditampilkan di modal
