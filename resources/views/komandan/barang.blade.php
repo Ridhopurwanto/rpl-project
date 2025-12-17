@@ -117,76 +117,29 @@
         @include('komandan.partials.barang-list')
     </div>
 
-    {{-- Modal Tampil Foto dengan SLIDER (Sama persis dengan Anggota) --}}
-    <div x-show="showPhotoModal" style="display: none;"
-        class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-[60]" x-transition
-        @keydown.window.escape="showPhotoModal = false"
-        @keydown.window.arrow-right="if(showPhotoModal && currentPhotoIndex < photos.length - 1) currentPhotoIndex++"
-        @keydown.window.arrow-left="if(showPhotoModal && currentPhotoIndex > 0) currentPhotoIndex--"
-        @touchstart="touchStartX = $event.changedTouches[0].screenX" 
-        @touchend="
-            touchEndX = $event.changedTouches[0].screenX;
-            if (touchStartX - touchEndX > 50 && currentPhotoIndex < photos.length - 1) currentPhotoIndex++;
-            if (touchEndX - touchStartX > 50 && currentPhotoIndex > 0) currentPhotoIndex--;
-        "
-        @mousedown="touchStartX = $event.screenX"
-        @mouseup="
-            touchEndX = $event.screenX;
-            if (touchStartX - touchEndX > 50 && currentPhotoIndex < photos.length - 1) currentPhotoIndex++;
-            if (touchEndX - touchStartX > 50 && currentPhotoIndex > 0) currentPhotoIndex--;
-        ">
-
-        <div @click.outside="showPhotoModal = false" class="relative max-w-4xl w-full">
-
-            {{-- Header Modal --}}
-            <div class="flex justify-between items-center mb-4">
-                <div class="text-white">
-                    <p class="text-sm text-gray-300">Foto <span x-text="currentPhotoIndex + 1"></span> dari <span
-                            x-text="photos.length"></span></p>
-                    <p class="text-xs text-gray-400 mt-1"
-                        x-text="currentPhotoIndex === 0 ? 'Foto Barang' : 'Foto Penerima'"></p>
-                </div>
-                <button @click="showPhotoModal = false"
-                    class="text-white hover:text-gray-300 text-2xl font-bold bg-gray-800 hover:bg-gray-700 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
-                    ×
+    {{-- MODAL FOTO --}}
+    <div x-show="showPhotoModal" 
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
+         @click.away="showPhotoModal = false"
+         style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full relative overflow-hidden" @click.stop>
+            <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] flex justify-between items-center p-4">
+                <h3 class="text-xl font-bold text-white" x-text="currentPhotoIndex === 0 ? 'FOTO BARANG' : 'FOTO PENERIMA'"></h3>
+                <button @click="showPhotoModal = false" class="text-white hover:text-gray-200 text-3xl">&times;</button>
+            </div>
+            <div class="mt-4 relative">
+                <img :src="photos[currentPhotoIndex]" alt="Foto" class="w-full h-auto rounded">
+                <button x-show="currentPhotoIndex > 0" @click="currentPhotoIndex--" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <button x-show="currentPhotoIndex < photos.length - 1" @click="currentPhotoIndex++" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                 </button>
             </div>
-
-            {{-- Image Container --}}
-            <div class="relative flex justify-center bg-transparent">
-                <img :src="photos[currentPhotoIndex]"
-                    class="w-auto h-auto max-h-[70vh] object-contain rounded-lg border-2 border-gray-700">
-
-                {{-- Previous Button --}}
-                <button x-show="currentPhotoIndex > 0" @click="currentPhotoIndex--"
-                    class="absolute left-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
-                        </path>
-                    </svg>
-                </button>
-
-                {{-- Next Button --}}
-                <button x-show="currentPhotoIndex < photos.length - 1" @click="currentPhotoIndex++"
-                    class="absolute right-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </button>
-            </div>
-
-            {{-- Indicator Dots --}}
-            <div class="flex justify-center gap-2 mt-4" x-show="photos.length > 1">
+            <div class="flex justify-center gap-2 mt-3" x-show="photos.length > 1">
                 <template x-for="(photo, index) in photos" :key="index">
-                    <button @click="currentPhotoIndex = index"
-                        :class="currentPhotoIndex === index ? 'bg-white w-8' : 'bg-gray-500 w-2'"
-                        class="h-2 rounded-full transition-all"></button>
+                    <button @click="currentPhotoIndex = index" :class="currentPhotoIndex === index ? 'bg-gray-800 w-6' : 'bg-gray-400 w-2'" class="h-2 rounded-full transition-all"></button>
                 </template>
-            </div>
-
-            {{-- Hint --}}
-            <div class="text-center mt-4 text-gray-400 text-xs" x-show="photos.length > 1">
-                Swipe atau gunakan tombol panah untuk navigasi
             </div>
         </div>
     </div>
@@ -226,6 +179,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const dateInputTitipan = document.getElementById('tanggal_titipan');
             const perPageTemuan = document.getElementById('per_page_temuan');
             const perPageTitipan = document.getElementById('per_page_titipan');
+            const statusTemuan = document.getElementById('status_temuan');
+            const statusTitipan = document.getElementById('status_titipan');
 
             const params = new URLSearchParams(window.location.search);
             
@@ -235,6 +190,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (dateInputTitipan && dateInputTitipan.value) params.set('tanggal_titipan', dateInputTitipan.value);
             if (perPageTemuan && perPageTemuan.value) params.set('per_page_temuan', perPageTemuan.value);
             if (perPageTitipan && perPageTitipan.value) params.set('per_page_titipan', perPageTitipan.value);
+            if (statusTemuan && statusTemuan.value) params.set('status_temuan', statusTemuan.value); else params.delete('status_temuan');
+            if (statusTitipan && statusTitipan.value) params.set('status_titipan', statusTitipan.value); else params.delete('status_titipan');
 
             url = `${window.location.pathname}?${params.toString()}`;
             
@@ -298,6 +255,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const perPageTitipan = document.getElementById('per_page_titipan');
         if (perPageTitipan) perPageTitipan.addEventListener('change', () => fetchResults());
+
+        const statusTemuan = document.getElementById('status_temuan');
+        if (statusTemuan) statusTemuan.addEventListener('change', () => fetchResults());
+
+        const statusTitipan = document.getElementById('status_titipan');
+        if (statusTitipan) statusTitipan.addEventListener('change', () => fetchResults());
     }
 
     // Attach initial listeners
