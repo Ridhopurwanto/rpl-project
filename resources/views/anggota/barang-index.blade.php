@@ -418,20 +418,66 @@
                     {{-- Mobile Layout --}}
                     <div class="md:hidden">
                         <div class="text-center text-xs text-gray-600 mb-3">
-                            Hal <span x-text="currentPage"></span> dari <span x-text="totalPages"></span>
+                            Showing <span x-text="(currentPage - 1) * itemsPerPage + 1"></span> to
+                            <span x-text="Math.min(currentPage * itemsPerPage, filteredBarang.length)"></span>
+                            of <span x-text="filteredBarang.length"></span> entries
                         </div>
-                        <div class="flex justify-center space-x-2">
+                        <div class="flex justify-center items-center space-x-1">
                             <button
                                 @click="currentPage--"
                                 :disabled="currentPage === 1"
-                                class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm font-medium"
+                                class="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-xs"
                             >
                                 Previous
                             </button>
+                            <template x-if="totalPages <= 4">
+                                <template x-for="page in Array.from({length: totalPages}, (_, i) => i + 1)" :key="page">
+                                    <button
+                                        @click="currentPage = page"
+                                        :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-2 py-1 rounded text-xs"
+                                        x-text="page"
+                                    ></button>
+                                </template>
+                            </template>
+                            <template x-if="totalPages > 4">
+                                <div class="flex items-center space-x-1">
+                                    <template x-for="page in (() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return Array.from({length: 3}, (_, i) => start + i).filter(p => p <= totalPages);
+                                    })()" :key="page">
+                                        <button
+                                            @click="currentPage = page"
+                                            :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                            class="px-2 py-1 rounded text-xs"
+                                            x-text="page"
+                                        ></button>
+                                    </template>
+                                    <span x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()" class="text-xs text-gray-500">...</span>
+                                    <button x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()"
+                                        @click="currentPage = totalPages"
+                                        :class="currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-2 py-1 rounded text-xs"
+                                        x-text="totalPages"
+                                    ></button>
+                                </div>
+                            </template>
                             <button
                                 @click="currentPage++"
                                 :disabled="currentPage >= totalPages"
-                                class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm font-medium"
+                                class="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-xs"
                             >
                                 Next
                             </button>
@@ -740,20 +786,66 @@
                     {{-- Mobile Layout --}}
                     <div class="md:hidden">
                         <div class="text-center text-xs text-gray-600 mb-3">
-                            Hal <span x-text="currentPage"></span> dari <span x-text="totalPages"></span>
+                            Showing <span x-text="(currentPage - 1) * itemsPerPage + 1"></span> to
+                            <span x-text="Math.min(currentPage * itemsPerPage, filteredBarang.length)"></span>
+                            of <span x-text="filteredBarang.length"></span> entries
                         </div>
-                        <div class="flex justify-center space-x-2">
+                        <div class="flex justify-center items-center space-x-1">
                             <button
                                 @click="currentPage--"
                                 :disabled="currentPage === 1"
-                                class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm font-medium"
+                                class="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-xs"
                             >
                                 Previous
                             </button>
+                            <template x-if="totalPages <= 4">
+                                <template x-for="page in Array.from({length: totalPages}, (_, i) => i + 1)" :key="page">
+                                    <button
+                                        @click="currentPage = page"
+                                        :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-2 py-1 rounded text-xs"
+                                        x-text="page"
+                                    ></button>
+                                </template>
+                            </template>
+                            <template x-if="totalPages > 4">
+                                <div class="flex items-center space-x-1">
+                                    <template x-for="page in (() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return Array.from({length: 3}, (_, i) => start + i).filter(p => p <= totalPages);
+                                    })()" :key="page">
+                                        <button
+                                            @click="currentPage = page"
+                                            :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                            class="px-2 py-1 rounded text-xs"
+                                            x-text="page"
+                                        ></button>
+                                    </template>
+                                    <span x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()" class="text-xs text-gray-500">...</span>
+                                    <button x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()"
+                                        @click="currentPage = totalPages"
+                                        :class="currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-2 py-1 rounded text-xs"
+                                        x-text="totalPages"
+                                    ></button>
+                                </div>
+                            </template>
                             <button
                                 @click="currentPage++"
                                 :disabled="currentPage >= totalPages"
-                                class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm font-medium"
+                                class="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-xs"
                             >
                                 Next
                             </button>
@@ -1092,20 +1184,66 @@
                     {{-- Mobile Layout --}}
                     <div class="md:hidden">
                         <div class="text-center text-xs text-gray-600 mb-3">
-                            Hal <span x-text="currentPage"></span> dari <span x-text="totalPages"></span>
+                            Showing <span x-text="(currentPage - 1) * itemsPerPage + 1"></span> to
+                            <span x-text="Math.min(currentPage * itemsPerPage, filteredRiwayat.length)"></span>
+                            of <span x-text="filteredRiwayat.length"></span> entries
                         </div>
-                        <div class="flex justify-center space-x-2">
+                        <div class="flex justify-center items-center space-x-1">
                             <button
                                 @click="currentPage--"
                                 :disabled="currentPage === 1"
-                                class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm font-medium"
+                                class="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-xs"
                             >
                                 Previous
                             </button>
+                            <template x-if="totalPages <= 4">
+                                <template x-for="page in Array.from({length: totalPages}, (_, i) => i + 1)" :key="page">
+                                    <button
+                                        @click="currentPage = page"
+                                        :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-2 py-1 rounded text-xs"
+                                        x-text="page"
+                                    ></button>
+                                </template>
+                            </template>
+                            <template x-if="totalPages > 4">
+                                <div class="flex items-center space-x-1">
+                                    <template x-for="page in (() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return Array.from({length: 3}, (_, i) => start + i).filter(p => p <= totalPages);
+                                    })()" :key="page">
+                                        <button
+                                            @click="currentPage = page"
+                                            :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                            class="px-2 py-1 rounded text-xs"
+                                            x-text="page"
+                                        ></button>
+                                    </template>
+                                    <span x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()" class="text-xs text-gray-500">...</span>
+                                    <button x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()"
+                                        @click="currentPage = totalPages"
+                                        :class="currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-2 py-1 rounded text-xs"
+                                        x-text="totalPages"
+                                    ></button>
+                                </div>
+                            </template>
                             <button
                                 @click="currentPage++"
                                 :disabled="currentPage >= totalPages"
-                                class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm font-medium"
+                                class="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-xs"
                             >
                                 Next
                             </button>

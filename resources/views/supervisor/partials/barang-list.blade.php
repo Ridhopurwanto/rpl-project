@@ -32,7 +32,15 @@
                         <input type="date" id="tanggal_temuan" name="tanggal_temuan" x-ref="dateInputTemuan" class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer" value="{{ $tanggalTemuan }}">
                     </div>
                 </div>
-                <div class="w-full md:flex-1">
+                <div class="w-[calc(50%-0.5rem)] md:flex-1">
+                    <label for="status_temuan" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Status</label>
+                    <select name="status_temuan" id="status_temuan" class="h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm appearance-none cursor-pointer" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em;">
+                        <option value="" {{ ($statusTemuan ?? '') == '' ? 'selected' : '' }}>Semua Status</option>
+                        <option value="belum selesai" {{ ($statusTemuan ?? '') == 'belum selesai' ? 'selected' : '' }}>Belum Selesai</option>
+                        <option value="selesai" {{ ($statusTemuan ?? '') == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                    </select>
+                </div>
+                <div class="w-[calc(50%-0.5rem)] md:flex-1">
                     <label for="searchInputTemuan" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Cari Barang</label>
                     <input type="text" id="searchInputTemuan" name="search_temuan" class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm placeholder-gray-400" value="{{ $searchTemuan }}" placeholder="Ketik untuk mencari...">
                 </div>
@@ -211,7 +219,15 @@
                         <input type="date" id="tanggal_titipan" name="tanggal_titipan" x-ref="dateInputTitipan" class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer" value="{{ $tanggalTitipan }}">
                     </div>
                 </div>
-                <div class="w-full md:flex-1">
+                <div class="w-[calc(50%-0.5rem)] md:flex-1">
+                    <label for="status_titipan" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Status</label>
+                    <select name="status_titipan" id="status_titipan" class="h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm appearance-none cursor-pointer" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em;">
+                        <option value="" {{ ($statusTitipan ?? '') == '' ? 'selected' : '' }}>Semua Status</option>
+                        <option value="belum selesai" {{ ($statusTitipan ?? '') == 'belum selesai' ? 'selected' : '' }}>Belum Selesai</option>
+                        <option value="selesai" {{ ($statusTitipan ?? '') == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                    </select>
+                </div>
+                <div class="w-[calc(50%-0.5rem)] md:flex-1">
                     <label for="searchInputTitipan" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Cari Barang</label>
                     <input type="text" id="searchInputTitipan" name="search_titipan" class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm placeholder-gray-400" value="{{ $searchTitipan }}" placeholder="Ketik untuk mencari...">
                 </div>

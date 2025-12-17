@@ -21,23 +21,13 @@ class KendaraanController extends Controller
                             ->orderBy('waktu_masuk', 'asc')
                             ->get();
 
-        // 2. Filter tanggal riwayat
+        // 2. Filter riwayat berdasarkan tanggal dan keterangan
         $tanggal_riwayat = $request->input('tanggal', Carbon::today()->toDateString());
-        $nopol_filter    = $request->input('nopol');
         $keterangan_filter = $request->input('keterangan');
 
         $query = LogKendaraan::where('status', 'Keluar')
                              ->whereDate('waktu_keluar', $tanggal_riwayat);
         
-        if ($nopol_filter) {
-            $query->where(function($q) use ($nopol_filter) {
-                $q->where('nopol', 'like', strtoupper($nopol_filter) . '%')
-                  ->orWhereRaw("pemilik REGEXP ?", [
-                      '(^|[[:space:]])' . preg_quote(strtoupper($nopol_filter), '/')
-                  ]);
-            });
-        }
-
         if ($keterangan_filter) {
             $query->where('keterangan', $keterangan_filter);
         }
@@ -48,7 +38,6 @@ class KendaraanController extends Controller
             'kendaraan_aktif'   => $kendaraan_aktif,
             'riwayat_kendaraan' => $riwayat_kendaraan,
             'tanggal_terpilih'  => $tanggal_riwayat,
-            'nopol_filter'      => $nopol_filter,
             'keterangan_filter' => $keterangan_filter,
         ]);
     }
@@ -210,8 +199,7 @@ class KendaraanController extends Controller
     public function getRiwayat(Request $request)
     {
         $tanggal_riwayat = $request->input('tanggal', Carbon::today()->toDateString());
-        $nopol_filter    = $request->input('nopol');
-        $keterangan_filter = $request->input('keterangan');
+
 
         $query = LogKendaraan::where('status', 'Keluar')
                              ->whereDate('waktu_keluar', $tanggal_riwayat);

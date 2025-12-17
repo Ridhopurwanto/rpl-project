@@ -226,6 +226,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const dateInputTitipan = document.getElementById('tanggal_titipan');
             const perPageTemuan = document.getElementById('per_page_temuan');
             const perPageTitipan = document.getElementById('per_page_titipan');
+            const statusTemuan = document.getElementById('status_temuan');
+            const statusTitipan = document.getElementById('status_titipan');
 
             const params = new URLSearchParams(window.location.search);
             
@@ -235,6 +237,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (dateInputTitipan && dateInputTitipan.value) params.set('tanggal_titipan', dateInputTitipan.value);
             if (perPageTemuan && perPageTemuan.value) params.set('per_page_temuan', perPageTemuan.value);
             if (perPageTitipan && perPageTitipan.value) params.set('per_page_titipan', perPageTitipan.value);
+            if (statusTemuan && statusTemuan.value) params.set('status_temuan', statusTemuan.value); else params.delete('status_temuan');
+            if (statusTitipan && statusTitipan.value) params.set('status_titipan', statusTitipan.value); else params.delete('status_titipan');
 
             url = `${window.location.pathname}?${params.toString()}`;
             
@@ -298,6 +302,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const perPageTitipan = document.getElementById('per_page_titipan');
         if (perPageTitipan) perPageTitipan.addEventListener('change', () => fetchResults());
+
+        const statusTemuan = document.getElementById('status_temuan');
+        if (statusTemuan) statusTemuan.addEventListener('change', () => fetchResults());
+
+        const statusTitipan = document.getElementById('status_titipan');
+        if (statusTitipan) statusTitipan.addEventListener('change', () => fetchResults());
     }
 
     // Attach initial listeners
