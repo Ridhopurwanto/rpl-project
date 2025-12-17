@@ -30,27 +30,9 @@
 
 <div class="w-full mx-auto"
      x-data="{ 
-        showEditModal: false, editAction: '', editPlat: '', editPemilik: '', editTipe: '',
-        showDeleteModal: false, deleteAction: '',
-        showPromoteModal: false, promoteAction: '',
         showSuccessNotif: {{ session('success') ? 'true' : 'false' }},
         showErrorNotif: {{ session('error') ? 'true' : 'false' }} 
-     }"
-     @edit-master.window="
-        editAction = `/supervisor/kendaraan/master/${$event.detail.id}`;
-        editPlat = $event.detail.plat;
-        editPemilik = $event.detail.pemilik;
-        editTipe = $event.detail.tipe;
-        showEditModal = true;
-     "
-     @delete-master.window="
-        deleteAction = `/supervisor/kendaraan/master/${$event.detail.id}`;
-        showDeleteModal = true;
-     "
-     @promote-master.window="
-        promoteAction = `/supervisor/kendaraan/log/${$event.detail.id}/promote`;
-        showPromoteModal = true;
-     ">
+     }">
     
     <h2 class="text-2xl font-bold text-slate-800 mb-4">Laporan Kendaraan</h2>
 
@@ -341,137 +323,7 @@
         </div>
     </div>
 
-    {{-- Modal Edit Kendaraan --}}
-    <div x-show="showEditModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
-        @click.away="showEditModal = false"
-        style="display: none;">
-        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full relative overflow-hidden" @click.stop>
-            {{-- Header Biru --}}
-            <div class="bg-[#1e3a5f] py-4 px-6 border-b border-[#1e3a5f] flex justify-between items-center">
-                <h3 class="text-lg font-bold text-white flex items-center tracking-wide">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
-                        </path>
-                    </svg>
-                    EDIT DATA KENDARAAN
-                </h3>
-                <button @click="showEditModal = false" class="text-white/70 hover:text-white transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
-                        </path>
-                    </svg>
-                </button>
-            </div>
-            
-            <form :action="editAction" method="POST">
-                @csrf
-                @method('PUT')
-                <div class="modal-body max-h-[70vh] overflow-y-auto p-6">
-                    <div class="space-y-5">
-                        
-                        {{-- GROUP: Informasi Kendaraan --}}
-                        <div class="p-4 bg-blue-50/50 rounded-xl border border-blue-100">
-                            
-                            <div class="space-y-4">
-                                {{-- Nomor Plat --}}
-                                <div>
-                                    <label for="edit_nomor_plat" class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">Nomor Plat <span class="text-red-500">*</span></label>
-                                    <div class="relative">
-                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
-                                        </div>
-                                        <input type="text" id="edit_nomor_plat" name="nomor_plat" x-model="editPlat" required placeholder="Contoh: B 1234 XYZ"
-                                               class="pl-10 w-full bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5">
-                                    </div>
-                                </div>
-                                
-                                {{-- Pemilik --}}
-                                <div>
-                                    <label for="edit_pemilik" class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">Pemilik <span class="text-red-500">*</span></label>
-                                    <div class="relative">
-                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                                        </div>
-                                        <input type="text" id="edit_pemilik" name="pemilik" x-model="editPemilik" required placeholder="Nama pemilik kendaraan"
-                                               class="pl-10 w-full bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5">
-                                    </div>
-                                </div>
 
-                                {{-- Tipe --}}
-                                <div>
-                                    <label for="edit_tipe" class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">Tipe <span class="text-red-500">*</span></label>
-                                    <div class="relative">
-                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                                        </div>
-                                        <select id="edit_tipe" name="tipe" x-model="editTipe" required
-                                                class="pl-10 pr-10 w-full bg-white border border-gray-300 text-[#1e3a5f] text-sm font-bold rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5 cursor-pointer appearance-none">
-                                            <option value="Roda 2">Roda 2</option>
-                                            <option value="Roda 4">Roda 4</option>
-                                        </select>
-                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                            <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-footer p-4 border-t bg-gray-50">
-                    <button type="submit" class="w-full px-4 py-3 text-white font-bold bg-[#1e3a5f] rounded-xl hover:bg-[#2a4a6f] shadow-lg transition transform hover:-translate-y-0.5">
-                        SIMPAN PERUBAHAN
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    {{-- Modal Hapus --}}
-    <div x-show="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4" @click.away="showDeleteModal = false" style="display: none;">
-        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full p-6 relative" @click.stop>
-            <h3 class="text-lg font-bold text-gray-900 mb-4">Konfirmasi Hapus</h3>
-            <p class="text-gray-600 mb-6">
-                Apakah Anda yakin ingin menghapus data kendaraan ini? Tindakan ini tidak dapat dibatalkan.
-            </p>
-            <form :action="deleteAction" method="POST" class="flex justify-end space-x-4">
-                @csrf
-                @method('DELETE')
-                <button type="button" @click="showDeleteModal = false"
-                    class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">
-                    Batal
-                </button>
-                <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
-                    Ya, Hapus
-                </button>
-            </form>
-        </div>
-    </div>
-
-    {{-- Modal Promote --}}
-    <div x-show="showPromoteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4" @click.away="showPromoteModal = false" style="display: none;">
-        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full p-6 relative" @click.stop>
-            <h3 class="text-lg font-bold text-gray-900 mb-4">Konfirmasi Pendaftaran</h3>
-            <p class="text-gray-600 mb-6">
-                Tambahkan kendaraan ini ke Daftar Master?
-            </p>
-            <form :action="promoteAction" method="POST" class="flex justify-end space-x-4">
-                @csrf
-                <button type="button" @click="showPromoteModal = false"
-                    class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">
-                    Batal
-                </button>
-                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                    OK
-                </button>
-            </form>
-        </div>
-    </div>
 
     {{-- Loading Indicator --}}
     <div id="loading-indicator" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">

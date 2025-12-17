@@ -9,7 +9,7 @@
                 <th class="py-3 px-4 text-center w-[15%]">Waktu</th>
                 <th class="py-3 px-4 text-center w-[20%]">Wilayah</th>
                 <th class="py-3 px-4 text-center w-[5%]">Foto</th>
-                <th class="py-3 px-4 text-center w-[10%]">Aksi</th>
+
             </tr>
         </thead>
         <tbody class="text-sm divide-y divide-gray-200">
@@ -25,19 +25,11 @@
                         Buka
                     </button>
                 </td>
-                <td class="py-2 px-4">
-                    @if(Auth::user()->peran == 'supervisor')
-                        <div class="flex justify-center space-x-3">
-                            <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('supervisor.patroli.destroy', $item->id_patroli) }}'" class="text-red-500 hover:text-red-700" title="Hapus">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                            </button>
-                        </div>
-                    @endif
-                </td>
+
             </tr>
             @empty
             <tr>
-                <td colspan="7" class="py-4 px-4 text-center text-gray-500">
+                <td colspan="6" class="py-4 px-4 text-center text-gray-500">
                     Tidak ada data patroli shift {{ $shift }} pada tanggal ini.
                 </td>
             </tr>
@@ -51,12 +43,6 @@
 <div class="md:hidden space-y-2 p-3">
     @forelse($data as $index => $item)
         <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 relative">
-            @if(Auth::user()->peran == 'supervisor')
-                <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('supervisor.patroli.destroy', $item->id_patroli) }}'" 
-                        class="absolute top-2 right-2 bg-red-500 text-white p-2 rounded hover:bg-red-600 transition">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                </button>
-            @endif
             <div class="flex gap-3 p-3">
                 {{-- Foto di Sebelah Kiri --}}
                 <div class="flex-shrink-0">

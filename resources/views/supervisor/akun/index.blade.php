@@ -8,7 +8,7 @@
 @section('header-left')
     {{-- Update warna border dan text badge agar seragam --}}
     <a class="flex items-center border-2 border-[#1a2847] text-[#1a2847] text-sm font-bold px-4 py-2 rounded-full">
-        MANAJEMEN AKUN
+        DAFTAR AKUN
     </a>
 @endsection
 
@@ -16,19 +16,10 @@
 
 {{-- Bungkusan Utama AlpineJS --}}
 <div x-data="{ 
-    openCreateModal: false, 
     openInfoModal: false, 
-    openEditModal: false, 
-    openHapusModal: false,
     infoUser: {},
-    editUser: {}, 
-    editFormAction: '',
-    hapusUserName: '',
-    hapusFormAction: '',
     defaultFoto: '{{ asset('images/default-profile.png') }}'
-}"
-@open-create-modal.window="openCreateModal = true" 
->
+}">
 
     {{-- Konten Halaman --}}
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -167,22 +158,6 @@
                                 @else
                                     <a href="{{ route('supervisor.akun.shift', $user->id_pengguna) }}" class="bg-green-600 hover:bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow transition">Shift</a>
                                 @endif
-
-                                {{-- Edit --}}
-                                <button @click="
-                                    openEditModal = true; 
-                                    editUser = {{ json_encode($user) }}; 
-                                    editFormAction = '{{ route('supervisor.akun.update', $user->id_pengguna) }}';
-                                    $dispatch('set-edit-data', {{ json_encode($user) }});
-                                " class="bg-yellow-600 hover:bg-yellow-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow transition">Edit</button>
-
-                                {{-- Delete --}}
-                                @if($isLocked)
-                                    <button disabled class="bg-gray-400 text-white text-[10px] font-bold px-2 py-1 rounded shadow cursor-not-allowed opacity-60">Delete</button>
-                                @else
-                                    <button @click="openHapusModal = true; hapusUserName = '{{ $user->nama_lengkap }}'; hapusFormAction = '{{ route('supervisor.akun.destroy', $user->id_pengguna) }}';" 
-                                            class="bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow transition">Delete</button>
-                                @endif
                             </div>
                         </div>
 
@@ -200,26 +175,7 @@
         </div>
     </div>
 
-    {{-- Floating Action Button (Create) --}}
-    <div 
-        x-show="!openCreateModal && !openInfoModal && !openEditModal && !openHapusModal" 
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 scale-90"
-        x-transition:enter-end="opacity-100 scale-100"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100 scale-100"
-        x-transition:leave-end="opacity-0 scale-90"
-        class="fixed bottom-8 right-6 z-40"
-    >
-        <button 
-            @click="openCreateModal = true"
-            class="bg-[#1e3a5f] hover:bg-[#2a4a6f] text-white rounded-full h-16 w-16 shadow-2xl flex items-center justify-center transition-transform hover:scale-110"
-        >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-        </button>
-    </div>
+
 
     {{-- 
       =================================
@@ -227,33 +183,7 @@
       =================================
     --}}
 
-    {{-- MODAL TAMBAH --}}
-    <div x-show="openCreateModal" x-init="$watch('openCreateModal', value => { if(value) $dispatch('reset-create-data') })"
-         class="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-gray-900 bg-opacity-50" style="display: none;">
-        <div class="relative w-full max-w-md mx-4 bg-white rounded-xl shadow-xl overflow-hidden" @click.away="openCreateModal = false">
-            <form action="{{ route('supervisor.akun.store') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                
-                {{-- HEADER BIRU --}}
-                <div class="bg-[#1e3a5f] py-4 px-6 border-b border-[#1e3a5f] flex justify-between items-center">
-                    <h5 class="text-lg font-bold text-white flex items-center tracking-wide">
-                        TAMBAH AKUN
-                    </h5>
-                    <button type="button" @click="openCreateModal = false" class="text-white/70 hover:text-white transition">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
 
-                <div class="modal-body max-h-[70vh] overflow-y-auto p-6">
-                    @include('supervisor.akun.partials.form-fields', ['isEdit' => false])
-                </div>
-
-                <div class="modal-footer p-4 border-t bg-gray-50">
-                    <button type="submit" class="w-full px-4 py-3 text-white font-bold bg-[#1e3a5f] rounded-xl hover:bg-[#2a4a6f] shadow-lg transition transform hover:-translate-y-0.5">BUAT AKUN BARU</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
     {{-- MODAL INFO (DETAIL PROFIL) --}}
     <div x-show="openInfoModal" class="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-gray-900 bg-opacity-70 backdrop-blur-sm" style="display: none;">
@@ -376,71 +306,7 @@
         </div>
     </div>
 
-    {{-- MODAL EDIT --}}
-    <div x-show="openEditModal" class="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-gray-900 bg-opacity-50" style="display: none;">
-        <div class="relative w-full max-w-md mx-4 bg-white rounded-xl shadow-xl overflow-hidden" @click.away="openEditModal = false">
-            <form :action="editFormAction" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
-                
-                {{-- HEADER BIRU --}}
-                <div class="bg-[#1e3a5f] py-4 px-6 border-b border-[#1e3a5f] flex justify-between items-center">
-                    <h5 class="text-lg font-bold text-white flex items-center tracking-wide">
-                        EDIT PROFIL
-                    </h5>
-                    <button type="button" @click="openEditModal = false" class="text-white/70 hover:text-white transition">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
 
-                <div class="modal-body max-h-[70vh] overflow-y-auto p-6">
-                    <div class="w-full bg-blue-50/50 rounded-xl p-4 text-center mb-6 border border-blue-100 border-dashed">
-                        <img :src="editUser.foto_profil ? `/storage/${editUser.foto_profil}` : defaultFoto" alt="Foto Profil" 
-                             class="w-24 h-24 mx-auto rounded-full object-cover border-4 border-white shadow-md">
-                        <p class="text-xs text-gray-500 mt-2">Foto profil saat ini</p>
-                    </div>
-                    @include('supervisor.akun.partials.form-fields', ['isEdit' => true])
-                </div>
-
-                <div class="modal-footer p-4 border-t bg-gray-50">
-                    <button type="submit" class="w-full px-4 py-3 text-white font-bold bg-[#1e3a5f] rounded-xl hover:bg-[#2a4a6f] shadow-lg transition transform hover:-translate-y-0.5">SIMPAN PERUBAHAN</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    {{-- MODAL HAPUS --}}
-    <div x-show="openHapusModal" class="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-gray-900 bg-opacity-50" style="display: none;">
-        <div class="relative w-full max-w-lg mx-4 bg-white rounded-xl shadow-xl overflow-hidden" @click.away="openHapusModal = false">
-            <form :action="hapusFormAction" method="POST">
-                @csrf @method('DELETE')
-                
-                {{-- Header Merah Solid (Tetap Merah untuk Indikasi Bahaya/Hapus) --}}
-                <div class="bg-red-600 py-4 px-6 border-b border-red-600 flex justify-between items-center">
-                    <h5 class="text-lg font-bold text-white flex items-center tracking-wide">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        KONFIRMASI HAPUS
-                    </h5>
-                    <button type="button" @click="openHapusModal = false" class="text-white/70 hover:text-white transition">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
-
-                <div class="modal-body p-6 text-center">
-                    <div class="bg-red-50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                    </div>
-                    <p class="text-gray-800 text-lg">Apakah Anda yakin ingin menghapus akun <br><strong class="font-bold text-red-600" x-text="hapusUserName"></strong>?</p>
-                    <p class="text-sm text-gray-500 mt-2">Tindakan ini permanen dan tidak dapat dibatalkan.</p>
-                </div>
-
-                <div class="modal-footer flex justify-end p-4 bg-gray-50 border-t border-gray-100 gap-3">
-                    <button type="button" @click="openHapusModal = false" class="px-5 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 font-semibold shadow-sm transition">Batal</button>
-                    <button type="submit" class="px-5 py-2.5 text-white bg-red-600 rounded-lg hover:bg-red-700 font-semibold shadow-md transition">Ya, Hapus</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
 </div>
 </div>

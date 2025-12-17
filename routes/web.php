@@ -274,8 +274,8 @@ Route::middleware('auth')->group(function () {
         // Menggunakan Controller dari folder Supervisor (hasil copy logika Komandan)
         // Nama route tetap 'bau.*' sesuai request user
         
-        // Manajemen Akun
-        Route::resource('akun', App\Http\Controllers\Supervisor\ManajemenAkunController::class);
+        // Daftar Akun (View Only + Shift Management)
+        Route::get('/akun', [App\Http\Controllers\Supervisor\ManajemenAkunController::class, 'index'])->name('akun.index');
         Route::get('akun/{id_pengguna}/shift', [App\Http\Controllers\Supervisor\ManajemenShiftController::class, 'index'])->name('akun.shift');
         Route::post('akun/shift/update', [App\Http\Controllers\Supervisor\ManajemenShiftController::class, 'update'])->name('akun.shift.update');
         Route::post('akun/shift/reset', [App\Http\Controllers\Supervisor\ManajemenShiftController::class, 'reset'])->name('akun.shift.reset');
@@ -283,24 +283,17 @@ Route::middleware('auth')->group(function () {
         // Presensi (View Only)
         Route::get('/presensi', [App\Http\Controllers\Supervisor\PresensiController::class, 'index'])->name('presensi.index');
 
-        // Patroli
-        // Perlu method lengkap (index, destroy, update, dll) seperti komandan
-        Route::resource('patroli', App\Http\Controllers\Supervisor\PatroliController::class)->only(['index', 'destroy', 'update']);
-        Route::post('/patroli/update-rules', [App\Http\Controllers\Supervisor\PatroliRuleController::class, 'updateRules'])->name('patroli.updateRules');
+        // Patroli (View Only)
+        Route::get('/patroli', [App\Http\Controllers\Supervisor\PatroliController::class, 'index'])->name('patroli.index');
 
-        // Kendaraan
-        Route::resource('kendaraan', App\Http\Controllers\Supervisor\KendaraanController::class)->only(['index']);
+        // Kendaraan (View Only)
+        Route::get('/kendaraan', [App\Http\Controllers\Supervisor\KendaraanController::class, 'index'])->name('kendaraan.index');
         Route::get('/kendaraan/search-riwayat', [App\Http\Controllers\Supervisor\KendaraanController::class, 'searchRiwayat'])->name('kendaraan.searchRiwayat');
         Route::get('/kendaraan/search-master', [App\Http\Controllers\Supervisor\KendaraanController::class, 'searchMaster'])->name('kendaraan.searchMaster');
-        Route::put('/kendaraan/log/{id_log}/update-keterangan', [App\Http\Controllers\Supervisor\KendaraanController::class, 'updateKeterangan'])->name('kendaraan.log.updateKeterangan');
-        Route::get('/kendaraan/master/{id_kendaraan}/edit', [App\Http\Controllers\Supervisor\KendaraanController::class, 'editMaster'])->name('kendaraan.master.edit');
-        Route::put('/kendaraan/master/{id_kendaraan}', [App\Http\Controllers\Supervisor\KendaraanController::class, 'updateMaster'])->name('kendaraan.master.update');
-        Route::delete('/kendaraan/master/{id_kendaraan}', [App\Http\Controllers\Supervisor\KendaraanController::class, 'destroyMaster'])->name('kendaraan.master.destroy');
-        Route::post('/kendaraan/log/{id_log}/promote', [App\Http\Controllers\Supervisor\KendaraanController::class, 'promoteLogToMaster'])->name('kendaraan.log.promote');
 
 
-        // Tamu
-        Route::resource('tamu', App\Http\Controllers\Supervisor\TamuController::class)->only(['index', 'update', 'destroy']);
+        // Tamu (View Only)
+        Route::get('/tamu', [App\Http\Controllers\Supervisor\TamuController::class, 'index'])->name('tamu.index');
 
         // Barang
         Route::resource('barang', App\Http\Controllers\Supervisor\BarangController::class)->only(['index']);
