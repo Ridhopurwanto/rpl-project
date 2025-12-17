@@ -10,7 +10,7 @@
                 <th class="py-3 px-4 text-center w-[11%]">Masuk</th>
                 <th class="py-3 px-4 text-center w-[11%]">Keluar</th>
                 <th class="py-3 px-4 text-center w-[16%]">Ket.</th>
-                <th class="py-3 px-4 text-center w-[12%]">Aksi</th>
+
             </tr>
         </thead>
         <tbody class="text-sm divide-y divide-gray-200">
@@ -36,24 +36,14 @@
                     @else <span class="text-gray-400">-</span> @endif
                 </td>
                 <td class="py-2 px-4">
-                    <form action="{{ route('supervisor.kendaraan.log.updateKeterangan', $log->id_log) }}" method="POST">
-                        @csrf @method('PUT')
-                        <select name="keterangan" onchange="this.form.submit()" class="border-gray-300 rounded-lg shadow-sm text-xs py-1 focus:border-blue-500 focus:ring-blue-500">
-                            <option value="Tidak Menginap" {{ $log->keterangan == 'Tidak Menginap' ? 'selected' : '' }}>Tidak Menginap</option>
-                            <option value="Menginap" {{ $log->keterangan == 'Menginap' ? 'selected' : '' }}>Menginap</option>
-                        </select>
-                    </form>
-                </td>
-                <td class="py-2 px-4 text-center">
-                    @if($log->kendaraan)
-                        <span class="text-green-500" title="Terdaftar"><svg class="w-6 h-6 inline" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg></span>
-                    @else
-                        <button @click="$dispatch('promote-master', { id: {{ $log->id_log }}, plat: '{{ $log->nopol }}', pemilik: '{{ $log->pemilik }}' })" class="text-blue-500 hover:text-blue-700"><svg class="w-6 h-6 inline" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"></path></svg></button>
-                    @endif
+                    <span class="text-xs font-semibold px-2 py-1 rounded-full 
+                        {{ $log->keterangan == 'Menginap' ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-800' }}">
+                        {{ $log->keterangan ?? 'Tidak Menginap' }}
+                    </span>
                 </td>
             </tr>
             @empty
-            <tr><td colspan="8" class="py-4 px-4 text-center text-gray-500">Data tidak ditemukan.</td></tr>
+            <tr><td colspan="7" class="py-4 px-4 text-center text-gray-500">Data tidak ditemukan.</td></tr>
             @endforelse
         </tbody>
     </table>
@@ -100,27 +90,23 @@
 
                             {{-- Keterangan --}}
                             <div class="mb-2">
-                                <form action="{{ route('supervisor.kendaraan.log.updateKeterangan', $log->id_log) }}" method="POST">
-                                    @csrf @method('PUT')
-                                    <select name="keterangan" onchange="this.form.submit()" class="w-full border-gray-300 rounded text-xs py-1 focus:border-blue-500 focus:ring-blue-500">
-                                        <option value="Tidak Menginap" {{ $log->keterangan == 'Tidak Menginap' ? 'selected' : '' }}>Tidak Menginap</option>
-                                        <option value="Menginap" {{ $log->keterangan == 'Menginap' ? 'selected' : '' }}>Menginap</option>
-                                    </select>
-                                </form>
+                                <span class="text-xs font-semibold px-2 py-1 rounded-full 
+                                    {{ $log->keterangan == 'Menginap' ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-800' }}">
+                                    {{ $log->keterangan ?? 'Tidak Menginap' }}
+                                </span>
                             </div>
 
-                            {{-- Status/Aksi --}}
+                            {{-- Status --}}
                             @if($log->kendaraan)
                                 <div class="flex items-center justify-center gap-1 bg-green-50 text-green-700 font-bold py-1.5 rounded text-xs border border-green-300">
                                     <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                                     Terdaftar
                                 </div>
                             @else
-                                <button @click="$dispatch('promote-master', { id: {{ $log->id_log }}, plat: '{{ $log->nopol }}', pemilik: '{{ $log->pemilik }}' })" 
-                                        class="w-full bg-blue-500 text-white font-bold py-1.5 rounded text-xs hover:bg-blue-600 transition flex items-center justify-center gap-1">
-                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"></path></svg>
-                                    Daftarkan
-                                </button>
+                                <div class="flex items-center justify-center gap-1 bg-gray-50 text-gray-600 font-bold py-1.5 rounded text-xs border border-gray-300">
+                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                                    Belum Terdaftar
+                                </div>
                             @endif
                         </div>
                     </div>

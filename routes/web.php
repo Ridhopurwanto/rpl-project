@@ -286,15 +286,10 @@ Route::middleware('auth')->group(function () {
         // Patroli (View Only)
         Route::get('/patroli', [App\Http\Controllers\Supervisor\PatroliController::class, 'index'])->name('patroli.index');
 
-        // Kendaraan
-        Route::resource('kendaraan', App\Http\Controllers\Supervisor\KendaraanController::class)->only(['index']);
+        // Kendaraan (View Only)
+        Route::get('/kendaraan', [App\Http\Controllers\Supervisor\KendaraanController::class, 'index'])->name('kendaraan.index');
         Route::get('/kendaraan/search-riwayat', [App\Http\Controllers\Supervisor\KendaraanController::class, 'searchRiwayat'])->name('kendaraan.searchRiwayat');
         Route::get('/kendaraan/search-master', [App\Http\Controllers\Supervisor\KendaraanController::class, 'searchMaster'])->name('kendaraan.searchMaster');
-        Route::put('/kendaraan/log/{id_log}/update-keterangan', [App\Http\Controllers\Supervisor\KendaraanController::class, 'updateKeterangan'])->name('kendaraan.log.updateKeterangan');
-        Route::get('/kendaraan/master/{id_kendaraan}/edit', [App\Http\Controllers\Supervisor\KendaraanController::class, 'editMaster'])->name('kendaraan.master.edit');
-        Route::put('/kendaraan/master/{id_kendaraan}', [App\Http\Controllers\Supervisor\KendaraanController::class, 'updateMaster'])->name('kendaraan.master.update');
-        Route::delete('/kendaraan/master/{id_kendaraan}', [App\Http\Controllers\Supervisor\KendaraanController::class, 'destroyMaster'])->name('kendaraan.master.destroy');
-        Route::post('/kendaraan/log/{id_log}/promote', [App\Http\Controllers\Supervisor\KendaraanController::class, 'promoteLogToMaster'])->name('kendaraan.log.promote');
 
 
         // Tamu
