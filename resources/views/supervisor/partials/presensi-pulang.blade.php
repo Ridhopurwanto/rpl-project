@@ -30,7 +30,7 @@
                     <th class="py-3 px-4 text-center {{ $shiftTerpilih == 'semua' ? 'w-[15%]' : 'w-[18%]' }}">Waktu</th>
                     <th class="py-3 px-4 text-center {{ $shiftTerpilih == 'semua' ? 'w-[10%]' : 'w-[13%]' }}">Foto</th>
                     <th class="py-3 px-4 text-center {{ $shiftTerpilih == 'semua' ? 'w-[15%]' : 'w-[18%]' }}">Status</th>
-                    <th class="py-3 px-4 text-center w-[15%]">Aksi</th>
+
                 </tr>
             </thead>
             <tbody class="text-sm divide-y divide-gray-200">
@@ -64,25 +64,6 @@
                             <span class="text-yellow-500 font-semibold">{{ ucfirst($presensi->status) }}</span>
                         @endif
                     </td>
-                        </td>
-                        <td class="py-2 px-4">
-                            <div class="flex justify-center space-x-3">
-                                <button @click="
-                                    showEditModal = true; 
-                                    editAction = '{{ route('komandan.presensi.update', $presensi->id_presensi) }}';
-                                    editWaktu = '{{ $presensi->waktu->format('Y-m-d\TH:i') }}';
-                                    editMin = '{{ $presensi->waktu->format('Y-m-d') }}T00:00';
-                                    editMax = '{{ $presensi->waktu->format('Y-m-d') }}T23:59';
-                                    editStatus = '{{ $presensi->status }}';
-                                    editJenisPresensi = '{{ $presensi->jenis_presensi }}';
-                                    editShiftId = '{{ $presensi->jenis_shift }}';
-                                " class="text-blue-500 hover:text-blue-700" title="Edit">
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path></svg>
-                                </button>
-                                <button @click.prevent="showDeleteModal = true; deleteAction = '{{ route('supervisor.presensi.destroy', $presensi->id_presensi) }}'" class="text-red-500 hover:text-red-700" title="Hapus">
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                                </button>
-                            </div>
                         </td>
                 </tr>
                 @empty
@@ -170,33 +151,7 @@
                             </div>
                         </div>
 
-                        {{-- Tombol Aksi --}}
-                        <div class="flex gap-1.5">
-                            <button @click="
-                                    showEditModal = true; 
-                                    editAction = '{{ route('supervisor.presensi.update', $presensi->id_presensi) }}';
-                                    editWaktu = '{{ $presensi->waktu->format('Y-m-d\TH:i') }}';
-                                    editMin = '{{ $presensi->waktu->format('Y-m-d') }}T00:00';
-                                    editMax = '{{ $presensi->waktu->format('Y-m-d') }}T23:59';
-                                    editStatus = '{{ $presensi->status }}';
-                                    editJenisPresensi = '{{ $presensi->jenis_presensi }}';
-                                    editShiftId = '{{ $presensi->jenis_shift }}';
-                                "
-                                class="flex-1 bg-blue-500 text-white font-bold py-1.5 rounded text-xs hover:bg-blue-600 transition flex items-center justify-center gap-1">
-                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path>
-                                </svg>
-                                Edit
-                            </button>
-                            <button
-                                @click.prevent="showDeleteModal = true; deleteAction = '{{ route('supervisor.presensi.destroy', $presensi->id_presensi) }}'"
-                                class="flex-1 bg-red-500 text-white font-bold py-1.5 rounded text-xs hover:bg-red-600 transition flex items-center justify-center gap-1">
-                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                                </svg>
-                                Hapus
-                            </button>
-                        </div>
+
                     </div>
                 </div>
             </div>

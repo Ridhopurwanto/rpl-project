@@ -280,9 +280,8 @@ Route::middleware('auth')->group(function () {
         Route::post('akun/shift/update', [App\Http\Controllers\Supervisor\ManajemenShiftController::class, 'update'])->name('akun.shift.update');
         Route::post('akun/shift/reset', [App\Http\Controllers\Supervisor\ManajemenShiftController::class, 'reset'])->name('akun.shift.reset');
 
-        // Presensi
-        Route::resource('presensi', App\Http\Controllers\Supervisor\PresensiController::class)->only(['index', 'destroy', 'update']);
-        Route::put('/presensi/update-rules', [App\Http\Controllers\Supervisor\PresensiController::class, 'updateRules'])->name('presensi.updateRules');
+        // Presensi (View Only)
+        Route::get('/presensi', [App\Http\Controllers\Supervisor\PresensiController::class, 'index'])->name('presensi.index');
 
         // Patroli
         // Perlu method lengkap (index, destroy, update, dll) seperti komandan

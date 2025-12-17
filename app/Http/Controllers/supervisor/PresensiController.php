@@ -56,12 +56,7 @@ class PresensiController extends Controller
                                  ->orderBy('presensi.waktu', 'asc')
                                  ->paginate($perPage, ['*'], 'page_pulang');
 
-        // --- TAMBAHAN BARU: Ambil Data Shift Rule ---
-        // Kita ambil data rule untuk Pagi, Malam, dan Non Shift agar bisa ditampilkan di modal
-        $rules = ShiftRule::whereIn('jenis_shift', ['Pagi', 'Malam', 'Non Shift'])->get();
-        
-        // Ambil nilai toleransi & dibuka dari salah satu (misal Pagi) karena nilainya seragam
-        $globalRule = $rules->firstWhere('jenis_shift', 'Pagi');
+
 
         // Kirim data ke view
         if ($request->ajax()) {
@@ -81,41 +76,12 @@ class PresensiController extends Controller
             'dataMasuk' => $dataMasuk,
             'dataPulang' => $dataPulang,
             'tanggalTerpilih' => $tanggalFilter,
-            'shiftTerpilih' => $shiftFilter, // Ganti nama variabel agar sesuai view
-            'rules' => $rules,
-            'globalToleransi' => $globalRule ? $globalRule->toleransi : 0,
-            'globalDibuka' => $globalRule ? $globalRule->dibuka : 0,
+            'shiftTerpilih' => $shiftFilter,
             'perPage' => $perPage,
         ]);
     }
 
-    /**
-     * Menghapus data presensi (HANYA UNTUK SUPERVISOR).
-     *
-     * DIPERBARUI: 'foto_masuk' -> 'foto'
-     */
-    public function destroy($id_presensi)
-    {
-        if (Auth::user()->peran !== 'supervisor') {
-            return redirect()->route('supervisor.presensi.index')->with('error', 'Anda tidak memiliki hak akses.');
-        }
 
-        try {
-            $presensi = Presensi::findOrFail($id_presensi);
-            
-            // Hapus foto dari storage (disesuaikan ke 1 kolom 'foto')
-            if ($presensi->foto) {
-                Storage::disk('public')->delete($presensi->foto);
-            }
-
-            $presensi->delete();
-            
-            return redirect()->back()->with('success', 'Data presensi berhasil dihapus.');
-        
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menghapus data.');
-        }
-    }
 
     /**
      * Fungsi edit() tidak diperlukan lagi karena kita pakai MODAL.
@@ -123,60 +89,7 @@ class PresensiController extends Controller
      */
     // public function edit(...) { ... }
 
-    /**
-     * Mengupdate data presensi (HANYA UNTUK KOMANDAN).
-     *
-     * DIPERBARUI: Disesuaikan dengan modal dan database baru.
-     */
-    public function update(Request $request, $id_presensi)
-    {
-        if (Auth::user()->peran !== 'supervisor') {
-            return redirect()->route('supervisor.presensi.index')->with('error', 'Anda tidak memiliki hak akses.');
-        }
 
-        // Validasi input (disesuaikan dengan field modal)
-        $request->validate([
-            'waktu' => 'required|date',
-            'status' => 'required|in:tepat waktu,terlambat,terlalu cepat,izin',
-            'jenis_presensi' => 'required|in:Masuk,Pulang',
-        ]);
-
-        try {
-            $presensi = Presensi::findOrFail($id_presensi);
-            
-            // Cek apakah status berubah
-            $oldStatus = $presensi->status;
-            
-            $presensi->update([
-                'waktu' => $request->waktu,
-                'status' => $request->status,
-                'jenis_presensi' => $request->jenis_presensi,
-                'tanggal' => Carbon::parse($request->waktu)->format('Y-m-d'), // Update tanggal
-            ]);
-
-            // Kirim Notifikasi jika status berubah
-            if ($oldStatus != $request->status) {
-                $user = \App\Models\User::find($presensi->id_pengguna);
-                if ($user) {
-                    // Format waktu presensi agar lebih enak dibaca (Hari, Tanggal Jam)
-                    $waktuFormatted = \Carbon\Carbon::parse($presensi->waktu)->translatedFormat('l, d F Y H:i');
-                    $pesan = "Status presensi Anda pada {$waktuFormatted} telah diubah oleh Komandan dari '{$oldStatus}' menjadi '{$request->status}'.";
-                    
-                    try {
-                        $user->notify(new \App\Notifications\PerubahanStatusPresensiNotification($pesan, $presensi));
-                    } catch (\Exception $e) {
-                         // Log error notification but don't stop process
-                         \Illuminate\Support\Facades\Log::error('Gagal kirim notifikasi status presensi: ' . $e->getMessage());
-                    }
-                }
-            }
-
-            return redirect()->back()->with('success', 'Data presensi berhasil diperbarui.');
-
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
-        }
-    }
 
 
     // --- FUNGSI UNTUK ANGGOTA ---
@@ -305,70 +218,5 @@ class PresensiController extends Controller
         }
     }
 
-    public function updateRules(Request $request)
-    {
-        if (Auth::user()->peran !== 'supervisor') {
-            return redirect()->back()->with('error', 'Akses ditolak.');
-        }
 
-        $request->validate([
-            'masuk_pagi' => 'required',
-            'keluar_pagi' => 'required',
-            'masuk_malam' => 'required',
-            'keluar_malam' => 'required',
-            'masuk_non' => 'required',
-            'keluar_non' => 'required',
-            'toleransi' => 'required|numeric|min:0',
-            'dibuka' => 'required|numeric|min:0',
-        ]);
-
-        $geoStatus = $request->input('isgeotagenabled', 0);
-
-        // --- VALIDASI TAMBAHAN ---
-        // Jam Pulang Shift Pagi harus sama persis dengan Jam Masuk Shift Malam (Sambung)
-        // Kita ambil 5 karakter pertama (HH:mm) untuk mengantisipasi perbedaan detik (misal 19:00 vs 19:00:00)
-        $pagiKeluar = substr($request->keluar_pagi, 0, 5);
-        $malamMasuk = substr($request->masuk_malam, 0, 5);
-
-        if ($pagiKeluar != $malamMasuk) {
-            return redirect()->back()->with('error', 'Jam Pulang Shift Pagi harus bersambung dengan Jam Masuk Shift Malam (Tidak boleh ada jeda).');
-        }
-
-        try {
-            // 1. Update Shift Pagi
-            ShiftRule::where('jenis_shift', 'Pagi')->update([
-                'jam_masuk' => $request->masuk_pagi,
-                'jam_keluar' => $request->keluar_pagi,
-                'toleransi' => $request->toleransi,
-                'dibuka' => $request->dibuka,
-                'is_geotag_enabled' => $geoStatus,
-            ]);
-
-            // 2. Update Shift Malam
-            ShiftRule::where('jenis_shift', 'Malam')->update([
-                'jam_masuk' => $request->masuk_malam,
-                'jam_keluar' => $request->keluar_malam,
-                'toleransi' => $request->toleransi,
-                'dibuka' => $request->dibuka,
-                'is_geotag_enabled' => $geoStatus,
-            ]);
-
-            // 3. Update Non Shift
-            ShiftRule::where('jenis_shift', 'Non Shift')->update([
-                'jam_masuk' => $request->masuk_non,
-                'jam_keluar' => $request->keluar_non,
-                'toleransi' => $request->toleransi,
-                'dibuka' => $request->dibuka,
-                'is_geotag_enabled' => $geoStatus,
-            ]);
-            
-
-            // Catatan: Shift 'Off' tidak diupdate karena toleransi/dibuka null (sesuai gambar)
-
-            return redirect()->back()->with('success', 'Pengaturan Shift Rule berhasil diperbarui.');
-
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal update rule: ' . $e->getMessage());
-        }
-    }
 }
