@@ -20,13 +20,24 @@ class BarangController extends Controller
         $tanggalTitipan = $request->input('tanggal_titipan', now()->format('Y-m-d'));
         $searchTemuan = $request->input('search_temuan');
         $searchTitipan = $request->input('search_titipan');
+        $statusTemuan = $request->input('status_temuan');
+        $statusTitipan = $request->input('status_titipan');
         $perPageTemuan = $request->input('per_page_temuan', 10);
         $perPageTitipan = $request->input('per_page_titipan', 10);
 
         // Query Barang Temuan
-        $queryTemuan = BarangTemuan::query()
-                    ->whereDate('waktu_lapor', $tanggalTemuan)
-                    ->orderBy('waktu_lapor', 'desc');
+        $queryTemuan = BarangTemuan::query()->orderBy('waktu_lapor', 'desc');
+        
+        if ($tanggalTemuan) {
+            $queryTemuan->where(function($q) use ($tanggalTemuan) {
+                $q->whereDate('waktu_lapor', $tanggalTemuan)
+                  ->orWhereDate('waktu_selesai', $tanggalTemuan);
+            });
+        }
+        
+        if ($statusTemuan) {
+            $queryTemuan->where('status', $statusTemuan);
+        }
         
         if ($searchTemuan) {
             $queryTemuan->where(function($q) use ($searchTemuan) {
@@ -38,9 +49,18 @@ class BarangController extends Controller
         }
 
         // Query Barang Titipan
-        $queryTitipan = BarangTitipan::query()
-                    ->whereDate('waktu_titip', $tanggalTitipan)
-                    ->orderBy('waktu_titip', 'desc');
+        $queryTitipan = BarangTitipan::query()->orderBy('waktu_titip', 'desc');
+        
+        if ($tanggalTitipan) {
+            $queryTitipan->where(function($q) use ($tanggalTitipan) {
+                $q->whereDate('waktu_titip', $tanggalTitipan)
+                  ->orWhereDate('waktu_selesai', $tanggalTitipan);
+            });
+        }
+        
+        if ($statusTitipan) {
+            $queryTitipan->where('status', $statusTitipan);
+        }
         
         if ($searchTitipan) {
             $queryTitipan->where(function($q) use ($searchTitipan) {
@@ -62,6 +82,8 @@ class BarangController extends Controller
                 'tanggalTitipan', 
                 'searchTemuan', 
                 'searchTitipan', 
+                'statusTemuan',
+                'statusTitipan',
                 'perPageTemuan', 
                 'perPageTitipan'
             ));
@@ -74,6 +96,8 @@ class BarangController extends Controller
             'tanggalTitipan' => $tanggalTitipan,
             'searchTemuan' => $searchTemuan,
             'searchTitipan' => $searchTitipan,
+            'statusTemuan' => $statusTemuan,
+            'statusTitipan' => $statusTitipan,
             'perPageTemuan' => $perPageTemuan,
             'perPageTitipan' => $perPageTitipan,
         ]);
