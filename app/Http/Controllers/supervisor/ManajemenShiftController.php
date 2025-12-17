@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Supervisor;
 
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Shift;
 use App\Models\ShiftRule;
@@ -10,7 +11,6 @@ use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-// use Illuminate\Support\Facades\Cache; // Cache dimatikan agar aman di semua laptop
 use App\Notifications\PerubahanShiftNotification;
 
 class ManajemenShiftController extends Controller
@@ -61,7 +61,7 @@ class ManajemenShiftController extends Controller
             ];
         }
 
-        return view('komandan.akun.shift', [
+        return view('supervisor.akun.shift', [
             'user' => $user,
             'kalender' => $kalender,
             'bulanTahun' => $tanggalAwal,
@@ -70,175 +70,7 @@ class ManajemenShiftController extends Controller
         ]);
     }
 
-    /**
-     * Update Shift dengan Opsi Overwrite/Timpa Masa Depan
-     */
-    public function update(Request $request)
-    {
-        $request->validate([
-            'id_pengguna' => 'required|exists:pengguna,id_pengguna',
-            'tanggal'     => 'required|date_format:Y-m-d',
-            'jenis_shift' => 'required|in:Pagi,Malam,Off',
-            'apply_pattern' => 'boolean'
-        ]);
 
-        try {
-            $user = User::findOrFail($request->id_pengguna);
-            $targetDate = Carbon::parse($request->tanggal);
-            
-            // Loop sampai 6 bulan ke depan agar pola tidak putus
-            $endDate = $targetDate->copy()->addMonths(6)->endOfMonth(); 
-
-            // Ambil ID Shift dari DB
-            $rules = ShiftRule::whereIn('jenis_shift', ['Pagi', 'Malam', 'Off'])
-                              ->get()
-                              ->pluck('idshift_rule', 'jenis_shift');
-
-            $selectedShiftId = $rules[$request->jenis_shift];
-
-            // 1. Simpan Tanggal Utama
-            $shift = Shift::updateOrCreate(
-                ['id_pengguna' => $request->id_pengguna, 'tanggal' => $request->tanggal],
-                ['jenis_shift' => $selectedShiftId]
-            );
-
-            $affectedDates = [];
-
-            // HANYA JALANKAN LOGIKA POLA JIKA CHECKBOX DICENTANG
-            if ($request->apply_pattern) {
-                // Hapus jadwal masa depan
-                Shift::where('id_pengguna', $request->id_pengguna)
-                     ->whereDate('tanggal', '>', $targetDate)
-                     ->delete();
-
-                $currentDate = $targetDate->copy()->addDay();
-                $counter = 1;
-
-                // Ambil Data Libur
-                $hariLibur = $this->getHariLibur($targetDate->year, $endDate->year);
-
-                // Tentukan Jenis Jadwal
-                $jadwalType = $user->jenis_jadwal; 
-                if (!$jadwalType) {
-                     $jadwalType = ($user->peran == 'anggota') ? 'shift' : 'non_shift';
-                }
-
-                // LOGIKA SHIFT (2-2-2)
-                if ($jadwalType == 'shift') {
-                    $pattern = [
-                        $rules['Pagi'], $rules['Pagi'], 
-                        $rules['Malam'], $rules['Malam'], 
-                        $rules['Off'], $rules['Off']
-                    ];
-
-                    // Deteksi start index
-                    $startIndex = 0; 
-                    if ($request->jenis_shift == 'Pagi') {
-                        $yesterday = Shift::where('id_pengguna', $request->id_pengguna)->whereDate('tanggal', $targetDate->copy()->subDay())->first();
-                        $startIndex = ($yesterday && $yesterday->jenis_shift == $rules['Pagi']) ? 1 : 0;
-                    }
-                    elseif ($request->jenis_shift == 'Malam') {
-                        $yesterday = Shift::where('id_pengguna', $request->id_pengguna)->whereDate('tanggal', $targetDate->copy()->subDay())->first();
-                        $startIndex = ($yesterday && $yesterday->jenis_shift == $rules['Malam']) ? 3 : 2;
-                    }
-                    elseif ($request->jenis_shift == 'Off') {
-                        $yesterday = Shift::where('id_pengguna', $request->id_pengguna)->whereDate('tanggal', $targetDate->copy()->subDay())->first();
-                        $startIndex = ($yesterday && $yesterday->jenis_shift == $rules['Off']) ? 5 : 4;
-                    }
-
-                    while ($currentDate <= $endDate) {
-                        $exists = Shift::where('id_pengguna', $request->id_pengguna)
-                                       ->whereDate('tanggal', $currentDate)
-                                       ->exists();
-                        
-                        if (!$exists) {
-                            $patternIndex = ($startIndex + $counter) % 6;
-                            $newShiftId = $pattern[$patternIndex];
-                            $shiftName = $rules->search($newShiftId); 
-
-                            Shift::create([
-                                'id_pengguna' => $request->id_pengguna, 
-                                'tanggal' => $currentDate->format('Y-m-d'), 
-                                'jenis_shift' => $newShiftId
-                            ]);
-                            $affectedDates[] = ['date' => $currentDate->format('Y-m-d'), 'shift' => $shiftName];
-                        }
-                        $currentDate->addDay();
-                        $counter++;
-                    }
-                }
-                // LOGIKA NON-SHIFT (Senin-Jumat)
-                elseif ($jadwalType == 'non_shift') {
-                    while ($currentDate <= $endDate) {
-                        $tglStr = $currentDate->format('Y-m-d');
-                        $isOffDay = $currentDate->isWeekend() || in_array($tglStr, $hariLibur);
-                        
-                        $exists = Shift::where('id_pengguna', $request->id_pengguna)
-                                       ->whereDate('tanggal', $currentDate)
-                                       ->exists();
-
-                        if (!$exists) {
-                            if ($isOffDay) {
-                                Shift::create(['id_pengguna' => $request->id_pengguna, 'tanggal' => $tglStr, 'jenis_shift' => $rules['Off']]);
-                                $affectedDates[] = ['date' => $tglStr, 'shift' => 'Off'];
-                            } else {
-                                Shift::create(['id_pengguna' => $request->id_pengguna, 'tanggal' => $tglStr, 'jenis_shift' => $rules['Pagi']]);
-                                $affectedDates[] = ['date' => $tglStr, 'shift' => 'Pagi'];
-                            }
-                        }
-                        $currentDate->addDay();
-                    }
-                }
-            }
-
-            // Notifikasi
-            if ($shift->wasRecentlyCreated || $shift->wasChanged('jenis_shift')) {
-                 $aksi = $shift->wasRecentlyCreated ? 'dibuatkan' : 'diubah';
-                 
-                 if ($shift->wasRecentlyCreated) {
-                     $pesan = "Jadwal shift Anda telah diatur oleh Komandan sampai periode tertentu.";
-                 } else {
-                     $pesan = "Jadwal shift Anda pada tanggal {$request->tanggal} telah diubah menjadi {$request->jenis_shift}.";
-                 }
-                 
-                 $shift->load('shiftRule'); 
-
-                 try {
-                    $type = $shift->wasRecentlyCreated ? 'assignment' : 'change';
-                    $user->notify(new PerubahanShiftNotification($pesan, $shift, $type));
-                 } catch (\Exception $e) {
-                    Log::error('Gagal kirim notifikasi shift: ' . $e->getMessage());
-                 }
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => $request->apply_pattern ? 'Shift diubah & pola masa depan diperbarui!' : 'Shift berhasil disimpan.',
-                'affected_dates' => $affectedDates
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Gagal: ' . $e->getMessage()], 500);
-        }
-    }
-
-    /**
-     * RESET JADWAL (Hapus Masa Depan)
-     */
-    public function reset(Request $request)
-    {
-        $request->validate(['id_pengguna' => 'required']);
-
-        try {
-            Shift::where('id_pengguna', $request->id_pengguna)
-                 ->where('tanggal', '>', Carbon::today())
-                 ->delete();
-
-            return response()->json(['success' => true, 'message' => 'Jadwal masa depan berhasil dikosongkan.']);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Gagal reset: ' . $e->getMessage()], 500);
-        }
-    }
 
     /**
      * Helper: Ambil Hari Libur (Google Calendar + Manual Backup)

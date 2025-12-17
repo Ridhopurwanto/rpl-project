@@ -274,8 +274,8 @@ Route::middleware('auth')->group(function () {
         // Menggunakan Controller dari folder Supervisor (hasil copy logika Komandan)
         // Nama route tetap 'bau.*' sesuai request user
         
-        // Manajemen Akun
-        Route::resource('akun', App\Http\Controllers\Supervisor\ManajemenAkunController::class);
+        // Daftar Akun (View Only + Shift Management)
+        Route::get('/akun', [App\Http\Controllers\Supervisor\ManajemenAkunController::class, 'index'])->name('akun.index');
         Route::get('akun/{id_pengguna}/shift', [App\Http\Controllers\Supervisor\ManajemenShiftController::class, 'index'])->name('akun.shift');
         Route::post('akun/shift/update', [App\Http\Controllers\Supervisor\ManajemenShiftController::class, 'update'])->name('akun.shift.update');
         Route::post('akun/shift/reset', [App\Http\Controllers\Supervisor\ManajemenShiftController::class, 'reset'])->name('akun.shift.reset');
