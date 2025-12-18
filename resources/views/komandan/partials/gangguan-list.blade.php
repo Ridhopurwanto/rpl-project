@@ -101,7 +101,7 @@
                             <p class="text-gray-600 text-xs">{{ $gangguan->waktu_lapor->format('d/m/Y H:i') }}</p>
                         </div>
                         <div class="flex-shrink-0">
-                            <span class="inline-block text-[10px] font-bold px-2 py-1 rounded-full bg-red-500 text-white text-center leading-tight max-w-[80px] break-words">
+                            <span class="inline-block text-[10px] font-bold px-2 py-1 rounded-full bg-red-500 text-white text-center leading-tight max-w-[80px] whitespace-normal">
                                 {{ $gangguan->kategori }}
                             </span>
                         </div>

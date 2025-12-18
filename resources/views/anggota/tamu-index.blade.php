@@ -106,7 +106,7 @@
         </div>
 
         {{-- BAGIAN RIWAYAT TAMU --}}
-        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ isOpen: true }">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="tamuData">
             <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] p-3 border-b border-gray-200 cursor-pointer hover:opacity-90 transition" @click="isOpen = !isOpen">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center">
@@ -121,8 +121,8 @@
                 </div>
             </div>
 
-            <div x-show="isOpen" x-collapse>
-                {{-- Filter Rentang Tanggal --}}
+            <div x-show="isOpen" x-transition>
+                {{-- Filter dan Search --}}
                 <div class="p-4 border-b border-gray-200">
                     <form action="{{ route('anggota.tamu.index') }}" method="GET" id="filterForm"
                         x-data="{ 
@@ -138,19 +138,23 @@
                               }
                           }">
                         
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {{-- Show Entries di atas --}}
+                        <div class="mb-4">
                             <div class="w-full md:w-auto">
                                 <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
                                 <div class="flex items-center gap-2">
-                                    <select name="per_page" onchange="this.form.submit()" class="h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm appearance-none cursor-pointer" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em;">
-                                        <option value="5" {{ request('per_page', 5) == 5 ? 'selected' : '' }}>5</option>
-                                        <option value="10" {{ request('per_page', 5) == 10 ? 'selected' : '' }}>10</option>
-                                        <option value="25" {{ request('per_page', 5) == 25 ? 'selected' : '' }}>25</option>
-                                        <option value="50" {{ request('per_page', 5) == 50 ? 'selected' : '' }}>50</option>
+                                    <select x-model="itemsPerPage" @change="currentPage = 1" class="h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm appearance-none cursor-pointer" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em;">
+                                        <option value="5">5</option>
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
                                     </select>
                                     <span class="text-sm text-gray-600">rows</span>
                                 </div>
                             </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="w-full">
                                 <label for="start_date" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
                                     Dari Tanggal
@@ -182,20 +186,54 @@
                                         class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
                                 </div>
                             </div>
+                            
+                            <div class="w-full">
+                                <label for="search" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                                    Cari Nama/Instansi
+                                </label>
+                                <div class="relative">
+                                    <input 
+                                        type="text" 
+                                        id="search"
+                                        x-model="searchQuery"
+                                        @input="searchTamu(); clearSearch()"
+                                        @focus="searchTamu()"
+                                        @click.away="showSuggestions = false"
+                                        placeholder="Cari nama tamu atau instansi..."
+                                        class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm">
+                                    
+                                    <div x-show="showSuggestions" 
+                                         x-transition:enter="transition ease-out duration-100"
+                                         x-transition:enter-start="opacity-0 scale-95"
+                                         x-transition:enter-end="opacity-100 scale-100"
+                                         x-transition:leave="transition ease-in duration-75"
+                                         x-transition:leave-start="opacity-100 scale-100"
+                                         x-transition:leave-end="opacity-0 scale-95"
+                                         class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                        <template x-for="suggestion in suggestions" :key="suggestion.nama + suggestion.instansi">
+                                            <div @click="selectSuggestion(suggestion)" 
+                                                 class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0">
+                                                <div class="font-semibold text-sm text-gray-800" x-text="suggestion.nama"></div>
+                                                <div class="text-xs text-gray-600" x-text="suggestion.instansi"></div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
 
                 {{-- Card Layout Riwayat Tamu --}}
-                <div class="p-3 space-y-3">
-                    @forelse($riwayat_tamu as $tamu)
+                <div class="p-4 space-y-3">
+                    <template x-for="(tamu, index) in paginatedTamu" :key="'tamu-' + index">
                         <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-300">
                             <div class="p-3">
                                 <div class="w-full">
                                     {{-- Header dengan Nama dan Badge --}}
                                     <div class="flex justify-between items-start gap-2 mb-2">
-                                        <h4 class="font-bold text-gray-800 text-sm flex-1 break-words">{{ $tamu->nama_tamu }}</h4>
-                                        <span class="inline-block bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md flex-shrink-0">{{ $tamu->waktu_datang->format('d/m/Y') }}</span>
+                                        <h4 class="font-bold text-gray-800 text-sm flex-1 break-words" x-text="tamu.nama_tamu"></h4>
+                                        <span class="inline-block bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md flex-shrink-0" x-text="new Date(tamu.waktu_datang).toLocaleDateString('id-ID', {day: '2-digit', month: '2-digit', year: '2-digit'})"></span>
                                     </div>
 
                                     {{-- Info Instansi & Waktu --}}
@@ -204,92 +242,182 @@
                                             <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                                             </svg>
-                                            <p class="text-gray-700 font-semibold text-xs">{{ $tamu->instansi }}</p>
+                                            <p class="text-gray-700 font-semibold text-xs" x-text="tamu.instansi"></p>
                                         </div>
                                         
                                         <div class="flex items-center gap-1">
                                             <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                             </svg>
-                                            <p class="text-gray-700 font-semibold text-xs">{{ $tamu->waktu_datang->format('H:i') }}</p>
+                                            <p class="text-gray-700 font-semibold text-xs" x-text="new Date(tamu.waktu_datang).toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'})"></p>
                                         </div>
                                     </div>
 
                                     {{-- Tujuan & No Identitas --}}
                                     <div class="text-xs text-gray-500">
                                         <div class="mb-1">
-                                            <span class="font-semibold">Tujuan:</span> {{ $tamu->tujuan }}
+                                            <span class="font-semibold">Tujuan:</span> <span x-text="tamu.tujuan"></span>
                                         </div>
-                                        @if(!empty($tamu->no_identitas))
-                                        <div>
-                                            <span class="font-semibold">No. Identitas:</span> {{ $tamu->no_identitas }}
+                                        <div x-show="tamu.no_identitas">
+                                            <span class="font-semibold">No. Identitas:</span> <span x-text="tamu.no_identitas"></span>
                                         </div>
-                                        @endif
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    @empty
+                    </template>
+                    
+                    <div x-show="paginatedTamu.length === 0">
                         <div class="bg-white rounded-xl shadow-md p-8 text-center border-2 border-gray-300">
                             <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
                                 <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                                 </svg>
                             </div>
-                            <p class="text-gray-500 font-semibold">Tidak ada riwayat tamu pada rentang tanggal ini.</p>
+                            <p class="text-gray-500 font-semibold">Tidak ada data tamu.</p>
                         </div>
-                    @endforelse
-                </div>
-                
-                {{-- Pagination Desktop --}}
-                @if(method_exists($riwayat_tamu, 'hasPages') && $riwayat_tamu->hasPages())
-                <div class="hidden md:flex justify-between items-center px-6 py-4 border-t border-gray-200">
-                    <div class="text-sm text-gray-600">Showing {{ $riwayat_tamu->firstItem() ?? 0 }} to {{ $riwayat_tamu->lastItem() ?? 0 }} of {{ $riwayat_tamu->total() }} entries</div>
-                    <div class="flex gap-1">
-                        @if($riwayat_tamu->onFirstPage())
-                            <span class="px-3 py-2 text-sm text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">Previous</span>
-                        @else
-                            <a href="{{ $riwayat_tamu->appends(request()->query())->previousPageUrl() }}" class="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Previous</a>
-                        @endif
-                        @foreach($riwayat_tamu->getUrlRange(1, $riwayat_tamu->lastPage()) as $page => $url)
-                            @if($page == $riwayat_tamu->currentPage())
-                                <span class="px-3 py-2 text-sm text-white bg-[#1e3a5f] rounded-lg">{{ $page }}</span>
-                            @else
-                                <a href="{{ $riwayat_tamu->appends(request()->query())->url($page) }}" class="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">{{ $page }}</a>
-                            @endif
-                        @endforeach
-                        @if($riwayat_tamu->hasMorePages())
-                            <a href="{{ $riwayat_tamu->appends(request()->query())->nextPageUrl() }}" class="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Next</a>
-                        @else
-                            <span class="px-3 py-2 text-sm text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">Next</span>
-                        @endif
                     </div>
                 </div>
                 
-                {{-- Pagination Mobile --}}
-                <div class="md:hidden flex justify-between items-center px-3 py-4 border-t border-gray-200">
-                    <div class="text-xs text-gray-600">{{ $riwayat_tamu->firstItem() ?? 0 }}-{{ $riwayat_tamu->lastItem() ?? 0 }} of {{ $riwayat_tamu->total() }}</div>
-                    <div class="flex gap-1">
-                        @if($riwayat_tamu->onFirstPage())
-                            <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Prev</span>
-                        @else
-                            <a href="{{ $riwayat_tamu->appends(request()->query())->previousPageUrl() }}" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Prev</a>
-                        @endif
-                        @foreach($riwayat_tamu->getUrlRange(1, $riwayat_tamu->lastPage()) as $page => $url)
-                            @if($page == $riwayat_tamu->currentPage())
-                                <span class="px-2 py-1 text-xs text-white bg-[#1e3a5f] rounded">{{ $page }}</span>
-                            @else
-                                <a href="{{ $riwayat_tamu->appends(request()->query())->url($page) }}" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
-                            @endif
-                        @endforeach
-                        @if($riwayat_tamu->hasMorePages())
-                            <a href="{{ $riwayat_tamu->appends(request()->query())->nextPageUrl() }}" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
-                        @else
-                            <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
-                        @endif
+                {{-- Pagination --}}
+                <div class="mt-6 px-3 md:px-6 py-4 border-t border-gray-200" x-show="paginatedTamu.length > 0 && totalPages > 1">
+                    {{-- Desktop Layout --}}
+                    <div class="hidden md:flex justify-between items-center">
+                        <div class="text-sm text-gray-600">
+                            Showing
+                            <span x-text="(currentPage - 1) * itemsPerPage + 1"></span> to
+                            <span x-text="Math.min(currentPage * itemsPerPage, filteredTamu.length > 0 ? filteredTamu.length : allTamu.length)"></span>
+                            of <span x-text="filteredTamu.length > 0 ? filteredTamu.length : allTamu.length"></span> entries
+                        </div>
+                        <div class="flex space-x-1">
+                            <button
+                                @click="currentPage--"
+                                :disabled="currentPage === 1"
+                                class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm"
+                            >
+                                Previous
+                            </button>
+                            <template x-if="totalPages <= 4">
+                                <template x-for="page in Array.from({length: totalPages}, (_, i) => i + 1)" :key="page">
+                                    <button
+                                        @click="currentPage = page"
+                                        :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-3 py-1 rounded text-sm"
+                                        x-text="page"
+                                    ></button>
+                                </template>
+                            </template>
+                            <template x-if="totalPages > 4">
+                                <div class="flex items-center space-x-1">
+                                    <template x-for="page in (() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return Array.from({length: 3}, (_, i) => start + i).filter(p => p <= totalPages);
+                                    })()" :key="page">
+                                        <button
+                                            @click="currentPage = page"
+                                            :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                            class="px-3 py-1 rounded text-sm"
+                                            x-text="page"
+                                        ></button>
+                                    </template>
+                                    <span x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()" class="text-sm text-gray-500">...</span>
+                                    <button x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()"
+                                        @click="currentPage = totalPages"
+                                        :class="currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-3 py-1 rounded text-sm"
+                                        x-text="totalPages"
+                                    ></button>
+                                </div>
+                            </template>
+                            <button
+                                @click="currentPage++"
+                                :disabled="currentPage >= totalPages"
+                                class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {{-- Mobile Layout --}}
+                    <div class="md:hidden">
+                        <div class="text-xs text-gray-600 mb-3">
+                            Showing <span x-text="(currentPage - 1) * itemsPerPage + 1"></span> to <span x-text="Math.min(currentPage * itemsPerPage, filteredTamu.length > 0 ? filteredTamu.length : allTamu.length)"></span> of <span x-text="filteredTamu.length > 0 ? filteredTamu.length : allTamu.length"></span> entries
+                        </div>
+                        <div class="flex justify-center items-center space-x-1">
+                            <button
+                                @click="currentPage--"
+                                :disabled="currentPage === 1"
+                                class="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-xs"
+                            >
+                                Previous
+                            </button>
+                            <template x-if="totalPages <= 4">
+                                <template x-for="page in Array.from({length: totalPages}, (_, i) => i + 1)" :key="page">
+                                    <button
+                                        @click="currentPage = page"
+                                        :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-2 py-1 rounded text-xs"
+                                        x-text="page"
+                                    ></button>
+                                </template>
+                            </template>
+                            <template x-if="totalPages > 4">
+                                <div class="flex items-center space-x-1">
+                                    <template x-for="page in (() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return Array.from({length: 3}, (_, i) => start + i).filter(p => p <= totalPages);
+                                    })()" :key="page">
+                                        <button
+                                            @click="currentPage = page"
+                                            :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                            class="px-2 py-1 rounded text-xs"
+                                            x-text="page"
+                                        ></button>
+                                    </template>
+                                    <span x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()" class="text-xs text-gray-500">...</span>
+                                    <button x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()"
+                                        @click="currentPage = totalPages"
+                                        :class="currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-2 py-1 rounded text-xs"
+                                        x-text="totalPages"
+                                    ></button>
+                                </div>
+                            </template>
+                            <button
+                                @click="currentPage++"
+                                :disabled="currentPage >= totalPages"
+                                class="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-xs"
+                            >
+                                Next
+                            </button>
+                        </div>
                     </div>
                 </div>
-                @endif
             </div>
         </div>
 
@@ -440,4 +568,89 @@
         </div>
 
     </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('tamuData', () => ({
+                isOpen: true,
+                allTamu: @json($riwayat_tamu),
+                searchQuery: '',
+                showSuggestions: false,
+                suggestions: [],
+                currentPage: 1,
+                itemsPerPage: 5,
+                
+                filteredTamu: [],
+                selectedSearch: '',
+                
+                get paginatedTamu() {
+                    const dataToShow = this.filteredTamu.length > 0 ? this.filteredTamu : this.allTamu;
+                    const start = (this.currentPage - 1) * this.itemsPerPage;
+                    return dataToShow.slice(start, start + this.itemsPerPage);
+                },
+                
+                get totalPages() {
+                    const dataToShow = this.filteredTamu.length > 0 ? this.filteredTamu : this.allTamu;
+                    return Math.ceil(dataToShow.length / this.itemsPerPage);
+                },
+                
+                init() {
+                    this.filteredTamu = [];
+                },
+                
+                searchTamu() {
+                    if (this.searchQuery.length >= 2) {
+                        const filtered = this.allTamu.filter(tamu => 
+                            tamu.nama_tamu.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                            tamu.instansi.toLowerCase().includes(this.searchQuery.toLowerCase())
+                        );
+                        
+                        const uniqueMap = new Map();
+                        filtered.forEach(tamu => {
+                            const key = tamu.nama_tamu + '|' + tamu.instansi;
+                            if (!uniqueMap.has(key)) {
+                                uniqueMap.set(key, {nama: tamu.nama_tamu, instansi: tamu.instansi});
+                            }
+                        });
+                        
+                        this.suggestions = Array.from(uniqueMap.values()).slice(0, 5);
+                        this.showSuggestions = this.suggestions.length > 0;
+                    } else {
+                        this.showSuggestions = false;
+                    }
+                    this.currentPage = 1;
+                },
+                
+                selectSuggestion(suggestion) {
+                    const query = this.searchQuery.toLowerCase();
+                    if (suggestion.nama.toLowerCase().includes(query)) {
+                        this.searchQuery = suggestion.nama;
+                        this.selectedSearch = suggestion.nama;
+                    } else if (suggestion.instansi.toLowerCase().includes(query)) {
+                        this.searchQuery = suggestion.instansi;
+                        this.selectedSearch = suggestion.instansi;
+                    } else {
+                        this.searchQuery = suggestion.nama;
+                        this.selectedSearch = suggestion.nama;
+                    }
+                    
+                    this.filteredTamu = this.allTamu.filter(tamu => 
+                        tamu.nama_tamu.toLowerCase().includes(this.selectedSearch.toLowerCase()) ||
+                        tamu.instansi.toLowerCase().includes(this.selectedSearch.toLowerCase())
+                    );
+                    
+                    this.showSuggestions = false;
+                    this.currentPage = 1;
+                },
+                
+                clearSearch() {
+                    if (this.searchQuery === '') {
+                        this.filteredTamu = [];
+                        this.selectedSearch = '';
+                        this.currentPage = 1;
+                    }
+                }
+            }))
+        })
+    </script>
 @endsection
