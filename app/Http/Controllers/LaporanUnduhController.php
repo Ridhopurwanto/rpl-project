@@ -192,12 +192,30 @@ class LaporanUnduhController extends Controller
                                         ->orderBy('waktu_lapor', 'asc')
                                         ->get();
             case 'shift':       
-                return Shift::join('pengguna', 'shift.id_pengguna', '=', 'pengguna.id_pengguna')
-                            ->whereBetween('shift.tanggal', [$start, $end])
-                            ->orderBy('pengguna.nama_lengkap', 'asc') // Sort by Name
-                            ->orderBy('shift.tanggal', 'asc')
-                            ->select('shift.*') // Keep shift data
-                            ->get();
+                // Fetch ALL active security personnel (exclude admin if needed, assumed komandan/anggota/bau)
+                $users = User::whereIn('peran', ['anggota', 'komandan', 'supervisor']) // Added supervisor/bau
+                             ->orderBy('nama_lengkap', 'asc')
+                             ->get();
+                
+                // Fetch Shifts in range
+                $shifts = Shift::with(['shiftRule'])
+                               ->whereBetween('tanggal', [$start, $end])
+                               ->get();
+                
+                // Map shifts to users
+                foreach ($users as $user) {
+                    // Filter shifts for this user
+                    $userShifts = $shifts->where('id_pengguna', $user->id_pengguna);
+                    
+                    // Create a map: date => shift_code
+                    $shiftMap = [];
+                    foreach ($userShifts as $s) {
+                        $shiftMap[$s->tanggal] = $s;
+                    }
+                    $user->shifts_by_date = $shiftMap;
+                }
+                
+                return $users;
             case 'anggota':     
                 return User::whereIn('peran', ['anggota', 'komandan'])
                            ->orderBy('nama_lengkap', 'asc') // Sort by Name
