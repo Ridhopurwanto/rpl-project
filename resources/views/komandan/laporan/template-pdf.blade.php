@@ -161,7 +161,8 @@
         @include('komandan.laporan.parts.pdf-kendaraan-terdaftar')
     @endif
 
-    {{-- FOOTER SIGNATURE --}}
+    {{-- FOOTER SIGNATURE (HANYA JIKA BUKAN SHIFT) --}}
+    @if(!isset($shift))
     <table style="width: 95%; margin-top: 60px; border: none;">
         <tr style="border: none;">
             <td style="width: 33%; text-align: center; vertical-align: top; border: none;">
@@ -180,6 +181,7 @@
             </td>
         </tr>
     </table>
+    @endif
 
 </body>
 </html>

@@ -1,116 +1,118 @@
+@php
+    $start = \Carbon\Carbon::parse($tanggalMulai);
+    $end = \Carbon\Carbon::parse($tanggalSelesai);
+    
+    // Split period by Month (Logic copied from Excel part)
+    $months = [];
+    $paramStart = $start->copy();
+    $paramEnd = $end->copy();
+
+    while ($paramStart <= $paramEnd) {
+        $key = $paramStart->format('Y-m');
+        if (!in_array($key, $months)) {
+            $months[] = $key;
+        }
+        $paramStart->addMonth();
+    }
+@endphp
+
 <h2 style="margin: 20px 10px; color: #1a1a1a; font-size: 13pt; border-bottom: 2px solid #333; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;">
     LAPORAN SHIFT ANGGOTA
 </h2>
 
-<div style="margin-bottom: 15px; font-size: 10pt; background-color: #f5f5f5; padding: 10px; border: 1px solid #ddd;">
-    <strong>KETERANGAN:</strong>
-    <div style="margin-top: 8px;">
-        <span style="display: inline-block; margin-right: 20px;">
-            <span style="display: inline-block; width: 20px; height: 20px; background-color: #ffff00; border: 1px solid #000; margin-right: 5px; vertical-align: middle;"></span>
-            <span>P = PAGI</span>
-        </span>
-        <span style="display: inline-block; margin-right: 20px;">
-            <span style="display: inline-block; width: 20px; height: 20px; background-color: #4fc3f7; border: 1px solid #000; margin-right: 5px; vertical-align: middle;"></span>
-            <span>M = MALAM</span>
-        </span>
-        <span style="display: inline-block; margin-right: 20px;">
-            <span style="display: inline-block; width: 20px; height: 20px; background-color: #ff5252; border: 1px solid #000; margin-right: 5px; vertical-align: middle; color: white;"></span>
-            <span>O = OFF/LIBUR</span>
-        </span>
-        <span style="display: inline-block;">
-            <span style="display: inline-block; width: 20px; height: 20px; background-color: #e0e0e0; border: 1px solid #000; margin-right: 5px; vertical-align: middle;"></span>
-            <span>N = NON SHIFT</span>
-        </span>
-    </div>
-</div>
+{{-- Legend at Top or Bottom? User asked for bottom. But PDF usually has space constraints. Let's keep it consistent with Excel (Bottom each table or End). --}}
+{{-- For PDF, let's put it once at the end. --}}
 
-@php
-    $start = \Carbon\Carbon::parse($tanggalMulai);
-    $end = \Carbon\Carbon::parse($tanggalSelesai);
-    $period = \Carbon\CarbonPeriod::create($start, $end);
-
-    $shiftMatrix = [];
-    $userDetails = [];
-
-    foreach($shift ?? [] as $s) {
-        $dateKey = \Carbon\Carbon::parse($s->tanggal)->format('Y-m-d');
-        $userId = $s->id_pengguna;
+@foreach($months as $monthKey)
+    @php
+        $monthParams = \Carbon\Carbon::createFromFormat('Y-m', $monthKey);
+        $monthName = $monthParams->isoFormat('MMMM Y');
         
-        if (!isset($userDetails[$userId])) {
-            $namaLengkap = $s->pengguna->nama_lengkap ?? '-';
-            $peran = $s->pengguna->peran ?? '-';
-            $userDetails[$userId] = [
-                'name' => $namaLengkap,
-                'role' => ucfirst($peran) 
-            ];
-        }
-
-        // 1. Ambil object rule dari relasi
-        $rule = $s->shiftRule; 
+        $monthStart = $monthParams->copy()->startOfMonth();
+        $monthEnd = $monthParams->copy()->endOfMonth();
         
-        // 2. Ambil teks jenisnya (Pagi, Malam, Off)
-        $namaShift = $rule ? $rule->jenis_shift : '-'; 
-
-        // 3. Ambil Kode Huruf Depan (P, M, O, N)
-        $kode = substr($namaShift, 0, 1); 
-        if ($namaShift == 'Non Shift') $kode = 'N';
+        if ($monthStart < $start) $monthStart = $start->copy();
+        if ($monthEnd > $end) $monthEnd = $end->copy();
         
-        $shiftMatrix[$userId][$dateKey] = $kode;
-    }
-    
-@endphp
+        $monthPeriod = \Carbon\CarbonPeriod::create($monthStart, $monthEnd);
+    @endphp
 
-<table style="border-collapse: collapse; width: 95%; margin: 10px auto; font-size: 7pt;">
-    <thead>
-        <tr style="background-color: #cccccc;">
-            <th rowspan="2" style="border: 1px solid #000; padding: 3px; text-align: center; width: 3%">NO</th>
-            <th rowspan="2" style="border: 1px solid #000; padding: 3px; text-align: left; width: 15%">NAMA PERSONIL</th>
-            <th rowspan="2" style="border: 1px solid #000; padding: 3px; text-align: center; width: 10%">JABATAN</th>
-            @foreach($period as $date)
-                <th style="border: 1px solid #000; padding: 2px; text-align: center; font-size: 7pt;">{{ $date->format('d') }}</th>
-            @endforeach
-        </tr>
-        <tr style="background-color: #cccccc;">
-            @foreach($period as $date)
-                @php
-                    $dayMap = [
-                        'Mon' => 'SEN', 'Tue' => 'SEL', 'Wed' => 'RAB', 
-                        'Thu' => 'KAM', 'Fri' => 'JUM', 'Sat' => 'SAB', 'Sun' => 'MIN'
-                    ];
-                    $dayEng = $date->format('D');
-                    $dayInd = $dayMap[$dayEng] ?? $dayEng;
-                @endphp
-                <th style="border: 1px solid #000; padding: 1px; text-align: center; font-size: 6pt;">
-                    {{ $dayInd }}
-                </th>
-            @endforeach
-        </tr>
-    </thead>
-    <tbody>
-        @php $no = 1; @endphp
-        @foreach($userDetails as $userId => $info)
-            <tr>
-                <td style="border: 1px solid #000; padding: 3px; text-align: center;">{{ $no++ }}</td>
-                <td style="border: 1px solid #000; padding: 3px; font-size: 7pt;">{{ $info['name'] }}</td>
-                <td style="border: 1px solid #000; padding: 3px; text-align: center; font-size: 7pt;">{{ $info['role'] }}</td>
-                
-                @foreach($period as $date)
-                    @php
-                        $dKey = $date->format('Y-m-d');
-                        $kode = $shiftMatrix[$userId][$dKey] ?? '';
-                        
-                        $bgColor = '#fff';
-                        if($kode == 'P') $bgColor = '#ffff00';
-                        elseif($kode == 'M') $bgColor = '#4fc3f7';
-                        elseif($kode == 'O') $bgColor = '#ff5252';
-                        elseif($kode == 'N') $bgColor = '#e0e0e0';
-                    @endphp
+    <h3 style="margin: 10px 10px; font-size: 10pt;">BULAN: {{ strtoupper($monthName) }}</h3>
 
-                    <td style="border: 1px solid #000; padding: 2px; text-align: center; background-color: {{ $bgColor }}; font-weight: bold; font-size: 7pt;">
-                        {{ $kode }}
-                    </td>
+    <table style="border-collapse: collapse; width: 98%; margin: 10px auto; font-size: 7pt;">
+        <thead>
+            <tr style="background-color: #cccccc;">
+                <th rowspan="2" style="border: 1px solid #000; padding: 2px; text-align: center; width: 3%">NO</th>
+                <th rowspan="2" style="border: 1px solid #000; padding: 2px; text-align: left; width: 15%">NAMA PERSONIL</th>
+                <th rowspan="2" style="border: 1px solid #000; padding: 2px; text-align: center; width: 10%">JABATAN</th>
+                @foreach($monthPeriod as $date)
+                    <th style="border: 1px solid #000; padding: 1px; text-align: center; font-size: 6pt;">{{ $date->format('d') }}</th>
                 @endforeach
             </tr>
-        @endforeach
-    </tbody>
-</table>
+            <tr style="background-color: #cccccc;">
+                @foreach($monthPeriod as $date)
+                    <th style="border: 1px solid #000; padding: 1px; text-align: center; font-size: 5pt;">
+                        {{ strtoupper(substr($date->isoFormat('dddd'), 0, 1)) }}
+                    </th>
+                @endforeach
+            </tr>
+        </thead>
+        <tbody>
+            @php $no = 1; @endphp
+            {{-- $shift passed from controller is actually the Collection of Users with shifts_by_date --}}
+            {{-- Controller passes 'shift' => $users --}}
+            @foreach($shift as $user)
+                <tr>
+                    <td style="border: 1px solid #000; padding: 2px; text-align: center;">{{ $no++ }}</td>
+                    <td style="border: 1px solid #000; padding: 3px; font-size: 7pt;">{{ $user->nama_lengkap }}</td>
+                    <td style="border: 1px solid #000; padding: 2px; text-align: center; font-size: 7pt;">{{ ucfirst($user->peran) }}</td>
+                    
+                    @foreach($monthPeriod as $date)
+                        @php
+                            $dKey = $date->format('Y-m-d');
+                            $sObj = $user->shifts_by_date[$dKey] ?? null;
+                            
+                            $kode = 'O'; 
+                            $bgColor = '#ff5252'; // Default Red
+
+                            if ($sObj) {
+                                $namaShift = $sObj->shiftRule->jenis_shift ?? 'Off';
+                                $kode = strtoupper(substr($namaShift, 0, 1));
+                                
+                                if($kode == 'P') $bgColor = '#ffff00';
+                                elseif($kode == 'M') $bgColor = '#4fc3f7';
+                                else $bgColor = '#ff5252'; 
+                            }
+                        @endphp
+
+                        <td style="border: 1px solid #000; padding: 1px; text-align: center; background-color: {{ $bgColor }}; font-weight: bold; font-size: 6pt; color: {{ $bgColor == '#ff5252' ? 'white' : 'black' }};">
+                            {{ $kode }}
+                        </td>
+                    @endforeach
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+    
+    {{-- Page Break between months if needed, or just specific spacing --}}
+    <div style="margin-bottom: 20px;"></div>
+@endforeach
+
+{{-- LEGEND (Bottom) --}}
+<div style="margin: 10px 10px; font-size: 8pt; border: 1px solid #ccc; padding: 5px; width: 50%;">
+    <strong>KETERANGAN:</strong>
+    <table style="width: 100%; border: none; margin: 5px 0 0 0;">
+        <tr>
+            <td style="border: none; width: 25px;"><div style="width: 20px; height: 15px; background-color: #ffff00; border: 1px solid #000; text-align: center; font-size: 8pt;">P</div></td>
+            <td style="border: none;">SHIFT PAGI</td>
+        </tr>
+        <tr>
+            <td style="border: none;"><div style="width: 20px; height: 15px; background-color: #4fc3f7; border: 1px solid #000; text-align: center; font-size: 8pt;">M</div></td>
+            <td style="border: none;">SHIFT MALAM</td>
+        </tr>
+        <tr>
+            <td style="border: none;"><div style="width: 20px; height: 15px; background-color: #ff5252; color: white; border: 1px solid #000; text-align: center; font-size: 8pt;">O</div></td>
+            <td style="border: none;">OFF / LIBUR</td>
+        </tr>
+    </table>
+</div>

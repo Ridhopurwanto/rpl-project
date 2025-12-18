@@ -62,8 +62,12 @@ class LaporanUnduhController extends Controller
         }
 
         if ($format == 'pdf') {
+            // Check if Shift is present to determine orientation
+            $hasShift = isset($dataGabungan['shift']);
+            $orientation = $hasShift ? 'landscape' : 'portrait';
+
             $pdf = Pdf::loadView('komandan.laporan.template-pdf', $dataGabungan)
-                ->setPaper('a4', 'portrait')
+                ->setPaper('a4', $orientation)
                 ->setOption('isHtml5ParserEnabled', true)
                 ->setOption('isRemoteEnabled', true);
 
@@ -125,8 +129,11 @@ class LaporanUnduhController extends Controller
         }
         
         if ($format == 'pdf') {
+            // Set Landscape if Shift
+            $orientation = ($type == 'shift') ? 'landscape' : 'portrait';
+
             $pdf = Pdf::loadView('komandan.laporan.template-pdf', $dataWrapper)
-                ->setPaper('a4', 'portrait')
+                ->setPaper('a4', $orientation)
                 ->setOption('isHtml5ParserEnabled', true)
                 ->setOption('isRemoteEnabled', true);
 
