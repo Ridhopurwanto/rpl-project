@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Supervisor;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Presensi;
 use App\Models\Patroli;

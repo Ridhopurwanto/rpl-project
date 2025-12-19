@@ -254,7 +254,7 @@
 
                                     {{-- Keterangan & Tombol --}}
                                     <div class="flex gap-1.5">
-                                        <form :action="'/anggota/kendaraan/update-keterangan/' + log.id_log" method="POST" class="flex-1">
+                                        <form :action="'/anggota/kendaraan/' + log.id_log + '/update-keterangan'" method="POST" class="flex-1">
                                             @csrf @method('PUT')
                                             <select name="keterangan" onchange="this.form.submit()" class="w-full border border-gray-300 rounded text-xs py-1 focus:border-blue-500 focus:ring-blue-500">
                                                 <option value="Tidak Menginap" :selected="log.keterangan === 'Tidak Menginap'">Tidak Menginap</option>
