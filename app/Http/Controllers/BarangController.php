@@ -30,8 +30,11 @@ class BarangController extends Controller
         
         if ($tanggalTemuan) {
             $queryTemuan->where(function($q) use ($tanggalTemuan) {
-                $q->whereDate('waktu_lapor', $tanggalTemuan)
-                  ->orWhereDate('waktu_selesai', $tanggalTemuan);
+                $q->whereDate('waktu_lapor', '<=', $tanggalTemuan)
+                  ->where(function($sub) use ($tanggalTemuan) {
+                      $sub->whereNull('waktu_selesai')
+                          ->orWhereDate('waktu_selesai', '>=', $tanggalTemuan);
+                  });
             });
         }
         
@@ -53,8 +56,11 @@ class BarangController extends Controller
         
         if ($tanggalTitipan) {
             $queryTitipan->where(function($q) use ($tanggalTitipan) {
-                $q->whereDate('waktu_titip', $tanggalTitipan)
-                  ->orWhereDate('waktu_selesai', $tanggalTitipan);
+                $q->whereDate('waktu_titip', '<=', $tanggalTitipan)
+                  ->where(function($sub) use ($tanggalTitipan) {
+                      $sub->whereNull('waktu_selesai')
+                          ->orWhereDate('waktu_selesai', '>=', $tanggalTitipan);
+                  });
             });
         }
         
