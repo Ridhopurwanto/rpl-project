@@ -313,50 +313,46 @@ class LaporanPerSheet implements FromView, ShouldAutoSize, WithTitle, WithStyles
                             $currentRow = $rowTemuanStart + $index;
                             
                             // SET TINGGI BARIS AGAR MUAT 2 FOTO
-                            // 150 points cukup untuk 2 foto height 50 + spacing
-                            // Update: 180 points agar foto penerima tidak menimpa text
-                            // Update 2: 150 points, gap bawah terlalu besar (End img2 ~131pt)
-                            // SET TINGGI BARIS AGAR MUAT 2 FOTO
-                            // 150 points cukup untuk 2 foto height 50 + spacing
+                            // 150 points cukup untuk 2 foto + text (lebih padat)
                             $sheet->getRowDimension($currentRow)->setRowHeight(150);
 
-                            // 1. FOTO BARANG
-                            if ($item->foto) {
-                                try {
-                                    $rawPath = public_path('storage/' . $item->foto);
-                                    if (file_exists($rawPath) && ($cleanPath = realpath($rawPath))) {
-                                        $drawing = new Drawing();
-                                        $drawing->setName('Foto Barang');
-                                        $drawing->setDescription('Foto Barang');
-                                        $drawing->setPath($cleanPath);
-                                        $drawing->setHeight(50);
-                                        $drawing->setCoordinates('B' . $currentRow);
-                                        $drawing->setOffsetX(60); 
-                                        $drawing->setOffsetY(25); 
-                                        $drawing->setWorksheet($sheet);
-                                    }
-                                } catch (\Throwable $e) {
-                                    // Ignore image if error
+                            // 1. FOTO BARANG (Di bawah text "Barang :")
+                            try {
+                                $fotoPath = public_path('storage/' . $item->foto);
+                                $realFotoPath = realpath($fotoPath);
+                                
+                                if ($item->foto && $realFotoPath && file_exists($realFotoPath) && is_file($realFotoPath)) {
+                                    $drawing = new Drawing();
+                                    $drawing->setName('Foto Barang');
+                                    $drawing->setDescription('Foto Barang');
+                                    $drawing->setPath($realFotoPath);
+                                    $drawing->setHeight(50);
+                                    $drawing->setCoordinates('B' . $currentRow);
+                                    $drawing->setOffsetX(10); // Rata Kiri
+                                    $drawing->setOffsetY(30); 
+                                    $drawing->setWorksheet($sheet);
                                 }
+                            } catch (\Throwable $e) {
                             }
 
-                            // 2. FOTO PENERIMA (Jika selesai & ada foto)
+                            // 2. FOTO PENERIMA (Di bawah text "Penerima :")
                             if (strtolower($item->status ?? '') === 'selesai' && $item->foto_penerima) {
                                 try {
-                                    $rawPath = public_path('storage/' . $item->foto_penerima);
-                                    if (file_exists($rawPath) && ($cleanPath = realpath($rawPath))) {
+                                    $fotoPenerimaPath = public_path('storage/' . $item->foto_penerima);
+                                    $realFotoPenerimaPath = realpath($fotoPenerimaPath);
+                                    
+                                    if ($realFotoPenerimaPath && file_exists($realFotoPenerimaPath) && is_file($realFotoPenerimaPath)) {
                                         $drawing2 = new Drawing();
                                         $drawing2->setName('Foto Penerima');
                                         $drawing2->setDescription('Foto Penerima');
-                                        $drawing2->setPath($cleanPath);
+                                        $drawing2->setPath($realFotoPenerimaPath);
                                         $drawing2->setHeight(50);
                                         $drawing2->setCoordinates('B' . $currentRow);
-                                        $drawing2->setOffsetX(60); 
-                                        $drawing2->setOffsetY(125); 
+                                        $drawing2->setOffsetX(10); // Rata Kiri
+                                        $drawing2->setOffsetY(115); 
                                         $drawing2->setWorksheet($sheet);
                                     }
                                 } catch (\Throwable $e) {
-                                    // Ignore
                                 }
                             }
                         }
@@ -370,42 +366,42 @@ class LaporanPerSheet implements FromView, ShouldAutoSize, WithTitle, WithStyles
                             $sheet->getRowDimension($currentRow)->setRowHeight(150);
 
                             // 1. FOTO BARANG
-                            if ($item->foto) {
-                                try {
-                                    $rawPath = public_path('storage/' . $item->foto);
-                                    if (file_exists($rawPath) && ($cleanPath = realpath($rawPath))) {
-                                        $drawing = new Drawing();
-                                        $drawing->setName('Foto Barang');
-                                        $drawing->setDescription('Foto Barang');
-                                        $drawing->setPath($cleanPath);
-                                        $drawing->setHeight(50);
-                                        $drawing->setCoordinates('B' . $currentRow);
-                                        $drawing->setOffsetX(60); 
-                                        $drawing->setOffsetY(25); 
-                                        $drawing->setWorksheet($sheet);
-                                    }
-                                } catch (\Throwable $e) {
-                                    // Ignore
+                            try {
+                                $fotoPathTitip = public_path('storage/' . $item->foto);
+                                $realFotoPathTitip = realpath($fotoPathTitip);
+
+                                if ($item->foto && $realFotoPathTitip && file_exists($realFotoPathTitip) && is_file($realFotoPathTitip)) {
+                                    $drawing = new Drawing();
+                                    $drawing->setName('Foto Barang');
+                                    $drawing->setDescription('Foto Barang');
+                                    $drawing->setPath($realFotoPathTitip);
+                                    $drawing->setHeight(50);
+                                    $drawing->setCoordinates('B' . $currentRow);
+                                    $drawing->setOffsetX(10); 
+                                    $drawing->setOffsetY(30); 
+                                    $drawing->setWorksheet($sheet);
                                 }
+                            } catch (\Throwable $e) {
                             }
 
                             // 2. FOTO PENERIMA
                             if (strtolower($item->status ?? '') === 'selesai' && $item->foto_penerima) {
                                 try {
-                                    $rawPath = public_path('storage/' . $item->foto_penerima);
-                                    if (file_exists($rawPath) && ($cleanPath = realpath($rawPath))) {
+                                    $fotoPenerimaPathTitip = public_path('storage/' . $item->foto_penerima);
+                                    $realFotoPenerimaPathTitip = realpath($fotoPenerimaPathTitip);
+
+                                    if ($realFotoPenerimaPathTitip && file_exists($realFotoPenerimaPathTitip) && is_file($realFotoPenerimaPathTitip)) {
                                         $drawing2 = new Drawing();
                                         $drawing2->setName('Foto Penerima');
                                         $drawing2->setDescription('Foto Penerima');
-                                        $drawing2->setPath($cleanPath);
+                                        $drawing2->setPath($realFotoPenerimaPathTitip);
                                         $drawing2->setHeight(50);
                                         $drawing2->setCoordinates('B' . $currentRow);
-                                        $drawing2->setOffsetX(60); 
-                                        $drawing2->setOffsetY(125); 
+                                        $drawing2->setOffsetX(10); 
+                                        $drawing2->setOffsetY(115); 
                                         $drawing2->setWorksheet($sheet);
                                     }
                                 } catch (\Throwable $e) {
-                                    // Ignore
                                 }
                             }
                         }

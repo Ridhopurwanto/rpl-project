@@ -52,12 +52,12 @@ class LaporanUnduhController extends Controller
             }
         }
 
-        $timestamp = date('d-m-Y H-i');
+        $timestamp = date('d-m-Y_H-i');
         
         if ($format == 'excel') {
             return Excel::download(
                 new LaporanGabunganExport($dataGabungan),
-                "Laporan Gabungan {$timestamp}.xlsx"
+                "Laporan_Gabungan_{$timestamp}.xlsx"
             );
         }
 
@@ -72,7 +72,7 @@ class LaporanUnduhController extends Controller
                 ->setOption('isRemoteEnabled', true);
 
             // return $pdf->stream("Laporan_Gabungan_{$timestamp}.pdf");
-            return $pdf->download("Laporan Gabungan {$timestamp}.pdf");
+            return $pdf->download("Laporan_Gabungan_{$timestamp}.pdf");
         }
 
         // kalau bukan excel atau pdf
@@ -119,8 +119,7 @@ class LaporanUnduhController extends Controller
             ];
         }
 
-        $cleanType = str_replace('_', ' ', $type);
-        $fileName = ucfirst($cleanType) . " {$start} sd {$end}";
+        $fileName = ucfirst($type) . "_{$start}_sd_{$end}";
 
         if ($format == 'excel') {
             return Excel::download(
