@@ -70,7 +70,6 @@ class ManajemenAkunController extends Controller
             'email'        => ['required', 'email', 'max:255', Rule::unique('pengguna')->ignore($user->id_pengguna, 'id_pengguna')],
             'username'     => ['required', 'string', 'max:255', Rule::unique('pengguna')->ignore($user->id_pengguna, 'id_pengguna')],
             'password'     => ['nullable', 'confirmed', Password::min(8)],
-            'peran'        => ['required', Rule::in(['anggota', 'komandan', 'supervisor'])],
             'jenis_jadwal' => 'nullable|in:shift,non_shift',
             'status'       => ['required', Rule::in(['Aktif', 'Tidak Aktif'])],
             'tanggal_lahir'=> 'nullable|date',
@@ -79,7 +78,7 @@ class ManajemenAkunController extends Controller
             'foto_profil'  => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $data = $request->except(['password', 'foto_profil', 'password_confirmation']);
+        $data = $request->except(['password', 'foto_profil', 'password_confirmation', 'peran']);
 
         // Update password hanya jika diisi
         if ($request->filled('password')) {
@@ -88,10 +87,16 @@ class ManajemenAkunController extends Controller
 
         // Update Foto
         if ($request->hasFile('foto_profil')) {
-            // Hapus foto lama
-            if ($user->foto_profil && Storage::disk('public')->exists($user->foto_profil)) {
-                Storage::disk('public')->delete($user->foto_profil);
+            // Hapus foto lama (Legacy & Storage)
+            if ($user->foto_profil) {
+                if (file_exists(public_path('uploads/profil/' . $user->foto_profil))) {
+                    @unlink(public_path('uploads/profil/' . $user->foto_profil));
+                }
+                if (Storage::disk('public')->exists($user->foto_profil)) {
+                    Storage::disk('public')->delete($user->foto_profil);
+                }
             }
+            
             $path = $request->file('foto_profil')->store('akun', 'public');
             $data['foto_profil'] = $path;
         }

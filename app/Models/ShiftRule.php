@@ -22,6 +22,12 @@ class ShiftRule extends Model
         'is_geotag_enabled',
     ];
 
+    protected $casts = [
+        'toleransi' => 'integer',
+        'dibuka' => 'integer',
+        'is_geotag_enabled' => 'boolean',
+    ];
+
     // Relasi ke tabel 'shift' (One Rule has Many Shifts)
     public function shifts()
     {

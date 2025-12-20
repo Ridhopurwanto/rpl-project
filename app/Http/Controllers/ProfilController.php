@@ -59,20 +59,21 @@ class ProfilController extends Controller
         // 3. Cek apakah ada upload foto baru
         if ($request->hasFile('foto_profil')) {
             
-            // Hapus foto lama jika ada (dan bukan placeholder default)
+            // A. Hapus foto lama (Cek Legacy Path: public/uploads/profil)
             if ($pengguna->foto_profil && file_exists(public_path('uploads/profil/' . $pengguna->foto_profil))) {
                 @unlink(public_path('uploads/profil/' . $pengguna->foto_profil));
             }
+            // B. Hapus foto lama (Cek Storage Path: storage/app/public/...)
+            elseif ($pengguna->foto_profil && Storage::disk('public')->exists($pengguna->foto_profil)) {
+                Storage::disk('public')->delete($pengguna->foto_profil);
+            }
 
-            // Simpan foto baru
-            $file = $request->file('foto_profil');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            
-            // Pindahkan ke folder public/uploads/profil
-            $file->move(public_path('uploads/profil'), $filename);
+            // Simpan foto baru menggunakan Storage (Standard ManajemenAkunController)
+            // Path otomatis: storage/app/public/akun/filename.ext
+            $path = $request->file('foto_profil')->store('akun', 'public');
 
-            // Masukkan nama file ke array update
-            $dataToUpdate['foto_profil'] = $filename;
+            // Masukkan path relative ke array update (Contoh: akun/xyz.jpg)
+            $dataToUpdate['foto_profil'] = $path;
         }
 
         // 4. Update Database
