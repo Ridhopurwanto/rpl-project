@@ -58,7 +58,7 @@ class LaporanUnduhController extends Controller
         if ($format == 'excel') {
             return Excel::download(
                 new LaporanGabunganExport($dataGabungan),
-                "Laporan_Gabungan_{$timestamp}.xlsx"
+                "Laporan Gabungan {$timestamp}.xlsx"
             );
         }
 
@@ -68,8 +68,8 @@ class LaporanUnduhController extends Controller
                 ->setOption('isHtml5ParserEnabled', true)
                 ->setOption('isRemoteEnabled', true);
 
-            // return $pdf->stream("Laporan_Gabungan_{$timestamp}.pdf");
-            return $pdf->download("Laporan_Gabungan_{$timestamp}.pdf");
+            // return $pdf->stream("Laporan Gabungan {$timestamp}.pdf");
+            return $pdf->download("Laporan Gabungan {$timestamp}.pdf");
         }
 
         // kalau bukan excel atau pdf
@@ -116,7 +116,7 @@ class LaporanUnduhController extends Controller
             ];
         }
 
-        $fileName = ucfirst($type) . "_{$start}_sd_{$end}";
+        $fileName = ucfirst(str_replace('_', ' ', $type)) . " {$start} sd {$end}";
 
         if ($format == 'excel') {
             return Excel::download(
