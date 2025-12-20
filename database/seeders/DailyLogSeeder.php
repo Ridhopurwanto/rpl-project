@@ -25,7 +25,7 @@ class DailyLogSeeder extends Seeder
 
         // STRICTLY 2025 as requested
         $startDate = Carbon::create(2025, 10, 1);
-        $endDate = Carbon::create(2025, 12, 14);
+        $endDate = Carbon::create(2025, 12, 25);
         
         $anggotaUsers = User::where('peran', 'anggota')->get();
         
