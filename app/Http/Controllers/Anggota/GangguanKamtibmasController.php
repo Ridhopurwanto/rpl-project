@@ -46,8 +46,8 @@ class GangguanKamtibmasController extends Controller
             $query->where('kategori', $kategori_terpilih);
         }
 
-        $perPage = $request->input('per_page', 5);
-        $laporan_gangguan = $query->orderBy('waktu_lapor', 'desc')->paginate($perPage);
+        // Ambil semua data tanpa pagination (untuk client-side pagination)
+        $laporan_gangguan = $query->orderBy('waktu_lapor', 'desc')->get();
 
         // 6. Kirim ke View
         return view('anggota.gangguan-index', [
