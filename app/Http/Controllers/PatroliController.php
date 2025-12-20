@@ -13,8 +13,15 @@ class PatroliController extends Controller
 {
     public function index(Request $request)
     {
-        // 1. Ambil Tanggal (Default Hari Ini)
-        $tanggalTerpilih = $request->input('tanggal', now()->format('Y-m-d'));
+        // 1. Ambil Tanggal - terpisah untuk pagi dan malam
+        // Gunakan filled() untuk memastikan parameter tidak kosong
+        $tanggalPagi = $request->filled('tanggal_pagi') 
+            ? $request->input('tanggal_pagi') 
+            : now()->format('Y-m-d');
+            
+        $tanggalMalam = $request->filled('tanggal_malam') 
+            ? $request->input('tanggal_malam') 
+            : now()->format('Y-m-d');
         
         // 2. Definisikan Opsi Jenis Patroli (Untuk Dropdown Filter)
         $jenisPatroliOptions = collect([
@@ -31,7 +38,7 @@ class PatroliController extends Controller
 
         $queryPagi = Patroli::query()
             ->with(['claim.rule']) // Eager load relasi
-            ->whereDate('tanggal', $tanggalTerpilih)
+            ->whereDate('tanggal', $tanggalPagi)
             ->whereHas('claim.rule', function ($q) {
                 // Filter hanya yang shift Pagi
                 $q->where('jenis_shift', 'Pagi'); 
@@ -56,7 +63,7 @@ class PatroliController extends Controller
 
         $queryMalam = Patroli::query()
             ->with(['claim.rule']) // Eager load relasi
-            ->whereDate('tanggal', $tanggalTerpilih)
+            ->whereDate('tanggal', $tanggalMalam)
             ->whereHas('claim.rule', function ($q) {
                 // Filter hanya yang shift Malam
                 $q->where('jenis_shift', 'Malam'); 
@@ -98,8 +105,9 @@ class PatroliController extends Controller
             'dataPatroliPagi' => $dataPatroliPagi,
             'dataPatroliMalam' => $dataPatroliMalam,
             
-            // Filter State
-            'tanggalTerpilih' => $tanggalTerpilih,
+            // Filter State - terpisah untuk pagi dan malam
+            'tanggalPagi' => $tanggalPagi,
+            'tanggalMalam' => $tanggalMalam,
             'jenisPatroliTerpilihPagi' => $jenisPatroliTerpilihPagi,
             'jenisPatroliTerpilihMalam' => $jenisPatroliTerpilihMalam,
             
@@ -134,7 +142,7 @@ class PatroliController extends Controller
     /**
      * Menghapus data patroli.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         try {
             $patroli = Patroli::findOrFail($id);
@@ -146,7 +154,20 @@ class PatroliController extends Controller
             
             $patroli->delete();
 
-            return back()->with('success', 'Data patroli berhasil dihapus.');
+            // Ambil parameter filter dari request agar tidak reset
+            $params = $request->only([
+                'tanggal_pagi', 
+                'tanggal_malam', 
+                'per_page_pagi', 
+                'per_page_malam', 
+                'jenis_patroli_pagi', 
+                'jenis_patroli_malam'
+            ]);
+
+            // Redirect ke route index dengan parameter yang tetap terjaga
+            return redirect()->route('komandan.patroli', $params)
+                             ->with('success', 'Data patroli berhasil dihapus.');
+
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal menghapus data: ' . $e->getMessage());
         }

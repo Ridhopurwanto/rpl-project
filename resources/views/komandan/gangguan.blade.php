@@ -45,7 +45,10 @@
             showDeleteModal: false,
             deleteAction: '',
             showSuccessNotif: {{ session('success') ? 'true' : 'false' }},
-            showErrorNotif: {{ session('error') ? 'true' : 'false' }}
+            showErrorNotif: {{ session('error') ? 'true' : 'false' }},
+            bulan: '{{ $bulanTerpilih }}',
+            perPage: '{{ $perPage }}',
+            kategori: '{{ $kategoriTerpilih ?? 'semua' }}'
          }">
 
         <h2 class="text-2xl font-bold text-slate-800 mb-4">Laporan Gangguan Kamtibmas</h2>
@@ -165,14 +168,14 @@
                     <div class="w-[calc(50%-0.5rem)] md:w-auto">
                         <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
                         <div class="flex items-center gap-2">
-                            <select id="perPage" name="per_page"
+                            <select id="perPage" name="per_page" x-model="perPage"
                                 class="filter-input h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm appearance-none cursor-pointer"
                                 style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em;">
-                                <option value="5" {{ $perPage == 5 ? 'selected' : '' }}>5</option>
-                                <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10</option>
-                                <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25</option>
-                                <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>
-                                <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100</option>
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
                             </select>
                             <span class="text-sm text-gray-600">rows</span>
                         </div>
@@ -211,7 +214,7 @@
                         <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Bulan</label>
                         <div class="relative">
                             {{-- Hidden Input --}}
-                            <input type="hidden" id="bulan" name="bulan" x-ref="hiddenBulan" value="{{ $bulanTerpilih }}">
+                            <input type="hidden" id="bulan" name="bulan" x-ref="hiddenBulan" :value="bulan" x-init="$watch('month', m => bulan = year + '-' + m.toString().padStart(2, '0')); $watch('year', y => bulan = y + '-' + month.toString().padStart(2, '0'))">
 
                             {{-- Trigger Button (Looks like Input) --}}
                             <div @click="showPicker = !showPicker"
@@ -266,11 +269,11 @@
                         <label for="kategori"
                             class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Kategori</label>
                         <div class="relative">
-                            <select id="kategori" name="kategori"
+                            <select id="kategori" name="kategori" x-model="kategori"
                                 class="filter-input block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
                                 <option value="semua">Semua Kategori</option>
                                 @foreach($kategoriOptions as $kategori)
-                                    <option value="{{ $kategori }}" {{ $kategoriTerpilih == $kategori ? 'selected' : '' }}>
+                                    <option value="{{ $kategori }}">
                                         {{ $kategori }}</option>
                                 @endforeach
                             </select>
@@ -334,6 +337,11 @@
                 <form :action="editAction" method="POST">
                     @csrf
                     @method('PUT')
+                    
+                    {{-- Hidden inputs to preserve filters --}}
+                    <input type="hidden" name="bulan" :value="bulan">
+                    <input type="hidden" name="per_page" :value="perPage">
+                    <input type="hidden" name="kategori_filter" :value="kategori">
                     <div class="modal-body max-h-[70vh] overflow-y-auto p-6">
                         <div class="space-y-5">
 
@@ -453,6 +461,11 @@
                 <form :action="deleteAction" method="POST" class="flex justify-end space-x-4">
                     @csrf
                     @method('DELETE')
+                    
+                    {{-- Hidden inputs to preserve filters --}}
+                    <input type="hidden" name="bulan" :value="bulan">
+                    <input type="hidden" name="per_page" :value="perPage">
+                    <input type="hidden" name="kategori_filter" :value="kategori">
                     <button type="button" @click="showDeleteModal = false"
                         class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">
                         Batal
