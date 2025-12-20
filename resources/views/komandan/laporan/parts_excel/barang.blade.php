@@ -17,19 +17,17 @@
             @foreach($data['temu'] as $index => $item)
                 <tr>
                     <td style="{{ $tdCenterStyle }}">{{ $index + 1 }}</td>
-                    <td style="{{ $tdCenterStyle }}; text-align: center; vertical-align: middle;">
+                    <td style="{{ $tdCenterStyle }}; text-align: center; vertical-align: top;">
                         @if(isset($item->foto) && $item->foto)
-                            <strong>Barang :</strong><br>
-                            <img src="{{ public_path('storage/' . $item->foto) }}" height="50" width="auto" style="display: block; margin: auto; margin-top: 5px;">
+                            <strong>Barang :</strong><br><br><br><br><br>
                         @endif
 
                         @if(isset($item->foto) && $item->foto && isset($item->foto_penerima) && $item->foto_penerima && strtolower($item->status ?? '') === 'selesai')
-                            <br><br>
+                            <br>
                         @endif
 
                         @if(isset($item->foto_penerima) && $item->foto_penerima && strtolower($item->status ?? '') === 'selesai')
-                            <strong>Penerima :</strong><br>
-                            <img src="{{ public_path('storage/' . $item->foto_penerima) }}" height="50" width="auto" style="display: block; margin: auto; margin-top: 5px;">
+                            <strong>Penerima :</strong><br><br><br><br>
                         @endif
                     </td>
                     <td style="{{ $tdCenterStyle }}">{{ \Carbon\Carbon::parse($item->waktu_lapor ?? $item->created_at)->format('d/m/Y H:i') }}</td>
@@ -68,19 +66,17 @@
             @foreach($data['titip'] as $index => $item)
                 <tr>
                     <td style="{{ $tdCenterStyle }}">{{ $index + 1 }}</td>
-                    <td style="{{ $tdCenterStyle }}; text-align: center; vertical-align: middle;">
+                    <td style="{{ $tdCenterStyle }}; text-align: center; vertical-align: top;">
                         @if(isset($item->foto) && $item->foto)
-                            <strong>Barang :</strong><br>
-                            <img src="{{ public_path('storage/' . $item->foto) }}" height="50" width="auto" style="display: block; margin: auto; margin-top: 5px;">
+                            <strong>Barang :</strong><br><br><br><br><br>
                         @endif
                         
                         @if(isset($item->foto) && $item->foto && isset($item->foto_penerima) && $item->foto_penerima && strtolower($item->status ?? '') === 'selesai')
-                            <br><br>
+                            <br>
                         @endif
 
                         @if(isset($item->foto_penerima) && $item->foto_penerima && strtolower($item->status ?? '') === 'selesai')
-                            <strong>Penerima :</strong><br>
-                            <img src="{{ public_path('storage/' . $item->foto_penerima) }}" height="50" width="auto" style="display: block; margin: auto; margin-top: 5px;">
+                            <strong>Penerima :</strong><br><br><br><br>
                         @endif
                     </td>
                     <td style="{{ $tdCenterStyle }}">{{ \Carbon\Carbon::parse($item->waktu_titip ?? $item->created_at)->format('d/m/Y H:i') }}</td>

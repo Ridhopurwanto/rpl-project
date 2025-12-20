@@ -267,6 +267,150 @@ class LaporanPerSheet implements FromView, ShouldAutoSize, WithTitle, WithStyles
                 if ($this->type == 'shift') {
                     $event->sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
                 }
+
+                // --- KHUSUS BARANG: INSERT GAMBAR MANUAL ---
+                if ($this->type == 'barang') {
+                     $sheet = $event->sheet->getDelegate();
+                     $highestRow = $sheet->getHighestRow();
+
+                     // Cari baris mulai untuk "BARANG TEMUAN" dan "BARANG TITIPAN"
+                     // Kita cari text header tabel "NO"
+                     $rowTemuanStart = 0;
+                     $rowTitipanStart = 0;
+                     
+                     // Helper simple untuk deteksi section
+                     // Asumsi: Header tabel selalu ada "NO" di kolom A
+                     // Kita scanning dari baris 5 ke bawah
+                     for ($row = 5; $row <= $highestRow; $row++) {
+                        $valA = $sheet->getCell('A' . $row)->getValue();
+                        
+                        // Deteksi Header Tabel
+                        if ($valA === 'NO') {
+                            // Cek baris sebelumnya atau sebelumnya lagi ada judul "BARANG TEMUAN" atau "BARANG TITIPAN"?
+                            // Atau cek data apa yang sedang kita proses
+                            // Karena struktur dinamis, kita pakai counter saja. 
+                            // Temu duluan, baru Titip.
+                            if ($rowTemuanStart == 0) {
+                                // Jika data temu ada, ini pasti temu
+                                if (isset($this->data['temu']) && count($this->data['temu']) > 0) {
+                                    $rowTemuanStart = $row + 1; // Data mulai dari row header + 1
+                                } else {
+                                    // Jika tidak ada temu, mungkin ini titip
+                                     if (isset($this->data['titip']) && count($this->data['titip']) > 0) {
+                                        $rowTitipanStart = $row + 1;
+                                     }
+                                }
+                            } else {
+                                // Jika temu sudah ketemu, maka NO berikutnya pasti titipan
+                                $rowTitipanStart = $row + 1;
+                            }
+                        }
+                     }
+
+                     // PROSES DATA TEMUAN
+                     if ($rowTemuanStart > 0 && isset($this->data['temu'])) {
+                        foreach ($this->data['temu'] as $index => $item) {
+                            $currentRow = $rowTemuanStart + $index;
+                            
+                            // SET TINGGI BARIS AGAR MUAT 2 FOTO
+                            // 150 points cukup untuk 2 foto height 50 + spacing
+                            // Update: 180 points agar foto penerima tidak menimpa text
+                            // Update 2: 150 points, gap bawah terlalu besar (End img2 ~131pt)
+                            // SET TINGGI BARIS AGAR MUAT 2 FOTO
+                            // 150 points cukup untuk 2 foto height 50 + spacing
+                            $sheet->getRowDimension($currentRow)->setRowHeight(150);
+
+                            // 1. FOTO BARANG
+                            if ($item->foto) {
+                                try {
+                                    $rawPath = public_path('storage/' . $item->foto);
+                                    if (file_exists($rawPath) && ($cleanPath = realpath($rawPath))) {
+                                        $drawing = new Drawing();
+                                        $drawing->setName('Foto Barang');
+                                        $drawing->setDescription('Foto Barang');
+                                        $drawing->setPath($cleanPath);
+                                        $drawing->setHeight(50);
+                                        $drawing->setCoordinates('B' . $currentRow);
+                                        $drawing->setOffsetX(60); 
+                                        $drawing->setOffsetY(25); 
+                                        $drawing->setWorksheet($sheet);
+                                    }
+                                } catch (\Throwable $e) {
+                                    // Ignore image if error
+                                }
+                            }
+
+                            // 2. FOTO PENERIMA (Jika selesai & ada foto)
+                            if (strtolower($item->status ?? '') === 'selesai' && $item->foto_penerima) {
+                                try {
+                                    $rawPath = public_path('storage/' . $item->foto_penerima);
+                                    if (file_exists($rawPath) && ($cleanPath = realpath($rawPath))) {
+                                        $drawing2 = new Drawing();
+                                        $drawing2->setName('Foto Penerima');
+                                        $drawing2->setDescription('Foto Penerima');
+                                        $drawing2->setPath($cleanPath);
+                                        $drawing2->setHeight(50);
+                                        $drawing2->setCoordinates('B' . $currentRow);
+                                        $drawing2->setOffsetX(60); 
+                                        $drawing2->setOffsetY(125); 
+                                        $drawing2->setWorksheet($sheet);
+                                    }
+                                } catch (\Throwable $e) {
+                                    // Ignore
+                                }
+                            }
+                        }
+                     }
+
+                     // PROSES DATA TITIPAN
+                     if ($rowTitipanStart > 0 && isset($this->data['titip'])) {
+                        foreach ($this->data['titip'] as $index => $item) {
+                            $currentRow = $rowTitipanStart + $index;
+                            
+                            $sheet->getRowDimension($currentRow)->setRowHeight(150);
+
+                            // 1. FOTO BARANG
+                            if ($item->foto) {
+                                try {
+                                    $rawPath = public_path('storage/' . $item->foto);
+                                    if (file_exists($rawPath) && ($cleanPath = realpath($rawPath))) {
+                                        $drawing = new Drawing();
+                                        $drawing->setName('Foto Barang');
+                                        $drawing->setDescription('Foto Barang');
+                                        $drawing->setPath($cleanPath);
+                                        $drawing->setHeight(50);
+                                        $drawing->setCoordinates('B' . $currentRow);
+                                        $drawing->setOffsetX(60); 
+                                        $drawing->setOffsetY(25); 
+                                        $drawing->setWorksheet($sheet);
+                                    }
+                                } catch (\Throwable $e) {
+                                    // Ignore
+                                }
+                            }
+
+                            // 2. FOTO PENERIMA
+                            if (strtolower($item->status ?? '') === 'selesai' && $item->foto_penerima) {
+                                try {
+                                    $rawPath = public_path('storage/' . $item->foto_penerima);
+                                    if (file_exists($rawPath) && ($cleanPath = realpath($rawPath))) {
+                                        $drawing2 = new Drawing();
+                                        $drawing2->setName('Foto Penerima');
+                                        $drawing2->setDescription('Foto Penerima');
+                                        $drawing2->setPath($cleanPath);
+                                        $drawing2->setHeight(50);
+                                        $drawing2->setCoordinates('B' . $currentRow);
+                                        $drawing2->setOffsetX(60); 
+                                        $drawing2->setOffsetY(125); 
+                                        $drawing2->setWorksheet($sheet);
+                                    }
+                                } catch (\Throwable $e) {
+                                    // Ignore
+                                }
+                            }
+                        }
+                     }
+                }
             },
         ];
     }
