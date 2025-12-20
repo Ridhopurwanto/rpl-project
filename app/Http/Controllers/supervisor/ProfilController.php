@@ -59,25 +59,24 @@ class ProfilController extends Controller
         // 3. Cek apakah ada upload foto baru
         if ($request->hasFile('foto_profil')) {
             
-            // Hapus foto lama jika ada (dan bukan placeholder default)
-            if ($pengguna->foto_profil && file_exists(public_path('uploads/profil/' . $pengguna->foto_profil))) {
-                @unlink(public_path('uploads/profil/' . $pengguna->foto_profil));
+            // Hapus foto lama (Legacy & Storage)
+            if ($pengguna->foto_profil) {
+                if (file_exists(public_path('uploads/profil/' . $pengguna->foto_profil))) {
+                    @unlink(public_path('uploads/profil/' . $pengguna->foto_profil));
+                }
+                if (Storage::disk('public')->exists($pengguna->foto_profil)) {
+                    Storage::disk('public')->delete($pengguna->foto_profil);
+                }
             }
 
-            // Simpan foto baru
-            $file = $request->file('foto_profil');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            // Simpan foto baru ke Storage
+            $path = $request->file('foto_profil')->store('akun', 'public');
             
-            // Pindahkan ke folder public/uploads/profil
-            $file->move(public_path('uploads/profil'), $filename);
-
-            // Masukkan nama file ke array update
-            $dataToUpdate['foto_profil'] = $filename;
+            // Masukkan path ke array update
+            $dataToUpdate['foto_profil'] = $path;
         }
 
         // 4. Update Database
-        // Pastikan pakai ID yang benar. Kalau di tabelmu primary key-nya 'id', ganti 'id_pengguna' jadi 'id'
-        // Asumsi di sini primary key kamu adalah 'id_pengguna' sesuai kode awalmu.
         User::where('id_pengguna', $pengguna->id_pengguna)->update($dataToUpdate);
 
         return redirect()->route('profil.index')->with('success', 'Profil berhasil diperbarui!');

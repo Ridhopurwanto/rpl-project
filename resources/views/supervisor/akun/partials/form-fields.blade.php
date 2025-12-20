@@ -149,11 +149,23 @@
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                     </div>
-                    <input type="text" value="Anggota" disabled
-                        class="pl-10 w-full bg-gray-100 text-gray-500 border border-gray-200 text-sm font-bold rounded-lg cursor-not-allowed block p-2.5 shadow-inner">
-                    <input type="hidden" name="peran" value="anggota" x-model="peran">
+                    <select name="peran" x-model="peran" 
+                        {{ $isEdit ? 'disabled' : '' }}
+                        class="w-full border border-gray-300 rounded-lg text-slate-800 text-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5 
+                               appearance-none 
+                               pr-10 pl-10 
+                               bg-no-repeat 
+                               bg-[length:1.25em_1.25em] 
+                               bg-[right_1rem_center] 
+                               bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22M6%208l4%204%204-4%22%2F%3E%3C%2Fsvg%3E')]">
+                        <option value="anggota">Anggota</option>
+                        <option value="supervisor">Supervisor</option>
+                    </select>
                 </div>
             </div>
+            @if($isEdit)
+                <input type="hidden" name="peran" :value="peran">
+            @endif
         </div>
 
         {{-- Password Section --}}
