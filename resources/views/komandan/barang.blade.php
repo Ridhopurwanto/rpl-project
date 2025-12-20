@@ -113,8 +113,128 @@
     
     <h2 class="text-2xl font-bold text-slate-800 mb-4">Laporan Barang</h2>
 
-    <div id="barang-results">
-        @include('komandan.partials.barang-list')
+    <div id="barang-results" class="space-y-6">
+        {{-- Tabel Barang Temuan --}}
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+            <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] p-3 border-b border-[#2a4a6f] cursor-pointer hover:bg-[#2a4a6f] transition" @click="showTemuan = !showTemuan">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                        </svg>
+                        <h3 class="font-bold text-white">BARANG TEMUAN</h3>
+                    </div>
+                    <svg class="w-5 h-5 text-white transition-transform" :class="{ 'rotate-180': !showTemuan }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div x-show="showTemuan" x-collapse>
+                {{-- Form Filter Temuan --}}
+                <form action="{{ route('komandan.barang') }}" method="GET" class="p-4 border-b border-gray-200" onsubmit="return false;">
+                    <div class="flex flex-wrap gap-4">
+                        <div class="w-[calc(50%-0.5rem)] md:w-auto">
+                            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
+                            <div class="flex items-center gap-2">
+                                <select name="per_page_temuan" id="per_page_temuan" class="h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm appearance-none cursor-pointer" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em;">
+                                    <option value="5" {{ $perPageTemuan == 5 ? 'selected' : '' }}>5</option>
+                                    <option value="10" {{ $perPageTemuan == 10 ? 'selected' : '' }}>10</option>
+                                    <option value="25" {{ $perPageTemuan == 25 ? 'selected' : '' }}>25</option>
+                                    <option value="50" {{ $perPageTemuan == 50 ? 'selected' : '' }}>50</option>
+                                    <option value="100" {{ $perPageTemuan == 100 ? 'selected' : '' }}>100</option>
+                                </select>
+                                <span class="text-sm text-gray-600">rows</span>
+                            </div>
+                        </div>
+                        <div class="w-[calc(50%-0.5rem)] md:flex-1">
+                            <label for="tanggal_temuan" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Tanggal</label>
+                            <div class="cursor-pointer" @click="$refs.dateInputTemuan.showPicker()">
+                                <input type="date" id="tanggal_temuan" name="tanggal_temuan" x-ref="dateInputTemuan" class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer" value="{{ $tanggalTemuan }}">
+                            </div>
+                        </div>
+                        <div class="w-[calc(50%-0.5rem)] md:flex-1">
+                            <label for="status_temuan" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Status</label>
+                            <select name="status_temuan" id="status_temuan" class="h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm appearance-none cursor-pointer" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em;">
+                                <option value="" {{ ($statusTemuan ?? '') == '' ? 'selected' : '' }}>Semua Status</option>
+                                <option value="belum selesai" {{ ($statusTemuan ?? '') == 'belum selesai' ? 'selected' : '' }}>Belum Selesai</option>
+                                <option value="selesai" {{ ($statusTemuan ?? '') == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                            </select>
+                        </div>
+                        <div class="w-[calc(50%-0.5rem)] md:flex-1">
+                            <label for="searchInputTemuan" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Cari Barang</label>
+                            <input type="text" id="searchInputTemuan" name="search_temuan" class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm placeholder-gray-400" value="{{ $searchTemuan }}" placeholder="Ketik untuk mencari...">
+                        </div>
+                    </div>
+                </form>
+
+                {{-- Container Data Temuan --}}
+                <div id="barang-temuan-container">
+                    @include('komandan.partials.barang-table-temuan')
+                </div>
+            </div>
+        </div>
+
+        {{-- Tabel Barang Titipan --}}
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+            <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] p-3 border-b border-[#2a4a6f] cursor-pointer hover:bg-[#2a4a6f] transition" @click="showTitipan = !showTitipan">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                        </svg>
+                        <h3 class="font-bold text-white">BARANG TITIPAN</h3>
+                    </div>
+                    <svg class="w-5 h-5 text-white transition-transform" :class="{ 'rotate-180': !showTitipan }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div x-show="showTitipan" x-collapse>
+                {{-- Form Filter Titipan --}}
+                <form action="{{ route('komandan.barang') }}" method="GET" class="p-4 border-b border-gray-200" onsubmit="return false;">
+                    <div class="flex flex-wrap gap-4">
+                        <div class="w-[calc(50%-0.5rem)] md:w-auto">
+                            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
+                            <div class="flex items-center gap-2">
+                                <select name="per_page_titipan" id="per_page_titipan" class="h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm appearance-none cursor-pointer" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em;">
+                                    <option value="5" {{ $perPageTitipan == 5 ? 'selected' : '' }}>5</option>
+                                    <option value="10" {{ $perPageTitipan == 10 ? 'selected' : '' }}>10</option>
+                                    <option value="25" {{ $perPageTitipan == 25 ? 'selected' : '' }}>25</option>
+                                    <option value="50" {{ $perPageTitipan == 50 ? 'selected' : '' }}>50</option>
+                                    <option value="100" {{ $perPageTitipan == 100 ? 'selected' : '' }}>100</option>
+                                </select>
+                                <span class="text-sm text-gray-600">rows</span>
+                            </div>
+                        </div>
+                        <div class="w-[calc(50%-0.5rem)] md:flex-1">
+                            <label for="tanggal_titipan" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Tanggal</label>
+                            <div class="cursor-pointer" @click="$refs.dateInputTitipan.showPicker()">
+                                <input type="date" id="tanggal_titipan" name="tanggal_titipan" x-ref="dateInputTitipan" class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer" value="{{ $tanggalTitipan }}">
+                            </div>
+                        </div>
+                        <div class="w-[calc(50%-0.5rem)] md:flex-1">
+                            <label for="status_titipan" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Status</label>
+                            <select name="status_titipan" id="status_titipan" class="h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm appearance-none cursor-pointer" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em;">
+                                <option value="" {{ ($statusTitipan ?? '') == '' ? 'selected' : '' }}>Semua Status</option>
+                                <option value="belum selesai" {{ ($statusTitipan ?? '') == 'belum selesai' ? 'selected' : '' }}>Belum Selesai</option>
+                                <option value="selesai" {{ ($statusTitipan ?? '') == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                            </select>
+                        </div>
+                        <div class="w-[calc(50%-0.5rem)] md:flex-1">
+                            <label for="searchInputTitipan" class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Cari Barang</label>
+                            <input type="text" id="searchInputTitipan" name="search_titipan" class="block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm placeholder-gray-400" value="{{ $searchTitipan }}" placeholder="Ketik untuk mencari...">
+                        </div>
+                    </div>
+                </form>
+
+                {{-- Container Data Titipan --}}
+                <div id="barang-titipan-container">
+                    @include('komandan.partials.barang-table-titipan')
+                </div>
+            </div>
+        </div>
     </div>
 
     {{-- MODAL FOTO --}}
@@ -198,6 +318,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (statusTemuan && statusTemuan.value) params.set('status_temuan', statusTemuan.value); else params.delete('status_temuan');
             if (statusTitipan && statusTitipan.value) params.set('status_titipan', statusTitipan.value); else params.delete('status_titipan');
 
+            // Reset pagination to page 1 on new search/filter
+            params.delete('page_temuan');
+            params.delete('page_titipan');
+
             url = `${window.location.pathname}?${params.toString()}`;
             
             // Update Browser URL
@@ -210,26 +334,31 @@ document.addEventListener('DOMContentLoaded', function() {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             })
-            .then(response => response.text())
-            .then(html => {
-                resultsContainer.innerHTML = html;
-                // Re-attach listeners after content update
-                attachListeners();
-                
-                // Important: Re-initialize Alpine.js for the new content if needed
-                // But since x-data is on the parent div, removing x-data from children 
-                // means we rely on parent scope. Alpine typically handles DOM updates if inside an x-data component.
-                // However, since we replace HTML via innerHTML, existing Alpine bindings might be lost 
-                // unless we are careful. 
-                // Because we replaced the entire content, we might need to be careful about x-show/x-collapse.
-                // Since the parent component holds the state (showTemuan, showTitipan), and the partial 
-                // contains x-show="showTemuan" relying on parent.
-                // Alpine usually needs to 'discover' new DOM nodes.
-                
-                // Note: Livewire is better for this, but with vanilla JS + Alpine + AJAX replacement:
-                // We might need to manually trigger Alpine to scan the new DOM.
+            .then(async response => {
+                if (!response.ok) {
+                    const text = await response.text();
+                    try {
+                        const json = JSON.parse(text);
+                        throw new Error(json.message || json.exception || 'Server Error');
+                    } catch (e) {
+                         // If not JSON, it's probably the HTML error page title or substring
+                        throw new Error('Server Error: ' + response.statusText);
+                    }
+                }
+                return response.json();
             })
-            .catch(error => console.error('Error:', error))
+            .then(data => {
+                if (!data.html_temuan || !data.html_titipan) {
+                    // If we get here but missing keys, and it's not a standard Laravel error structure
+                    throw new Error('Response missing HTML data');
+                }
+                document.getElementById('barang-temuan-container').innerHTML = data.html_temuan;
+                document.getElementById('barang-titipan-container').innerHTML = data.html_titipan;
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                alert('Terjadi kesalahan: ' + error.message);
+            })
             .finally(() => {
                 toggleLoading(false);
             });

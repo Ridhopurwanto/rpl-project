@@ -81,18 +81,20 @@ class BarangController extends Controller
         $barangTitipan = $queryTitipan->paginate($perPageTitipan, ['*'], 'page_titipan');
 
         if ($request->ajax()) {
-            return view('komandan.partials.barang-list', compact(
-                'barangTemuan', 
-                'barangTitipan', 
-                'tanggalTemuan', 
-                'tanggalTitipan', 
-                'searchTemuan', 
-                'searchTitipan', 
-                'statusTemuan',
-                'statusTitipan',
-                'perPageTemuan', 
-                'perPageTitipan'
-            ));
+            try {
+                $htmlTemuan = view('komandan.partials.barang-table-temuan', compact('barangTemuan'))->render();
+                $htmlTitipan = view('komandan.partials.barang-table-titipan', compact('barangTitipan'))->render();
+
+                return response()->json([
+                    'html_temuan' => $htmlTemuan,
+                    'html_titipan' => $htmlTitipan,
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'message' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ], 500);
+            }
         }
 
         return view('komandan.barang', [

@@ -1,6 +1,6 @@
 {{-- TABEL (Desktop & Tablet) --}}
 <div class="hidden md:block overflow-x-auto">
-    <table class="w-full min-w-max table-fixed">
+    <table class="w-full table-fixed">
         <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
             <tr>
                 <th class="py-3 px-4 text-center w-[5%]">No</th>

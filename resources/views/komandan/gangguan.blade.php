@@ -150,7 +150,7 @@
         @endif
 
         {{-- Tabel Riwayat Gangguan --}}
-        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+        <div class="bg-white rounded-lg shadow-md overflow-visible mb-6">
             <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] p-3 border-b border-[#2a4a6f]">
                 <div class="flex items-center gap-2">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -195,6 +195,7 @@
 
                         selectMonth(m) {
                             this.month = m;
+                            this.showPicker = false;
                             this.submitForm();
                         },
 
@@ -228,7 +229,7 @@
 
                             {{-- Dropdown Picker --}}
                             <div x-show="showPicker" style="display: none;"
-                                class="absolute z-50 top-full left-0 mt-1 w-64 bg-white rounded-lg shadow-xl border border-gray-200 p-4">
+                                class="absolute z-[100] top-full left-0 mt-1 w-64 bg-white rounded-lg shadow-xl border border-gray-200 p-4">
 
                                 {{-- Year Navigator --}}
                                 <div class="flex justify-between items-center mb-4">

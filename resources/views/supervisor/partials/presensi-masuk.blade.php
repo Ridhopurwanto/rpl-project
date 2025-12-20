@@ -30,7 +30,6 @@
                         <th class="py-3 px-4 text-center {{ $shiftTerpilih == 'semua' ? 'w-[15%]' : 'w-[18%]' }}">Waktu</th>
                         <th class="py-3 px-4 text-center {{ $shiftTerpilih == 'semua' ? 'w-[10%]' : 'w-[13%]' }}">Foto</th>
                         <th class="py-3 px-4 text-center {{ $shiftTerpilih == 'semua' ? 'w-[15%]' : 'w-[18%]' }}">Status</th>
-
                     </tr>
                 </thead>
                 <tbody class="text-sm divide-y divide-gray-200">
@@ -64,8 +63,6 @@
                                 <span class="text-yellow-500 font-semibold">{{ ucfirst($presensi->status) }}</span>
                             @endif
                         </td>
-
-
                     </tr>
                     @empty
                     <tr>
@@ -151,8 +148,6 @@
                                     <p class="text-gray-700 font-semibold text-xs">{{ $presensi->waktu->format('H:i:s') }}</p>
                                 </div>
                             </div>
-
-
                         </div>
                     </div>
                 </div>
