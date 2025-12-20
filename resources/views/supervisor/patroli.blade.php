@@ -328,8 +328,6 @@
     document.addEventListener('DOMContentLoaded', function() {
         const filterInputs = document.querySelectorAll('.filter-input');
         
-
-
         // Handle Filter Changes
         filterInputs.forEach(input => {
             input.addEventListener('change', function() {

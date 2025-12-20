@@ -124,8 +124,8 @@
 
     {{-- GROUP 1: Informasi Login --}}
     <div class="p-4 bg-blue-50/50 rounded-xl border border-blue-100">
-        <h3 class="text-sm font-bold text-[#1e3a5f] mb-3 flex items-center">
-            <svg class="w-4 h-4 mr-2 text-[#1e3a5f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 19l-1 1-1-1-1 1-1-1-1 1-1-1-5.636-5.636A6 6 0 1115 7z"></path></svg>
+        <h3 class="text-sm font-bold text-[#1e3a5f] flex items-center">
+            <svg class="w-4 h-4 mr-2 text-[#1e3a5f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             AKUN PENGGUNA
         </h3>
         
@@ -149,15 +149,23 @@
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                     </div>
-                    <input type="text" value="Anggota" disabled
-                        class="pl-10 w-full bg-gray-100 text-gray-500 border border-gray-200 text-sm font-bold rounded-lg cursor-not-allowed block p-2.5 shadow-inner">
-                    <input type="hidden" name="peran" value="anggota" x-model="peran">
+                    <select name="peran" x-model="peran"
+                        class="w-full border border-gray-300 rounded-lg text-slate-800 text-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5 
+                               appearance-none 
+                               pr-10 pl-10 
+                               bg-no-repeat 
+                               bg-[length:1.25em_1.25em] 
+                               bg-[right_1rem_center] 
+                               bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22M6%208l4%204%204-4%22%2F%3E%3C%2Fsvg%3E')]">
+                        <option value="anggota">Anggota</option>
+                        <option value="supervisor">Supervisor</option>
+                    </select>
                 </div>
             </div>
         </div>
 
         {{-- Password Section --}}
-        <div x-show="!{{ $isEdit ? 'true' : 'false' }} || (peran === 'komandan' || peran === 'anggota' || peran === 'bau')" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <div x-show="!{{ $isEdit ? 'true' : 'false' }} || (peran === 'komandan' || peran === 'anggota' || peran === 'supervisor')" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             {{-- Password --}}
             <div>
                 <label class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">

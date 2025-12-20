@@ -33,7 +33,7 @@ class ManajemenAkunController extends Controller
             // Pastikan tabel di DB bernama 'users' atau sesuaikan 'unique:users,username'
             'username'     => 'required|string|max:255|unique:pengguna,username', 
             'password'     => ['required', 'confirmed', Password::min(8)],
-            'peran'        => ['required', Rule::in(['anggota', 'komandan', 'bau'])],
+            'peran'        => ['required', Rule::in(['anggota', 'komandan', 'supervisor'])],
             'status'       => ['required', Rule::in(['Aktif', 'Tidak Aktif'])],
             'tanggal_lahir'=> 'nullable|date',
             'no_hp'        => 'nullable|string|max:20',
@@ -70,7 +70,7 @@ class ManajemenAkunController extends Controller
             'email'        => ['required', 'email', 'max:255', Rule::unique('pengguna')->ignore($user->id_pengguna, 'id_pengguna')],
             'username'     => ['required', 'string', 'max:255', Rule::unique('pengguna')->ignore($user->id_pengguna, 'id_pengguna')],
             'password'     => ['nullable', 'confirmed', Password::min(8)],
-            'peran'        => ['required', Rule::in(['anggota', 'komandan', 'bau'])],
+            'peran'        => ['required', Rule::in(['anggota', 'komandan', 'supervisor'])],
             'jenis_jadwal' => 'nullable|in:shift,non_shift',
             'status'       => ['required', Rule::in(['Aktif', 'Tidak Aktif'])],
             'tanggal_lahir'=> 'nullable|date',

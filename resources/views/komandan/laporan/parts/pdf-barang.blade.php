@@ -102,12 +102,7 @@
                         {{ \Carbon\Carbon::parse($item->waktu_titip ?? $item->created_at)->format('d/m/Y H:i') }}
                     </td>
                     <td style="border: 1px solid #000; padding: 6px;">{{ $item->nama_barang ?? '-' }}</td>
-                    <td style="border: 1px solid #000; padding: 6px;">
-                        <strong>Penitip :</strong><br>
-                        {{ $item->nama_penitip ?? '-' }}<br><br>
-                        <strong>Penerima :</strong><br>
-                        {{ $item->tujuan ?? '-' }}
-                    </td>
+                    <td style="border: 1px solid #000; padding: 6px;">{{ $item->nama_penitip ?? '-' }}</td>
                     <td style="border: 1px solid #000; padding: 6px;">{{ $item->tujuan ?? '-' }}</td>
                     <td style="border: 1px solid #000; padding: 6px; text-align: center;">{{ ucfirst($item->status ?? '-') }}</td>
                     <td style="border: 1px solid #000; padding: 6px;">{{ $item->catatan ?? '-' }}</td>

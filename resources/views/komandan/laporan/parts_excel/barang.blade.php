@@ -15,6 +15,12 @@
         </thead>
         <tbody>
             @foreach($data['temu'] as $index => $item)
+                @php
+                    $hasFoto1 = isset($item->foto) && $item->foto;
+                    $hasFoto2 = isset($item->foto_penerima) && $item->foto_penerima && strtolower($item->status ?? '') === 'selesai';
+                    $doubleRow = $hasFoto1 && $hasFoto2;
+                    $rowSpanAttr = $doubleRow ? 'rowspan="2"' : '';
+                @endphp
                 <tr>
                     <td style="{{ $tdCenterStyle }}">{{ $index + 1 }}</td>
                     <td style="{{ $tdCenterStyle }}; text-align: center; vertical-align: top;">
@@ -30,18 +36,29 @@
                             <strong>Penerima :</strong><br><br><br><br>
                         @endif
                     </td>
-                    <td style="{{ $tdCenterStyle }}">{{ \Carbon\Carbon::parse($item->waktu_lapor ?? $item->created_at)->format('d/m/Y H:i') }}</td>
-                    <td style="{{ $tdStyle }}">{{ $item->nama_barang ?? '-' }}</td>
-                    <td style="{{ $tdStyle }} font-weight: normal;">
+
+                    <td style="{{ $tdCenterStyle }}" {!! $rowSpanAttr !!}>{{ \Carbon\Carbon::parse($item->waktu_lapor ?? $item->created_at)->format('d/m/Y H:i') }}</td>
+                    <td style="{{ $tdStyle }}" {!! $rowSpanAttr !!}>{{ $item->nama_barang ?? '-' }}</td>
+                    <td style="{{ $tdStyle }} font-weight: normal;" {!! $rowSpanAttr !!}>
                         <strong>Pelapor :</strong><br>
                         {{ $item->nama_pelapor ?? '-' }}<br><br>
                         <strong>Pemilik :</strong><br>
                         {{ $item->nama_penerima ?? '-' }}
                     </td>
-                    <td style="{{ $tdStyle }}">{{ $item->lokasi_penemuan ?? '-' }}</td>
-                    <td style="{{ $tdCenterStyle }}">{{ ucfirst($item->status ?? '-') }}</td>
-                    <td style="{{ $tdStyle }}">{{ $item->catatan ?? '-' }}</td>
+                    <td style="{{ $tdStyle }}" {!! $rowSpanAttr !!}>{{ $item->lokasi_penemuan ?? '-' }}</td>
+                    <td style="{{ $tdCenterStyle }}" {!! $rowSpanAttr !!}>{{ ucfirst($item->status ?? '-') }}</td>
+                    <td style="{{ $tdStyle }}" {!! $rowSpanAttr !!}>{{ $item->catatan ?? '-' }}</td>
                 </tr>
+
+                {{-- Row 2 (Only if double photo) --}}
+                @if($doubleRow)
+                <tr>
+                    <td style="{{ $tdCenterStyle }}; text-align: center; vertical-align: middle;">
+                        <strong>Penerima :</strong><br>
+                        <img src="{{ public_path('storage/' . $item->foto_penerima) }}" height="50" width="auto" style="display: block; margin: auto; margin-top: 5px;">
+                    </td>
+                </tr>
+                @endif
             @endforeach
         </tbody>
     </table>
@@ -64,6 +81,12 @@
         </thead>
         <tbody>
             @foreach($data['titip'] as $index => $item)
+                @php
+                    $hasFoto1 = isset($item->foto) && $item->foto;
+                    $hasFoto2 = isset($item->foto_penerima) && $item->foto_penerima && strtolower($item->status ?? '') === 'selesai';
+                    $doubleRow = $hasFoto1 && $hasFoto2;
+                    $rowSpanAttr = $doubleRow ? 'rowspan="2"' : '';
+                @endphp
                 <tr>
                     <td style="{{ $tdCenterStyle }}">{{ $index + 1 }}</td>
                     <td style="{{ $tdCenterStyle }}; text-align: center; vertical-align: top;">
@@ -79,17 +102,28 @@
                             <strong>Penerima :</strong><br><br><br><br>
                         @endif
                     </td>
-                    <td style="{{ $tdCenterStyle }}">{{ \Carbon\Carbon::parse($item->waktu_titip ?? $item->created_at)->format('d/m/Y H:i') }}</td>
-                    <td style="{{ $tdStyle }}">{{ $item->nama_barang ?? '-' }}</td>
-                    <td style="{{ $tdStyle }} font-weight: normal;" colspan="2">
+
+                    <td style="{{ $tdCenterStyle }}" {!! $rowSpanAttr !!}>{{ \Carbon\Carbon::parse($item->waktu_titip ?? $item->created_at)->format('d/m/Y H:i') }}</td>
+                    <td style="{{ $tdStyle }}" {!! $rowSpanAttr !!}>{{ $item->nama_barang ?? '-' }}</td>
+                    <td style="{{ $tdStyle }} font-weight: normal;" colspan="2" {!! $rowSpanAttr !!}>
                         <strong>Penitip :</strong><br>
                         {{ $item->nama_penitip ?? '-' }}<br><br>
                         <strong>Penerima :</strong><br>
                         {{ $item->tujuan ?? '-' }}
                     </td>
-                    <td style="{{ $tdCenterStyle }}">{{ ucfirst($item->status ?? '-') }}</td>
-                    <td style="{{ $tdStyle }}">{{ $item->catatan ?? '-' }}</td>
+                    <td style="{{ $tdCenterStyle }}" {!! $rowSpanAttr !!}>{{ ucfirst($item->status ?? '-') }}</td>
+                    <td style="{{ $tdStyle }}" {!! $rowSpanAttr !!}>{{ $item->catatan ?? '-' }}</td>
                 </tr>
+
+                {{-- Row 2 (Only if double photo) --}}
+                @if($doubleRow)
+                <tr>
+                    <td style="{{ $tdCenterStyle }}; text-align: center; vertical-align: middle;">
+                        <strong>Penerima :</strong><br>
+                        <img src="{{ public_path('storage/' . $item->foto_penerima) }}" height="50" width="auto" style="display: block; margin: auto; margin-top: 5px;">
+                    </td>
+                </tr>
+                @endif
             @endforeach
         </tbody>
     </table>

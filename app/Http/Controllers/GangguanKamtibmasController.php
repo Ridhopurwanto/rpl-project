@@ -103,10 +103,18 @@ class GangguanKamtibmasController extends Controller
                 'deskripsi' => $request->deskripsi,
             ]);
 
-            return redirect()->back()->with('success', 'Laporan gangguan berhasil diperbarui.');
+            // Ambil parameter filter untuk redirect
+            $params = [
+                'bulan' => $request->input('bulan'),
+                'per_page' => $request->input('per_page'),
+                'kategori' => $request->input('kategori_filter'), // Map kategori_filter form input to kategori query param
+            ];
+
+            return redirect()->route('komandan.gangguan', $params)
+                             ->with('success', 'Laporan gangguan berhasil diperbarui.');
 
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal memperbarui laporan.');
+            return back()->with('error', 'Gagal memperbarui laporan.');
         }
     }
 
@@ -131,10 +139,20 @@ class GangguanKamtibmasController extends Controller
             // Hapus data dari database
             $gangguan->delete();
             
-            return redirect()->back()->with('success', 'Laporan gangguan berhasil dihapus.');
+            // Ambil parameter filter dari request (karena method DELETE hanya bisa ambil dari query string atau body form jika POST spoofing)
+            // Di Laravel, $request->input() mengambil dari query string maupun request body.
+            // Kita sudah tambahkan hidden inputs di form delete.
+            $params = [
+                'bulan' => request('bulan'),
+                'per_page' => request('per_page'),
+                'kategori' => request('kategori_filter'),
+            ];
+            
+            return redirect()->route('komandan.gangguan', $params)
+                             ->with('success', 'Laporan gangguan berhasil dihapus.');
         
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menghapus laporan.');
+            return back()->with('error', 'Gagal menghapus laporan.');
         }
     }
 }

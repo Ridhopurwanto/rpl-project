@@ -36,7 +36,13 @@
          deleteAction: '',
          showRulesModal: false,
          showSuccessNotif: {{ session('success') ? 'true' : 'false' }},
-         showErrorNotif: {{ session('error') ? 'true' : 'false' }}
+         showErrorNotif: {{ session('error') ? 'true' : 'false' }},
+         tanggalPagi: '{{ $tanggalPagi }}',
+         tanggalMalam: '{{ $tanggalMalam }}',
+         perPagePagi: '{{ $perPagePagi }}',
+         perPageMalam: '{{ $perPageMalam }}',
+         jenisPatroliPagi: '{{ $jenisPatroliTerpilihPagi }}',
+         jenisPatroliMalam: '{{ $jenisPatroliTerpilihMalam }}'
      }">
     
     <div class="flex justify-between items-center mb-4">
@@ -145,7 +151,7 @@
                     <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
                     <div class="flex items-center gap-2">
                         <div class="relative">
-                            <select id="perPagePagi" name="per_page_pagi" class="filter-input block h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                            <select id="perPagePagi" name="per_page_pagi" x-model="perPagePagi" class="filter-input block h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
                                 <option value="5" {{ $perPagePagi == 5 ? 'selected' : '' }}>5</option>
                                 <option value="10" {{ $perPagePagi == 10 ? 'selected' : '' }}>10</option>
                                 <option value="25" {{ $perPagePagi == 25 ? 'selected' : '' }}>25</option>
@@ -168,9 +174,9 @@
                         Tanggal
                     </label>
                     <div class="cursor-pointer" @click="$refs.dateInputPagi.showPicker()">
-                        <input type="date" id="tanggal_pagi" name="tanggal" x-ref="dateInputPagi"
+                        <input type="date" id="tanggal_pagi" name="tanggal" x-ref="dateInputPagi" x-model="tanggalPagi"
                             class="filter-input block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
-                            value="{{ $tanggalTerpilih }}">
+                            value="{{ $tanggalPagi }}">
                     </div>
                 </div>
 
@@ -180,7 +186,7 @@
                         Jenis Patroli
                     </label>
                     <div class="relative">
-                        <select id="jenis_patroli_pagi" name="jenis_patroli_pagi" 
+                        <select id="jenis_patroli_pagi" name="jenis_patroli_pagi" x-model="jenisPatroliPagi"
                                 class="filter-input block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
                             @forelse($jenisPatroliOptions as $opsi)
                                 <option value="{{ $opsi }}" {{ $jenisPatroliTerpilihPagi == $opsi ? 'selected' : '' }}>
@@ -234,7 +240,7 @@
                     <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
                     <div class="flex items-center gap-2">
                         <div class="relative">
-                            <select id="perPageMalam" name="per_page_malam" class="filter-input block h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
+                            <select id="perPageMalam" name="per_page_malam" x-model="perPageMalam" class="filter-input block h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
                                 <option value="5" {{ $perPageMalam == 5 ? 'selected' : '' }}>5</option>
                                 <option value="10" {{ $perPageMalam == 10 ? 'selected' : '' }}>10</option>
                                 <option value="25" {{ $perPageMalam == 25 ? 'selected' : '' }}>25</option>
@@ -257,9 +263,9 @@
                         Tanggal
                     </label>
                     <div class="cursor-pointer" @click="$refs.dateInputMalam.showPicker()">
-                        <input type="date" id="tanggal_malam" name="tanggal" x-ref="dateInputMalam"
+                        <input type="date" id="tanggal_malam" name="tanggal" x-ref="dateInputMalam" x-model="tanggalMalam"
                             class="filter-input block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
-                            value="{{ $tanggalTerpilih }}">
+                            value="{{ $tanggalMalam }}">
                     </div>
                 </div>
 
@@ -269,7 +275,7 @@
                         Jenis Patroli
                     </label>
                     <div class="relative">
-                        <select id="jenis_patroli_malam" name="jenis_patroli_malam" 
+                        <select id="jenis_patroli_malam" name="jenis_patroli_malam" x-model="jenisPatroliMalam"
                                 class="filter-input block w-full h-[42px] px-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer appearance-none">
                             @forelse($jenisPatroliOptions as $opsi)
                                 <option value="{{ $opsi }}" {{ $jenisPatroliTerpilihMalam == $opsi ? 'selected' : '' }}>
@@ -331,6 +337,14 @@
             <form :action="deleteAction" method="POST" class="flex justify-end space-x-4">
                 @csrf
                 @method('DELETE')
+                {{-- Hidden inputs to preserve current filters --}}
+                <input type="hidden" name="tanggal_pagi" :value="tanggalPagi">
+                <input type="hidden" name="tanggal_malam" :value="tanggalMalam">
+                <input type="hidden" name="per_page_pagi" :value="perPagePagi">
+                <input type="hidden" name="per_page_malam" :value="perPageMalam">
+                <input type="hidden" name="jenis_patroli_pagi" :value="jenisPatroliPagi">
+                <input type="hidden" name="jenis_patroli_malam" :value="jenisPatroliMalam">
+                
                 <button type="button" @click="showDeleteModal = false"
                     class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">
                     Batal
@@ -481,15 +495,6 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const filterInputs = document.querySelectorAll('.filter-input');
-        
-        // Sync Dates
-        const datePagi = document.getElementById('tanggal_pagi');
-        const dateMalam = document.getElementById('tanggal_malam');
-        
-        if(datePagi && dateMalam) {
-            datePagi.addEventListener('change', () => dateMalam.value = datePagi.value);
-            dateMalam.addEventListener('change', () => datePagi.value = dateMalam.value);
-        }
 
         // Handle Filter Changes
         filterInputs.forEach(input => {
@@ -514,8 +519,9 @@
             if (!url) {
                 const params = new URLSearchParams();
                 
-                // Get Date (Pagi/Malam synced so just take one)
-                params.append('tanggal', document.getElementById('tanggal_pagi').value);
+                // Get separate dates for Pagi and Malam
+                params.append('tanggal_pagi', document.getElementById('tanggal_pagi').value);
+                params.append('tanggal_malam', document.getElementById('tanggal_malam').value);
                 
                 params.append('per_page_pagi', document.getElementById('perPagePagi').value);
                 params.append('jenis_patroli_pagi', document.getElementById('jenis_patroli_pagi').value);

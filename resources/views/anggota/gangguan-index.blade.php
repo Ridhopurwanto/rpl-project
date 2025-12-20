@@ -29,17 +29,7 @@
         }
     </style>
 
-    <div class="w-full min-h-screen bg-slate-100 p-4 pb-32" x-data="{ 
-                        modalCheckoutOpen: false, 
-                        selectedVehicleId: null,
-                        selectedVehicleNopol: '',
-                        selectedVehicleStatus: '',
-                        showCreateModal: false,
-                        showPhotoModal: false,
-                        photoUrl: '',
-                        showSuccessNotif: {{ session('success') ? 'true' : 'false' }},
-                        showErrorNotif: {{ session('error') ? 'true' : 'false' }}
-                     }">
+    <div class="w-full min-h-screen bg-slate-100 p-4 pb-32" x-data="gangguanData">
 
         {{-- Floating Notification Success --}}
         <div x-show="showSuccessNotif" 
@@ -107,7 +97,7 @@
         </div>
 
         {{-- BAGIAN RIWAYAT GANGGUAN KAMTIBMAS --}}
-        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6" x-data="{ isOpen: true }">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
             <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] p-3 border-b border-gray-200 cursor-pointer hover:opacity-90 transition" @click="isOpen = !isOpen">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center">
@@ -122,7 +112,7 @@
                 </div>
             </div>
 
-            <div x-show="isOpen" x-collapse>
+            <div x-show="isOpen" x-transition>
                 {{-- Filter --}}
                 <div class="p-4 border-b border-gray-200">
                     <form action="{{ route('anggota.gangguan.index') }}" method="GET" id="filterForm">
@@ -132,11 +122,11 @@
                             <div class="w-full md:w-auto">
                                 <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
                                 <div class="flex items-center gap-2">
-                                    <select name="per_page" onchange="this.form.submit()" class="h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm appearance-none cursor-pointer" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em;">
-                                        <option value="5" {{ request('per_page', 5) == 5 ? 'selected' : '' }}>5</option>
-                                        <option value="10" {{ request('per_page', 5) == 10 ? 'selected' : '' }}>10</option>
-                                        <option value="25" {{ request('per_page', 5) == 25 ? 'selected' : '' }}>25</option>
-                                        <option value="50" {{ request('per_page', 5) == 50 ? 'selected' : '' }}>50</option>
+                                    <select x-model="itemsPerPage" @change="currentPage = 1" class="h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm appearance-none cursor-pointer" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em;">
+                                        <option value="5">5</option>
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
                                     </select>
                                     <span class="text-sm text-gray-600">rows</span>
                                 </div>
@@ -241,25 +231,25 @@
 
                 {{-- Card Layout Gangguan Kamtibmas --}}
                 <div class="p-3 space-y-3">
-                    @forelse($laporan_gangguan as $laporan)
+                    <template x-for="(gangguan, index) in paginatedGangguan" :key="'gangguan-' + index">
                         <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-300 relative">
                             {{-- Badge Kategori di Pojok Kanan Atas --}}
                             <div class="absolute top-3 right-3 z-10">
-                                <span class="inline-block bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md">{{ $laporan->kategori }}</span>
+                                <span class="inline-block bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md" x-text="gangguan.kategori"></span>
                             </div>
                             
                             <div class="p-4">
                                 <div class="w-full">
                                     {{-- Lokasi sebagai judul utama --}}
-                                    <h4 class="font-bold text-gray-800 text-sm mb-3 pr-20">{{ $laporan->lokasi }}</h4>
+                                    <h4 class="font-bold text-gray-800 text-sm mb-3 pr-20" x-text="gangguan.lokasi"></h4>
 
                                     {{-- Info Foto & Waktu --}}
                                     <div class="flex gap-4 mb-2">
                                         {{-- Foto di Kiri --}}
                                         <div class="flex-shrink-0">
-                                            <div @click="showPhotoModal = true; photoUrl = '{{ Storage::url($laporan->foto) }}'" 
+                                            <div @click="showPhotoModal = true; photoUrl = gangguan.foto_url" 
                                                  class="w-16 h-16 rounded-lg overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-colors">
-                                                <img src="{{ Storage::url($laporan->foto) }}" 
+                                                <img :src="gangguan.foto_url" 
                                                      alt="Foto Gangguan" 
                                                      class="w-full h-full object-cover">
                                             </div>
@@ -271,18 +261,20 @@
                                                 <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                                 </svg>
-                                                <p class="text-gray-700 font-semibold text-xs">{{ $laporan->waktu_lapor->format('d/m/Y H:i') }}</p>
+                                                <p class="text-gray-700 font-semibold text-xs" x-text="gangguan.waktu_formatted"></p>
                                             </div>
                                             
                                             <div class="text-xs text-gray-500">
-                                                <span class="font-semibold">Keterangan:</span> {{ Str::limit($laporan->deskripsi, 50) }}
+                                                <span class="font-semibold">Keterangan:</span> <span x-text="gangguan.deskripsi_short"></span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    @empty
+                    </template>
+                    
+                    <div x-show="paginatedGangguan.length === 0">
                         <div class="bg-white rounded-xl shadow-md p-8 text-center border-2 border-gray-300">
                             <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
                                 <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -291,58 +283,148 @@
                             </div>
                             <p class="text-gray-500 font-semibold">Tidak ada laporan gangguan pada bulan & kategori ini.</p>
                         </div>
-                    @endforelse
-                </div>
-                
-                {{-- Pagination Desktop --}}
-                @if(method_exists($laporan_gangguan, 'hasPages') && $laporan_gangguan->hasPages())
-                <div class="hidden md:flex justify-between items-center px-6 py-4 border-t border-gray-200">
-                    <div class="text-sm text-gray-600">Showing {{ $laporan_gangguan->firstItem() ?? 0 }} to {{ $laporan_gangguan->lastItem() ?? 0 }} of {{ $laporan_gangguan->total() }} entries</div>
-                    <div class="flex gap-1">
-                        @if($laporan_gangguan->onFirstPage())
-                            <span class="px-3 py-2 text-sm text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">Previous</span>
-                        @else
-                            <a href="{{ $laporan_gangguan->appends(request()->query())->previousPageUrl() }}" class="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Previous</a>
-                        @endif
-                        @foreach($laporan_gangguan->getUrlRange(1, $laporan_gangguan->lastPage()) as $page => $url)
-                            @if($page == $laporan_gangguan->currentPage())
-                                <span class="px-3 py-2 text-sm text-white bg-[#1e3a5f] rounded-lg">{{ $page }}</span>
-                            @else
-                                <a href="{{ $laporan_gangguan->appends(request()->query())->url($page) }}" class="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">{{ $page }}</a>
-                            @endif
-                        @endforeach
-                        @if($laporan_gangguan->hasMorePages())
-                            <a href="{{ $laporan_gangguan->appends(request()->query())->nextPageUrl() }}" class="px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Next</a>
-                        @else
-                            <span class="px-3 py-2 text-sm text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">Next</span>
-                        @endif
                     </div>
                 </div>
                 
-                {{-- Pagination Mobile --}}
-                <div class="md:hidden flex justify-between items-center px-3 py-4 border-t border-gray-200">
-                    <div class="text-xs text-gray-600">{{ $laporan_gangguan->firstItem() ?? 0 }}-{{ $laporan_gangguan->lastItem() ?? 0 }} of {{ $laporan_gangguan->total() }}</div>
-                    <div class="flex gap-1">
-                        @if($laporan_gangguan->onFirstPage())
-                            <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Prev</span>
-                        @else
-                            <a href="{{ $laporan_gangguan->appends(request()->query())->previousPageUrl() }}" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Prev</a>
-                        @endif
-                        @foreach($laporan_gangguan->getUrlRange(1, $laporan_gangguan->lastPage()) as $page => $url)
-                            @if($page == $laporan_gangguan->currentPage())
-                                <span class="px-2 py-1 text-xs text-white bg-[#1e3a5f] rounded">{{ $page }}</span>
-                            @else
-                                <a href="{{ $laporan_gangguan->appends(request()->query())->url($page) }}" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">{{ $page }}</a>
-                            @endif
-                        @endforeach
-                        @if($laporan_gangguan->hasMorePages())
-                            <a href="{{ $laporan_gangguan->appends(request()->query())->nextPageUrl() }}" class="px-2 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">Next</a>
-                        @else
-                            <span class="px-2 py-1 text-xs text-gray-400 bg-gray-100 rounded cursor-not-allowed">Next</span>
-                        @endif
+                {{-- Pagination --}}
+                <div class="mt-6 px-3 md:px-6 py-4 border-t border-gray-200" x-show="paginatedGangguan.length > 0 && totalPages > 1">
+                    {{-- Desktop Layout --}}
+                    <div class="hidden md:flex justify-between items-center">
+                        <div class="text-sm text-gray-600">
+                            Showing
+                            <span x-text="(currentPage - 1) * itemsPerPage + 1"></span> to
+                            <span x-text="Math.min(currentPage * itemsPerPage, allGangguan.length)"></span>
+                            of <span x-text="allGangguan.length"></span> entries
+                        </div>
+                        <div class="flex space-x-1">
+                            <button
+                                @click="currentPage--"
+                                :disabled="currentPage === 1"
+                                class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm"
+                            >
+                                Previous
+                            </button>
+                            <template x-if="totalPages <= 4">
+                                <template x-for="page in Array.from({length: totalPages}, (_, i) => i + 1)" :key="page">
+                                    <button
+                                        @click="currentPage = page"
+                                        :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-3 py-1 rounded text-sm"
+                                        x-text="page"
+                                    ></button>
+                                </template>
+                            </template>
+                            <template x-if="totalPages > 4">
+                                <div class="flex items-center space-x-1">
+                                    <template x-for="page in (() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return Array.from({length: 3}, (_, i) => start + i).filter(p => p <= totalPages);
+                                    })()" :key="page">
+                                        <button
+                                            @click="currentPage = page"
+                                            :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                            class="px-3 py-1 rounded text-sm"
+                                            x-text="page"
+                                        ></button>
+                                    </template>
+                                    <span x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()" class="text-sm text-gray-500">...</span>
+                                    <button x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()"
+                                        @click="currentPage = totalPages"
+                                        :class="currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-3 py-1 rounded text-sm"
+                                        x-text="totalPages"
+                                    ></button>
+                                </div>
+                            </template>
+                            <button
+                                @click="currentPage++"
+                                :disabled="currentPage >= totalPages"
+                                class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-sm"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {{-- Mobile Layout --}}
+                    <div class="md:hidden">
+                        <div class="text-xs text-gray-600 mb-3">
+                            Showing <span x-text="(currentPage - 1) * itemsPerPage + 1"></span> to <span x-text="Math.min(currentPage * itemsPerPage, allGangguan.length)"></span> of <span x-text="allGangguan.length"></span> entries
+                        </div>
+                        <div class="flex justify-center items-center space-x-1">
+                            <button
+                                @click="currentPage--"
+                                :disabled="currentPage === 1"
+                                class="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-xs"
+                            >
+                                Previous
+                            </button>
+                            <template x-if="totalPages <= 4">
+                                <template x-for="page in Array.from({length: totalPages}, (_, i) => i + 1)" :key="page">
+                                    <button
+                                        @click="currentPage = page"
+                                        :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-2 py-1 rounded text-xs"
+                                        x-text="page"
+                                    ></button>
+                                </template>
+                            </template>
+                            <template x-if="totalPages > 4">
+                                <div class="flex items-center space-x-1">
+                                    <template x-for="page in (() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return Array.from({length: 3}, (_, i) => start + i).filter(p => p <= totalPages);
+                                    })()" :key="page">
+                                        <button
+                                            @click="currentPage = page"
+                                            :class="currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                            class="px-2 py-1 rounded text-xs"
+                                            x-text="page"
+                                        ></button>
+                                    </template>
+                                    <span x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()" class="text-xs text-gray-500">...</span>
+                                    <button x-show="(() => {
+                                        let start = Math.max(1, currentPage - 1);
+                                        let end = Math.min(totalPages, start + 2);
+                                        if (end - start < 2) start = Math.max(1, end - 2);
+                                        return start + 2 < totalPages;
+                                    })()"
+                                        @click="currentPage = totalPages"
+                                        :class="currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'"
+                                        class="px-2 py-1 rounded text-xs"
+                                        x-text="totalPages"
+                                    ></button>
+                                </div>
+                            </template>
+                            <button
+                                @click="currentPage++"
+                                :disabled="currentPage >= totalPages"
+                                class="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 text-xs"
+                            >
+                                Next
+                            </button>
+                        </div>
                     </div>
                 </div>
-                @endif
             </div>
         </div>
 
@@ -588,5 +670,52 @@
     });
 </script>
 @endif
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('gangguanData', () => ({
+            // Modal states
+            showCreateModal: false,
+            showPhotoModal: false,
+            photoUrl: '',
+            showSuccessNotif: {{ session('success') ? 'true' : 'false' }},
+            showErrorNotif: {{ session('error') ? 'true' : 'false' }},
+            
+            // Pagination states
+            isOpen: true,
+            allGangguan: [],
+            currentPage: 1,
+            itemsPerPage: 5,
+            
+            get paginatedGangguan() {
+                const start = (this.currentPage - 1) * this.itemsPerPage;
+                return this.allGangguan.slice(start, start + this.itemsPerPage);
+            },
+            
+            get totalPages() {
+                return Math.ceil(this.allGangguan.length / this.itemsPerPage);
+            },
+            
+            init() {
+                // Process data from Laravel with formatted fields
+                const rawData = @json($laporan_gangguan);
+                this.allGangguan = rawData.map(gangguan => ({
+                    ...gangguan,
+                    foto_url: '{{ asset('storage') }}/' + gangguan.foto,
+                    waktu_formatted: new Date(gangguan.waktu_lapor).toLocaleDateString('id-ID', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }),
+                    deskripsi_short: gangguan.deskripsi && gangguan.deskripsi.length > 50 
+                        ? gangguan.deskripsi.substring(0, 50) + '...'
+                        : gangguan.deskripsi || ''
+                }));
+            }
+        }))
+    })
+</script>
 
 @endsection

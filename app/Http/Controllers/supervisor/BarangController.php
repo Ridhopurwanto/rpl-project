@@ -30,8 +30,11 @@ class BarangController extends Controller
         
         if ($tanggalTemuan) {
             $queryTemuan->where(function($q) use ($tanggalTemuan) {
-                $q->whereDate('waktu_lapor', $tanggalTemuan)
-                  ->orWhereDate('waktu_selesai', $tanggalTemuan);
+                $q->whereDate('waktu_lapor', '<=', $tanggalTemuan)
+                  ->where(function($sub) use ($tanggalTemuan) {
+                      $sub->whereNull('waktu_selesai')
+                          ->orWhereDate('waktu_selesai', '>=', $tanggalTemuan);
+                  });
             });
         }
         
@@ -53,8 +56,11 @@ class BarangController extends Controller
         
         if ($tanggalTitipan) {
             $queryTitipan->where(function($q) use ($tanggalTitipan) {
-                $q->whereDate('waktu_titip', $tanggalTitipan)
-                  ->orWhereDate('waktu_selesai', $tanggalTitipan);
+                $q->whereDate('waktu_titip', '<=', $tanggalTitipan)
+                  ->where(function($sub) use ($tanggalTitipan) {
+                      $sub->whereNull('waktu_selesai')
+                          ->orWhereDate('waktu_selesai', '>=', $tanggalTitipan);
+                  });
             });
         }
         
@@ -75,21 +81,23 @@ class BarangController extends Controller
         $barangTitipan = $queryTitipan->paginate($perPageTitipan, ['*'], 'page_titipan');
 
         if ($request->ajax()) {
-            return view('supervisor.partials.barang-list', compact(
-                'barangTemuan', 
-                'barangTitipan', 
-                'tanggalTemuan', 
-                'tanggalTitipan', 
-                'searchTemuan', 
-                'searchTitipan', 
-                'statusTemuan',
-                'statusTitipan',
-                'perPageTemuan', 
-                'perPageTitipan'
-            ));
+            try {
+                $htmlTemuan = view('komandan.partials.barang-table-temuan', compact('barangTemuan'))->render();
+                $htmlTitipan = view('komandan.partials.barang-table-titipan', compact('barangTitipan'))->render();
+
+                return response()->json([
+                    'html_temuan' => $htmlTemuan,
+                    'html_titipan' => $htmlTitipan,
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'message' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ], 500);
+            }
         }
 
-        return view('supervisor.barang', [
+        return view('komandan.barang', [
             'barangTemuan' => $barangTemuan,
             'barangTitipan' => $barangTitipan,
             'tanggalTemuan' => $tanggalTemuan,

@@ -12,6 +12,8 @@
          reportType: 'harian',
          dateFrom: '{{ now()->format('Y-m-d') }}',
          dateTo: '{{ now()->format('Y-m-d') }}',
+         monthFrom: '{{ now()->format('Y-m') }}',
+         monthTo: '{{ now()->format('Y-m') }}',
          
          selectedChecks: [], 
          
@@ -59,13 +61,39 @@
          },
 
          pushItemToQueue(value) {
+             let start, end, periode;
+
+             if (this.reportType === 'harian') {
+                 start = this.dateFrom;
+                 end = this.dateTo;
+                 periode = this.formatDate(start) + ' - ' + this.formatDate(end);
+             } else if (this.reportType === 'bulanan') {
+                 // Calculate full range from month input
+                 start = this.monthFrom + '-01';
+                 
+                 // Get last day of end month
+                 let parts = this.monthTo.split('-');
+                 let year = parseInt(parts[0]);
+                 let month = parseInt(parts[1]);
+                 // Day 0 of next month gives last day of current month
+                 let lastDay = new Date(year, month, 0).getDate();
+                 end = this.monthTo + '-' + lastDay;
+
+                 periode = this.formatMonth(this.monthFrom) + ' - ' + this.formatMonth(this.monthTo);
+             } else {
+                 // Administrasi - no date filter needed, but we pass something valid or empty
+                 start = '{{ now()->format('Y-m-d') }}';
+                 end = '{{ now()->format('Y-m-d') }}';
+                 periode = 'Semua Data';
+             }
+
              this.downloadQueue.push({
                  id: Date.now() + Math.random(),
                  value: value, 
                  label: this.formatLabel(value),
-                 dateStart: this.dateFrom,
-                 dateEnd: this.dateTo,
-                 periodeDisplay: this.formatDate(this.dateFrom) + ' - ' + this.formatDate(this.dateTo),
+                 dateStart: start,
+                 dateEnd: end,
+                 periodeDisplay: periode,
                  tipe: this.reportType
              });
          },
@@ -93,6 +121,13 @@
             if(!dateStr) return '';
             let parts = dateStr.split('-');
             return parts[2] + '/' + parts[1] + '/' + parts[0];
+         },
+
+         formatMonth(monthStr) {
+            if(!monthStr) return '';
+            let parts = monthStr.split('-');
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+            return months[parseInt(parts[1]) - 1] + ' ' + parts[0];
          }
      }"
 >
@@ -127,20 +162,37 @@
                     </div>
                 </div>
 
-                {{-- 2. DATE RANGE PICKER - DIPERBAIKI --}}
-                <div class="w-full">
-                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                        Periode Tanggal
-                    </label>
-                    <div class="flex flex-col sm:flex-row items-stretch gap-2 sm:gap-3">
+                {{-- 2. FILTER INPUTS (CONDITIONAL) --}}
+                <div class="w-full" x-show="reportType !== 'administrasi'">
+                    
+                    {{-- HEADER TEXT --}}
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2" x-text="reportType === 'harian' ? 'Periode Tanggal' : 'Periode Bulan'"></label>
+                    
+                    {{-- A. DATE RANGE (HARIAN) --}}
+                    <div x-show="reportType === 'harian'" class="flex flex-col sm:flex-row items-stretch gap-2 sm:gap-3">
                         <div class="flex-1 min-w-0">
-                            <input type="date" x-model="dateFrom" x-ref="dateStart"
+                            <input type="date" x-model="dateFrom"
                                    @click="$el.showPicker()"
                                    class="block w-full h-[42px] px-3 sm:px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
                         </div>
                         <span class="text-gray-500 text-sm font-medium self-center text-center sm:text-left">s/d</span>
                         <div class="flex-1 min-w-0">
-                            <input type="date" x-model="dateTo" x-ref="dateEnd"
+                            <input type="date" x-model="dateTo"
+                                   @click="$el.showPicker()"
+                                   class="block w-full h-[42px] px-3 sm:px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
+                        </div>
+                    </div>
+
+                    {{-- B. MONTH RANGE (BULANAN) --}}
+                    <div x-show="reportType === 'bulanan'" class="flex flex-col sm:flex-row items-stretch gap-2 sm:gap-3" style="display: none;">
+                        <div class="flex-1 min-w-0">
+                            <input type="month" x-model="monthFrom"
+                                   @click="$el.showPicker()"
+                                   class="block w-full h-[42px] px-3 sm:px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
+                        </div>
+                        <span class="text-gray-500 text-sm font-medium self-center text-center sm:text-left">s/d</span>
+                        <div class="flex-1 min-w-0">
+                            <input type="month" x-model="monthTo"
                                    @click="$el.showPicker()"
                                    class="block w-full h-[42px] px-3 sm:px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer">
                         </div>
@@ -272,7 +324,7 @@
                                                    @click.prevent="downloadSingle(baseUrlSingle + '?type=' + item.value + '&format=excel&start=' + item.dateStart + '&end=' + item.dateEnd)"
                                                    class="bg-green-100 text-green-700 p-1.5 sm:p-2 rounded hover:bg-green-200 transition border border-green-200 cursor-pointer" 
                                                    title="Download Excel">
-                                                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"/><path d="M3 7l9 6 9-6"/></svg>
+                                                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                                                 </button>
                                                 <button type="button"
                                                    @click.prevent="downloadSingle(baseUrlSingle + '?type=' + item.value + '&format=pdf&start=' + item.dateStart + '&end=' + item.dateEnd)"
