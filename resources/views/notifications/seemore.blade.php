@@ -19,10 +19,10 @@ class="relative">
 
     {{-- Dropdown Menu Notifikasi --}}
     <div x-show="notifOpen"
-        @click.away="notifOpen = false"
-        x-transition
-        class="absolute top-full right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-50 overflow-hidden"
-        style="display: none;">
+     @click.away="notifOpen = false"
+     x-transition
+     class="fixed left-4 right-4 top-20 z-50 w-auto sm:absolute sm:left-auto sm:top-full sm:right-0 sm:w-80 sm:mt-2 bg-white rounded-lg shadow-xl overflow-hidden"
+     style="display: none;">
 
         {{-- Header Dropdown --}}
         <div class="px-4 py-2 bg-gray-50 border-b border-gray-200 font-semibold text-gray-700 flex justify-between items-center">
@@ -31,7 +31,7 @@ class="relative">
         </div>
 
         {{-- List Notifikasi --}}
-        <div class="max-h-64 overflow-y-auto">
+        <div class="max-h-[60vh] sm:max-h-64 overflow-y-auto">
             @forelse(Auth::user()->notifications as $notification)
             {{-- Kita perlu menyimpan pesan asli ke variabel lokal $fullMessage --}}
             @php
