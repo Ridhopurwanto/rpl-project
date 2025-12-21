@@ -47,6 +47,7 @@ class ManajemenAkunController extends Controller
         ]);
 
         $data = $request->except(['password', 'foto_profil', 'password_confirmation']);
+        $data['nama_lengkap'] = strtoupper($request->nama_lengkap);
         $data['password'] = \Illuminate\Support\Facades\Hash::make($request->password);
 
         // Upload Foto
@@ -90,6 +91,9 @@ class ManajemenAkunController extends Controller
 
         // Peran tidak diupdate sesuai request user
         $data = $request->except(['password', 'foto_profil', 'password_confirmation', 'peran']);
+        if ($request->has('nama_lengkap')) {
+            $data['nama_lengkap'] = strtoupper($request->nama_lengkap);
+        }
 
         // Update password hanya jika diisi
         if ($request->filled('password')) {

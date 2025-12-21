@@ -42,6 +42,7 @@ class ManajemenAkunController extends Controller
         ]);
 
         $data = $request->except(['password', 'foto_profil', 'password_confirmation']);
+        $data['nama_lengkap'] = strtoupper($request->nama_lengkap);
 
         // Hash password
         $data['password'] = Hash::make($request->password);
@@ -79,6 +80,9 @@ class ManajemenAkunController extends Controller
         ]);
 
         $data = $request->except(['password', 'foto_profil', 'password_confirmation', 'peran']);
+        if ($request->has('nama_lengkap')) {
+            $data['nama_lengkap'] = strtoupper($request->nama_lengkap);
+        }
 
         // Update password hanya jika diisi
         if ($request->filled('password')) {
