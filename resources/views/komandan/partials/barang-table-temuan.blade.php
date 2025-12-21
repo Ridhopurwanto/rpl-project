@@ -4,11 +4,12 @@
         <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
             <tr>
                 <th class="py-3 px-4 text-center">No</th>
-                <th class="py-3 px-4 text-center">Foto</th>
+                <th class="py-3 px-4 text-center">Tanggal</th>
                 <th class="py-3 px-4 text-center">Nama Barang</th>
                 <th class="py-3 px-4 text-center">Pelapor</th>
                 <th class="py-3 px-4 text-center">Lokasi Temuan</th>
                 <th class="py-3 px-4 text-center">Catatan</th>
+                <th class="py-3 px-4 text-center">Foto</th>
                 <th class="py-3 px-4 text-center">Status</th>
             </tr>
         </thead>
@@ -16,6 +17,11 @@
             @forelse($barangTemuan as $index => $barang)
                 <tr>
                     <td class="py-2 px-4">{{ $barangTemuan->firstItem() + $index }}.</td>
+                    <td class="py-2 px-4 text-center">{{ $barang->waktu_lapor->format('d/m/Y') }}</td>
+                    <td class="py-2 px-4 font-medium">{{ $barang->nama_barang }}</td>
+                    <td class="py-2 px-4">{{ $barang->nama_pelapor }}</td>
+                    <td class="py-2 px-4">{{ $barang->lokasi_penemuan }}</td>
+                    <td class="py-2 px-4">{{ $barang->catatan }}</td>
                     <td class="py-2 px-4 text-center">
                         @if($barang->foto)
                             <button @click="showPhotoModal = true; photos = ['{{ asset('storage/' . $barang->foto) }}'@if($barang->foto_penerima), '{{ asset('storage/' . $barang->foto_penerima) }}'@endif]; currentPhotoIndex = 0" class="text-blue-500 hover:underline">Buka</button>
@@ -23,10 +29,6 @@
                             -
                         @endif
                     </td>
-                    <td class="py-2 px-4 font-medium">{{ $barang->nama_barang }}</td>
-                    <td class="py-2 px-4">{{ $barang->nama_pelapor }}</td>
-                    <td class="py-2 px-4">{{ $barang->lokasi_penemuan }}</td>
-                    <td class="py-2 px-4">{{ $barang->catatan }}</td>
                     <td class="py-2 px-4 text-center">
                         <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $barang->status == 'belum selesai' ? 'bg-red-200 text-yellow-800' : 'bg-green-200 text-green-800' }}">{{ $barang->status }}</span>
                     </td>

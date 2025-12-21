@@ -26,7 +26,9 @@ class BarangController extends Controller
         $perPageTitipan = $request->input('per_page_titipan', 10);
 
         // Query Barang Temuan
-        $queryTemuan = BarangTemuan::query()->orderBy('waktu_lapor', 'desc');
+        $queryTemuan = BarangTemuan::query()
+            ->orderByRaw("CASE WHEN status = 'selesai' THEN 0 ELSE 1 END ASC")
+            ->orderBy('waktu_lapor', 'desc');
         
         if ($tanggalTemuan) {
             $queryTemuan->where(function($q) use ($tanggalTemuan) {
@@ -52,7 +54,9 @@ class BarangController extends Controller
         }
 
         // Query Barang Titipan
-        $queryTitipan = BarangTitipan::query()->orderBy('waktu_titip', 'desc');
+        $queryTitipan = BarangTitipan::query()
+            ->orderByRaw("CASE WHEN status = 'selesai' THEN 0 ELSE 1 END ASC")
+            ->orderBy('waktu_titip', 'desc');
         
         if ($tanggalTitipan) {
             $queryTitipan->where(function($q) use ($tanggalTitipan) {
