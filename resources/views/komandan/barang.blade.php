@@ -134,7 +134,7 @@
                 {{-- Form Filter Temuan --}}
                 <form action="{{ route('komandan.barang') }}" method="GET" class="p-4 border-b border-gray-200" onsubmit="return false;">
                     <div class="flex flex-wrap gap-4">
-                        <div class="w-[calc(50%-0.5rem)] md:w-32">
+                        <div class="w-[calc(50%-0.5rem)] md:w-auto">
                             <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
                             <div class="flex items-center gap-2">
                                 <select name="per_page_temuan" id="per_page_temuan" class="w-full h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm appearance-none cursor-pointer" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em;">
@@ -195,7 +195,7 @@
                 {{-- Form Filter Titipan --}}
                 <form action="{{ route('komandan.barang') }}" method="GET" class="p-4 border-b border-gray-200" onsubmit="return false;">
                     <div class="flex flex-wrap gap-4">
-                        <div class="w-[calc(50%-0.5rem)] md:w-32">
+                        <div class="w-[calc(50%-0.5rem)] md:w-auto">
                             <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Show</label>
                             <div class="flex items-center gap-2">
                                 <select name="per_page_titipan" id="per_page_titipan" class="w-full h-[42px] pl-4 pr-10 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm appearance-none cursor-pointer" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25em 1.25em;">
