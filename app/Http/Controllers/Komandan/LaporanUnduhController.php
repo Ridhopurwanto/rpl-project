@@ -39,10 +39,21 @@ class LaporanUnduhController extends Controller
             return back()->with('error', 'Tidak ada laporan dipilih');
         }
 
-        // Data Dasar
+        // Data Dasar - Cari Tgl Awal Terkecil & Tgl Akhir Terbesar dari seluruh antrian
+        $minStart = null;
+        $maxEnd   = null;
+
+        foreach ($queue as $q) {
+            $s = $q['dateStart'];
+            $e = $q['dateEnd'];
+
+            if (is_null($minStart) || $s < $minStart) $minStart = $s;
+            if (is_null($maxEnd)   || $e > $maxEnd)   $maxEnd   = $e;
+        }
+
         $dataGabungan = [
-            'tanggalMulai'   => $queue[0]['dateStart'] ?? date('Y-m-d'),
-            'tanggalSelesai' => $queue[0]['dateEnd'] ?? date('Y-m-d'),
+            'tanggalMulai'   => $minStart ?? date('Y-m-d'),
+            'tanggalSelesai' => $maxEnd   ?? date('Y-m-d'),
         ];
 
         foreach ($queue as $item) {
