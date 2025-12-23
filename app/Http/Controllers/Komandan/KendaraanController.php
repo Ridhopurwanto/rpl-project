@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Komandan;
 
 use App\Http\Controllers\Controller;
+
+
 use Illuminate\Http\Request;
 use App\Models\Kendaraan;
 use App\Models\LogKendaraan; // Pastikan ini ada
@@ -24,7 +26,8 @@ class KendaraanController extends Controller
         $queryRiwayat = LogKendaraan::with('kendaraan')
             ->where(function($q) use ($tanggalFilter) {
                 $q->whereDate('waktu_masuk', $tanggalFilter)
-                  ->orWhereDate('waktu_keluar', $tanggalFilter);
+                  ->orWhereDate('waktu_keluar', $tanggalFilter)
+                  ->orWhere('status', 'Masuk');
             });
 
         if ($tipeFilter) {
@@ -92,7 +95,8 @@ class KendaraanController extends Controller
         $queryRiwayat = LogKendaraan::with('kendaraan')
             ->where(function($q) use ($tanggalFilter) {
                 $q->whereDate('waktu_masuk', $tanggalFilter)
-                  ->orWhereDate('waktu_keluar', $tanggalFilter);
+                  ->orWhereDate('waktu_keluar', $tanggalFilter)
+                  ->orWhere('status', 'Masuk');
             });
 
         // 3. Filter Tipe (Jika ada) - Cek tipe dari log langsung, bukan dari relasi kendaraan

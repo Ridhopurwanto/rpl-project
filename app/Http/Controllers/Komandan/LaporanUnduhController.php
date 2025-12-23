@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Komandan;
+
+use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
 use App\Models\Presensi;
@@ -27,6 +29,9 @@ class LaporanUnduhController extends Controller
 
     public function download(Request $request)
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
+
         $queue  = json_decode($request->download_queue, true);
         $format = $request->format;
 
@@ -81,6 +86,9 @@ class LaporanUnduhController extends Controller
 
     public function downloadSatuan(Request $request)
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
+
         $rawType = $request->query('type'); 
         $format  = $request->query('format');
         $start   = $request->query('start');
@@ -165,7 +173,8 @@ class LaporanUnduhController extends Controller
 
         switch ($type) {
             case 'presensi':    
-                return Presensi::whereBetween('tanggal', [$start, $end])
+                return Presensi::with('pengguna')
+                               ->whereBetween('tanggal', [$start, $end])
                                ->orderBy('tanggal', 'asc')
                                ->orderBy('waktu', 'asc')
                                ->get();

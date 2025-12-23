@@ -35,7 +35,7 @@
                     {{ \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}
                 </td>
                 <td style="border: 1px solid #000; padding: 6px;">
-                    {{ $item->nama_lengkap ?? $item->user->nama_lengkap ?? '-' }}
+                    {{ $item->nama_lengkap ?? optional($item->pengguna)->nama_lengkap ?? '-' }}
                 </td>
                 <td style="border: 1px solid #000; padding: 6px; text-align: center;">
                     {{ \Carbon\Carbon::parse($item->waktu)->format('H:i') }}
@@ -91,7 +91,7 @@
                     {{ \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}
                 </td>
                 <td style="border: 1px solid #000; padding: 6px;">
-                    {{ $item->nama_lengkap ?? $item->user->nama_lengkap ?? '-' }}
+                    {{ $item->nama_lengkap ?? optional($item->pengguna)->nama_lengkap ?? '-' }}
                 </td>
                 <td style="border: 1px solid #000; padding: 6px; text-align: center;">
                     {{ \Carbon\Carbon::parse($item->waktu)->format('H:i') }}

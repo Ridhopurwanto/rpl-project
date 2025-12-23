@@ -4,15 +4,15 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\PresensiController;
-use App\Http\Controllers\PatroliController;
-use App\Http\Controllers\PatroliRuleController;
-use App\Http\Controllers\KendaraanController;
-use App\Http\Controllers\TamuController;
-use App\Http\Controllers\BarangController;
-use App\Http\Controllers\GangguanKamtibmasController;
-use App\Http\Controllers\ManajemenAkunController;
-use App\Http\Controllers\ManajemenShiftController;
+use App\Http\Controllers\Komandan\PresensiController;
+use App\Http\Controllers\Komandan\PatroliController;
+use App\Http\Controllers\Komandan\PatroliRuleController;
+use App\Http\Controllers\Komandan\KendaraanController;
+use App\Http\Controllers\Komandan\TamuController;
+use App\Http\Controllers\Komandan\BarangController;
+use App\Http\Controllers\Komandan\GangguanKamtibmasController;
+use App\Http\Controllers\Komandan\ManajemenAkunController;
+use App\Http\Controllers\Komandan\ManajemenShiftController;
 use App\Http\Controllers\Anggota\PresensiController as AnggotaPresensiController;
 use App\Http\Controllers\Anggota\PatroliController as AnggotaPatroliController;
 use App\Http\Controllers\RoleSwitchController;
@@ -20,7 +20,7 @@ use App\Http\Controllers\Anggota\KendaraanController as AnggotaKendaraanControll
 use App\Http\Controllers\Anggota\TamuController as AnggotaTamuController;
 use App\Http\Controllers\Anggota\GangguanKamtibmasController as AnggotaGangguanKamtibmasController;
 use App\Http\Controllers\Anggota\BarangController as AnggotaBarangController;
-use App\Http\Controllers\LaporanUnduhController;
+use App\Http\Controllers\Komandan\LaporanUnduhController;
 use App\Http\Controllers\ProfilController;
 
 // Rute untuk tamu (belum login)
