@@ -71,7 +71,7 @@
                 // Koordinat kampus Anda
                 campusLat: -6.2315465,
                 campusLng: 106.8666516, 
-                maxDistance: 80,
+                maxDistance: 500,
 
                 filterStartDate: '{{ $startDate }}',
                 filterEndDate: '{{ $endDate }}',
@@ -523,7 +523,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span>Radius presensi: <span class="font-bold">80m</span> dari kampus</span>
+                            <span>Radius presensi: <span class="font-bold">500m</span> dari kampus</span>
                         </div>
                     </div>
                 </div>

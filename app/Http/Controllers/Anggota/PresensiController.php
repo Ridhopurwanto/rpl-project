@@ -205,7 +205,7 @@ class PresensiController extends Controller
             if ($isGeotagEnabled) {
                 $campusLat = -6.2315465;
                 $campusLng = 106.8666516;
-                $maxDistance = 80;
+                $maxDistance = 500;
                 
                 $distance = $this->calculateDistance(
                     $request->latitude,
