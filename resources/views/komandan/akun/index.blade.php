@@ -506,7 +506,6 @@ function filterUsers(searchTerm) {
         }
     });
     
-    // Tampilkan pesan "Data Tidak Ditemukan" jika tidak ada hasil
     if (visibleCount === 0 && search !== '') {
         noDataMessage.classList.remove('hidden');
     } else {

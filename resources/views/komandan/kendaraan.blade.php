@@ -22,7 +22,6 @@
             transform: rotate(-90deg);
             transform-origin: center;
         }
-        /* Animasi berjalan 5 detik sesuai timeout javascript */
         .animate-timer {
             animation: countdown 5s linear forwards;
         }
@@ -509,20 +508,17 @@ if (searchMasterInput) {
     });
 }
 
-// Function untuk load data riwayat via AJAX
 function loadRiwayatData(page = 1) {
     toggleLoading(true);
 
     const formData = new FormData(document.getElementById('filterForm'));
     formData.append('page_riwayat', page);
-    
-    // 1. Params for API Call (Only form specific)
+
     const apiParams = new URLSearchParams();
     for (let [key, value] of formData) {
         apiParams.append(key, value);
     }
-    
-    // 2. Params for Browser URL (Merge with existing)
+ 
     const urlParams = new URLSearchParams(window.location.search);
     for (let [key, value] of formData) {
         if (value) {
@@ -531,9 +527,8 @@ function loadRiwayatData(page = 1) {
             urlParams.delete(key);
         }
     }
-    urlParams.set('page_riwayat', page); // Ensure page is set
+    urlParams.set('page_riwayat', page); 
 
-    // Update Browser URL
     window.history.pushState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
 
     fetch('{{ route("komandan.kendaraan.searchRiwayat") }}?' + apiParams.toString())
@@ -548,24 +543,19 @@ function loadRiwayatData(page = 1) {
         });
 }
 
-// Function untuk load data master via AJAX
 function loadMasterData(page = 1) {
     toggleLoading(true);
 
     const formData = new FormData(document.getElementById('filterFormMaster'));
     formData.append('page_master', page);
-    
-    // 1. Params for API Call
+
     const apiParams = new URLSearchParams();
     for (let [key, value] of formData) {
         apiParams.append(key, value);
     }
 
-    // 2. Params for Browser URL (Merge)
     const urlParams = new URLSearchParams(window.location.search);
     for (let [key, value] of formData) {
-        // filterFormMaster might have hidden inputs from previous request, 
-        // we trust the form data as the latest "truth" for these keys.
         if (value) {
             urlParams.set(key, value);
         } else {
@@ -574,7 +564,6 @@ function loadMasterData(page = 1) {
     }
     urlParams.set('page_master', page);
 
-    // Update Browser URL
     window.history.pushState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
     
     fetch('{{ route("komandan.kendaraan.searchMaster") }}?' + apiParams.toString())
@@ -594,21 +583,14 @@ function toggleLoading(show) {
     if (loader) loader.style.display = show ? 'flex' : 'none';
 }
 
-// Function untuk pagination riwayat
 function loadRiwayatPage(page) {
     loadRiwayatData(page);
 }
 
-// Function untuk pagination master
 function loadMasterPage(page) {
     loadMasterData(page);
 }
 
-
-
-
-
-// Event listener untuk filter changes (tanggal, tipe)
 document.getElementById('tanggal').addEventListener('change', loadRiwayatData);
 document.getElementById('tipe').addEventListener('change', loadRiwayatData);
 document.querySelector('select[name="per_page_riwayat"]').addEventListener('change', loadRiwayatData);

@@ -8,9 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class PatroliRuleController extends Controller
 {
-    /**
-     * Update atau create patroli rules
-     */
+     
     public function updateRules(Request $request)
     {
         $request->validate([
@@ -23,7 +21,7 @@ class PatroliRuleController extends Controller
         try {
             DB::beginTransaction();
 
-            // Update Shift Pagi
+            
             if ($request->has('shift_pagi')) {
                 foreach ($request->shift_pagi as $jenisPatroli => $data) {
                     PatroliRule::updateOrCreate(
@@ -39,7 +37,7 @@ class PatroliRuleController extends Controller
                 }
             }
 
-            // Update Shift Malam
+            
             if ($request->has('shift_malam')) {
                 foreach ($request->shift_malam as $jenisPatroli => $data) {
                     PatroliRule::updateOrCreate(

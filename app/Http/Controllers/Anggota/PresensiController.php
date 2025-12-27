@@ -19,11 +19,11 @@ class PresensiController extends Controller
     {
         $user = Auth::user();
         
-        // --- 1. FILTER TANGGAL (RANGE) ---
+        
         $startDate = $request->input('start_date', Carbon::today()->toDateString());
         $endDate = $request->input('end_date', Carbon::today()->toDateString());
 
-        // --- 2. AMBIL DATA SHIFT (Untuk Kalender) ---
+        
         $startCarbon = Carbon::parse($startDate);
         $bulan = $startCarbon->month;
         $tahun = $startCarbon->year;
@@ -38,7 +38,7 @@ class PresensiController extends Controller
             return Carbon::parse($shift->tanggal)->format('Y-m-d');
         });
 
-        // --- 3. GENERATE KALENDER (Visual Bulan Ini) ---
+        
         $calStart = $startCarbon->copy()->startOfMonth();
         $calEnd = $startCarbon->copy()->endOfMonth();
         $period = CarbonPeriod::create($calStart, $calEnd);
@@ -59,7 +59,7 @@ class PresensiController extends Controller
             ];
         }
 
-        // --- 4. AMBIL RIWAYAT PRESENSI (Sesuai Rentang Tanggal) ---
+        
         $riwayatPresensi = Presensi::where('id_pengguna', $user->id_pengguna)
                             ->whereDate('waktu', '>=', $startDate)
                             ->whereDate('waktu', '<=', $endDate)
@@ -73,18 +73,18 @@ class PresensiController extends Controller
                             ->whereDate('tanggal', Carbon::today())
                             ->first();
 
-        // Cek Status Presensi Hari Ini
-        // Cek Status Presensi Hari Ini (Sudah Masuk / Pulang?)
+        
+        
         $presensiLog = Presensi::where('id_pengguna', $user->id_pengguna)
                             ->whereDate('waktu', Carbon::today()) 
                             ->get();
 
-        // GANTI DARI 'Masuk'/'Pulang' JADI 'masuk'/'pulang' (lowercase)
-        $sudahMasuk = $presensiLog->where('jenis_presensi', 'Masuk')->first();   // ← PERBAIKI
-        $sudahPulang = $presensiLog->where('jenis_presensi', 'Pulang')->first();  // ← PERBAIKI
+        
+        $sudahMasuk = $presensiLog->where('jenis_presensi', 'Masuk')->first();   
+        $sudahPulang = $presensiLog->where('jenis_presensi', 'Pulang')->first();  
 
         
-        // Default Data Jadwal
+        
         $jadwalAbsen = [
             'nama_shift'     => 'TIDAK ADA JADWAL',
             'info_terdekat'  => '-',
@@ -150,7 +150,7 @@ class PresensiController extends Controller
 
         $shiftHariIni = $todayShiftData && $todayShiftData->shiftRule ? strtoupper($todayShiftData->shiftRule->jenis_shift) : 'TIDAK ADA JADWAL';
 
-        // Default True (Wajib) jika data tidak ditemukan
+        
         $wajibGeotag = true; 
         if ($todayShiftData && $todayShiftData->shiftRule) {
             $wajibGeotag = (bool) $todayShiftData->shiftRule->is_geotag_enabled;
@@ -178,7 +178,7 @@ class PresensiController extends Controller
                         ->whereDate('tanggal', $now)
                         ->first();
 
-        $isGeotagEnabled = true; // Default nyala
+        $isGeotagEnabled = true; 
         if ($shiftHariIni && $shiftHariIni->shiftRule) {
             $isGeotagEnabled = $shiftHariIni->shiftRule->is_geotag_enabled;
         }
@@ -186,12 +186,12 @@ class PresensiController extends Controller
         $rules = [
             'foto_base64' => 'required|string',
             'jenis_presensi' => 'required|in:masuk,pulang',
-            // Default: latitude/longitude boleh nullable jika geotag mati
+            
             'latitude' => 'nullable', 
             'longitude' => 'nullable',
         ];
 
-        // Hanya validasi lat/long jika fitur dinyalakan
+        
         if ($isGeotagEnabled) {
             $rules['latitude'] = 'required|numeric';
             $rules['longitude'] = 'required|numeric';
@@ -200,8 +200,8 @@ class PresensiController extends Controller
         $request->validate($rules);
 
         try {
-            // 3. Cek Jarak (HANYA JIKA ENABLED)
-            $distance = 0; // Default
+            
+            $distance = 0; 
             if ($isGeotagEnabled) {
                 $campusLat = -6.2315465;
                 $campusLng = 106.8666516;
@@ -220,7 +220,7 @@ class PresensiController extends Controller
                 }
             }
                   
-            // 1. Cek Duplikasi
+            
             $cekDuplikat = Presensi::where('id_pengguna', $user->id_pengguna)
                             ->whereDate('waktu', $now) 
                             ->where('jenis_presensi', $request->jenis_presensi)
@@ -230,7 +230,7 @@ class PresensiController extends Controller
                 return redirect()->back()->with('error', 'Anda sudah presensi ' . $request->jenis_presensi . ' hari ini.');
             }
 
-            // 2. Simpan Foto
+            
             $imageData = $request->foto_base64;
             if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
                 $imageData = substr($imageData, strpos($imageData, ',') + 1);
@@ -241,7 +241,7 @@ class PresensiController extends Controller
             $fileName = 'presensi/' . $request->jenis_presensi . '_' . $user->id_pengguna . '_' . time() . '.jpg';
             Storage::disk('public')->put($fileName, $imageData);
 
-            // 3. LOGIKA HITUNG KETERLAMBATAN
+            
             $status = 'tepat waktu';
             $shiftHariIni = Shift::with('shiftRule')
                             ->where('id_pengguna', $user->id_pengguna)
@@ -285,13 +285,13 @@ class PresensiController extends Controller
             }
 
 
-            // 4. Simpan Data (DENGAN LATITUDE & LONGITUDE)
+            
             Presensi::create([
                 'id_pengguna'    => $user->id_pengguna,
                 'id_shift'       => $shiftHariIni ? $shiftHariIni->id_shift : null,
                 'nama_lengkap'   => $user->nama_lengkap,
                 'waktu'          => $now,
-                'tanggal'        => $now->toDateString(), // ← PAKAI INI
+                'tanggal'        => $now->toDateString(), 
                 'foto'           => $fileName,
                 'jenis_presensi' => $request->jenis_presensi,
                 'status'         => $status,
@@ -307,18 +307,10 @@ class PresensiController extends Controller
         }
     }
 
-    /**
-     * Hitung jarak antara dua koordinat GPS menggunakan formula Haversine
-     * 
-     * @param float $lat1 Latitude titik 1
-     * @param float $lon1 Longitude titik 1
-     * @param float $lat2 Latitude titik 2
-     * @param float $lon2 Longitude titik 2
-     * @return float Jarak dalam meter
-     */
+     
     private function calculateDistance($lat1, $lon1, $lat2, $lon2)
     {
-        $earthRadius = 6371000; // Radius bumi dalam meter
+        $earthRadius = 6371000; 
         
         $dLat = deg2rad($lat2 - $lat1);
         $dLon = deg2rad($lon2 - $lon1);

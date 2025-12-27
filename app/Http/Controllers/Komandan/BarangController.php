@@ -13,9 +13,7 @@ use Illuminate\Support\Carbon;
 
 class BarangController extends Controller
 {
-    /**
-     * Menampilkan halaman Laporan Barang (untuk Komandan dan BAU).
-     */
+     
     public function index(Request $request)
     {
         $tanggalTemuan = $request->input('tanggal_temuan', now()->format('Y-m-d'));
@@ -27,7 +25,7 @@ class BarangController extends Controller
         $perPageTemuan = $request->input('per_page_temuan', 10);
         $perPageTitipan = $request->input('per_page_titipan', 10);
 
-        // Query Barang Temuan
+        
         $queryTemuan = BarangTemuan::query()
             ->orderByRaw("CASE WHEN status = 'selesai' THEN 0 ELSE 1 END ASC")
             ->orderBy('waktu_lapor', 'desc');
@@ -55,7 +53,7 @@ class BarangController extends Controller
             });
         }
 
-        // Query Barang Titipan
+        
         $queryTitipan = BarangTitipan::query()
             ->orderByRaw("CASE WHEN status = 'selesai' THEN 0 ELSE 1 END ASC")
             ->orderBy('waktu_titip', 'desc');

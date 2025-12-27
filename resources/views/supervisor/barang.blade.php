@@ -26,7 +26,6 @@
             transform: rotate(-90deg);
             transform-origin: center;
         }
-        /* Animasi berjalan 5 detik sesuai timeout javascript */
         .animate-timer {
             animation: countdown 5s linear forwards;
         }
@@ -327,7 +326,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const resultsContainer = document.getElementById('barang-results');
 
-    // Debounce function
     function debounce(func, wait) {
         let timeout;
         return function(...args) {
@@ -339,7 +337,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function fetchResults(url) {
         toggleLoading(true);
         if (!url) {
-            // Collect params from inputs inside the results container (which are re-rendered)
             const searchInputTemuan = document.getElementById('searchInputTemuan');
             const searchInputTitipan = document.getElementById('searchInputTitipan');
             const dateInputTemuan = document.getElementById('tanggal_temuan');
@@ -360,17 +357,14 @@ document.addEventListener('DOMContentLoaded', function() {
             if (statusTemuan && statusTemuan.value) params.set('status_temuan', statusTemuan.value); else params.delete('status_temuan');
             if (statusTitipan && statusTitipan.value) params.set('status_titipan', statusTitipan.value); else params.delete('status_titipan');
 
-            // Reset pagination to page 1 on new search/filter
             params.delete('page_temuan');
             params.delete('page_titipan');
 
             url = `${window.location.pathname}?${params.toString()}`;
-            
-            // Update Browser URL
+
             window.history.pushState({}, '', url);
         }
 
-        // Fetch Data
         fetch(url, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
@@ -383,7 +377,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         const json = JSON.parse(text);
                         throw new Error(json.message || json.exception || 'Server Error');
                     } catch (e) {
-                         // If not JSON, it's probably the HTML error page title or substring
                         throw new Error('Server Error: ' + response.statusText);
                     }
                 }
@@ -391,7 +384,6 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(data => {
                 if (!data.html_temuan || !data.html_titipan) {
-                    // If we get here but missing keys, and it's not a standard Laravel error structure
                     throw new Error('Response missing HTML data');
                 }
                 document.getElementById('barang-temuan-container').innerHTML = data.html_temuan;
@@ -439,21 +431,17 @@ document.addEventListener('DOMContentLoaded', function() {
         if (statusTitipan) statusTitipan.addEventListener('change', () => fetchResults());
     }
 
-    // Attach initial listeners
     attachListeners();
 
-    // Delegate Pagination Clicks
     resultsContainer.addEventListener('click', function(e) {
         if (e.target.closest('.pagination-link')) {
             e.preventDefault();
             const link = e.target.closest('.pagination-link');
             fetchResults(link.href);
-            // Also update URL to match the pagination link
             window.history.pushState({}, '', link.href);
         }
     });
 
-    // Handle Back/Forward Browser Buttons
     window.addEventListener('popstate', function() {
         fetchResults(window.location.href);
     });

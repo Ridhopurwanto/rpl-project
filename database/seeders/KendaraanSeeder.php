@@ -7,15 +7,13 @@ use Illuminate\Support\Facades\DB;
 
 class KendaraanSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
+     
     public function run(): void
     {
-        // Opsional: Kosongkan tabel sebelum seeding untuk menghindari duplikat saat re-seed
-        // DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        // DB::table('kendaraan')->truncate();
-        // DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        
+        
+        
+        
 
         $data = [
             ['nomor_plat' => 'B 1087 TQH', 'pemilik' => 'DIREKTUR', 'tipe' => 'Roda 4'],
@@ -102,7 +100,7 @@ class KendaraanSeeder extends Seeder
             ['nomor_plat' => 'BK 6360 ALB', 'pemilik' => 'DOSEN LUAR', 'tipe' => 'Roda 2'],
         ];
 
-        // Memasukkan data dengan timestamp
+        
         $now = now();
         $dataWithTime = array_map(function ($item) use ($now) {
             return array_merge($item, [

@@ -35,7 +35,7 @@ class LaporanUnduhController extends Controller
             return back()->with('error', 'Tidak ada laporan dipilih');
         }
 
-        // Data Dasar - Cari Tgl Awal Terkecil & Tgl Akhir Terbesar dari seluruh antrian
+        
         $minStart = null;
         $maxEnd   = null;
 
@@ -47,7 +47,7 @@ class LaporanUnduhController extends Controller
             if (is_null($maxEnd)   || $e > $maxEnd)   $maxEnd   = $e;
         }
 
-        // Data Dasar
+        
         $dataGabungan = [
             'tanggalMulai'   => $minStart ?? date('Y-m-d'),
             'tanggalSelesai' => $maxEnd   ?? date('Y-m-d'),
@@ -80,11 +80,11 @@ class LaporanUnduhController extends Controller
                 ->setOption('isHtml5ParserEnabled', true)
                 ->setOption('isRemoteEnabled', true);
 
-            // return $pdf->stream("Laporan Gabungan {$timestamp}.pdf");
+            
             return $pdf->download("Laporan Gabungan {$timestamp}.pdf");
         }
 
-        // kalau bukan excel atau pdf
+        
         return back()->with('error', 'Format tidak valid');
     }
 
@@ -97,12 +97,12 @@ class LaporanUnduhController extends Controller
 
         $type = $this->normalizeType($rawType);
 
-        // KHUSUS BARANG: Fetch Temu & Titip sekaligus agar masuk ke satu sheet 'barang'
+        
         if ($type == 'barang') {
             $dataTemu = $this->fetchData('barang_temu', $start, $end);
             $dataTitip = $this->fetchData('barang_titip', $start, $end);
             
-            // Jika keduanya kosong, anggap data kosong
+            
             if ($dataTemu->isEmpty() && $dataTitip->isEmpty()) {
                  return back()->with('error', "Laporan barang tidak ditemukan pada periode tersebut.");
             }
@@ -114,7 +114,7 @@ class LaporanUnduhController extends Controller
                 'barang_titip'   => $dataTitip,
             ];
         } else {
-            // Logic default untuk tipe lain
+            
             $data = $this->fetchData($type, $start, $end);
 
             if (!$data) {
@@ -143,7 +143,7 @@ class LaporanUnduhController extends Controller
                 ->setOption('isHtml5ParserEnabled', true)
                 ->setOption('isRemoteEnabled', true);
 
-            // return $pdf->stream($fileName . '.pdf');
+            
             return $pdf->download($fileName . '.pdf');
         }
 
@@ -207,13 +207,13 @@ class LaporanUnduhController extends Controller
             case 'shift':       
                 return Shift::join('pengguna', 'shift.id_pengguna', '=', 'pengguna.id_pengguna')
                             ->whereBetween('shift.tanggal', [$start, $end])
-                            ->orderBy('pengguna.nama_lengkap', 'asc') // Sort by Name
+                            ->orderBy('pengguna.nama_lengkap', 'asc') 
                             ->orderBy('shift.tanggal', 'asc')
-                            ->select('shift.*') // Keep shift data
+                            ->select('shift.*') 
                             ->get();
             case 'anggota':     
                 return User::whereIn('peran', ['anggota', 'komandan'])
-                           ->orderBy('nama_lengkap', 'asc') // Sort by Name
+                           ->orderBy('nama_lengkap', 'asc') 
                            ->get();
             case 'kendaraan_terdaftar': return Kendaraan::orderBy('tipe', 'asc')->get();
             default:            return null;

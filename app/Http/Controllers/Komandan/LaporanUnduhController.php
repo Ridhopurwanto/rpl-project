@@ -39,7 +39,7 @@ class LaporanUnduhController extends Controller
             return back()->with('error', 'Tidak ada laporan dipilih');
         }
 
-        // Data Dasar - Cari Tgl Awal Terkecil & Tgl Akhir Terbesar dari seluruh antrian
+        
         $minStart = null;
         $maxEnd   = null;
 
@@ -78,7 +78,7 @@ class LaporanUnduhController extends Controller
         }
 
         if ($format == 'pdf') {
-            // Check if Shift is present to determine orientation
+            
             $hasShift = isset($dataGabungan['shift']);
             $orientation = $hasShift ? 'landscape' : 'portrait';
 
@@ -87,11 +87,11 @@ class LaporanUnduhController extends Controller
                 ->setOption('isHtml5ParserEnabled', true)
                 ->setOption('isRemoteEnabled', true);
 
-            // return $pdf->stream("Laporan Gabungan {$timestamp}.pdf");
+            
             return $pdf->download("Laporan Gabungan {$timestamp}.pdf");
         }
 
-        // kalau bukan excel atau pdf
+        
         return back()->with('error', 'Format tidak valid');
     }
 
@@ -107,12 +107,12 @@ class LaporanUnduhController extends Controller
 
         $type = $this->normalizeType($rawType);
 
-        // KHUSUS BARANG: Fetch Temu & Titip sekaligus agar masuk ke satu sheet 'barang'
+        
         if ($type == 'barang') {
             $dataTemu = $this->fetchData('barang_temu', $start, $end);
             $dataTitip = $this->fetchData('barang_titip', $start, $end);
             
-            // Jika keduanya kosong, anggap data kosong
+            
             if ($dataTemu->isEmpty() && $dataTitip->isEmpty()) {
                  return back()->with('error', "Laporan barang tidak ditemukan pada periode tersebut.");
             }
@@ -124,7 +124,7 @@ class LaporanUnduhController extends Controller
                 'barang_titip'   => $dataTitip,
             ];
         } else {
-            // Logic default untuk tipe lain
+            
             $data = $this->fetchData($type, $start, $end);
 
             if (!$data) {
@@ -148,7 +148,7 @@ class LaporanUnduhController extends Controller
         }
         
         if ($format == 'pdf') {
-            // Set Landscape if Shift
+            
             $orientation = ($type == 'shift') ? 'landscape' : 'portrait';
 
             $pdf = Pdf::loadView('komandan.laporan.template-pdf', $dataWrapper)
@@ -156,7 +156,7 @@ class LaporanUnduhController extends Controller
                 ->setOption('isHtml5ParserEnabled', true)
                 ->setOption('isRemoteEnabled', true);
 
-            // return $pdf->stream($fileName . '.pdf');
+            
             return $pdf->download($fileName . '.pdf');
         }
 
@@ -219,22 +219,22 @@ class LaporanUnduhController extends Controller
                                         ->orderBy('waktu_lapor', 'asc')
                                         ->get();
             case 'shift':       
-                // Fetch ALL active security personnel (exclude admin if needed, assumed komandan/anggota/bau)
-                $users = User::whereIn('peran', ['anggota', 'komandan', 'supervisor']) // Added supervisor/bau
+                
+                $users = User::whereIn('peran', ['anggota', 'komandan', 'supervisor']) 
                              ->orderBy('nama_lengkap', 'asc')
                              ->get();
                 
-                // Fetch Shifts in range
+                
                 $shifts = Shift::with(['shiftRule'])
                                ->whereBetween('tanggal', [$start, $end])
                                ->get();
                 
-                // Map shifts to users
+                
                 foreach ($users as $user) {
-                    // Filter shifts for this user
+                    
                     $userShifts = $shifts->where('id_pengguna', $user->id_pengguna);
                     
-                    // Create a map: date => shift_code
+                    
                     $shiftMap = [];
                     foreach ($userShifts as $s) {
                         $shiftMap[$s->tanggal] = $s;
@@ -245,7 +245,7 @@ class LaporanUnduhController extends Controller
                 return $users;
             case 'anggota':     
                 return User::whereIn('peran', ['anggota', 'komandan'])
-                           ->orderBy('nama_lengkap', 'asc') // Sort by Name
+                           ->orderBy('nama_lengkap', 'asc') 
                            ->get();
             case 'kendaraan_terdaftar': return Kendaraan::orderBy('tipe', 'asc')->get();
             default:            return null;

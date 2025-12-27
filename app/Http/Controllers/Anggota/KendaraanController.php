@@ -11,17 +11,15 @@ use Illuminate\Support\Facades\Auth;
 
 class KendaraanController extends Controller
 {
-    /**
-     * Menampilkan halaman index (daftar kendaraan aktif & riwayat).
-     */
+     
     public function index(Request $request)
     {
-        // 1. Ambil kendaraan yang statusnya "Masuk"
+        
         $kendaraan_aktif = LogKendaraan::where('status', 'Masuk')
                             ->orderBy('waktu_masuk', 'asc')
                             ->get();
 
-        // 2. Filter riwayat berdasarkan tanggal dan keterangan
+        
         $tanggal_riwayat = $request->input('tanggal', Carbon::today()->toDateString());
         $keterangan_filter = $request->input('keterangan');
 
@@ -42,17 +40,13 @@ class KendaraanController extends Controller
         ]);
     }
 
-    /**
-     * Menampilkan halaman form tambah kendaraan.
-     */
+     
     public function create()
     {
         return view('anggota.kendaraan-create');
     }
 
-    /**
-     * Menyimpan kendaraan baru ke log
-     */
+     
     public function store(Request $request)
     {
         $request->validate([
@@ -83,9 +77,7 @@ class KendaraanController extends Controller
                          ->with('success', 'Kendaraan berhasil ditambahkan.');
     }
 
-    /**
-     * Meng-update Keterangan (Menginap/Tidak)
-     */
+     
     public function updateKeterangan(Request $request, $id_kendaraan_log)
     {
         $request->validate([
@@ -102,9 +94,7 @@ class KendaraanController extends Controller
         return redirect()->route('anggota.kendaraan.index')->with('error', 'Tidak dapat mengubah keterangan kendaraan yang sudah keluar.');
     }
 
-    /**
-     * Memproses checkout kendaraan
-     */
+     
     public function checkout(Request $request, $id_kendaraan_log)
     {
         $request->validate([
@@ -124,10 +114,7 @@ class KendaraanController extends Controller
                          ->with('success', 'Kendaraan berhasil dikeluarkan.');
     }
 
-    /**
-     * API UNTUK SUGGESTION AUTOCOMPLETE
-     * Support untuk dropdown suggestion
-     */
+     
     public function searchNopol(Request $request)
     {
         $request->validate([
@@ -144,7 +131,7 @@ class KendaraanController extends Controller
 
         $searchTerm = strtoupper(trim($searchTerm));
 
-        // ▼▼▼ UNTUK FILTER RIWAYAT (dengan tanggal) ▼▼▼
+        
         if ($tanggal) {
             $results = LogKendaraan::where('status', 'Keluar')
                                    ->whereDate('waktu_keluar', $tanggal)
@@ -170,7 +157,7 @@ class KendaraanController extends Controller
             return response()->json($results);
         }
 
-        // ▼▼▼ UNTUK FORM CREATE (MODAL) ▼▼▼
+        
         $kendaraan = Kendaraan::where(function($query) use ($searchTerm) {
                                     $query->where('nomor_plat', 'LIKE', $searchTerm . '%')
                                           ->orWhereRaw("pemilik REGEXP ?", [
@@ -192,10 +179,7 @@ class KendaraanController extends Controller
         return response()->json($kendaraan);
     }
 
-    /**
-     * ▼▼▼ NEW METHOD: AJAX endpoint untuk live search riwayat ▼▼▼
-     * Return partial HTML untuk update container tanpa reload page
-     */
+     
     public function getRiwayat(Request $request)
     {
         $tanggal_riwayat = $request->input('tanggal', Carbon::today()->toDateString());
@@ -221,7 +205,7 @@ class KendaraanController extends Controller
 
         $riwayat_kendaraan = $query->orderBy('waktu_keluar', 'desc')->get();
 
-        // Return hanya HTML card riwayat (partial view)
+        
         return view('anggota.kendaraan-riwayat-cards', [
             'riwayat_kendaraan' => $riwayat_kendaraan
         ])->render();

@@ -9,7 +9,6 @@
 @section('content')
     {{-- Style untuk animasi --}}
     <style>
-        /* Animasi Loading Dots (...) */
         .loading-dots::after {
             content: ' .';
             animation: dots 1.5s steps(5, end) infinite;

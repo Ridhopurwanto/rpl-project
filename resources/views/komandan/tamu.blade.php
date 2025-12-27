@@ -350,8 +350,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const startDateInput = document.getElementById('start_date');
     const endDateInput = document.getElementById('end_date');
     const resultsContainer = document.getElementById('tamu-results');
-    
-    // Debounce function
+
     function debounce(func, wait) {
         let timeout;
         return function(...args) {
@@ -362,7 +361,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function fetchResults(url) {
         toggleLoading(true);
-        // Collect params if url is not provided
         if (!url) {
             const params = new URLSearchParams(window.location.search);
             if (searchInput.value) params.set('cari', searchInput.value); else params.delete('cari');
@@ -370,16 +368,13 @@ document.addEventListener('DOMContentLoaded', function() {
             if (startDateInput.value) params.set('start_date', startDateInput.value);
             if (endDateInput.value) params.set('end_date', endDateInput.value);
             
-            // --- FIX: Reset Pagination to Page 1 on Filter Change ---
             params.delete('page'); 
 
             url = `${window.location.pathname}?${params.toString()}`;
             
-             // Update Browser URL
             window.history.pushState({}, '', url);
         }
 
-        // Fetch Data
         fetch(url, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
@@ -388,8 +383,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.text())
             .then(html => {
                 resultsContainer.innerHTML = html;
-                // Re-attach event listeners for new pagination links if needed, 
-                // but we use delegation below so it's fine.
             })
             .catch(error => console.error('Error:', error))
             .finally(() => {
@@ -402,7 +395,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (loader) loader.style.display = show ? 'flex' : 'none';
     }
 
-    // Event Listeners
     const debouncedFetch = debounce(() => fetchResults(), 300);
 
     searchInput.addEventListener('input', debouncedFetch);
@@ -410,18 +402,15 @@ document.addEventListener('DOMContentLoaded', function() {
     startDateInput.addEventListener('change', () => fetchResults());
     endDateInput.addEventListener('change', () => fetchResults());
 
-    // Delegate Pagination Clicks
     resultsContainer.addEventListener('click', function(e) {
         if (e.target.closest('.pagination-link')) {
             e.preventDefault();
             const link = e.target.closest('.pagination-link');
             fetchResults(link.href);
-            // Also update URL to match the pagination link
             window.history.pushState({}, '', link.href);
         }
     });
 
-    // Handle Back/Forward Browser Buttons
     window.addEventListener('popstate', function() {
         fetchResults(window.location.href);
     });

@@ -22,7 +22,6 @@
             transform: rotate(-90deg);
             transform-origin: center;
         }
-        /* Animasi berjalan 5 detik sesuai timeout javascript */
         .animate-timer {
             animation: countdown 5s linear forwards;
         }
@@ -337,7 +336,6 @@
 
 {{-- SCRIPT AJAX LIVE SEARCH --}}
 <script>
-// AJAX Live Search untuk Riwayat
 let searchTimeout;
 const searchInput = document.getElementById('searchInput');
 if (searchInput) {
@@ -349,7 +347,6 @@ if (searchInput) {
     });
 }
 
-// AJAX Live Search untuk Master
 let searchMasterTimeout;
 const searchMasterInput = document.getElementById('searchMasterInput');
 if (searchMasterInput) {
@@ -361,7 +358,6 @@ if (searchMasterInput) {
     });
 }
 
-// Function untuk load data riwayat via AJAX
 function loadRiwayatData(page = 1) {
     toggleLoading(true);
 
@@ -385,7 +381,6 @@ function loadRiwayatData(page = 1) {
         });
 }
 
-// Function untuk load data master via AJAX
 function loadMasterData(page = 1) {
     toggleLoading(true);
 
@@ -414,21 +409,14 @@ function toggleLoading(show) {
     if (loader) loader.style.display = show ? 'flex' : 'none';
 }
 
-// Function untuk pagination riwayat
 function loadRiwayatPage(page) {
     loadRiwayatData(page);
 }
 
-// Function untuk pagination master
 function loadMasterPage(page) {
     loadMasterData(page);
 }
 
-
-
-
-
-// Event listener untuk filter changes (tanggal, tipe)
 document.getElementById('tanggal').addEventListener('change', loadRiwayatData);
 document.getElementById('tipe').addEventListener('change', loadRiwayatData);
 document.querySelector('select[name="per_page_riwayat"]').addEventListener('change', loadRiwayatData);

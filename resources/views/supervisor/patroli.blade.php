@@ -22,7 +22,6 @@
             transform: rotate(-90deg);
             transform-origin: center;
         }
-        /* Animasi berjalan 5 detik sesuai timeout javascript */
         .animate-timer {
             animation: countdown 5s linear forwards;
         }
@@ -327,15 +326,13 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const filterInputs = document.querySelectorAll('.filter-input');
-        
-        // Handle Filter Changes
+
         filterInputs.forEach(input => {
             input.addEventListener('change', function() {
                 fetchData();
             });
         });
 
-        // Handle Pagination
         document.addEventListener('click', function(e) {
             if (e.target.closest('.pagination-link')) {
                 e.preventDefault();
@@ -346,12 +343,10 @@
 
         function fetchData(url = null) {
             toggleLoading(true);
-            
-            // Build URL if not provided (filter change)
+
             if (!url) {
                 const params = new URLSearchParams();
-                
-                // Get separate dates for Pagi and Malam
+
                 params.append('tanggal_pagi', document.getElementById('tanggal_pagi').value);
                 params.append('tanggal_malam', document.getElementById('tanggal_malam').value);
                 

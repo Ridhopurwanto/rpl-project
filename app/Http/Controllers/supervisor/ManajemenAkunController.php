@@ -8,31 +8,25 @@ use Illuminate\Http\Request;
 
 class ManajemenAkunController extends Controller
 {
-    /**
-     * Menampilkan daftar akun pengguna.
-     */
+     
     public function index()
     {
-        // Mengambil semua user diurutkan berdasarkan nama
+        
         $users = User::orderBy('nama_lengkap')->get();
         
         return view('supervisor.akun.index', compact('users'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+     
     public function create()
     {
         return view('supervisor.akun.create', ['isEdit' => false]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+     
     public function store(Request $request)
     {
-        // Validasi
+        
         $request->validate([
             'nama_lengkap' => 'required|string|max:255',
             'email'        => 'required|email|unique:pengguna,email',
@@ -50,7 +44,7 @@ class ManajemenAkunController extends Controller
         $data['nama_lengkap'] = strtoupper($request->nama_lengkap);
         $data['password'] = \Illuminate\Support\Facades\Hash::make($request->password);
 
-        // Upload Foto
+        
         if ($request->hasFile('foto_profil')) {
             $path = $request->file('foto_profil')->store('akun', 'public');
             $data['foto_profil'] = $path;
@@ -61,18 +55,14 @@ class ManajemenAkunController extends Controller
         return redirect()->route('supervisor.akun.index')->with('success', 'Akun berhasil ditambahkan.');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+     
     public function edit($id_pengguna)
     {
         $user = User::findOrFail($id_pengguna);
         return view('supervisor.akun.edit', compact('user'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+     
     public function update(Request $request, $id_pengguna)
     {
         $user = User::findOrFail($id_pengguna);
@@ -89,20 +79,20 @@ class ManajemenAkunController extends Controller
             'foto_profil'  => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Peran tidak diupdate sesuai request user
+        
         $data = $request->except(['password', 'foto_profil', 'password_confirmation', 'peran']);
         if ($request->has('nama_lengkap')) {
             $data['nama_lengkap'] = strtoupper($request->nama_lengkap);
         }
 
-        // Update password hanya jika diisi
+        
         if ($request->filled('password')) {
             $data['password'] = \Illuminate\Support\Facades\Hash::make($request->password);
         }
 
-        // Update Foto
+        
         if ($request->hasFile('foto_profil')) {
-            // Hapus foto lama (Legacy & Storage)
+            
             if ($user->foto_profil) {
                 if (file_exists(public_path('uploads/profil/' . $user->foto_profil))) {
                     @unlink(public_path('uploads/profil/' . $user->foto_profil));
@@ -121,9 +111,7 @@ class ManajemenAkunController extends Controller
         return redirect()->route('supervisor.akun.index')->with('success', 'Akun berhasil diperbarui.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+     
     public function destroy($id_pengguna)
     {
         $user = User::findOrFail($id_pengguna);

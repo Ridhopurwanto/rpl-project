@@ -14,35 +14,20 @@ class PerubahanStatusPresensiNotification extends Notification
     protected $pesan;
     protected $presensiData;
 
-    /**
-     * Create a new notification instance.
-     *
-     * @param string $pesan
-     * @param object $presensiData
-     */
+     
     public function __construct($pesan, $presensiData)
     {
         $this->pesan = $pesan;
         $this->presensiData = $presensiData;
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @param  mixed  $notifiable
-     * @return array
-     */
+     
     public function via($notifiable)
     {
-        return ['database', 'mail']; // Kirim ke DB dan Email
+        return ['database', 'mail']; 
     }
 
-    /**
-     * Get the mail representation of the notification.
-     *
-     * @param  mixed  $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
-     */
+     
     public function toMail($notifiable)
     {
         return (new MailMessage)
@@ -54,12 +39,7 @@ class PerubahanStatusPresensiNotification extends Notification
             ]);
     }
 
-    /**
-     * Get the array representation of the notification.
-     *
-     * @param  mixed  $notifiable
-     * @return array
-     */
+     
     public function toArray($notifiable)
     {
         return [

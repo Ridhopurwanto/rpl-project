@@ -12,10 +12,7 @@ use Illuminate\Support\Carbon;
 
 class TamuController extends Controller
 {
-    /**
-     * Menampilkan halaman Laporan Tamu (untuk Komandan dan BAU).
-     * Menggunakan nama 'index' sesuai permintaan.
-     */
+     
     public function index(Request $request)
     {
         $startDate = $request->input('start_date', now()->format('Y-m-d'));
@@ -47,12 +44,10 @@ class TamuController extends Controller
         ]);
     }
 
-    /**
-     * Update data tamu (HANYA UNTUK KOMANDAN).
-     */
+     
     public function update(Request $request, $id_tamu)
     {
-        // Pengecekan keamanan: Hanya Komandan
+        
         if (Auth::user()->peran !== 'komandan') {
             return redirect()->route('komandan.tamu')->with('error', 'Anda tidak memiliki hak akses.');
         }
@@ -81,12 +76,10 @@ class TamuController extends Controller
         }
     }
 
-    /**
-     * Menghapus data tamu (HANYA UNTUK KOMANDAN).
-     */
+     
     public function destroy($id_tamu)
     {
-        // Pengecekan keamanan: Hanya Komandan
+        
         if (Auth::user()->peran !== 'komandan') {
             return redirect()->route('komandan.tamu')->with('error', 'Anda tidak memiliki hak akses.');
         }

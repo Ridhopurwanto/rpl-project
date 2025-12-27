@@ -23,7 +23,7 @@ class DailyLogSeeder extends Seeder
     {
         $faker = Faker::create('id_ID');
 
-        // STRICTLY 2025 as requested
+        
         $startDate = Carbon::create(2025, 10, 1);
         $endDate = Carbon::create(2025, 12, 25);
         
@@ -36,7 +36,7 @@ class DailyLogSeeder extends Seeder
         
         $userIds = $anggotaUsers->pluck('id_pengguna')->toArray();
 
-        // === DATASETS (INDONESIAN CONTEXT) ===
+        
         $barangList = [
             'Laptop ASUS', 'Laptop Lenovo', 'MacBook Air', 'HP Samsung', 'iPhone 13', 
             'Kunci Motor Honda', 'Kunci Mobil Toyota', 'Dompet Kulit Coklat', 'Dompet Hitam',
@@ -44,14 +44,14 @@ class DailyLogSeeder extends Seeder
             'Tumblr Starbucks', 'Botol Minum Tupperware', 'Flashdisk Sandisk', 'Kacamata Hitam'
         ];
 
-        // Lokasi for Barang/Gangguan (Generic)
+        
         $lokasiList = [
             'Lobby Utama', 'Pos Satpam Depan', 'Parkiran Dosen', 'Parkiran Mahasiswa',
             'Kantin Pusat', 'Musholla', 'Gedung 1 Lantai 1', 'Gedung 2 Lantai 3',
             'Perpustakaan', 'Ruang Server', 'Toilet Lantai 1', 'Taman Depan'
         ];
 
-        // Specific Patrol Areas (From Migration Enum)
+        
         $patroliAreas = [
             'AREA POS 2', 'LOBBY VVIP', 'LOBBY AUDIT', 'KOLAM IKAN VVIP', 
             'AREA BAU', 'AREA KANTIN', 'AREA BAAK', 'AKSES LORONG GD 3', 
@@ -104,7 +104,7 @@ class DailyLogSeeder extends Seeder
             $dateString = $startDate->toDateString();
             $this->command->info("Processing date: " . $dateString);
 
-            // === 1. PRESENSI LOGIC ===
+            
             $dailyUsers = $faker->randomElements($userIds, rand(3, 5));
 
             foreach ($dailyUsers as $uid) {
@@ -114,14 +114,14 @@ class DailyLogSeeder extends Seeder
                 $shiftStart = $isPagi ? '07:00:00' : '19:00:00';
                 $shiftEnd   = $isPagi ? '19:00:00' : '07:00:00'; 
 
-                // -- MASUK --
+                
                 $entryTime = $startDate->copy()->setTimeFromTimeString($shiftStart);
                 $entryOffset = rand(-20, 30); 
                 $entryTime->addMinutes($entryOffset);
                 
                 $statusMasuk = $entryOffset > 10 ? 'terlambat' : 'tepat waktu';
 
-                // Photo Presensi Path
+                
                 $presensiPhoto = 'presensi/presensi_contoh'. '.jpg';
 
                 Presensi::create([
@@ -137,7 +137,7 @@ class DailyLogSeeder extends Seeder
                     'longitude' => 112.73 + ($faker->randomFloat(5, -0.001, 0.001)),
                 ]);
 
-                // -- PULANG --
+                
                 if ($faker->boolean(95)) {
                     $exitTime = $startDate->copy()->setTimeFromTimeString($shiftEnd);
                     if (!$isPagi) $exitTime->addDay(); 
@@ -147,7 +147,7 @@ class DailyLogSeeder extends Seeder
 
                     $statusPulang = $exitOffset < 0 ? 'terlalu cepat' : 'tepat waktu'; 
                     
-                    // Photo Presensi Path (Pulang)
+                    
                     $presensiPhotoPulang = 'presensi/presensi_contoh' . '.jpg';
 
                     Presensi::create([
@@ -165,35 +165,35 @@ class DailyLogSeeder extends Seeder
                 }
             }
 
-            // === 2. PATROLI LOGIC (UPDATED WITH CLAIM) ===
+            
             $patroliCount = rand(1, 2); 
             
             for ($p = 0; $p < $patroliCount; $p++) {
                 $patrollerId = $faker->randomElement($userIds);
                 $patroller = $anggotaUsers->firstWhere('id_pengguna', $patrollerId);
                 
-                // Tentukan Shift Patroli & ID Shift
+                
                 $isPagiPatroli = $faker->boolean(60);
                 $shiftPatroliStr = $isPagiPatroli ? 'Pagi' : 'Malam';
-                $shiftPatroliId = $isPagiPatroli ? 1 : 2; // 1=Pagi, 2=Malam
+                $shiftPatroliId = $isPagiPatroli ? 1 : 2; 
                 
-                // Ambil Rule yang valid sesuai shift
+                
                 $selectedRule = $allRules->where('jenis_shift', $shiftPatroliStr)->random();
 
-                // Generate Waktu Claim
+                
                 $claimTime = $startDate->copy()->setTimeFromTimeString($selectedRule->jam_mulai);
                 $claimTime->addMinutes(rand(0, 30)); 
 
-                // --- UPDATE: BUAT CLAIM SESUAI GAMBAR TABEL ---
+                
                 $claim = PatroliClaim::create([
                     'id_pengguna'     => $patrollerId,
-                    'id_shift'        => $shiftPatroliId, // Tambahan ID Shift
-                    'id_patroli_rule' => $selectedRule->id_patroli_rule ?? $selectedRule->id_rule, // Sesuaikan nama kolom PK di tabel rule
+                    'id_shift'        => $shiftPatroliId, 
+                    'id_patroli_rule' => $selectedRule->id_patroli_rule ?? $selectedRule->id_rule, 
                     'tanggal'         => $dateString,
-                    'claimed_at'      => $claimTime, // Sesuaikan nama kolom
+                    'claimed_at'      => $claimTime, 
                 ]);
 
-                // 2. BUAT CHECKPOINT PATROLI
+                
                 $checkpointBaseTime = $claimTime->copy()->addMinutes(5); 
 
                 foreach ($patroliAreas as $index => $areaName) {
@@ -207,24 +207,24 @@ class DailyLogSeeder extends Seeder
                         'foto'          => 'patroli/patroli_contoh.jpg',
                         'tanggal'       => $dateString,
                         'jenis_patroli' => $selectedRule->jenis_patroli, 
-                        'id_claim'      => $claim->id_claim, // Hubungkan ke ID Claim yang baru dibuat
+                        'id_claim'      => $claim->id_claim, 
                     ]);
                 }
             }
 
-            // === 3. BARANG LOGIC ===
+            
             $barangCount = rand(1, 3);
             for ($b = 0; $b < $barangCount; $b++) {
                 $ownerId = $faker->randomElement($userIds);
                 $itemName = $faker->randomElement($barangList);
                 
                 if ($faker->boolean(50)) {
-                    // TITIPAN
+                    
                     $startT = $startDate->copy()->setTime(rand(7, 10), rand(0,59));
                     $isDone = $faker->boolean(80);
                     $endT = $isDone ? $startT->copy()->addHours(rand(1, 8)) : null;
 
-                    // Paths
+                    
                     $titipanPhoto = 'barang/titipan/barang_contoh' . '.jpg';
                     $penerimaPhoto = $isDone ? 'barang/penerima/penerimaTitipan_contoh' . '.jpg' : null;
 
@@ -242,12 +242,12 @@ class DailyLogSeeder extends Seeder
                         'foto_penerima' => $penerimaPhoto,
                     ]);
                 } else {
-                    // TEMUAN
+                    
                     $startT = $startDate->copy()->setTime(rand(7, 16), rand(0,59));
                     $isDone = $faker->boolean(60);
                      $endT = $isDone ? $startT->copy()->addHours(rand(1, 48)) : null;
 
-                    // Paths
+                    
                     $temuanPhoto = 'barang/temuan/barang_contoh' . '.jpg';
                     $penerimaPhoto = $isDone ? 'barang/penerima/penerimaTemuan_contoh' . '.jpg' : null;
 
@@ -267,7 +267,7 @@ class DailyLogSeeder extends Seeder
                 }
             }
 
-            // === 4. TAMU LOGIC ===
+            
             $tamuCount = rand(2, 5);
             for ($t = 0; $t < $tamuCount; $t++) {
                 Tamu::create([
@@ -280,12 +280,12 @@ class DailyLogSeeder extends Seeder
                 ]);
             }
 
-            // === 5. GANGGUAN ===
+            
             if ($faker->boolean(20)) { 
                 $kat = $faker->randomElement(array_keys($gangguanKategori));
                 $desc = $faker->randomElement($gangguanKategori[$kat]);
                 
-                // Gangguan Photo Path
+                
                 $gangguanPhoto = 'foto_gangguan/gangguan_contoh' . '.jpg';
 
                 GangguanKamtibmas::create([

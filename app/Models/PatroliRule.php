@@ -24,17 +24,13 @@ class PatroliRule extends Model
         'jam_selesai' => 'datetime:H:i',
     ];
 
-    /**
-     * Mendapatkan jam mulai dalam format string (HH:mm)
-     */
+     
     public function getJamMulaiAttribute($value)
     {
         return \Carbon\Carbon::parse($value)->format('H:i');
     }
 
-    /**
-     * Mendapatkan jam selesai dalam format string (HH:mm)
-     */
+     
     public function getJamSelesaiAttribute($value)
     {
         return \Carbon\Carbon::parse($value)->format('H:i');

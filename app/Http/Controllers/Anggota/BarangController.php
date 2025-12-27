@@ -12,31 +12,29 @@ use Carbon\Carbon;
 
 class BarangController extends Controller
 {
-    /**
-     * Menampilkan halaman index (barang aktif & riwayat)
-     */
+     
     public function index(Request $request)
     {
-        // Barang titipan aktif
+        
         $barang_titipan = BarangTitipan::where('status', 'belum selesai')
             ->orderBy('waktu_titip', 'desc')
             ->get();
 
-        // Barang temuan aktif
+        
         $barang_temuan = BarangTemuan::where('status', 'belum selesai')
             ->orderBy('waktu_lapor', 'desc')
             ->get();
 
-        // 3. Filter riwayat
+        
         $tanggal_riwayat = $request->input('tanggal', Carbon::today()->toDateString());
-        $kategori_filter = $request->input('kategori', 'semua'); // semua, titipan, temuan
+        $kategori_filter = $request->input('kategori', 'semua'); 
         $search_filter = $request->input('search');
 
-        // 4. Query riwayat berdasarkan kategori
+        
         $riwayat_barang = collect();
 
         if ($kategori_filter === 'semua' || $kategori_filter === 'titipan') {
-            // Titipan di riwayat
+            
             $titipan = BarangTitipan::where('status', 'selesai')
                 ->whereDate('waktu_selesai', $tanggal_riwayat);
 
@@ -46,12 +44,12 @@ class BarangController extends Controller
                     $search_upper = strtoupper($search_filter);
                     $pattern = '(^|[[:space:]])' . preg_quote($search_filter, '/');
                     
-                    // Strict search: hanya cocok di awal kata
+                    
                     $q->whereRaw("LOWER(nama_barang) REGEXP ?", [$pattern])
                         ->orWhereRaw("LOWER(nama_penitip) REGEXP ?", [$pattern])
                         ->orWhereRaw("LOWER(nama_penerima) REGEXP ?", [$pattern])
                         ->orWhereRaw("LOWER(tujuan) REGEXP ?", [$pattern])
-                        // Untuk uppercase juga
+                        
                         ->orWhereRaw("nama_penitip REGEXP ?", [
                             '(^|[[:space:]])' . preg_quote($search_upper, '/')
                         ])
@@ -65,7 +63,7 @@ class BarangController extends Controller
         }
 
         if ($kategori_filter === 'semua' || $kategori_filter === 'temuan') {
-            // Temuan di riwayat - PERBAIKAN: gunakan 'selesai' dengan huruf kecil
+            
             $temuan = BarangTemuan::where('status', 'selesai')
                 ->whereDate('waktu_selesai', $tanggal_riwayat);
 
@@ -75,12 +73,12 @@ class BarangController extends Controller
                     $search_upper = strtoupper($search_filter);
                     $pattern = '(^|[[:space:]])' . preg_quote($search_filter, '/');
                     
-                    // Strict search: hanya cocok di awal kata
+                    
                     $q->whereRaw("LOWER(nama_barang) REGEXP ?", [$pattern])
                         ->orWhereRaw("LOWER(nama_pelapor) REGEXP ?", [$pattern])
                         ->orWhereRaw("LOWER(nama_penerima) REGEXP ?", [$pattern])
                         ->orWhereRaw("LOWER(lokasi_penemuan) REGEXP ?", [$pattern])
-                        // Untuk uppercase juga
+                        
                         ->orWhereRaw("nama_pelapor REGEXP ?", [
                             '(^|[[:space:]])' . preg_quote($search_upper, '/')
                         ])
@@ -93,7 +91,7 @@ class BarangController extends Controller
             $riwayat_barang = $riwayat_barang->merge($temuan->get());
         }
 
-        // Sort by waktu_selesai descending dan tambahkan kategori
+        
         $riwayat_barang = $riwayat_barang->sortByDesc('waktu_selesai')->map(function ($item) {
             $item->kategori = $item instanceof BarangTitipan ? 'titipan' : 'temuan';
             return $item;
@@ -109,9 +107,7 @@ class BarangController extends Controller
         ]);
     }
 
-    /**
-     * Form create barang
-     */
+     
     public function create()
     {
         return view('anggota.barang-create');
@@ -130,12 +126,12 @@ class BarangController extends Controller
             'catatan' => 'nullable|string',
         ]);
 
-        // Simpan foto barang
+        
         $imageData = preg_replace('#^data:image/\w+;base64,#i', '', $request->foto_base64);
         $filename = 'barang/' . $request->kategori . '/' . uniqid('barang_') . '.jpg';
         Storage::disk('public')->put($filename, base64_decode($imageData));
 
-        // Gabungkan tanggal + waktu
+        
         $waktu = Carbon::parse($request->tanggal . ' ' . $request->waktu);
 
         if ($request->kategori === 'titipan') {
@@ -173,9 +169,7 @@ class BarangController extends Controller
             ->with('success', 'Data barang berhasil disimpan.');
     }
 
-    /**
-     * Menandai barang TITIPAN sebagai "Selesai"
-     */
+     
     public function selesaiTitipan(Request $request, $id_barang)
     {
         $request->validate([
@@ -187,7 +181,7 @@ class BarangController extends Controller
 
         $barang = BarangTitipan::findOrFail($id_barang);
 
-        // Validasi: tanggal ambil tidak boleh sebelum tanggal titip
+        
         $waktuSelesai = Carbon::parse($request->tanggal_ambil . ' ' . $request->waktu_ambil);
         if ($waktuSelesai->lt($barang->waktu_titip)) {
             return redirect()->back()
@@ -195,7 +189,7 @@ class BarangController extends Controller
                 ->withInput();
         }
 
-        // Simpan foto penerima (jika ada)
+        
         $pathFotoPenerima = $barang->foto_penerima;
         if ($request->filled('foto_penerima_base64')) {
             $imageData = $request->input('foto_penerima_base64');
@@ -205,7 +199,7 @@ class BarangController extends Controller
             $pathFotoPenerima = $filename;
         }
 
-        // Gabungkan tanggal & waktu → kolom waktu_selesai
+        
 
         $barang->update([
             'nama_penerima' => $request->nama_penerima,
@@ -218,9 +212,7 @@ class BarangController extends Controller
             ->with('success', 'Barang titipan berhasil diserahkan dan dipindahkan ke riwayat.');
     }
 
-    /**
-     * Menandai barang TEMUAN sebagai "Selesai" - DIPERBAIKI
-     */
+     
     public function selesaiTemuan(Request $request, $id_barang)
     {
         $request->validate([
@@ -232,7 +224,7 @@ class BarangController extends Controller
 
         $barang = BarangTemuan::findOrFail($id_barang);
 
-        // Validasi: tanggal ambil tidak boleh sebelum tanggal lapor
+        
         $waktuSelesai = Carbon::parse($request->tanggal_ambil . ' ' . $request->waktu_ambil);
         if ($waktuSelesai->lt($barang->waktu_lapor)) {
             return redirect()->back()
@@ -240,20 +232,20 @@ class BarangController extends Controller
                 ->withInput();
         }
 
-        // Simpan foto penerima (jika ada)
+        
         $pathFotoPenerima = $barang->foto_penerima;
         if ($request->filled('foto_penerima_base64')) {
             $imageData = $request->input('foto_penerima_base64');
             $image = preg_replace('#^data:image/\w+;base64,#i', '', $imageData);
             $filename = 'barang/penerima/' . uniqid('penerima_') . '.jpg';
-            // PERBAIKAN: Gunakan disk('public') agar konsisten
+            
             Storage::disk('public')->put($filename, base64_decode($image));
             $pathFotoPenerima = $filename;
         }
 
         $waktuSelesai = Carbon::parse($request->tanggal_ambil . ' ' . $request->waktu_ambil);
 
-        // PERBAIKAN: Gunakan 'selesai' dengan huruf kecil (konsisten dengan titipan)
+        
         $barang->update([
             'nama_penerima' => $request->nama_penerima,
             'foto_penerima' => $pathFotoPenerima,
@@ -265,9 +257,7 @@ class BarangController extends Controller
             ->with('success', 'Barang temuan berhasil diserahkan dan dipindahkan ke riwayat.');
     }
 
-    /**
-     * API untuk dropdown suggestion
-     */
+     
     public function searchBarang(Request $request)
     {
         $request->validate([
@@ -288,7 +278,7 @@ class BarangController extends Controller
         $searchUpper = strtoupper($searchTerm);
         $results = collect();
 
-        // Search dari riwayat barang yang sudah selesai
+        
         if ($tanggal) {
             if ($kategori === 'semua' || $kategori === 'titipan') {
                 $titipan = BarangTitipan::where('status', 'selesai')
@@ -296,11 +286,11 @@ class BarangController extends Controller
                     ->where(function ($q) use ($searchTerm, $searchUpper) {
                         $pattern = '(^|[[:space:]])' . preg_quote($searchTerm, '/');
                         
-                        // Strict search: hanya cocok di awal kata
+                        
                         $q->whereRaw("LOWER(nama_barang) REGEXP ?", [$pattern])
                             ->orWhereRaw("LOWER(nama_penitip) REGEXP ?", [$pattern])
                             ->orWhereRaw("LOWER(nama_penerima) REGEXP ?", [$pattern])
-                            // Untuk uppercase
+                            
                             ->orWhereRaw("nama_penitip REGEXP ?", [
                                 '(^|[[:space:]])' . preg_quote($searchUpper, '/')
                             ])
@@ -317,17 +307,17 @@ class BarangController extends Controller
             }
 
             if ($kategori === 'semua' || $kategori === 'temuan') {
-                // PERBAIKAN: gunakan 'selesai' dengan huruf kecil
+                
                 $temuan = BarangTemuan::where('status', 'selesai')
                     ->whereDate('waktu_selesai', $tanggal)
                     ->where(function ($q) use ($searchTerm, $searchUpper) {
                         $pattern = '(^|[[:space:]])' . preg_quote($searchTerm, '/');
                         
-                        // Strict search: hanya cocok di awal kata
+                        
                         $q->whereRaw("LOWER(nama_barang) REGEXP ?", [$pattern])
                             ->orWhereRaw("LOWER(nama_pelapor) REGEXP ?", [$pattern])
                             ->orWhereRaw("LOWER(nama_penerima) REGEXP ?", [$pattern])
-                            // Untuk uppercase
+                            
                             ->orWhereRaw("nama_pelapor REGEXP ?", [
                                 '(^|[[:space:]])' . preg_quote($searchUpper, '/')
                             ])
@@ -349,9 +339,7 @@ class BarangController extends Controller
         return response()->json([]);
     }
 
-    /**
-     * AJAX endpoint untuk live search riwayat
-     */
+     
     public function getRiwayat(Request $request)
     {
         $tanggal_riwayat = $request->input('tanggal', Carbon::today()->toDateString());
@@ -362,7 +350,7 @@ class BarangController extends Controller
 
         $riwayat_barang = collect();
 
-        // Jika ada id_barang dan kategori_barang, ambil barang spesifik tersebut
+        
         if ($id_barang && $kategori_barang) {
             if ($kategori_barang === 'titipan') {
                 $barang = BarangTitipan::where('id_barang', $id_barang)
@@ -382,7 +370,7 @@ class BarangController extends Controller
                 }
             }
         } else {
-            // Logika pencarian normal (by name)
+            
             if ($kategori_filter === 'semua' || $kategori_filter === 'titipan') {
                 $titipan = BarangTitipan::where('status', 'selesai')
                     ->whereDate('waktu_selesai', $tanggal_riwayat);
@@ -393,11 +381,11 @@ class BarangController extends Controller
                         $search_upper = strtoupper($search_filter);
                         $pattern = '(^|[[:space:]])' . preg_quote($search_filter, '/');
                         
-                        // Strict search: hanya cocok di awal kata
+                        
                         $q->whereRaw("LOWER(nama_barang) REGEXP ?", [$pattern])
                             ->orWhereRaw("LOWER(nama_penitip) REGEXP ?", [$pattern])
                             ->orWhereRaw("LOWER(nama_penerima) REGEXP ?", [$pattern])
-                            // Untuk uppercase juga
+                            
                             ->orWhereRaw("nama_penitip REGEXP ?", [
                                 '(^|[[:space:]])' . preg_quote($search_upper, '/')
                             ])
@@ -411,7 +399,7 @@ class BarangController extends Controller
             }
 
             if ($kategori_filter === 'semua' || $kategori_filter === 'temuan') {
-                // PERBAIKAN: gunakan 'selesai' dengan huruf kecil
+                
                 $temuan = BarangTemuan::where('status', 'selesai')
                     ->whereDate('waktu_selesai', $tanggal_riwayat);
 
@@ -421,11 +409,11 @@ class BarangController extends Controller
                         $search_upper = strtoupper($search_filter);
                         $pattern = '(^|[[:space:]])' . preg_quote($search_filter, '/');
                         
-                        // Strict search: hanya cocok di awal kata
+                        
                         $q->whereRaw("LOWER(nama_barang) REGEXP ?", [$pattern])
                             ->orWhereRaw("LOWER(nama_pelapor) REGEXP ?", [$pattern])
                             ->orWhereRaw("LOWER(nama_penerima) REGEXP ?", [$pattern])
-                            // Untuk uppercase juga
+                            
                             ->orWhereRaw("nama_pelapor REGEXP ?", [
                                 '(^|[[:space:]])' . preg_quote($search_upper, '/')
                             ])

@@ -61,7 +61,7 @@ class UnduhController extends Controller
         }
 
         if ($format == 'pdf') {
-            // Menggunakan view template dari folder BAU
+            
             $pdf = Pdf::loadView('bau.laporan.template-pdf', $dataGabungan)
                 ->setPaper('a4', 'portrait')
                 ->setOption('isHtml5ParserEnabled', true)
@@ -103,7 +103,7 @@ class UnduhController extends Controller
         }
         
         if ($format == 'pdf') {
-            // Menggunakan view template dari folder BAU
+            
             $pdf = Pdf::loadView('bau.laporan.template-pdf', $dataWrapper)
                 ->setPaper('a4', 'portrait')
                 ->setOption('isHtml5ParserEnabled', true)

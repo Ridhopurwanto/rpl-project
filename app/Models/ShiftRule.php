@@ -10,14 +10,14 @@ class ShiftRule extends Model
     use HasFactory;
 
     protected $table = 'shift_rule';
-    protected $primaryKey = 'idshift_rule'; // Sesuai gambar 3
-    public $timestamps = false; // Biasanya tabel master tidak butuh timestamps
+    protected $primaryKey = 'idshift_rule'; 
+    public $timestamps = false; 
 
     protected $fillable = [
-        'jenis_shift', // Enum('Pagi','Malam', dll)
-        'jam_masuk',   // Time
-        'jam_keluar',  // Time
-        'toleransi',   // Int (Menit)
+        'jenis_shift', 
+        'jam_masuk',   
+        'jam_keluar',  
+        'toleransi',   
         'dibuka',
         'is_geotag_enabled',
     ];
@@ -28,7 +28,7 @@ class ShiftRule extends Model
         'is_geotag_enabled' => 'boolean',
     ];
 
-    // Relasi ke tabel 'shift' (One Rule has Many Shifts)
+    
     public function shifts()
     {
         return $this->hasMany(Shift::class, 'jenis_shift', 'idshift_rule');

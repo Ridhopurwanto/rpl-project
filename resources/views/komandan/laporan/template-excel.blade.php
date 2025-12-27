@@ -2,7 +2,6 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <style>
-        /* CSS Reset sederhana untuk PDF */
         body { font-family: sans-serif; }
         table { width: 100%; border-collapse: collapse; }
         th, td { border: 1px solid #000000; }

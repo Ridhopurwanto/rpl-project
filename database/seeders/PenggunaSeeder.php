@@ -60,7 +60,7 @@ class PenggunaSeeder extends Seeder
                 'created_at'    => Carbon::now(),
                 'updated_at'    => Carbon::now(),
             ],
-            // Data dari Excel - Personil Security STIS
+            
             [
                 'id_pengguna'   => 4,
                 'nama_lengkap'  => 'BUDIONO',

@@ -8,30 +8,28 @@ use Carbon\Carbon;
 
 class ShiftSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
+     
     public function run(): void
     {
-       // DB::table('shift')->truncate();
+       
 
         DB::table('shift')->insert([
             [
-                'id_pengguna' => 1, // Komandan
+                'id_pengguna' => 1, 
                 'tanggal' => Carbon::today(),
                 'jenis_shift' => 1,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
             [
-                'id_pengguna' => 2, // Anggota 1
+                'id_pengguna' => 2, 
                 'tanggal' => Carbon::today(),
                 'jenis_shift' => 2,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
             [
-                'id_pengguna' => 3, // BAU
+                'id_pengguna' => 3, 
                 'tanggal' => Carbon::today(),
                 'jenis_shift' => 3,
                 'created_at' => Carbon::now(),

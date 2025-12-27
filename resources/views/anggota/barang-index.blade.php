@@ -22,7 +22,6 @@
             transform: rotate(-90deg);
             transform-origin: center;
         }
-        /* Animasi berjalan 5 detik sesuai timeout javascript */
         .animate-timer {
             animation: countdown 5s linear forwards;
         }

@@ -9,25 +9,21 @@ use Carbon\Carbon;
 
 class NotificationSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
+     
     public function run()
     {
         echo "Seeding dummy 'notifications' for Anggota Jaga Satu (ID: 2)...\n";
 
-        $userId = 2; // ID Anggota Jaga Satu
-        $notifiableType = 'App\\Models\\User'; // Sesuai model yang kamu gunakan
+        $userId = 2; 
+        $notifiableType = 'App\\Models\\User'; 
         $now = Carbon::now();
         $past = Carbon::now()->subHours(2);
 
         $notificationsData = [
-            // Notifikasi 1: Perubahan Shift (BELUM DIBACA)
+            
             [
                 'id' => (string) Str::uuid(),
-                'type' => 'App\\Notifications\\PerubahanShiftNotification', // Class Notifikasi yang kita buat sebelumnya
+                'type' => 'App\\Notifications\\PerubahanShiftNotification', 
                 'notifiable_type' => $notifiableType,
                 'notifiable_id' => $userId,
                 'data' => json_encode([
@@ -37,12 +33,12 @@ class NotificationSeeder extends Seeder
                     'type' => 'info',
                     'icon' => 'fas fa-calendar-alt',
                 ]),
-                'read_at' => null, // null = Belum Dibaca
+                'read_at' => null, 
                 'created_at' => $now->subMinutes(5),
                 'updated_at' => $now->subMinutes(5),
             ],
             
-            // Notifikasi 2: Laporan Diterima (BELUM DIBACA)
+            
             [
                 'id' => (string) Str::uuid(),
                 'type' => 'App\\Notifications\\PerubahanShiftNotification',
@@ -55,12 +51,12 @@ class NotificationSeeder extends Seeder
                     'type' => 'success',
                     'icon' => 'fas fa-check',
                 ]),
-                'read_at' => null, // null = Belum Dibaca
+                'read_at' => null, 
                 'created_at' => $past->subMinutes(30),
                 'updated_at' => $past->subMinutes(30),
             ],
             
-            // Notifikasi 3: Pengumuman (SUDAH DIBACA)
+            
             [
                 'id' => (string) Str::uuid(),
                 'type' => 'App\\Notifications\\PerubahanShiftNotification',
@@ -72,7 +68,7 @@ class NotificationSeeder extends Seeder
                     'type' => 'warning',
                     'icon' => 'fas fa-exclamation-triangle',
                 ]),
-                'read_at' => $past->subHour(1), // Ada tanggal = Sudah Dibaca
+                'read_at' => $past->subHour(1), 
                 'created_at' => $past->subHour(1)->subMinutes(15),
                 'updated_at' => $past->subHour(1)->subMinutes(15),
             ],

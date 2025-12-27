@@ -8,9 +8,7 @@ use Carbon\Carbon;
 
 class BarangTitipSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
+     
     public function run(): void
     {
         DB::table('barang_titip')->truncate();
@@ -19,8 +17,8 @@ class BarangTitipSeeder extends Seeder
             [
                 'id_pengguna' => 2,
                 'nama_barang' => 'Paket Shopee',
-                'nama_penitip' => 'J&T Express', // <-- Kolom baru
-                'tujuan' => 'Kessya (Kamar 201)', // <-- Kolom baru
+                'nama_penitip' => 'J&T Express', 
+                'tujuan' => 'Kessya (Kamar 201)', 
                 'waktu_titip' => Carbon::now()->subHours(2),
                 'waktu_selesai' => null,
                 'nama_penerima' => null,
@@ -33,8 +31,8 @@ class BarangTitipSeeder extends Seeder
             [
                 'id_pengguna' => 2,
                 'nama_barang' => 'Makanan (GoFood)',
-                'nama_penitip' => 'Driver Gojek', // <-- Kolom baru
-                'tujuan' => 'Arkan (Kamar 305)', // <-- Kolom baru
+                'nama_penitip' => 'Driver Gojek', 
+                'tujuan' => 'Arkan (Kamar 305)', 
                 'waktu_titip' => Carbon::today()->addHours(10),
                 'waktu_selesai' => Carbon::today()->addHours(10)->addMinutes(15),
                 'nama_penerima' => 'Arkan',

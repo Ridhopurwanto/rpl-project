@@ -8,9 +8,7 @@ use Carbon\Carbon;
 
 class BarangTemuSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
+     
     public function run(): void
     {
         DB::table('barang_temu')->truncate();

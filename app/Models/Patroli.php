@@ -22,7 +22,7 @@ class Patroli extends Model
         'tanggal',
         'jenis_patroli',
         'id_claim',
-        'id_shift',  // ✅ TAMBAHKAN INI! (PENTING!)
+        'id_shift',  
     ];
 
     protected $casts = [
@@ -49,17 +49,17 @@ class Patroli extends Model
 
     public function claim()
     {
-        // Setiap foto checkpoint milik satu Claim spesifik
+        
         return $this->belongsTo(PatroliClaim::class, 'id_claim');
     }
 
-    // ✅ Relasi ke Shift
+    
     public function shift()
     {
         return $this->belongsTo(Shift::class, 'id_shift', 'id_shift');
     }
 
-    // ✅ Relasi ke Pengguna
+    
     public function pengguna()
     {
         return $this->belongsTo(User::class, 'id_pengguna', 'id_pengguna');

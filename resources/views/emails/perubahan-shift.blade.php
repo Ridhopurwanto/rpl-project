@@ -19,12 +19,12 @@
             max-width: 600px;
             margin: 40px auto;
             background-color: #ffffff;
-            border-radius: 16px; /* Lebih bulat */
+            border-radius: 16px; 
             overflow: hidden;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         .email-header {
-            background-color: #1e3a8a; /* SIAP Blue */
+            background-color: #1e3a8a; 
             padding: 40px 30px;
             text-align: center;
             color: #ffffff;
@@ -76,14 +76,14 @@
         }
         .detail-row {
             display: flex;
-            align-items: flex-start; /* Align top if text wraps */
-            margin-bottom: 16px; /* Lebih renggang */
+            align-items: flex-start; 
+            margin-bottom: 16px; 
         }
         .detail-row:last-child {
             margin-bottom: 0;
         }
         .detail-label {
-            flex: 0 0 100px; /* Fixed width for label */
+            flex: 0 0 100px; 
             font-size: 14px;
             color: #6b7280;
             font-weight: 500;
@@ -99,7 +99,7 @@
             font-size: 14px;
             color: #111827;
             font-weight: 600;
-            text-align: left; /* Rata kiri agar rapi dengan titik dua */
+            text-align: left; 
         }
         .cta-button-container {
             text-align: center;
@@ -108,7 +108,7 @@
         .cta-button {
             display: inline-block;
             background-color: #1e3a8a;
-            color: #ffffff !important; /* Force white */
+            color: #ffffff !important; 
             font-size: 15px;
             font-weight: 600;
             padding: 14px 36px;
@@ -133,7 +133,6 @@
 </head>
 <body>
     <div class="email-wrapper">
-        <!-- Header -->
         <div class="email-header">
             <h1>
                 @if(isset($type) && $type == 'assignment')
@@ -145,7 +144,6 @@
             <p>Sistem Informasi Keamanan (SIAP)</p>
         </div>
 
-        <!-- Body -->
         <div class="email-body">
             <div class="logo-container">
                 <img src="{{ $message->embed(public_path('images/logo-siap.png')) }}" alt="Logo SIAP">
@@ -200,7 +198,6 @@
             </div>
         </div>
 
-        <!-- Footer -->
         <div class="email-footer">
             <p style="margin-bottom: 10px;">&copy; {{ date('Y') }} SIAP (Sistem Informasi Keamanan).<br>Politeknik Statistika STIS</p>
             <p>Email ini dikirim secara otomatis, mohon tidak membalas email ini.</p>

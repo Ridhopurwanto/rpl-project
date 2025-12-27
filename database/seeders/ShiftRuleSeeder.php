@@ -8,13 +8,11 @@ use Illuminate\Support\Facades\DB;
 
 class ShiftRuleSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
+     
     public function run(): void
     {
-        // Opsional: Kosongkan tabel terlebih dahulu agar tidak duplikat saat di-seed ulang
-        // DB::table('shift_rule')->truncate(); 
+        
+        
 
         DB::table('shift_rule')->insert([
             [
@@ -30,7 +28,7 @@ class ShiftRuleSeeder extends Seeder
                 'idshift_rule' => 2,
                 'jenis_shift' => 'Malam',
                 'jam_masuk' => '19:00:00',
-                'jam_keluar' => '07:00:00', // Besok pagi
+                'jam_keluar' => '07:00:00', 
                 'toleransi' => 10,
                 'dibuka' => 120,
                 'is_geotag_enabled' => 1,

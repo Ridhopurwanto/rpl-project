@@ -26,7 +26,6 @@
             transform: rotate(-90deg);
             transform-origin: center;
         }
-        /* Animasi berjalan 5 detik sesuai timeout javascript */
         .animate-timer {
             animation: countdown 5s linear forwards;
         }
@@ -321,11 +320,9 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Expose fetchData to global scope for AlpineJS
         window.fetchData = function(url = null) {
             toggleLoading(true);
-            
-            // Build URL if not provided (filter change)
+
             if (!url) {
                 const params = new URLSearchParams();
                 
@@ -360,14 +357,12 @@
         }
 
         const filterInputs = document.querySelectorAll('.filter-input');
-        // Handle Filter Changes
         filterInputs.forEach(input => {
             input.addEventListener('change', function() {
                 fetchData();
             });
         });
 
-        // Handle Pagination
         document.addEventListener('click', function(e) {
             if (e.target.closest('.pagination-link')) {
                 e.preventDefault();

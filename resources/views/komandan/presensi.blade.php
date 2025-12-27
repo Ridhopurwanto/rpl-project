@@ -228,15 +228,11 @@
                     loadingComponent.classList.remove('hidden');
                     
                     const formData = new FormData(filterForm);
-                    // Jika URL tidak diberikan, gunakan URL form default
                     const fetchUrl = url || filterForm.action + '?' + new URLSearchParams(formData).toString();
 
-                    // --- IMPLEMENTASI PERSISTENSI URL ---
-                    // Mengubah URL browser tanpa reload agar saat refresh/back tetap di tanggal yang sama
-                    if (!url) { // Hanya update jika trigger dari filter change, bukan pagination click (opsional, tapi lebih rapi)
+                    if (!url) { 
                          history.pushState(null, '', fetchUrl);
                     } else {
-                         // Jika pagination, kita juga update URL biar rapi
                          history.pushState(null, '', url);
                     }
 
@@ -247,11 +243,9 @@
                     })
                     .then(response => response.json())
                     .then(data => {
-                        // Update DOM Wrappers
                         document.getElementById('presensi-masuk-wrapper').innerHTML = data.html_masuk;
                         document.getElementById('presensi-pulang-wrapper').innerHTML = data.html_pulang;
                         
-                        // Re-initialize any necessary JS handlers here if not using event delegation
                     })
                     .catch(error => {
                         console.error('Error fetching data:', error);
@@ -262,21 +256,16 @@
                     });
                 }
 
-                // Handle Browser Back/Forward Button
                 window.addEventListener('popstate', function() {
-                    // Reload page to ensure server renders correct state or re-fetch via AJAX
-                    // Simplest approach: Reload
                     window.location.reload(); 
                 });
 
-                // Handle Filter Changes
                 inputs.forEach(input => {
                     input.addEventListener('change', () => {
                         fetchData();
                     });
                 });
 
-                // Handle Pagination Clicks (Event Delegation)
                 document.addEventListener('click', function(e) {
                     if (e.target.closest('.pagination-link')) {
                         e.preventDefault();
@@ -605,8 +594,8 @@
             showEditModal: false, 
             editAction: '',
             editWaktu: '',
-            editMin: '', // Constraint start
-            editMax: '', // Constraint end
+            editMin: '', 
+            editMax: '', 
             editStatus: '',
             editJenisPresensi: '',
             editShiftId: '',
@@ -619,8 +608,7 @@
 
             calculateStatus() {
                 if (!this.editWaktu || !this.editShiftId || !this.editJenisPresensi) return;
-                
-                // Mapping ID ke Nama
+        
                 let namaShift = '';
                 if (this.editShiftId == 1) namaShift = 'Pagi';
                 else if (this.editShiftId == 2) namaShift = 'Malam';
@@ -629,7 +617,6 @@
                 let rule = this.rules.find(r => r.jenis_shift === namaShift);
                 if (!rule) return;
 
-                // Parse Waktu (YYYY-MM-DDTHH:mm)
                 let timeString = this.editWaktu.split('T')[1]; 
                 if(!timeString) return;
                 
@@ -638,7 +625,6 @@
                 let editTimeVal = parseInt(timeValues[0]) * 60 + parseInt(timeValues[1]);
 
                 if (this.editJenisPresensi === 'Masuk') {
-                    // Logic Masuk
                     let jamMasuk = rule.jam_masuk.substring(0, 5);
                     let masukValues = jamMasuk.split(':');
                     let ruleMasukVal = parseInt(masukValues[0]) * 60 + parseInt(masukValues[1]);
@@ -652,7 +638,6 @@
                     }
 
                 } else if (this.editJenisPresensi === 'Pulang') {
-                    // Logic Pulang
                     let jamKeluar = rule.jam_keluar.substring(0, 5);
                     let keluarValues = jamKeluar.split(':');
                     let ruleKeluarVal = parseInt(keluarValues[0]) * 60 + parseInt(keluarValues[1]);
@@ -666,7 +651,6 @@
                             this.editStatus = 'tepat waktu';
                         }
                     } else {
-                        // Shift Pagi Pulang jam 19:00.
                         if (editTimeVal < ruleKeluarVal) {
                              this.editStatus = 'terlalu cepat';
                         } else {

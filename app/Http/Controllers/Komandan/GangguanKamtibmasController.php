@@ -6,48 +6,45 @@ use App\Http\Controllers\Controller;
 
 
 use Illuminate\Http\Request;
-use App\Models\GangguanKamtibmas; // Panggil Model
+use App\Models\GangguanKamtibmas; 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
 
 class GangguanKamtibmasController extends Controller
 {
-    /**
-     * Menampilkan halaman Laporan Gangguan Kamtibmas (Komandan & BAU).
-     *
-     */
+     
     public function index(Request $request)
     {
-        // Filter Bulan: Ambil 'YYYY-MM' dari request, default bulan ini
+        
         $bulanFilter = $request->input('bulan', now()->format('Y-m'));
         $carbonDate = Carbon::createFromFormat('Y-m', $bulanFilter);
 
-        // Filter Kategori
+        
         $kategoriFilter = $request->input('kategori');
         
         $perPage = $request->input('per_page', 10);
 
-        // Query dasar
+        
         $query = GangguanKamtibmas::query()
                     ->whereYear('waktu_lapor', $carbonDate->year)
                     ->whereMonth('waktu_lapor', $carbonDate->month);
 
-        // Terapkan filter kategori jika ada (dan bukan 'semua')
+        
         if ($kategoriFilter && $kategoriFilter != 'semua') {
             $query->where('kategori', $kategoriFilter);
         }
 
         $riwayatGangguan = $query->orderBy('waktu_lapor', 'desc')->paginate($perPage);
 
-        // Ambil daftar Kategori dari ENUM di database
+        
         try {
             $result = \DB::select("SHOW COLUMNS FROM gangguan_kamtibmas WHERE Field = 'kategori'");
             $enumStr = $result[0]->Type;
             preg_match("/^enum\((.+)\)$/", $enumStr, $matches);
             $kategoriOptions = str_getcsv($matches[1], ',', "'");
         } catch (\Exception $e) {
-            // Fallback jika query gagal
+            
             $kategoriOptions = ['Curat', 'Curas', 'Curanmor', 'Narkoba', 'Laka Lantas', 'Pembunuhan', 'Perkelahian', 'Mabok', 'Unjuk Rasa', 'Penyerobotan Tanah', 'Kenakalan Remaja', 'Kebakaran', 'Bencana Alam'];
         }
 
@@ -68,17 +65,14 @@ class GangguanKamtibmasController extends Controller
         ]);
     }
 
-    /**
-     * Update data gangguan (HANYA UNTUK KOMANDAN).
-     *
-     */
+     
     public function update(Request $request, $id_gangguan)
     {
         if (Auth::user()->peran !== 'komandan') {
             return redirect()->route('komandan.gangguan')->with('error', 'Anda tidak memiliki hak akses.');
         }
 
-        // Ambil kategori dari ENUM untuk validasi
+        
         try {
             $result = \DB::select("SHOW COLUMNS FROM gangguan_kamtibmas WHERE Field = 'kategori'");
             $enumStr = $result[0]->Type;
@@ -105,11 +99,11 @@ class GangguanKamtibmasController extends Controller
                 'deskripsi' => $request->deskripsi,
             ]);
 
-            // Ambil parameter filter untuk redirect
+            
             $params = [
                 'bulan' => $request->input('bulan'),
                 'per_page' => $request->input('per_page'),
-                'kategori' => $request->input('kategori_filter'), // Map kategori_filter form input to kategori query param
+                'kategori' => $request->input('kategori_filter'), 
             ];
 
             return redirect()->route('komandan.gangguan', $params)
@@ -120,10 +114,7 @@ class GangguanKamtibmasController extends Controller
         }
     }
 
-    /**
-     * Menghapus data gangguan (HANYA UNTUK KOMANDAN).
-     *
-     */
+     
     public function destroy($id_gangguan)
     {
         if (Auth::user()->peran !== 'komandan') {
@@ -133,17 +124,17 @@ class GangguanKamtibmasController extends Controller
         try {
             $gangguan = GangguanKamtibmas::findOrFail($id_gangguan);
             
-            // Hapus foto dari storage
+            
             if ($gangguan->foto) {
                 Storage::disk('public')->delete($gangguan->foto);
             }
 
-            // Hapus data dari database
+            
             $gangguan->delete();
             
-            // Ambil parameter filter dari request (karena method DELETE hanya bisa ambil dari query string atau body form jika POST spoofing)
-            // Di Laravel, $request->input() mengambil dari query string maupun request body.
-            // Kita sudah tambahkan hidden inputs di form delete.
+            
+            
+            
             $params = [
                 'bulan' => request('bulan'),
                 'per_page' => request('per_page'),

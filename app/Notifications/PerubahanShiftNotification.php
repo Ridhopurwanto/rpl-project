@@ -12,7 +12,7 @@ class PerubahanShiftNotification extends Notification
 
     protected $pesan;
     protected $shiftData;
-    protected $type; // 'assignment' or 'change'
+    protected $type; 
 
     public function __construct($pesan, $shiftData = null, $type = 'change')
     {
@@ -21,13 +21,13 @@ class PerubahanShiftNotification extends Notification
         $this->type = $type;
     }
 
-    // Kirim via database DAN email
+    
     public function via($notifiable)
     {
         return ['database', 'mail'];
     }
 
-    // Konfigurasi Email
+    
     public function toMail($notifiable)
     {
         $subject = ($this->type == 'assignment') 
@@ -44,7 +44,7 @@ class PerubahanShiftNotification extends Notification
             ]);
     }
 
-    // Konfigurasi Database (untuk lonceng)
+    
     public function toArray($notifiable)
     {
         $jenisShift = 'Tidak Diketahui';

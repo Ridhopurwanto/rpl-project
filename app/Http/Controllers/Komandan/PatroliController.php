@@ -15,8 +15,8 @@ class PatroliController extends Controller
 {
     public function index(Request $request)
     {
-        // 1. Ambil Tanggal - terpisah untuk pagi dan malam
-        // Gunakan filled() untuk memastikan parameter tidak kosong
+        
+        
         $tanggalPagi = $request->filled('tanggal_pagi') 
             ? $request->input('tanggal_pagi') 
             : now()->format('Y-m-d');
@@ -25,29 +25,29 @@ class PatroliController extends Controller
             ? $request->input('tanggal_malam') 
             : now()->format('Y-m-d');
         
-        // 2. Definisikan Opsi Jenis Patroli (Untuk Dropdown Filter)
+        
         $jenisPatroliOptions = collect([
             'Semua',
             'Patroli 1', 'Patroli 2', 'Patroli 3', 
             'Patroli 4', 'Patroli 5', 'Patroli 6'
         ]);
         
-        // ---------------------------------------------------------
-        // QUERY SHIFT PAGI (jenis_shift = 'Pagi')
-        // ---------------------------------------------------------
+        
+        
+        
         $jenisPatroliTerpilihPagi = $request->input('jenis_patroli_pagi', 'Semua');
         $perPagePagi = $request->input('per_page_pagi', 10);
 
         $queryPagi = Patroli::query()
-            ->with(['claim.rule']) // Eager load relasi
+            ->with(['claim.rule']) 
             ->whereDate('tanggal', $tanggalPagi)
             ->whereHas('claim.rule', function ($q) {
-                // Filter hanya yang shift Pagi
+                
                 $q->where('jenis_shift', 'Pagi'); 
             })
             ->orderBy('waktu_exact', 'asc');
 
-        // Filter Jenis Patroli Pagi (jika user memilih spesifik)
+        
         if ($jenisPatroliTerpilihPagi !== 'Semua') {
             $queryPagi->whereHas('claim.rule', function ($q) use ($jenisPatroliTerpilihPagi) {
                 $q->where('jenis_patroli', $jenisPatroliTerpilihPagi);
@@ -57,22 +57,22 @@ class PatroliController extends Controller
         $dataPatroliPagi = $queryPagi->paginate($perPagePagi, ['*'], 'page_pagi');
 
 
-        // ---------------------------------------------------------
-        // QUERY SHIFT MALAM (jenis_shift = 'Malam')
-        // ---------------------------------------------------------
+        
+        
+        
         $jenisPatroliTerpilihMalam = $request->input('jenis_patroli_malam', 'Semua');
         $perPageMalam = $request->input('per_page_malam', 10);
 
         $queryMalam = Patroli::query()
-            ->with(['claim.rule']) // Eager load relasi
+            ->with(['claim.rule']) 
             ->whereDate('tanggal', $tanggalMalam)
             ->whereHas('claim.rule', function ($q) {
-                // Filter hanya yang shift Malam
+                
                 $q->where('jenis_shift', 'Malam'); 
             })
             ->orderBy('waktu_exact', 'asc');
 
-        // Filter Jenis Patroli Malam (jika user memilih spesifik)
+        
         if ($jenisPatroliTerpilihMalam !== 'Semua') {
             $queryMalam->whereHas('claim.rule', function ($q) use ($jenisPatroliTerpilihMalam) {
                 $q->where('jenis_patroli', $jenisPatroliTerpilihMalam);
@@ -82,11 +82,11 @@ class PatroliController extends Controller
         $dataPatroliMalam = $queryMalam->paginate($perPageMalam, ['*'], 'page_malam');
 
 
-        // ---------------------------------------------------------
-        // DATA PENDUKUNG (Rules untuk Modal Edit Jam)
-        // ---------------------------------------------------------
-        // Mengambil semua rules dan mengelompokkan berdasarkan shift (Pagi/Malam)
-        // Agar mudah ditampilkan di modal setting jam
+        
+        
+        
+        
+        
         $patroliRules = PatroliRule::all()->groupBy('jenis_shift');
         
         if ($request->ajax()) {
@@ -103,17 +103,17 @@ class PatroliController extends Controller
         }
 
         return view('komandan.patroli', [
-            // Data Utama
+            
             'dataPatroliPagi' => $dataPatroliPagi,
             'dataPatroliMalam' => $dataPatroliMalam,
             
-            // Filter State - terpisah untuk pagi dan malam
+            
             'tanggalPagi' => $tanggalPagi,
             'tanggalMalam' => $tanggalMalam,
             'jenisPatroliTerpilihPagi' => $jenisPatroliTerpilihPagi,
             'jenisPatroliTerpilihMalam' => $jenisPatroliTerpilihMalam,
             
-            // Options & Config
+            
             'jenisPatroliOptions' => $jenisPatroliOptions,
             'patroliRules' => $patroliRules,
             'perPagePagi' => $perPagePagi,
@@ -121,9 +121,7 @@ class PatroliController extends Controller
         ]);
     }
 
-    /**
-     * Mengupdate data wilayah patroli (dari modal edit).
-     */
+     
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -141,22 +139,20 @@ class PatroliController extends Controller
         }
     }
 
-    /**
-     * Menghapus data patroli.
-     */
+     
     public function destroy(Request $request, $id)
     {
         try {
             $patroli = Patroli::findOrFail($id);
             
-            // Hapus foto dari storage jika ada
+            
             if ($patroli->foto) {
                 Storage::delete('public/' . $patroli->foto);
             }
             
             $patroli->delete();
 
-            // Ambil parameter filter dari request agar tidak reset
+            
             $params = $request->only([
                 'tanggal_pagi', 
                 'tanggal_malam', 
@@ -166,7 +162,7 @@ class PatroliController extends Controller
                 'jenis_patroli_malam'
             ]);
 
-            // Redirect ke route index dengan parameter yang tetap terjaga
+            
             return redirect()->route('komandan.patroli', $params)
                              ->with('success', 'Data patroli berhasil dihapus.');
 
@@ -175,13 +171,11 @@ class PatroliController extends Controller
         }
     }
 
-    /**
-     * Update aturan jam patroli
-     */
+     
     public function updateRules(Request $request)
     {
         try {
-            // Proses Shift Pagi
+            
             if ($request->has('shift_pagi')) {
                 foreach ($request->shift_pagi as $jenisPatroli => $waktu) {
                     PatroliRule::updateOrCreate(
@@ -197,7 +191,7 @@ class PatroliController extends Controller
                 }
             }
 
-            // Proses Shift Malam
+            
             if ($request->has('shift_malam')) {
                 foreach ($request->shift_malam as $jenisPatroli => $waktu) {
                     PatroliRule::updateOrCreate(

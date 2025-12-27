@@ -9,9 +9,7 @@ use Illuminate\Support\Carbon;
 
 class GangguanController extends Controller
 {
-    /**
-     * Menampilkan halaman Laporan Gangguan Kamtibmas (Read Only untuk BAU).
-     */
+     
     public function index(Request $request)
     {
         $bulanFilter = $request->input('bulan', now()->format('Y-m'));

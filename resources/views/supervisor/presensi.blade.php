@@ -23,7 +23,6 @@
             transform: rotate(-90deg);
             transform-origin: center;
         }
-        /* Animasi berjalan 5 detik sesuai timeout javascript */
         .animate-timer {
             animation: countdown 5s linear forwards;
         }
@@ -218,15 +217,11 @@
                     loadingComponent.classList.remove('hidden');
                     
                     const formData = new FormData(filterForm);
-                    // Jika URL tidak diberikan, gunakan URL form default
                     const fetchUrl = url || filterForm.action + '?' + new URLSearchParams(formData).toString();
 
-                    // --- IMPLEMENTASI PERSISTENSI URL ---
-                    // Mengubah URL browser tanpa reload agar saat refresh/back tetap di tanggal yang sama
-                    if (!url) { // Hanya update jika trigger dari filter change, bukan pagination click (opsional, tapi lebih rapi)
+                    if (!url) { 
                          history.pushState(null, '', fetchUrl);
                     } else {
-                         // Jika pagination, kita juga update URL biar rapi
                          history.pushState(null, '', url);
                     }
 
@@ -237,11 +232,9 @@
                     })
                     .then(response => response.json())
                     .then(data => {
-                        // Update DOM Wrappers
                         document.getElementById('presensi-masuk-wrapper').innerHTML = data.html_masuk;
                         document.getElementById('presensi-pulang-wrapper').innerHTML = data.html_pulang;
-                        
-                        // Re-initialize any necessary JS handlers here if not using event delegation
+
                     })
                     .catch(error => {
                         console.error('Error fetching data:', error);
@@ -252,21 +245,16 @@
                     });
                 }
 
-                // Handle Browser Back/Forward Button
                 window.addEventListener('popstate', function() {
-                    // Reload page to ensure server renders correct state or re-fetch via AJAX
-                    // Simplest approach: Reload
                     window.location.reload(); 
                 });
 
-                // Handle Filter Changes
                 inputs.forEach(input => {
                     input.addEventListener('change', () => {
                         fetchData();
                     });
                 });
 
-                // Handle Pagination Clicks (Event Delegation)
                 document.addEventListener('click', function(e) {
                     if (e.target.closest('.pagination-link')) {
                         e.preventDefault();

@@ -10,9 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class PatroliRuleController extends Controller
 {
-    /**
-     * Update atau create patroli rules
-     */
+     
     public function updateRules(Request $request)
     {
         $request->validate([
@@ -23,24 +21,11 @@ class PatroliRuleController extends Controller
         ]);
 
         try {
-            /* 
-            // --- VALIDASI GAP & OVERLAP ---
-            // Removed: Now patrol times can have gaps.
-            
-            if ($request->has('shift_pagi')) {
-                $errorPagi = $this->validateContiguous($request->shift_pagi, 'Pagi');
-                if ($errorPagi) return back()->with('error', $errorPagi);
-            }
-
-            if ($request->has('shift_malam')) {
-                $errorMalam = $this->validateContiguous($request->shift_malam, 'Malam');
-                if ($errorMalam) return back()->with('error', $errorMalam);
-            }
-            */
+             
 
             DB::beginTransaction();
 
-            // Update Shift Pagi
+            
             if ($request->has('shift_pagi')) {
                 foreach ($request->shift_pagi as $jenisPatroli => $data) {
                     PatroliRule::updateOrCreate(
@@ -56,7 +41,7 @@ class PatroliRuleController extends Controller
                 }
             }
 
-            // Update Shift Malam
+            
             if ($request->has('shift_malam')) {
                 foreach ($request->shift_malam as $jenisPatroli => $data) {
                     PatroliRule::updateOrCreate(

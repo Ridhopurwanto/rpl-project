@@ -13,14 +13,14 @@ class PatroliClaim extends Model
     protected $table = 'patroli_claims';
     protected $primaryKey = 'id_claim';
     
-    // ✅ Nonaktifkan timestamps otomatis Laravel
+    
     public $timestamps = false;
     
     protected $fillable = [
         'id_pengguna',
         'tanggal',
         'jenis_patroli',
-        'id_shift',      // ✅ TAMBAHKAN INI! (PENTING!)
+        'id_shift',      
         'id_patroli_rule',
         'claimed_at'
     ];
@@ -32,26 +32,26 @@ class PatroliClaim extends Model
 
     public function rule()
 {
-    // Menghubungkan Claim ke Master Rule
+    
     return $this->belongsTo(PatroliRule::class, 'id_patroli_rule');
 }
 
     public function patrolis()
     {
-        // Satu Claim memiliki banyak titik checkpoint (foto)
+        
         return $this->hasMany(Patroli::class, 'id_claim');
     }
 
-    // ✅ Relasi ke Shift
+    
     public function shift()
     {
         return $this->belongsTo(Shift::class, 'id_shift', 'id_shift');
     }
 
-    // ✅ Relasi ke User/Pengguna
+    
     public function pengguna()
     {
-        // Ganti 'User' jadi 'Pengguna' kalau model kamu namanya Pengguna
+        
         return $this->belongsTo(user::class, 'id_pengguna', 'id_pengguna');
     }
 }
