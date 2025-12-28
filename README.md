@@ -75,7 +75,5 @@ Jika menggunakan seeder bawaan, berikut adalah akun default yang dapat digunakan
 
 ## Dokumen Pelengkap
 
-Dokumen seperti Laporan, Alih hak sistem, dan BAST dapat dilihat melalui link berikut:...  
-Atau dapat dilihat melalui folder Dokumen Pelengkap pada repository ini.
-
-  
+Dokumen seperti Laporan, Alih hak sistem, dan BAST dapat dilihat melalui link berikut: [https://s.stis.ac.id/dokumen-RPL](https://s.stis.ac.id/dokumen-RPL)  
+Atau dapat dilihat melalui folder Dokumen Project pada repository ini.
