@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('foto_penerima')->nullable();
             $table->enum('status', ['selesai', 'belum selesai']);
             $table->string('foto')->nullable();
-            $table->text('catatan');
+            $table->text('catatan')->nullable();
             $table->dateTime('waktu_titip');
             $table->dateTime('waktu_selesai')->nullable();
             $table->timestamps();
