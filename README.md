@@ -22,7 +22,7 @@ Modul untuk pengawasan dan validasi.
 - **Validasi Data**: Memantau dan memvalidasi laporan dari anggota (Presensi, Patroli, dll).
 - **Laporan & Unduhan**: Mengunduh rekapitulasi laporan dalam format PDF/Excel untuk arsip atau pelaporan ke atasan.
 
-### 3. BAU (Biro Administrasi Umum)
+### 3. Supervisor
 Modul untuk administrasi tingkat atas.
 - **Monitoring Keseluruhan**: Akses 'View-Only' atau administratif ke seluruh data keamanan.
 - **Rekapitulasi Laporan**: Akses ke laporan manajerial.
@@ -62,6 +62,20 @@ php artisan serve
 
 ## Akun Demo (Default Seeder)
 
-Jika menggunakan seeder bawaan, berikut adalah akun default (sesuaikan dengan `UserSeeder` jika ada):
-- **Anggota**: Login via halaman login anggota.
-- **Komandan**: Login via halaman login komandan.
+Jika menggunakan seeder bawaan, berikut adalah akun default yang dapat digunakan untuk login:
+- **Anggota**  
+      Username : anggota1  
+      Password : password123
+- **Komandan**  
+      Username : komandan  
+      Password : password123
+- **Supervisor**  
+      Username : bau  
+      Password : password123
+
+## Dokumen Pelengkap
+
+Dokumen seperti Laporan, Alih hak sistem, dan BAST dapat dilihat melalui link berikut:...  
+Atau dapat dilihat melalui folder Dokumen Pelengkap pada repository ini.
+
+  
