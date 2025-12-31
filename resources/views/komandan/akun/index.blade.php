@@ -506,6 +506,7 @@ function filterUsers(searchTerm) {
         }
     });
     
+
     if (visibleCount === 0 && search !== '') {
         noDataMessage.classList.remove('hidden');
     } else {

@@ -14,6 +14,9 @@
         no_hp: '{{ old('no_hp') }}',
         alamat: '{{ old('alamat') }}',
         
+        // Logic Username
+        old_username: '',
+        
         // Logic Password
         password: '',
         password_confirmation: '',
@@ -62,7 +65,8 @@
         fillForm(data) {
             this.nama_lengkap = data.nama_lengkap || '';
             this.email = data.email || '';
-            this.username = data.username || '';
+            this.username = '';
+            this.old_username = data.username || '';
             this.peran = data.peran || 'anggota';
             
             if (data.jenis_jadwal) {
@@ -97,6 +101,7 @@
             this.nama_lengkap = '';
             this.email = '';
             this.username = '';
+            this.old_username = '';
             this.peran = 'anggota';
             this.jenis_jadwal = 'shift';
             this.status = 'Aktif';
@@ -130,17 +135,52 @@
         </h3>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {{-- Username --}}
-            <div x-show="!{{ $isEdit ? 'true' : 'false' }}">
-                <label class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">Username <span class="text-red-500">*</span></label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+            {{-- Username Logic --}}
+            @if($isEdit)
+                {{-- Username Lama --}}
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Username Lama</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                        </div>
+                        <input type="text" x-model="old_username" readonly
+                            class="pl-10 w-full bg-gray-100 border border-gray-300 text-gray-500 text-sm font-medium rounded-lg shadow-sm block p-2.5 cursor-not-allowed">
                     </div>
-                    <input type="text" name="username" x-model="username" placeholder="Masukkan username" {{ !$isEdit ? 'required' : '' }}
-                        class="pl-10 w-full bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5">
                 </div>
-            </div>
+
+                {{-- Username Baru --}}
+                <div>
+                    <label class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">
+                        Username Baru
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                        </div>
+                        <input type="text" name="username" x-model="username" placeholder="Username baru"
+                            :class="{'border-red-500 focus:border-red-500 focus:ring-red-200': username === old_username && username !== '', 'border-gray-300 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]': !(username === old_username && username !== '')}"
+                            class="pl-10 w-full bg-white border text-gray-800 text-sm font-medium rounded-lg shadow-sm block p-2.5">
+                    </div>
+                    {{-- Validasi Client Side: Peringatan jika sama --}}
+                    <p x-show="username === old_username && username !== ''" x-transition class="mt-1 text-xs text-red-600 font-bold flex items-center">
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Username sama dengan yang lama
+                    </p>
+                </div>
+            @else
+                {{-- Create Mode: Username Biasa --}}
+                <div>
+                    <label class="block text-xs font-bold text-[#1e3a5f] uppercase tracking-wide mb-1">Username <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                        </div>
+                        <input type="text" name="username" x-model="username" placeholder="Masukkan username" required
+                            class="pl-10 w-full bg-white border border-gray-300 text-gray-800 text-sm font-medium rounded-lg shadow-sm focus:ring-[#1e3a5f] focus:border-[#1e3a5f] block p-2.5">
+                    </div>
+                </div>
+            @endif
 
             {{-- Peran (Role) - Readonly --}}
             {{-- Peran (Role) - Readonly saat Edit --}}

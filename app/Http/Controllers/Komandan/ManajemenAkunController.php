@@ -61,11 +61,9 @@ class ManajemenAkunController extends Controller
     {
         $user = User::findOrFail($id_pengguna);
 
-        $request->validate([
+        $rules = [
             'nama_lengkap' => 'required|string|max:255',
-            
             'email'        => ['required', 'email', 'max:255', Rule::unique('pengguna')->ignore($user->id_pengguna, 'id_pengguna')],
-            'username'     => ['required', 'string', 'max:255', Rule::unique('pengguna')->ignore($user->id_pengguna, 'id_pengguna')],
             'password'     => ['nullable', 'confirmed', Password::min(8)],
             'jenis_jadwal' => 'nullable|in:shift,non_shift',
             'status'       => ['required', Rule::in(['Aktif', 'Tidak Aktif'])],
@@ -73,9 +71,19 @@ class ManajemenAkunController extends Controller
             'no_hp'        => 'nullable|string|max:20',
             'alamat'       => 'nullable|string',
             'foto_profil'  => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+        ];
+
+        if ($request->filled('username')) {
+            $rules['username'] = ['required', 'string', 'max:255', Rule::unique('pengguna')->ignore($user->id_pengguna, 'id_pengguna')];
+        }
+
+        $request->validate($rules);
 
         $data = $request->except(['password', 'foto_profil', 'password_confirmation', 'peran']);
+        if (!$request->filled('username')) {
+            unset($data['username']);
+        }
+
         if ($request->has('nama_lengkap')) {
             $data['nama_lengkap'] = strtoupper($request->nama_lengkap);
         }

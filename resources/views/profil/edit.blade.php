@@ -194,11 +194,12 @@
                         </div>
                     </div>
 
+                    {{-- Form Fields --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {{-- Nama Lengkap --}}
                         <div class="col-span-2">
                             <label for="nama_lengkap" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-                            <input type="text" name="nama_lengkap" id="nama_lengkap" value="{{ old('nama_lengkap', $pengguna->nama_lengkap) }}" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-[#2a4a6f] focus:ring-[#2a4a6f] sm:text-sm">
+                            <input type="text" name="nama_lengkap" id="nama_lengkap" value="{{ old('nama_lengkap', $pengguna->nama_lengkap) }}" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-[#2a4a6f] focus:ring-[#2a4a6f] sm:text-sm uppercase">
                             @error('nama_lengkap') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
 
@@ -239,104 +240,170 @@
             </div>
         </div>
 
-        {{-- BAGIAN 2: FORM GANTI PASSWORD --}}
+        {{-- BAGIAN 2: INFORMASI AKUN (Username & Password) --}}
         <div class="lg:col-span-1">
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden top-6">
                 
                 <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-900">Keamanan</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">Informasi Akun</h3>
                     <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                 </div>
 
-                <form action="{{ route('profil.update-password') }}" method="POST" class="p-6 space-y-3">
+                <form action="{{ route('profil.update-account') }}" method="POST" class="p-6 space-y-6"
+                    x-data="{ 
+                        username: '{{ old('username') }}', 
+                        old_username: '{{ $pengguna->username }}',
+                        password_baru: '',
+                        password_confirm: ''
+                    }">
                     @csrf
                     @method('PATCH')
 
-                    {{-- Alert Error Global untuk Form Password --}}
-                    @if($errors->password_errors->any())
+                    {{-- Alert Error Global untuk Form Akun --}}
+                    @if($errors->account_errors->any())
                         <div class="bg-red-50 border-l-4 border-red-500 p-3 mb-4 rounded-r-md">
-                            <p class="text-xs text-red-700 font-bold">Gagal Mengubah Password</p>
+                            <p class="text-xs text-red-700 font-bold">Gagal Memperbarui Akun</p>
+                            <ul class="list-disc list-inside text-xs text-red-600 mt-1">
+                                @foreach($errors->account_errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
                         </div>
                     @endif
 
-                    {{-- 1. Password Lama --}}
-                    <div x-data="{ show: false }" class="group relative">
-                       <label for="password_lama" class="block text-sm font-medium text-gray-700">Password Lama</label>
-                        <div class="relative mt-2">
-                            <input :type="show ? 'text' : 'password'" 
-                                   name="password_lama" 
-                                   id="password_lama" 
-                                   class="block w-full border-t-0 border-x-0 border-b-2 border-gray-200 bg-transparent py-2 px-0 text-gray-900 placeholder-gray-300 focus:border-gray-900 focus:ring-0 focus:outline-none shadow-none rounded-none sm:text-sm transition-colors duration-300 ease-in-out" 
-                                   placeholder="Masukkan password lama">
+                    {{-- === BAGIAN USERNAME === --}}
+                    <div class="space-y-4">
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Ganti Username</label>
+
+                         {{-- Username Lama --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Username Lama</label>
+                            <div class="relative">
+                                <input type="text" x-model="old_username" readonly
+                                    class="block w-full border-t-0 border-x-0 border-b-2 border-gray-200 bg-transparent py-2 px-0 text-gray-500 placeholder-gray-300 focus:border-gray-900 focus:ring-0 focus:outline-none shadow-none rounded-none sm:text-sm cursor-not-allowed">
+                            </div>
+                        </div>
+
+                         {{-- Username Baru --}}
+                         <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Username Baru <span class="text-xs text-gray-500 font-normal italic ml-1">(Isi jika mengubah)</span>
+                            </label>
+                            <div class="relative">
+                                <input type="text" name="username" x-model="username" placeholder="Username baru"
+                                    :class="{'border-red-500 focus:border-red-500': username === old_username && username !== '', 'border-gray-200 focus:border-gray-900': !(username === old_username && username !== '')}"
+                                    class="block w-full border-t-0 border-x-0 border-b-2 bg-transparent py-2 px-0 text-gray-900 placeholder-gray-300 focus:ring-0 focus:outline-none shadow-none rounded-none sm:text-sm transition-colors duration-300 ease-in-out">
+                            </div>
                             
-                            <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 flex items-center pr-1 text-gray-400 hover:text-gray-900 focus:outline-none transition-colors cursor-pointer">
-                                <svg x-show="!show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                                <svg x-show="show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                                </svg>
-                            </button>
-                        </div>
-                        {{-- PERBAIKAN: Tambahkan argumen kedua 'password_errors' --}}
-                        @error('password_lama', 'password_errors') 
-                            <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p> 
-                        @enderror
-                    </div>
-
-                    {{-- 2. Password Baru --}}
-                    <div x-data="{ show: false }" class="group relative">
-                        <label for="password_baru" class="block text-sm font-medium text-gray-700">Password Baru</label>
-                        <div class="relative mt-2">
-                            <input :type="show ? 'text' : 'password'" 
-                                   name="password_baru" 
-                                   id="password_baru" 
-                                   class="block w-full border-t-0 border-x-0 border-b-2 border-gray-200 bg-transparent py-2 px-0 text-gray-900 placeholder-gray-300 focus:border-gray-900 focus:ring-0 focus:outline-none shadow-none rounded-none sm:text-sm transition-colors duration-300 ease-in-out" 
-                                   placeholder="Minimal 8 karakter">
-
-                            <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 flex items-center pr-1 text-gray-400 hover:text-gray-900 focus:outline-none transition-colors cursor-pointer">
-                                <svg x-show="!show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                                <svg x-show="show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                                </svg>
-                            </button>
-                        </div>
-                        {{-- PERBAIKAN: Tambahkan argumen kedua 'password_errors' --}}
-                        @error('password_baru', 'password_errors') 
-                            <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p> 
-                        @enderror
-                    </div>
-
-                    {{-- 3. Konfirmasi Password Baru --}}
-                    <div x-data="{ show: false }" class="group relative">
-                        <label for="password_baru_confirmation" class="block text-sm font-medium text-gray-700">Konfirmasi Password</label>
-                        <div class="relative mt-2">
-                            <input :type="show ? 'text' : 'password'" 
-                                   name="password_baru_confirmation" 
-                                   id="password_baru_confirmation" 
-                                   class="block w-full border-t-0 border-x-0 border-b-2 border-gray-200 bg-transparent py-2 px-0 text-gray-900 placeholder-gray-300 focus:border-gray-900 focus:ring-0 focus:outline-none shadow-none rounded-none sm:text-sm transition-colors duration-300 ease-in-out" 
-                                   placeholder="Ulangi password baru">
-
-                            <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 flex items-center pr-1 text-gray-400 hover:text-gray-900 focus:outline-none transition-colors cursor-pointer">
-                                <svg x-show="!show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                                <svg x-show="show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                                </svg>
-                            </button>
+                            {{-- Validasi Client Side --}}
+                            <p x-show="username === old_username && username !== ''" x-transition class="mt-1 text-xs text-red-600 font-bold flex items-center">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Username sama dengan yang lama
+                            </p>
+                            @error('username', 'account_errors') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                     </div>
 
-                    <div class="pt-4">
-                        <button type="submit" class="w-full inline-flex justify-center py-3 px-4 border border-transparent shadow-lg text-sm font-bold rounded-lg text-white bg-gray-800 hover:bg-gray-900 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-300 transform">
-                            Ganti Password
-                        </button>
+                    <div class="border-t border-gray-100 my-4"></div>
+
+                    {{-- === BAGIAN PASSWORD === --}}
+                    <div class="space-y-3">
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Ganti Password</label>
+                        
+                        {{-- 1. Password Lama --}}
+                        <div x-data="{ show: false }" class="group relative">
+                        <label for="password_lama" class="block text-sm font-medium text-gray-700">Password Lama</label>
+                            <div class="relative mt-2">
+                                <input :type="show ? 'text' : 'password'" 
+                                    name="password_lama" 
+                                    id="password_lama" 
+                                    class="block w-full border-t-0 border-x-0 border-b-2 border-gray-200 bg-transparent py-2 px-0 text-gray-900 placeholder-gray-300 focus:border-gray-900 focus:ring-0 focus:outline-none shadow-none rounded-none sm:text-sm transition-colors duration-300 ease-in-out" 
+                                    placeholder="Masukkan password lama">
+                                
+                                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 flex items-center pr-1 text-gray-400 hover:text-gray-900 focus:outline-none transition-colors cursor-pointer">
+                                    <svg x-show="!show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    <svg x-show="show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                    </svg>
+                                </button>
+                            </div>
+                            @error('password_lama', 'account_errors') 
+                                <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p> 
+                            @enderror
+                        </div>
+
+                        {{-- 2. Password Baru --}}
+                        <div x-data="{ show: false }" class="group relative">
+                            <label for="password_baru" class="block text-sm font-medium text-gray-700">Password Baru</label>
+                            <div class="relative mt-2">
+                                <input :type="show ? 'text' : 'password'" 
+                                    name="password_baru" 
+                                    id="password_baru"
+                                    x-model="password_baru" 
+                                    class="block w-full border-t-0 border-x-0 border-b-2 bg-transparent py-2 px-0 text-gray-900 placeholder-gray-300 focus:border-gray-900 focus:ring-0 focus:outline-none shadow-none rounded-none sm:text-sm transition-colors duration-300 ease-in-out"
+                                    :class="{'border-red-500': password_baru.length > 0 && password_baru.length < 8, 'border-gray-200': !(password_baru.length > 0 && password_baru.length < 8)}" 
+                                    placeholder="Minimal 8 karakter">
+
+                                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 flex items-center pr-1 text-gray-400 hover:text-gray-900 focus:outline-none transition-colors cursor-pointer">
+                                    <svg x-show="!show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    <svg x-show="show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            {{-- Validasi Panjang Password --}}
+                            <p x-show="password_baru.length > 0 && password_baru.length < 8" x-transition class="mt-1 text-xs text-red-600 font-bold flex items-center">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Password minimal 8 karakter
+                            </p>
+
+                            @error('password_baru', 'account_errors') 
+                                <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p> 
+                            @enderror
+                        </div>
+
+                        {{-- 3. Konfirmasi Password Baru --}}
+                        <div x-data="{ show: false }" class="group relative">
+                            <label for="password_baru_confirmation" class="block text-sm font-medium text-gray-700">Konfirmasi Password</label>
+                            <div class="relative mt-2">
+                                <input :type="show ? 'text' : 'password'" 
+                                    name="password_baru_confirmation" 
+                                    id="password_baru_confirmation"
+                                    x-model="password_confirm" 
+                                    class="block w-full border-t-0 border-x-0 border-b-2 bg-transparent py-2 px-0 text-gray-900 placeholder-gray-300 focus:border-gray-900 focus:ring-0 focus:outline-none shadow-none rounded-none sm:text-sm transition-colors duration-300 ease-in-out"
+                                    :class="{'border-red-500': password_confirm.length > 0 && password_baru !== password_confirm, 'border-gray-200': !(password_confirm.length > 0 && password_baru !== password_confirm)}" 
+                                    placeholder="Ulangi password baru">
+
+                                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 flex items-center pr-1 text-gray-400 hover:text-gray-900 focus:outline-none transition-colors cursor-pointer">
+                                    <svg x-show="!show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    <svg x-show="show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            {{-- Validasi Konfirmasi Password --}}
+                            <p x-show="password_confirm.length > 0 && password_baru !== password_confirm" x-transition class="mt-1 text-xs text-red-600 font-bold flex items-center">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Konfirmasi password tidak cocok
+                            </p>
+                        </div>
+
+                        <div class="pt-4">
+                            <button type="submit" class="w-full inline-flex justify-center py-3 px-4 border border-transparent shadow-lg text-sm font-bold rounded-lg text-white bg-gray-800 hover:bg-gray-900 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-300 transform">
+                                Simpan Perubahan Akun
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

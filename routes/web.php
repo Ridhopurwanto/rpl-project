@@ -67,7 +67,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
     Route::get('/profil/edit', [ProfilController::class, 'edit'])->name('profil.edit');
     Route::patch('/profil/update', [ProfilController::class, 'update'])->name('profil.update');
-    Route::patch('/profil/password', [ProfilController::class, 'updatePassword'])->name('profil.update-password');
+    Route::patch('/profil/account', [ProfilController::class, 'updateAccount'])->name('profil.update-account');
 
     
     Route::prefix('anggota')->name('anggota.')->group(function () {
