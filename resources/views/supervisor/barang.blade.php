@@ -255,57 +255,59 @@
             if (touchEndX - touchStartX > 50 && currentPhotoIndex > 0) currentPhotoIndex--;
         ">
 
-        <div @click.outside="showPhotoModal = false" class="relative max-w-4xl w-full">
+        <div @click.outside="showPhotoModal = false" class="bg-white rounded-lg shadow-xl w-auto max-w-[95vw] max-h-[90vh] relative overflow-hidden flex flex-col">
 
             {{-- Header Modal --}}
-            <div class="flex justify-between items-center mb-4">
+            <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] flex justify-between items-center p-4 shrink-0">
                 <div class="text-white">
-                    <p class="text-sm text-gray-300">Foto <span x-text="currentPhotoIndex + 1"></span> dari <span
+                    <p class="text-sm text-gray-100 font-bold">Foto <span x-text="currentPhotoIndex + 1"></span> dari <span
                             x-text="photos.length"></span></p>
-                    <p class="text-xs text-gray-400 mt-1"
+                    <p class="text-xs text-gray-300 mt-1"
                         x-text="currentPhotoIndex === 0 ? 'Foto Barang' : 'Foto Penerima'"></p>
                 </div>
                 <button @click="showPhotoModal = false"
-                    class="text-white hover:text-gray-300 text-2xl font-bold bg-gray-800 hover:bg-gray-700 rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                    class="text-white hover:text-gray-300 text-2xl font-bold bg-white/20 hover:bg-white/30 rounded-full w-8 h-8 flex items-center justify-center transition-colors">
                     ×
                 </button>
             </div>
 
             {{-- Image Container --}}
-            <div class="relative flex justify-center bg-transparent">
-                <img :src="photos[currentPhotoIndex]"
-                    class="w-auto h-auto max-h-[70vh] object-contain rounded-lg border-2 border-gray-700">
+            <div class="p-4 flex flex-col items-center bg-gray-50 overflow-auto">
+                <div class="relative">
+                    <img :src="photos[currentPhotoIndex]"
+                        class="max-h-[75vh] w-auto h-auto object-contain rounded shadow-md">
 
-                {{-- Previous Button --}}
-                <button x-show="currentPhotoIndex > 0" @click="currentPhotoIndex--"
-                    class="absolute left-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
-                        </path>
-                    </svg>
-                </button>
+                    {{-- Previous Button --}}
+                    <button x-show="currentPhotoIndex > 0" @click="currentPhotoIndex--"
+                        class="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full w-8 h-8 flex items-center justify-center transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
+                            </path>
+                        </svg>
+                    </button>
 
-                {{-- Next Button --}}
-                <button x-show="currentPhotoIndex < photos.length - 1" @click="currentPhotoIndex++"
-                    class="absolute right-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </button>
-            </div>
+                    {{-- Next Button --}}
+                    <button x-show="currentPhotoIndex < photos.length - 1" @click="currentPhotoIndex++"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full w-8 h-8 flex items-center justify-center transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
+                </div>
 
-            {{-- Indicator Dots --}}
-            <div class="flex justify-center gap-2 mt-4" x-show="photos.length > 1">
-                <template x-for="(photo, index) in photos" :key="index">
-                    <button @click="currentPhotoIndex = index"
-                        :class="currentPhotoIndex === index ? 'bg-white w-8' : 'bg-gray-500 w-2'"
-                        class="h-2 rounded-full transition-all"></button>
-                </template>
-            </div>
+                {{-- Indicator Dots --}}
+                <div class="flex justify-center gap-2 mt-3 shrink-0" x-show="photos.length > 1">
+                    <template x-for="(photo, index) in photos" :key="index">
+                        <button @click="currentPhotoIndex = index"
+                            :class="currentPhotoIndex === index ? 'bg-gray-800 w-6' : 'bg-gray-400 w-2'"
+                            class="h-2 rounded-full transition-all shadow-sm"></button>
+                    </template>
+                </div>
 
-            {{-- Hint --}}
-            <div class="text-center mt-4 text-gray-400 text-xs" x-show="photos.length > 1">
-                Swipe atau gunakan tombol panah untuk navigasi
+                {{-- Hint --}}
+                <div class="text-center mt-2 text-gray-400 text-xs shrink-0" x-show="photos.length > 1">
+                    Swipe atau gunakan tombol panah untuk navigasi
+                </div>
             </div>
         </div>
     </div>
