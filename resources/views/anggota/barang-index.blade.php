@@ -1496,8 +1496,8 @@
              class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
              @click.away="showPhotoModal = false"
              style="display: none;">
-            <div class="bg-white rounded-lg shadow-xl max-w-lg w-full relative overflow-hidden" @click.stop>
-                <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] flex justify-between items-center p-4">
+            <div class="bg-white rounded-lg shadow-xl w-auto max-w-[95vw] max-h-[90vh] relative overflow-hidden flex flex-col" @click.stop>
+                <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] flex justify-between items-center p-4 shrink-0">
                     <div class="flex items-center gap-2">
                         <svg class="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -1506,8 +1506,8 @@
                     </div>
                     <button @click="showPhotoModal = false" class="text-white hover:text-gray-200 text-3xl">&times;</button>
                 </div>
-                <div class="mt-4">
-                    <img :src="photoUrl" alt="Foto Barang" class="w-full h-auto rounded">
+                <div class="p-4 flex justify-center bg-gray-50 overflow-hidden">
+                    <img :src="photoUrl" alt="Foto Barang" class="max-h-[75vh] w-auto h-auto object-contain rounded shadow-md">
                 </div>
             </div>
         </div>
@@ -1516,8 +1516,8 @@
         <div x-show="photoModalOpen" style="display: none;"
             class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
              @click.away="photoModalOpen = false">
-            <div class="bg-white rounded-lg shadow-xl max-w-lg w-full relative overflow-hidden" @click.stop>
-                <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] flex justify-between items-center p-4">
+            <div class="bg-white rounded-lg shadow-xl w-auto max-w-[95vw] max-h-[90vh] relative overflow-hidden flex flex-col" @click.stop>
+                <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] flex justify-between items-center p-4 shrink-0">
                     <div class="flex items-center gap-2">
                         <svg class="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -1526,19 +1526,21 @@
                     </div>
                     <button @click="photoModalOpen = false" class="text-white hover:text-gray-200 text-3xl">&times;</button>
                 </div>
-                <div class="mt-4 relative">
-                    <img :src="photos[currentPhotoIndex]" alt="Foto" class="w-full h-auto rounded">
-                    <button x-show="currentPhotoIndex > 0" @click="currentPhotoIndex--" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full w-8 h-8 flex items-center justify-center">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                    </button>
-                    <button x-show="currentPhotoIndex < photos.length - 1" @click="currentPhotoIndex++" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full w-8 h-8 flex items-center justify-center">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                    </button>
-                </div>
-                <div class="flex justify-center gap-2 mt-3" x-show="photos.length > 1">
-                    <template x-for="(photo, index) in photos" :key="index">
-                        <button @click="currentPhotoIndex = index" :class="currentPhotoIndex === index ? 'bg-gray-800 w-6' : 'bg-gray-400 w-2'" class="h-2 rounded-full transition-all"></button>
-                    </template>
+                <div class="p-4 flex flex-col items-center bg-gray-50 overflow-hidden">
+                    <div class="relative">
+                        <img :src="photos[currentPhotoIndex]" alt="Foto" class="max-h-[75vh] w-auto h-auto object-contain rounded shadow-md">
+                        <button x-show="currentPhotoIndex > 0" @click="currentPhotoIndex--" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        </button>
+                        <button x-show="currentPhotoIndex < photos.length - 1" @click="currentPhotoIndex++" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                    </div>
+                    <div class="flex justify-center gap-2 mt-3 shrink-0" x-show="photos.length > 1">
+                        <template x-for="(photo, index) in photos" :key="index">
+                            <button @click="currentPhotoIndex = index" :class="currentPhotoIndex === index ? 'bg-gray-800 w-6' : 'bg-gray-400 w-2'" class="h-2 rounded-full transition-all"></button>
+                        </template>
+                    </div>
                 </div>
             </div>
         </div>
