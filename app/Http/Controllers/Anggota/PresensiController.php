@@ -278,9 +278,9 @@ class PresensiController extends Controller
                     if ($waktuSekarang->lt($batasAwalPulang)) {
                         $status = 'terlalu cepat';
                     }
-                    elseif($waktuSekarang->gt($batasAkhirPulang)){
-                        $status = 'terlambat';
-                    }
+                    // elseif($waktuSekarang->gt($batasAkhirPulang)){
+                    //     $status = 'terlambat';
+                    // }
                 }                
             }
 
