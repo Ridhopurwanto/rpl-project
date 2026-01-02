@@ -236,6 +236,96 @@
         </div>
     </div>
 
+    {{-- MODAL EDIT PENERIMA --}}
+    <div id="editModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md" onclick="event.stopPropagation()">
+            <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] flex justify-between items-center p-4">
+                <h3 class="text-xl font-bold text-white">Edit Nama Penerima</h3>
+                <button onclick="closeEditModal()" class="text-white hover:text-gray-200 text-3xl">&times;</button>
+            </div>
+            <form id="editForm" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="p-6">
+                    <label for="tujuan" class="block text-sm font-semibold text-gray-700 mb-2">Nama Penerima:</label>
+                    <input type="text" id="tujuan" name="tujuan" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="flex justify-end gap-3 p-6 pt-0">
+                    <button type="button" onclick="closeEditModal()"
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">
+                        Batal
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                        Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- MODAL EDIT COMPREHENSIVE --}}
+    <div id="editComprehensiveModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg" onclick="event.stopPropagation()">
+            <div class="bg-gradient-to-r from-[#2a4a6f] to-[#4a6a8f] flex justify-between items-center p-4">
+                <h3 id="editComprehensiveTitle" class="text-xl font-bold text-white">Edit Barang</h3>
+                <button onclick="closeEditComprehensiveModal()" class="text-white hover:text-gray-200 text-3xl">&times;</button>
+            </div>
+            <form id="editComprehensiveForm" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label for="edit_tanggal" class="block text-sm font-semibold text-gray-700 mb-2">Tanggal:</label>
+                        <input type="date" id="edit_tanggal" name="tanggal" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="edit_nama_barang" class="block text-sm font-semibold text-gray-700 mb-2">Nama Barang:</label>
+                        <input type="text" id="edit_nama_barang" name="nama_barang" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div id="edit_pelapor_field">
+                        <label for="edit_nama_pelapor" class="block text-sm font-semibold text-gray-700 mb-2">Pelapor:</label>
+                        <input type="text" id="edit_nama_pelapor" name="nama_pelapor"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div id="edit_penitip_field">
+                        <label for="edit_nama_penitip" class="block text-sm font-semibold text-gray-700 mb-2">Penitip:</label>
+                        <input type="text" id="edit_nama_penitip" name="nama_penitip"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div id="edit_lokasi_field">
+                        <label for="edit_lokasi_penemuan" class="block text-sm font-semibold text-gray-700 mb-2">Lokasi Penemuan:</label>
+                        <input type="text" id="edit_lokasi_penemuan" name="lokasi_penemuan"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div id="edit_penerima_field">
+                        <label for="edit_nama_penerima" class="block text-sm font-semibold text-gray-700 mb-2">Nama Penerima:</label>
+                        <input type="text" id="edit_nama_penerima" name="nama_penerima"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="edit_catatan" class="block text-sm font-semibold text-gray-700 mb-2">Catatan:</label>
+                        <textarea id="edit_catatan" name="catatan" rows="3"
+                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 p-6 pt-0">
+                    <button type="button" onclick="closeEditComprehensiveModal()"
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">
+                        Batal
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                        Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     {{-- MODAL FOTO --}}
     <div x-show="showPhotoModal" 
          class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
@@ -405,6 +495,208 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('popstate', function() {
         fetchResults(window.location.href);
     });
+});
+
+// Use event delegation to handle edit button clicks
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.edit-penerima-btn')) {
+        e.preventDefault();
+        const button = e.target.closest('.edit-penerima-btn');
+        const id = button.dataset.id;
+        const tujuan = button.dataset.tujuan;
+        console.log('Edit button clicked - ID:', id, 'Tujuan:', tujuan); // Debug log
+        if (id && id !== '' && id !== 'undefined') {
+            openEditModal(id, tujuan);
+        } else {
+            console.error('ID barang tidak valid:', id);
+            alert('Error: ID barang tidak ditemukan');
+        }
+    }
+    
+    if (e.target.closest('.edit-comprehensive-btn')) {
+        e.preventDefault();
+        const button = e.target.closest('.edit-comprehensive-btn');
+        const data = {
+            id: button.dataset.id,
+            type: button.dataset.type,
+            tanggal: button.dataset.tanggal,
+            nama_barang: button.dataset.namaBarang,
+            nama_pelapor: button.dataset.namaPelapor,
+            nama_penitip: button.dataset.namaPenitip,
+            lokasi_penemuan: button.dataset.lokasiPenemuan,
+            nama_penerima: button.dataset.namaPenerima,
+            catatan: button.dataset.catatan
+        };
+        if (data.id && data.id !== '' && data.id !== 'undefined') {
+            openEditComprehensiveModal(data);
+        } else {
+            console.error('ID barang tidak valid:', data.id);
+            alert('Error: ID barang tidak ditemukan');
+        }
+    }
+});
+
+// Edit Modal Functions
+function openEditModal(id, currentTujuan) {
+    console.log('Opening modal with ID:', id, 'Tujuan:', currentTujuan); // Debug log
+    if (!id || id === '' || id === 'undefined') {
+        console.error('Invalid ID passed to openEditModal:', id);
+        alert('Error: ID barang tidak valid');
+        return;
+    }
+    document.getElementById('editModal').style.display = 'flex';
+    document.getElementById('tujuan').value = currentTujuan || '';
+    document.getElementById('editForm').action = `/komandan/barang/titipan/${id}/edit-penerima`;
+    console.log('Form action set to:', document.getElementById('editForm').action); // Debug log
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+}
+
+// Comprehensive Edit Modal Functions
+function openEditComprehensiveModal(data) {
+    console.log('Opening comprehensive modal with data:', data);
+    if (!data.id || data.id === '' || data.id === 'undefined') {
+        console.error('Invalid ID passed to openEditComprehensiveModal:', data.id);
+        alert('Error: ID barang tidak valid');
+        return;
+    }
+    
+    const modal = document.getElementById('editComprehensiveModal');
+    const title = document.getElementById('editComprehensiveTitle');
+    const form = document.getElementById('editComprehensiveForm');
+    
+    // Set title and form action
+    title.textContent = data.type === 'temuan' ? 'Edit Barang Temuan' : 'Edit Barang Titipan';
+    form.action = `/komandan/barang/${data.type}/${data.id}/edit`;
+    
+    // Fill form fields
+    document.getElementById('edit_tanggal').value = data.tanggal || '';
+    document.getElementById('edit_nama_barang').value = data.nama_barang || '';
+    document.getElementById('edit_catatan').value = data.catatan || '';
+    
+    // Show/hide fields based on type
+    const pelapor = document.getElementById('edit_pelapor_field');
+    const penitip = document.getElementById('edit_penitip_field');
+    const lokasi = document.getElementById('edit_lokasi_field');
+    const penerima = document.getElementById('edit_penerima_field');
+    
+    if (data.type === 'temuan') {
+        pelapor.style.display = 'block';
+        lokasi.style.display = 'block';
+        penitip.style.display = 'none';
+        penerima.style.display = 'none';
+        
+        document.getElementById('edit_nama_pelapor').value = data.nama_pelapor || '';
+        document.getElementById('edit_lokasi_penemuan').value = data.lokasi_penemuan || '';
+        document.getElementById('edit_nama_pelapor').required = true;
+        document.getElementById('edit_lokasi_penemuan').required = true;
+        document.getElementById('edit_nama_penitip').required = false;
+        document.getElementById('edit_nama_penerima').required = false;
+    } else {
+        pelapor.style.display = 'none';
+        lokasi.style.display = 'none';
+        penitip.style.display = 'block';
+        penerima.style.display = 'block';
+        
+        document.getElementById('edit_nama_penitip').value = data.nama_penitip || '';
+        document.getElementById('edit_nama_penerima').value = data.nama_penerima || '';
+        document.getElementById('edit_nama_pelapor').required = false;
+        document.getElementById('edit_lokasi_penemuan').required = false;
+        document.getElementById('edit_nama_penitip').required = true;
+        document.getElementById('edit_nama_penerima').required = true;
+    }
+    
+    modal.style.display = 'flex';
+}
+
+function closeEditComprehensiveModal() {
+    document.getElementById('editComprehensiveModal').style.display = 'none';
+}
+
+// Initialize modal event listeners when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Close modal when clicking outside
+    const editModal = document.getElementById('editModal');
+    if (editModal) {
+        editModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEditModal();
+            }
+        });
+    }
+    
+    const editComprehensiveModal = document.getElementById('editComprehensiveModal');
+    if (editComprehensiveModal) {
+        editComprehensiveModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEditComprehensiveModal();
+            }
+        });
+    }
+
+    // Handle form submission
+    const editForm = document.getElementById('editForm');
+    if (editForm) {
+        editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeEditModal();
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Terjadi kesalahan');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menyimpan data');
+            });
+        });
+    }
+    
+    // Handle comprehensive edit form submission
+    const editComprehensiveForm = document.getElementById('editComprehensiveForm');
+    if (editComprehensiveForm) {
+        editComprehensiveForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeEditComprehensiveModal();
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Terjadi kesalahan');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menyimpan data');
+            });
+        });
+    }
 });
 </script>
 @endsection

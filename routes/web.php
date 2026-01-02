@@ -202,6 +202,8 @@ Route::middleware('auth')->group(function () {
             ->name('kendaraan');
         Route::put('/kendaraan/log/{id_log}/update-keterangan', [KendaraanController::class, 'updateKeterangan'])
             ->name('kendaraan.log.updateKeterangan');
+        Route::delete('/kendaraan/log/{id_log}', [KendaraanController::class, 'destroyLog'])
+            ->name('kendaraan.log.delete');
         Route::get('/kendaraan/master/{id_kendaraan}/edit', [KendaraanController::class, 'editMaster'])
             ->name('kendaraan.master.edit');
         Route::put('/kendaraan/master/{id_kendaraan}', [KendaraanController::class, 'updateMaster'])
@@ -226,6 +228,11 @@ Route::middleware('auth')->group(function () {
         
         Route::get('/barang', [BarangController::class, 'index'])
             ->name('barang');
+        Route::put('/barang/titipan/{id}/edit-penerima', [BarangController::class, 'updatePenerima'])
+            ->name('barang.updatePenerima');
+        Route::put('/barang/{type}/{id}/edit', [BarangController::class, 'updateBarang'])
+            ->name('barang.update')
+            ->where('type', 'temuan|titipan');
 
         
         Route::get('/gangguan', [GangguanKamtibmasController::class, 'index'])

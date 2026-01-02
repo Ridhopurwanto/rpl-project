@@ -45,11 +45,18 @@
                     </form>
                 </td>
                 <td class="py-2 px-4 text-center">
-                    @if($log->kendaraan)
-                        <span class="text-green-500" title="Terdaftar"><svg class="w-6 h-6 inline" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg></span>
-                    @else
-                        <button @click="$dispatch('promote-master', { id: {{ $log->id_log }}, plat: '{{ $log->nopol }}', pemilik: '{{ $log->pemilik }}' })" class="text-blue-500 hover:text-blue-700"><svg class="w-6 h-6 inline" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"></path></svg></button>
-                    @endif
+                    <div class="flex items-center justify-center gap-2">
+                        @if($log->kendaraan)
+                            <span class="text-green-500" title="Terdaftar"><svg class="w-6 h-6 inline" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg></span>
+                        @else
+                            <button @click="$dispatch('promote-master', { id: {{ $log->id_log }}, plat: '{{ $log->nopol }}', pemilik: '{{ $log->pemilik }}' })" class="text-blue-500 hover:text-blue-700"><svg class="w-6 h-6 inline" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"></path></svg></button>
+                        @endif
+                        <button @click="showDeleteLogModal = true; deleteLogAction = '{{ route('komandan.kendaraan.log.delete', $log->id_log) }}'" class="text-red-500 hover:text-red-700" title="Hapus">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </td>
             </tr>
             @empty
@@ -110,18 +117,25 @@
                             </div>
 
                             {{-- Status/Aksi --}}
-                            @if($log->kendaraan)
-                                <div class="flex items-center justify-center gap-1 bg-green-50 text-green-700 font-bold py-1.5 rounded text-xs border border-green-300">
-                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                                    Terdaftar
-                                </div>
-                            @else
-                                <button @click="$dispatch('promote-master', { id: {{ $log->id_log }}, plat: '{{ $log->nopol }}', pemilik: '{{ $log->pemilik }}' })" 
-                                        class="w-full bg-blue-500 text-white font-bold py-1.5 rounded text-xs hover:bg-blue-600 transition flex items-center justify-center gap-1">
-                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"></path></svg>
-                                    Daftarkan
+                            <div class="flex gap-2">
+                                @if($log->kendaraan)
+                                    <div class="flex-1 flex items-center justify-center gap-1 bg-green-50 text-green-700 font-bold py-1.5 rounded text-xs border border-green-300">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                        Terdaftar
+                                    </div>
+                                @else
+                                    <button @click="$dispatch('promote-master', { id: {{ $log->id_log }}, plat: '{{ $log->nopol }}', pemilik: '{{ $log->pemilik }}' })" 
+                                            class="flex-1 bg-blue-500 text-white font-bold py-1.5 rounded text-xs hover:bg-blue-600 transition flex items-center justify-center gap-1">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"></path></svg>
+                                        Daftarkan
+                                    </button>
+                                @endif
+                                <button @click="showDeleteLogModal = true; deleteLogAction = '{{ route('komandan.kendaraan.log.delete', $log->id_log) }}'" class="bg-red-500 text-white p-1.5 rounded text-xs hover:bg-red-600 transition" title="Hapus">
+                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                    </svg>
                                 </button>
-                            @endif
+                            </div>
                         </div>
                     </div>
                 </div>

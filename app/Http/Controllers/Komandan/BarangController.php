@@ -114,4 +114,81 @@ class BarangController extends Controller
             'perPageTitipan' => $perPageTitipan,
         ]);
     }
+
+    public function updatePenerima(Request $request, $id)
+    {
+        $request->validate([
+            'tujuan' => 'required|string|max:255',
+        ]);
+
+        $barang = BarangTitipan::findOrFail($id);
+        
+        if ($barang->status == 'selesai') {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Tidak dapat mengedit barang yang sudah selesai.']);
+            }
+            return redirect()->back()->with('error', 'Tidak dapat mengedit barang yang sudah selesai.');
+        }
+
+        $barang->update([
+            'tujuan' => $request->tujuan
+        ]);
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Nama penerima berhasil diperbarui.']);
+        }
+        
+        return redirect()->back()->with('success', 'Nama penerima berhasil diperbarui.');
+    }
+
+    public function updateBarang(Request $request, $type, $id)
+    {
+        $request->validate([
+            'tanggal' => 'required|date',
+            'nama_barang' => 'required|string|max:255',
+            'catatan' => 'nullable|string|max:500',
+        ]);
+
+        if ($type === 'temuan') {
+            $request->validate([
+                'nama_pelapor' => 'required|string|max:255',
+                'lokasi_penemuan' => 'required|string|max:255',
+            ]);
+            
+            $barang = BarangTemuan::findOrFail($id);
+            
+            if ($barang->status == 'selesai') {
+                return response()->json(['success' => false, 'message' => 'Tidak dapat mengedit barang yang sudah selesai.']);
+            }
+
+            $barang->update([
+                'waktu_lapor' => $request->tanggal,
+                'nama_barang' => $request->nama_barang,
+                'nama_pelapor' => $request->nama_pelapor,
+                'lokasi_penemuan' => $request->lokasi_penemuan,
+                'catatan' => $request->catatan,
+            ]);
+        } else {
+            $request->validate([
+                'nama_penitip' => 'required|string|max:255',
+                'nama_penerima' => 'required|string|max:255',
+            ]);
+            
+            $barang = BarangTitipan::findOrFail($id);
+            
+            if ($barang->status == 'selesai') {
+                return response()->json(['success' => false, 'message' => 'Tidak dapat mengedit barang yang sudah selesai.']);
+            }
+
+            $barang->update([
+                'waktu_titip' => $request->tanggal,
+                'nama_barang' => $request->nama_barang,
+                'nama_penitip' => $request->nama_penitip,
+                'tujuan' => $request->nama_penerima,
+                'catatan' => $request->catatan,
+            ]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Data barang berhasil diperbarui.']);
+    }
 }
