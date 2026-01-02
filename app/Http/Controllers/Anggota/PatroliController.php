@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use App\Models\ShiftRule;
 
 class PatroliController extends Controller
 {
@@ -71,13 +72,34 @@ class PatroliController extends Controller
         return ['is_off' => false, 'nama_shift' => strtoupper($jenisShift), 'id_shift' => $shift->id_shift];
     }
 
-     
+
+    private function getEffectiveLogicalDate($idPengguna)
+    {
+        $now = Carbon::now();
+
+        $batasPatroliMalam = ShiftRule::where('jenis_shift', 'Malam')->first()->jam_keluar;
+
+        if ($now->hour < $batasPatroliMalam) {
+            $yesterday = Carbon::yesterday();
+            
+            $shiftStatus = $this->checkShiftStatus($idPengguna, $yesterday);
+            if (!$shiftStatus['is_off'] && $shiftStatus['nama_shift'] === 'MALAM') {
+                return $yesterday;
+            }
+        }
+        
+        return Carbon::today();
+    }
+
     public function index(Request $request)
     {
         $user = Auth::user();
+        
+        $defaultDate = $this->getEffectiveLogicalDate($user->id_pengguna);
+        
         $tanggalTerpilih = $request->input('tanggal')
             ? Carbon::parse($request->input('tanggal'))
-            : Carbon::today();
+            : $defaultDate;
 
         $shiftStatus = $this->checkShiftStatus($user->id_pengguna, $tanggalTerpilih);
         $isShiftOff = $shiftStatus['is_off'];
@@ -169,7 +191,7 @@ class PatroliController extends Controller
     public function createSession(Request $request)
     {
         $user = Auth::user();
-        $tanggal = Carbon::today();
+        $tanggal = $this->getEffectiveLogicalDate($user->id_pengguna);
 
         
         $shiftStatus = $this->checkShiftStatus($user->id_pengguna, $tanggal);
@@ -290,7 +312,7 @@ class PatroliController extends Controller
         $request->validate(['jenis_patroli' => 'required|string']);
 
         $user = Auth::user();
-        $tanggal = Carbon::today();
+        $tanggal = $this->getEffectiveLogicalDate($user->id_pengguna);
         
         $shiftStatus = $this->checkShiftStatus($user->id_pengguna, $tanggal);
         $jenisShiftStr = ucfirst(strtolower($shiftStatus['nama_shift']));

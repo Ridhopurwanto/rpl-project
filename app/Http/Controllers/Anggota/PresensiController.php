@@ -19,11 +19,9 @@ class PresensiController extends Controller
     {
         $user = Auth::user();
         
-        
         $startDate = $request->input('start_date', Carbon::today()->toDateString());
         $endDate = $request->input('end_date', Carbon::today()->toDateString());
 
-        
         $startCarbon = Carbon::parse($startDate);
         $bulan = $startCarbon->month;
         $tahun = $startCarbon->year;
@@ -38,7 +36,6 @@ class PresensiController extends Controller
             return Carbon::parse($shift->tanggal)->format('Y-m-d');
         });
 
-        
         $calStart = $startCarbon->copy()->startOfMonth();
         $calEnd = $startCarbon->copy()->endOfMonth();
         $period = CarbonPeriod::create($calStart, $calEnd);
@@ -59,7 +56,6 @@ class PresensiController extends Controller
             ];
         }
 
-        
         $riwayatPresensi = Presensi::where('id_pengguna', $user->id_pengguna)
                             ->whereDate('waktu', '>=', $startDate)
                             ->whereDate('waktu', '<=', $endDate)
@@ -68,92 +64,118 @@ class PresensiController extends Controller
 
         $now = Carbon::now();
 
-        $todayShiftData = Shift::with('shiftRule')
+        $lastPresensi = Presensi::where('id_pengguna', $user->id_pengguna)
+                            ->orderBy('waktu', 'desc')
+                            ->first();
+
+        $isPendingPulang = false;
+        $activeShiftData = null;
+        
+        if ($lastPresensi && $lastPresensi->jenis_presensi == 'Masuk') {
+            if ($lastPresensi->waktu->diffInHours($now) < 36) {
+                $isPendingPulang = true;
+                if ($lastPresensi->id_shift) {
+                    $activeShiftData = Shift::with('shiftRule')->find($lastPresensi->id_shift);
+                }
+            }
+        }
+
+        if (!$activeShiftData) {
+             $activeShiftData = Shift::with('shiftRule')
                             ->where('id_pengguna', $user->id_pengguna)
                             ->whereDate('tanggal', Carbon::today())
                             ->first();
+        }
 
-        
-        
-        $presensiLog = Presensi::where('id_pengguna', $user->id_pengguna)
-                            ->whereDate('waktu', Carbon::today()) 
-                            ->get();
-
-        
-        $sudahMasuk = $presensiLog->where('jenis_presensi', 'Masuk')->first();   
-        $sudahPulang = $presensiLog->where('jenis_presensi', 'Pulang')->first();  
-
-        
-        
         $jadwalAbsen = [
             'nama_shift'     => 'TIDAK ADA JADWAL',
             'info_terdekat'  => '-',
             'canpresensi'   => false,
-            'pesan_error'    => 'Tidak ada jadwal shift hari ini.',
+            'pesan_error'    => 'Tidak ada jadwal shift saat ini.',
             'disable_masuk'  => true, 
             'disable_pulang' => true,
             'default_jenis'  => 'masuk',
         ];
 
-        if ($todayShiftData && $todayShiftData->shiftRule) {
-            $rule = $todayShiftData->shiftRule;
+        $shiftHariIniLabel = $activeShiftData && $activeShiftData->shiftRule ? strtoupper($activeShiftData->shiftRule->jenis_shift) : 'TIDAK ADA JADWAL';
+
+        if ($activeShiftData && $activeShiftData->shiftRule) {
+            $rule = $activeShiftData->shiftRule;
             $jadwalAbsen['nama_shift'] = strtoupper($rule->jenis_shift);
             $menitDibuka = $rule->dibuka ?? 0;
 
-            if ($rule->jam_masuk && $rule->jam_keluar) {
-                $jamMasuk = Carbon::createFromTimeString($rule->jam_masuk);
-                $jamKeluar = Carbon::createFromTimeString($rule->jam_keluar);
+            $tanggalShift = Carbon::parse($activeShiftData->tanggal);
 
-                if ($jamKeluar->lt($jamMasuk)) {
+            if ($rule->jam_masuk && $rule->jam_keluar) {
+                $jamMasuk = Carbon::createFromFormat('Y-m-d H:i:s', $tanggalShift->format('Y-m-d') . ' ' . $rule->jam_masuk);
+                $jamKeluar = Carbon::createFromFormat('Y-m-d H:i:s', $tanggalShift->format('Y-m-d') . ' ' . $rule->jam_keluar);
+
+                if ($jamKeluar->lessThan($jamMasuk)) {
                     $jamKeluar->addDay();
                 }
 
                 $waktuBukaMasuk = $jamMasuk->copy()->subMinutes($menitDibuka);
                 $waktuBukaPulang = $jamKeluar->copy();
 
-                if( $jadwalAbsen['nama_shift'] == 'OFF'){
+                if ($jadwalAbsen['nama_shift'] == 'OFF') {
                     $jadwalAbsen['info_terdekat'] = '-';
                     $jadwalAbsen['canpresensi'] = false;
                     $jadwalAbsen['pesan_error'] = 'Tidak sedang bekerja';
                     $jadwalAbsen['disable_masuk'] = true;
                     $jadwalAbsen['disable_pulang'] = true;
-                }
-                elseif (!$sudahMasuk) {
-                    $jadwalAbsen['info_terdekat'] = 'MASUK DIBUKA: ' . $waktuBukaMasuk->format('H:i');
-                    $jadwalAbsen['disable_masuk'] = false;
-                    $jadwalAbsen['disable_pulang'] = true;
-                    $jadwalAbsen['default_jenis'] = 'masuk';
-
-                    if ($now->gte($waktuBukaMasuk)) {
-                        $jadwalAbsen['canpresensi'] = true;
-                        $jadwalAbsen['pesan_error'] = '';
-                    } else {
-                        $jadwalAbsen['canpresensi'] = false;
-                        $jadwalAbsen['pesan_error'] = 'Presensi Masuk belum dibuka. Tunggu ' . $waktuBukaMasuk->format('H:i');
-                    }
-                } elseif (!$sudahPulang) {
-                    $jadwalAbsen['info_terdekat'] = 'PULANG PADA PUKUL: ' . $waktuBukaPulang->format('H:i');
-                    $jadwalAbsen['disable_masuk'] = true;
-                    $jadwalAbsen['disable_pulang'] = false;
-                    $jadwalAbsen['default_jenis'] = 'pulang';
-                    $jadwalAbsen['canpresensi'] = true;
-                    $jadwalAbsen['pesan_error'] = '';
                 } else {
-                    $jadwalAbsen['info_terdekat'] = 'PRESENSI SELESAI';
-                    $jadwalAbsen['canpresensi'] = false;
-                    $jadwalAbsen['pesan_error'] = 'Anda sudah menyelesaikan presensi hari ini.';
-                    $jadwalAbsen['disable_masuk'] = true;
-                    $jadwalAbsen['disable_pulang'] = true;
+                    if ($isPendingPulang) {                        
+                        $jadwalAbsen['info_terdekat'] = 'PULANG PADA PUKUL: ' . $waktuBukaPulang->format('H:i') . ($jamKeluar->day > $jamMasuk->day ? ' (Besok)' : '');
+                        $jadwalAbsen['disable_masuk'] = true;
+                        $jadwalAbsen['disable_pulang'] = false;
+                        $jadwalAbsen['default_jenis'] = 'pulang';
+                        $jadwalAbsen['canpresensi'] = true; 
+                        $jadwalAbsen['pesan_error'] = '';
+
+                    } else {
+                        $presensiShiftIni = Presensi::where('id_shift', $activeShiftData->id_shift)
+                                                    ->get();
+                        
+                        $sudahMasuk = $presensiShiftIni->where('jenis_presensi', 'Masuk')->first();
+                        $sudahPulang = $presensiShiftIni->where('jenis_presensi', 'Pulang')->first();
+
+                        if ($sudahMasuk && $sudahPulang) {
+                            $jadwalAbsen['info_terdekat'] = 'PRESENSI SELESAI';
+                            $jadwalAbsen['canpresensi'] = false;
+                            $jadwalAbsen['pesan_error'] = 'Anda sudah menyelesaikan presensi untuk jadwal ini.'; // Bisa jadwal kemarin atau hari ini
+                            $jadwalAbsen['disable_masuk'] = true;
+                            $jadwalAbsen['disable_pulang'] = true;
+                        } elseif ($sudahMasuk && !$sudahPulang) {
+                            $jadwalAbsen['disable_masuk'] = true;
+                            $jadwalAbsen['disable_pulang'] = false;
+                            $jadwalAbsen['default_jenis'] = 'pulang'; 
+                            $jadwalAbsen['canpresensi'] = true;
+                        } else {
+                            $jadwalAbsen['info_terdekat'] = 'MASUK DIBUKA: ' . $waktuBukaMasuk->format('H:i');
+                            
+                            if ($now->gte($waktuBukaMasuk)) {
+                                $jadwalAbsen['disable_masuk'] = false;
+                                $jadwalAbsen['disable_pulang'] = true;
+                                $jadwalAbsen['default_jenis'] = 'masuk';
+                                $jadwalAbsen['canpresensi'] = true;
+                                $jadwalAbsen['pesan_error'] = '';
+                            } else {
+                                $jadwalAbsen['disable_masuk'] = true;
+                                $jadwalAbsen['disable_pulang'] = true;
+                                $jadwalAbsen['canpresensi'] = false;
+                                $jadwalAbsen['pesan_error'] = 'Presensi Masuk belum dibuka. Tunggu ' . $waktuBukaMasuk->format('H:i');
+                            }
+                        }
+                    }
                 }
             }
+        } else {
+            $shiftHariIniLabel = 'TIDAK ADA JADWAL';
         }
 
-        $shiftHariIni = $todayShiftData && $todayShiftData->shiftRule ? strtoupper($todayShiftData->shiftRule->jenis_shift) : 'TIDAK ADA JADWAL';
-
-        
         $wajibGeotag = true; 
-        if ($todayShiftData && $todayShiftData->shiftRule) {
-            $wajibGeotag = (bool) $todayShiftData->shiftRule->is_geotag_enabled;
+        if ($activeShiftData && $activeShiftData->shiftRule) {
+            $wajibGeotag = (bool) $activeShiftData->shiftRule->is_geotag_enabled;
         }
 
         return view('anggota.presensi', [
@@ -162,7 +184,7 @@ class PresensiController extends Controller
             'riwayatPresensi' => $riwayatPresensi,
             'startDate' => $startDate,
             'endDate' => $endDate,
-            'shiftHariIni' => $shiftHariIni,
+            'shiftHariIni' => $shiftHariIniLabel,
             'jadwalAbsen' => $jadwalAbsen,
             'wajibGeotag' => $wajibGeotag,
         ]);
@@ -173,14 +195,27 @@ class PresensiController extends Controller
         $user = Auth::user();
         $now = Carbon::now();
         $status = 'tepat waktu';
-        $shiftHariIni = Shift::with('shiftRule')
+        $isGeotagEnabled = true;
+
+        if ($request->jenis_presensi == 'pulang') {
+             $lastMasukTag = Presensi::where('id_pengguna', $user->id_pengguna)
+                        ->where('jenis_presensi', 'masuk')
+                        ->orderBy('waktu', 'desc')
+                        ->first();
+             if ($lastMasukTag && $lastMasukTag->id_shift) {
+                  $shiftOrigin = Shift::with('shiftRule')->find($lastMasukTag->id_shift);
+                  if ($shiftOrigin && $shiftOrigin->shiftRule) {
+                      $isGeotagEnabled = $shiftOrigin->shiftRule->is_geotag_enabled;
+                  }
+             }
+        } else {
+             $shiftHariIni = Shift::with('shiftRule')
                         ->where('id_pengguna', $user->id_pengguna)
                         ->whereDate('tanggal', $now)
                         ->first();
-
-        $isGeotagEnabled = true; 
-        if ($shiftHariIni && $shiftHariIni->shiftRule) {
-            $isGeotagEnabled = $shiftHariIni->shiftRule->is_geotag_enabled;
+             if ($shiftHariIni && $shiftHariIni->shiftRule) {
+                 $isGeotagEnabled = $shiftHariIni->shiftRule->is_geotag_enabled;
+             }
         }
 
         $rules = [
@@ -226,8 +261,28 @@ class PresensiController extends Controller
                             ->where('jenis_presensi', $request->jenis_presensi)
                             ->exists();
             
-            if ($cekDuplikat) {
-                return redirect()->back()->with('error', 'Anda sudah presensi ' . $request->jenis_presensi . ' hari ini.');
+            if ($request->jenis_presensi == 'masuk') {
+                 if ($cekDuplikat) {
+                     return redirect()->back()->with('error', 'Anda sudah presensi masuk hari ini.');
+                 }
+            } else {
+                 $lastMasukForDup = Presensi::where('id_pengguna', $user->id_pengguna)
+                            ->where('jenis_presensi', 'masuk')
+                            ->orderBy('waktu', 'desc')
+                            ->first();
+
+                 if ($lastMasukForDup) {
+                      $alreadyPulang = Presensi::where('id_shift', $lastMasukForDup->id_shift)
+                                        ->where('jenis_presensi', 'pulang')
+                                        ->exists();
+                      if ($alreadyPulang) {
+                          return redirect()->back()->with('error', 'Anda sudah melakukan presensi pulang untuk shift ini.');
+                      }
+                 } else {
+                      if ($cekDuplikat) {
+                          return redirect()->back()->with('error', 'Anda sudah presensi pulang hari ini.');
+                      }
+                 }
             }
 
             
@@ -243,52 +298,69 @@ class PresensiController extends Controller
 
             
             $status = 'tepat waktu';
-            $shiftHariIni = Shift::with('shiftRule')
-                            ->where('id_pengguna', $user->id_pengguna)
-                            ->whereDate('tanggal', $now)
+            
+            $activeShift = null;
+
+            if ($request->jenis_presensi == 'masuk') {
+                $activeShift = Shift::with('shiftRule')
+                                ->where('id_pengguna', $user->id_pengguna)
+                                ->whereDate('tanggal', $now)
+                                ->first();
+            } else {
+                $lastMasuk = Presensi::where('id_pengguna', $user->id_pengguna)
+                            ->where('jenis_presensi', 'masuk')
+                            ->orderBy('waktu', 'desc')
                             ->first();
 
-            if ($request->jenis_presensi == 'masuk' && $shiftHariIni && $shiftHariIni->shiftRule) {
-                $rule = $shiftHariIni->shiftRule;
-                
-                if ($rule->jam_masuk) {
-                    $jamMasuk = Carbon::createFromTimeString($rule->jam_masuk);
-                    $batasTerlambat = $jamMasuk->copy()->addMinutes($rule->toleransi);
-                    $waktuSekarang = Carbon::createFromTimeString($now->format('H:i:s'));
-                    
-                    if ($waktuSekarang->gt($batasTerlambat)) {
-                        $status = 'terlambat';
-                    }
+                if ($lastMasuk && $lastMasuk->id_shift) {
+                    $activeShift = Shift::with('shiftRule')->find($lastMasuk->id_shift);
                 }
-            } elseif ($request->jenis_presensi == 'pulang' && $shiftHariIni && $shiftHariIni->shiftRule) {
-                $rule = $shiftHariIni->shiftRule;
                 
-                if ($rule->jam_keluar) {
-                    $jamMasuk = Carbon::createFromTimeString($rule->jam_masuk);
-                    $jamKeluar = Carbon::createFromTimeString($rule->jam_keluar);
-                    
-                    if ($jamKeluar->lt($jamMasuk)) {
-                        $jamKeluar->addDay();
-                    }
-                                
-                    $batasAwalPulang = $jamKeluar->copy()->subMinutes($rule->toleransi);
-                    $batasAkhirPulang = $jamKeluar->copy()->addMinutes($rule->toleransi);
-                    $waktuSekarang = Carbon::createFromTimeString($now->format('H:i:s'));
-                    
-                    if ($waktuSekarang->lt($batasAwalPulang)) {
-                        $status = 'terlalu cepat';
-                    }
-                    // elseif($waktuSekarang->gt($batasAkhirPulang)){
-                    //     $status = 'terlambat';
-                    // }
-                }                
+                if (!$activeShift) {
+                     $activeShift = Shift::with('shiftRule')
+                                ->where('id_pengguna', $user->id_pengguna)
+                                ->whereDate('tanggal', $now)
+                                ->first();
+                }
+            }
+            
+            if ($activeShift && $activeShift->shiftRule) {
+                 $rule = $activeShift->shiftRule;
+                 $tanggalShift = Carbon::parse($activeShift->tanggal);
+
+                 $jamMasuk = Carbon::createFromFormat('Y-m-d H:i:s', $tanggalShift->format('Y-m-d') . ' ' . $rule->jam_masuk);
+                 
+                 $jamKeluar = Carbon::createFromFormat('Y-m-d H:i:s', $tanggalShift->format('Y-m-d') . ' ' . $rule->jam_keluar);
+                 if ($jamKeluar->lessThan($jamMasuk)) {
+                     $jamKeluar->addDay();
+                 }
+
+                 $waktuSekarang = Carbon::now();
+
+                 if ($request->jenis_presensi == 'masuk') {
+                      if ($rule->jam_masuk) {
+                           $batasTerlambat = $jamMasuk->copy()->addMinutes($rule->toleransi);
+                           
+                           if ($waktuSekarang->gt($batasTerlambat)) {
+                               $status = 'terlambat';
+                           }
+                      }
+                 } elseif ($request->jenis_presensi == 'pulang') {
+                      if ($rule->jam_keluar) {
+                           $batasAwalPulang = $jamKeluar->copy()->subMinutes($rule->toleransi);
+
+                           if ($waktuSekarang->lt($batasAwalPulang)) {
+                               $status = 'terlalu cepat';
+                           }
+                      }
+                 }
             }
 
 
             
             Presensi::create([
                 'id_pengguna'    => $user->id_pengguna,
-                'id_shift'       => $shiftHariIni ? $shiftHariIni->id_shift : null,
+                'id_shift'       => $activeShift ? $activeShift->id_shift : null,
                 'nama_lengkap'   => $user->nama_lengkap,
                 'waktu'          => $now,
                 'tanggal'        => $now->toDateString(), 
