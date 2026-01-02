@@ -65,6 +65,10 @@ class PatroliController extends Controller
 
         $jenisShift = $shift->shiftRule->jenis_shift;
 
+        if ($shift->shiftRule->idshift_rule == 4) {
+             return ['is_off' => false, 'nama_shift' => 'PAGI', 'id_shift' => $shift->id_shift];
+        }
+
         if (in_array($jenisShift, ['Non Shift', 'Off'])) {
             return ['is_off' => true, 'nama_shift' => $jenisShift, 'id_shift' => $shift->id_shift];
         }

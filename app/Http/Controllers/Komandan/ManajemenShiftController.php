@@ -51,6 +51,11 @@ class ManajemenShiftController extends Controller
             $tglStr = $date->toDateString();
             
             $jenisShift = $shiftsDB[$tglStr]->shiftRule->jenis_shift ?? 'Off'; 
+            
+            if (isset($shiftsDB[$tglStr]->shiftRule) && $shiftsDB[$tglStr]->shiftRule->idshift_rule == 4) {
+                $jenisShift = 'Pagi';
+            }
+
             $isLibur = in_array($tglStr, $hariLibur);
 
             $kalender[] = [
@@ -94,6 +99,9 @@ class ManajemenShiftController extends Controller
 
             $selectedShiftId = $rules[$request->jenis_shift];
 
+            if (($user->jenis_jadwal == 'non_shift' || $user->peran == 'non_shift') && $request->jenis_shift != 'Off') {
+                 $selectedShiftId = 4; 
+            }
             
             $shift = Shift::updateOrCreate(
                 ['id_pengguna' => $request->id_pengguna, 'tanggal' => $request->tanggal],
@@ -176,11 +184,11 @@ class ManajemenShiftController extends Controller
                                        ->exists();
 
                         if (!$exists) {
-                            if ($isOffDay) {
+                        if ($isOffDay) {
                                 Shift::create(['id_pengguna' => $request->id_pengguna, 'tanggal' => $tglStr, 'jenis_shift' => $rules['Off']]);
                                 $affectedDates[] = ['date' => $tglStr, 'shift' => 'Off'];
                             } else {
-                                Shift::create(['id_pengguna' => $request->id_pengguna, 'tanggal' => $tglStr, 'jenis_shift' => $rules['Pagi']]);
+                                Shift::create(['id_pengguna' => $request->id_pengguna, 'tanggal' => $tglStr, 'jenis_shift' => 4]);
                                 $affectedDates[] = ['date' => $tglStr, 'shift' => 'Pagi'];
                             }
                         }
@@ -189,7 +197,6 @@ class ManajemenShiftController extends Controller
                 }
             }
 
-            
             if ($shift->wasRecentlyCreated || $shift->wasChanged('jenis_shift')) {
                  $aksi = $shift->wasRecentlyCreated ? 'dibuatkan' : 'diubah';
                  
@@ -213,7 +220,7 @@ class ManajemenShiftController extends Controller
                 'success' => true,
                 'message' => $request->apply_pattern ? 'Shift diubah & pola masa depan diperbarui!' : 'Shift berhasil disimpan.',
                 'affected_dates' => $affectedDates
-            ]);
+            ]);       
 
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Gagal: ' . $e->getMessage()], 500);

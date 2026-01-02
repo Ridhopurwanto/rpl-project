@@ -49,6 +49,10 @@ class PresensiController extends Controller
             $tglStr = $date->format('Y-m-d');
             $shiftData = $shiftMap->get($tglStr);
             $namaJenis = $shiftData && $shiftData->shiftRule ? strtolower($shiftData->shiftRule->jenis_shift) : null;
+
+            if ($shiftData && $shiftData->shiftRule && $shiftData->shiftRule->idshift_rule == 4) {
+                $namaJenis = 'pagi';
+            }
             
             $dataKalender[] = [
                 'tanggal' => $date->format('d'),
@@ -97,11 +101,13 @@ class PresensiController extends Controller
             'default_jenis'  => 'masuk',
         ];
 
-        $shiftHariIniLabel = $activeShiftData && $activeShiftData->shiftRule ? strtoupper($activeShiftData->shiftRule->jenis_shift) : 'TIDAK ADA JADWAL';
+        $shiftHariIniLabel = ($activeShiftData && $activeShiftData->shiftRule) ? 
+            ($activeShiftData->shiftRule->idshift_rule == 4 ? 'Shift Pagi' : strtoupper($activeShiftData->shiftRule->jenis_shift)) 
+            : 'TIDAK ADA JADWAL';
 
         if ($activeShiftData && $activeShiftData->shiftRule) {
             $rule = $activeShiftData->shiftRule;
-            $jadwalAbsen['nama_shift'] = strtoupper($rule->jenis_shift);
+            $jadwalAbsen['nama_shift'] = ($rule->idshift_rule == 4) ? 'PAGI' : strtoupper($rule->jenis_shift);
             $menitDibuka = $rule->dibuka ?? 0;
 
             $tanggalShift = Carbon::parse($activeShiftData->tanggal);
