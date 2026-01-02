@@ -31,6 +31,7 @@
      x-data="{ 
         showEditModal: false, editAction: '', editPlat: '', editPemilik: '', editTipe: '',
         showDeleteModal: false, deleteAction: '',
+        showDeleteLogModal: false, deleteLogAction: '',
         showPromoteModal: false, promoteAction: '',
         showSuccessNotif: {{ session('success') ? 'true' : 'false' }},
         showErrorNotif: {{ session('error') ? 'true' : 'false' }} 
@@ -427,6 +428,27 @@
                         SIMPAN PERUBAHAN
                     </button>
                 </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Modal Hapus Log Riwayat --}}
+    <div x-show="showDeleteLogModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4" @click.away="showDeleteLogModal = false" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full p-6 relative" @click.stop>
+            <h3 class="text-lg font-bold text-gray-900 mb-4">Konfirmasi Hapus</h3>
+            <p class="text-gray-600 mb-6">
+                Apakah Anda yakin ingin menghapus data riwayat kendaraan ini? Tindakan ini tidak dapat dibatalkan.
+            </p>
+            <form :action="deleteLogAction" method="POST" class="flex justify-end space-x-4">
+                @csrf
+                @method('DELETE')
+                <button type="button" @click="showDeleteLogModal = false"
+                    class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">
+                    Batal
+                </button>
+                <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                    Ya, Hapus
+                </button>
             </form>
         </div>
     </div>

@@ -11,6 +11,7 @@
                 <th class="py-3 px-4 text-center">Catatan</th>
                 <th class="py-3 px-4 text-center">Foto</th>
                 <th class="py-3 px-4 text-center">Status</th>
+                <th class="py-3 px-4 text-center">Aksi</th>
             </tr>
         </thead>
         <tbody class="text-sm divide-y divide-gray-200">
@@ -32,10 +33,24 @@
                     <td class="py-2 px-4 text-center">
                         <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $barang->status == 'belum selesai' ? 'bg-red-200 text-yellow-800' : 'bg-green-200 text-green-800' }}">{{ $barang->status }}</span>
                     </td>
+                    <td class="py-2 px-4 text-center">
+                        <button class="edit-comprehensive-btn text-blue-500 hover:text-blue-700" 
+                                data-id="{{ $barang->id_barang }}" 
+                                data-type="titipan"
+                                data-tanggal="{{ $barang->waktu_titip->format('Y-m-d') }}"
+                                data-nama-barang="{{ $barang->nama_barang }}"
+                                data-nama-penitip="{{ $barang->nama_penitip }}"
+                                data-nama-penerima="{{ $barang->tujuan }}"
+                                data-catatan="{{ $barang->catatan }}">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path>
+                            </svg>
+                        </button>
+                    </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="py-4 px-4 text-center text-gray-500">Tidak ada data barang titipan.</td>
+                    <td colspan="9" class="py-4 px-4 text-center text-gray-500">Tidak ada data barang titipan.</td>
                 </tr>
             @endforelse
         </tbody>
@@ -79,6 +94,20 @@
                             </div>
                         </div>
                         <p class="text-xs text-gray-600">{{ $barang->catatan }}</p>
+                        <div class="flex justify-end mt-2">
+                            <button class="edit-comprehensive-btn text-blue-500 hover:text-blue-700" 
+                                    data-id="{{ $barang->id_barang }}" 
+                                    data-type="titipan"
+                                    data-tanggal="{{ $barang->waktu_titip->format('Y-m-d') }}"
+                                    data-nama-barang="{{ $barang->nama_barang }}"
+                                    data-nama-penitip="{{ $barang->nama_penitip }}"
+                                    data-nama-penerima="{{ $barang->tujuan }}"
+                                    data-catatan="{{ $barang->catatan }}">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828zM5 12V7a2 2 0 012-2h2.586l-4 4H5zM3 15a2 2 0 00-2 2v2h16v-2a2 2 0 00-2-2H3z"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="pt-3 border-t border-gray-100">

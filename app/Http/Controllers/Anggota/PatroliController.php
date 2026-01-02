@@ -80,19 +80,28 @@ class PatroliController extends Controller
     private function getEffectiveLogicalDate($idPengguna)
     {
         $now = Carbon::now();
+        $today = Carbon::today();
+        $yesterday = Carbon::yesterday();
 
-        $batasPatroliMalam = ShiftRule::where('jenis_shift', 'Malam')->first()->jam_keluar;
+        // Ambil jam keluar shift malam (biasanya 07:00)
+        $batasPatroliMalam = ShiftRule::where('jenis_shift', 'Malam')->first()->jam_keluar ?? '07:00';
+        $batasJam = Carbon::parse($batasPatroliMalam)->hour;
 
-        if ($now->hour < $batasPatroliMalam) {
-            $yesterday = Carbon::yesterday();
-            
-            $shiftStatus = $this->checkShiftStatus($idPengguna, $yesterday);
-            if (!$shiftStatus['is_off'] && $shiftStatus['nama_shift'] === 'MALAM') {
+        // Jika sekarang masih dalam periode shift malam (sebelum jam 07:00)
+        if ($now->hour < $batasJam) {
+            // Cek apakah kemarin ada shift malam
+            $shiftKemarin = Shift::where('id_pengguna', $idPengguna)
+                ->whereDate('tanggal', $yesterday)
+                ->with('shiftRule')
+                ->first();
+
+            if ($shiftKemarin && $shiftKemarin->shiftRule && $shiftKemarin->shiftRule->jenis_shift === 'Malam') {
+                // Jika kemarin shift malam, gunakan tanggal kemarin untuk patroli
                 return $yesterday;
             }
         }
         
-        return Carbon::today();
+        return $today;
     }
 
     public function index(Request $request)
@@ -105,7 +114,29 @@ class PatroliController extends Controller
             ? Carbon::parse($request->input('tanggal'))
             : $defaultDate;
 
+        // Untuk shift malam, cek apakah ini adalah lanjutan dari shift kemarin
+        $now = Carbon::now();
+        $batasJam = Carbon::parse(ShiftRule::where('jenis_shift', 'Malam')->first()->jam_keluar ?? '07:00')->hour;
+        $isNightShiftContinuation = false;
+        
+        if ($now->hour < $batasJam && $tanggalTerpilih->isYesterday()) {
+            $shiftKemarin = Shift::where('id_pengguna', $user->id_pengguna)
+                ->whereDate('tanggal', $tanggalTerpilih)
+                ->with('shiftRule')
+                ->first();
+                
+            if ($shiftKemarin && $shiftKemarin->shiftRule && $shiftKemarin->shiftRule->jenis_shift === 'Malam') {
+                $isNightShiftContinuation = true;
+            }
+        }
+
         $shiftStatus = $this->checkShiftStatus($user->id_pengguna, $tanggalTerpilih);
+        
+        // Jika ini adalah lanjutan shift malam, override status off
+        if ($isNightShiftContinuation) {
+            $shiftStatus = ['is_off' => false, 'nama_shift' => 'MALAM', 'id_shift' => $shiftKemarin->id_shift];
+        }
+        
         $isShiftOff = $shiftStatus['is_off'];
         $namaShift = $shiftStatus['nama_shift'];
         $statusShift = $isShiftOff ? 'OFF' : 'AKTIF';
@@ -196,10 +227,34 @@ class PatroliController extends Controller
     {
         $user = Auth::user();
         $tanggal = $this->getEffectiveLogicalDate($user->id_pengguna);
-
+        $now = Carbon::now();
+        $batasJam = Carbon::parse(ShiftRule::where('jenis_shift', 'Malam')->first()->jam_keluar ?? '07:00')->hour;
         
+        // Cek apakah ini lanjutan shift malam
+        $isNightShiftContinuation = false;
+        if ($now->hour < $batasJam && $tanggal->isYesterday()) {
+            $shiftKemarin = Shift::where('id_pengguna', $user->id_pengguna)
+                ->whereDate('tanggal', $tanggal)
+                ->with('shiftRule')
+                ->first();
+                
+            if ($shiftKemarin && $shiftKemarin->shiftRule && $shiftKemarin->shiftRule->jenis_shift === 'Malam') {
+                $isNightShiftContinuation = true;
+            }
+        }
+
         $shiftStatus = $this->checkShiftStatus($user->id_pengguna, $tanggal);
-        if ($shiftStatus['is_off']) {
+        
+        // Override jika ini lanjutan shift malam
+        if ($isNightShiftContinuation) {
+            $shiftKemarin = Shift::where('id_pengguna', $user->id_pengguna)
+                ->whereDate('tanggal', $tanggal)
+                ->with('shiftRule')
+                ->first();
+            $shiftStatus = ['is_off' => false, 'nama_shift' => 'MALAM', 'id_shift' => $shiftKemarin->id_shift];
+        }
+        
+        if ($shiftStatus['is_off'] && !$isNightShiftContinuation) {
              return redirect()->route('anggota.patroli.index')->with('error', 'Sedang OFF');
         }
 
@@ -219,7 +274,6 @@ class PatroliController extends Controller
         
         $statusPatroli = [];
         $jadwalPatroli = [];
-        $now = Carbon::now();
         $suggestedPatroli = null;
 
         foreach($rules as $r) {

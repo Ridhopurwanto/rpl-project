@@ -192,7 +192,7 @@
         {{-- FAB & MODALS TETAP SAMA (Tidak perlu diubah logic-nya) --}}
         {{-- ... Kode FAB Anda ... --}}
         {{-- Tombol FAB --}}
-        @if($tanggalTerpilih->isToday())
+        @if($tanggalTerpilih->isToday() || ($tanggalTerpilih->isYesterday() && $namaShift === 'MALAM' && now()->hour < 7))
             @if(isset($isShiftOff) && $isShiftOff)
                  <div class="fixed bottom-24 right-4 z-40">
                     <button @click="showOffModal = true; offModalTitle = 'Patroli Dibatasi'; offModalMessage = 'Hari ini Anda sedang OFF/Libur.';"

@@ -59,6 +59,18 @@ class KendaraanController extends Controller
         ]);
 
         $nopol = strtoupper($request->nopol);
+        
+        // Check if vehicle is already inside
+        $existingVehicle = LogKendaraan::where('nopol', $nopol)
+                                      ->where('status', 'Masuk')
+                                      ->first();
+        
+        if ($existingVehicle) {
+            return redirect()->back()
+                           ->withInput()
+                           ->with('error', 'Kendaraan dengan nomor polisi ' . $nopol . ' sudah berada di dalam kampus. Silakan keluarkan terlebih dahulu sebelum menambahkan kembali.');
+        }
+        
         $kendaraanMaster = Kendaraan::where('nomor_plat', $nopol)->first();
         $idKendaraan = $kendaraanMaster ? $kendaraanMaster->id_kendaraan : null;
         $waktu_masuk = Carbon::parse($request->tanggal . ' ' . $request->waktu);

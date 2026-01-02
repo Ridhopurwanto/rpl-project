@@ -27,15 +27,22 @@
         }
     </style>
 
-    <div class="w-full min-h-screen bg-slate-100 p-4 pb-32" x-data="{ 
-                        modalCheckoutOpen: false, 
-                        selectedVehicleId: null,
-                        selectedVehicleNopol: '',
-                        selectedVehicleStatus: '',
-                        showCreateModal: false,
-                        showSuccessNotif: {{ session('success') ? 'true' : 'false' }},
-                        showErrorNotif: {{ session('error') ? 'true' : 'false' }}
-                     }">
+    <div class="w-full min-h-screen bg-slate-100 p-2 md:p-4 pb-32" x-data="{ 
+            showPhotoModal: false,
+            photoUrl: '',
+            photoModalOpen: false,
+            photos: [],
+            currentPhotoIndex: 0,
+            selesaiModalOpen: false,
+            selesaiFormAction: '',
+            namaPenerima: '',
+            tanggalSelesai: '{{ now()->format('Y-m-d') }}',
+            waktuSelesai: '{{ now()->format('H:i') }}',
+            minTanggalSelesai: '',
+            showCreateModal: false,
+            showSuccessNotif: {{ session('success') ? 'true' : 'false' }},
+            showErrorNotif: {{ session('error') ? 'true' : 'false' }}
+         }">
 
         {{-- Floating Notification Success --}}
         <div x-show="showSuccessNotif" 
@@ -101,22 +108,6 @@
                 </svg>
             </button>
         </div>
-
-
-    <div class="w-full min-h-screen bg-slate-100 p-2 md:p-4 pb-32" x-data="{ 
-            showPhotoModal: false,
-            photoUrl: '',
-            photoModalOpen: false,
-            photos: [],
-            currentPhotoIndex: 0,
-            selesaiModalOpen: false,
-            selesaiFormAction: '',
-            namaPenerima: '',
-            tanggalSelesai: '{{ now()->format('Y-m-d') }}',
-            waktuSelesai: '{{ now()->format('H:i') }}',
-            minTanggalSelesai: '',
-            showCreateModal: false,
-         }">
 
 
         {{-- 1. BAGIAN BARANG TITIPAN (AKTIF) --}}
