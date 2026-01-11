@@ -40,10 +40,11 @@ class PatroliController extends Controller
 
         $queryPagi = Patroli::query()
             ->with(['claim.rule']) 
-            ->whereDate('tanggal', $tanggalPagi)
-            ->whereHas('claim.rule', function ($q) {
-                
-                $q->where('jenis_shift', 'Pagi'); 
+            ->whereHas('claim', function ($q) use ($tanggalPagi) {
+                $q->whereDate('tanggal', $tanggalPagi); 
+                $q->whereHas('rule', function ($qRule) {
+                    $qRule->where('jenis_shift', 'Pagi'); 
+                });
             })
             ->orderBy('waktu_exact', 'asc');
 
@@ -65,12 +66,13 @@ class PatroliController extends Controller
 
         $queryMalam = Patroli::query()
             ->with(['claim.rule']) 
-            ->whereDate('tanggal', $tanggalMalam)
-            ->whereHas('claim.rule', function ($q) {
-                
-                $q->where('jenis_shift', 'Malam'); 
+            ->whereHas('claim', function ($q) use ($tanggalMalam) {
+                $q->whereDate('tanggal', $tanggalMalam); 
+                $q->whereHas('rule', function ($qRule) {
+                    $qRule->where('jenis_shift', 'Malam'); 
+                });
             })
-            ->orderBy('waktu_exact', 'asc');
+            ->orderBy('waktu_exact', 'asc');    
 
         
         if ($jenisPatroliTerpilihMalam !== 'Semua') {
