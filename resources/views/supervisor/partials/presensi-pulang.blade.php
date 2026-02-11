@@ -39,7 +39,7 @@
                     <td class="py-2 px-4 font-medium">{{ $presensi->nama_lengkap }}</td>
                     @if($shiftTerpilih == 'semua')
                         <td class="py-2 px-4 text-center">
-                            @if($presensi->jenis_shift == 1)
+                            @if($presensi->jenis_shift == 1 || $presensi->jenis_shift == 4)
                                 Shift Pagi
                             @elseif($presensi->jenis_shift == 2)
                                 Shift Malam
@@ -112,7 +112,7 @@
                             {{-- Shift dengan icon dinamis --}}
                             @if($shiftTerpilih == 'semua')
                                 <div class="flex items-center gap-1">
-                                    @if($presensi->jenis_shift == 1)
+                                    @if($presensi->jenis_shift == 1 || $presensi->jenis_shift == 4)
                                         {{-- Icon Matahari untuk Shift Pagi --}}
                                         <svg class="w-3.5 h-3.5 text-amber-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
@@ -129,7 +129,7 @@
                                         </svg>
                                     @endif
                                     <p class="text-gray-700 font-semibold text-xs">
-                                        @if($presensi->jenis_shift == 1)
+                                        @if($presensi->jenis_shift == 1 || $presensi->jenis_shift == 4)
                                             Shift Pagi
                                         @elseif($presensi->jenis_shift == 2)
                                             Shift Malam
