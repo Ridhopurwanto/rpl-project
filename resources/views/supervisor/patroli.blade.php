@@ -31,12 +31,31 @@
      x-data="{ 
          showPhotoModal: false, 
          photoUrl: '', 
+         showDeleteModal: false,
+         deleteAction: '',
+         showRulesModal: false,
          showSuccessNotif: {{ session('success') ? 'true' : 'false' }},
-         showErrorNotif: {{ session('error') ? 'true' : 'false' }}
+         showErrorNotif: {{ session('error') ? 'true' : 'false' }},
+         tanggalPagi: '{{ $tanggalPagi }}',
+         tanggalMalam: '{{ $tanggalMalam }}',
+         perPagePagi: '{{ $perPagePagi }}',
+         perPageMalam: '{{ $perPageMalam }}',
+         jenisPatroliPagi: '{{ $jenisPatroliTerpilihPagi }}',
+         jenisPatroliMalam: '{{ $jenisPatroliTerpilihMalam }}'
      }">
     
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-2xl font-bold text-slate-800">Laporan Patroli Anggota</h2>
+        <button @click="showRulesModal = true" 
+                class="bg-[#2a4a6f] text-white p-2.5 rounded-lg shadow-md hover:bg-[#1e3a5f] transition" 
+                title="Pengaturan Jam Patroli">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+        </button>
     </div>
 
     {{-- Floating Notification Success --}}
@@ -156,7 +175,7 @@
                     <div class="cursor-pointer" @click="$refs.dateInputPagi.showPicker()">
                         <input type="date" id="tanggal_pagi" name="tanggal_pagi" x-ref="dateInputPagi"
                             class="filter-input block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
-                            value="{{ $tanggalTerpilihPagi }}">
+                            value="{{ $tanggalPagi }}">
                     </div>
                 </div>
 
@@ -245,7 +264,7 @@
                     <div class="cursor-pointer" @click="$refs.dateInputMalam.showPicker()">
                         <input type="date" id="tanggal_malam" name="tanggal_malam" x-ref="dateInputMalam"
                             class="filter-input block w-full h-[42px] px-4 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#1e3a5f] focus:border-[#1e3a5f] shadow-sm cursor-pointer"
-                            value="{{ $tanggalTerpilihMalam }}">
+                            value="{{ $tanggalMalam }}">
                     </div>
                 </div>
 

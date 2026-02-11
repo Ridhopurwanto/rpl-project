@@ -15,9 +15,13 @@ class PatroliController extends Controller
     public function index(Request $request)
     {
         
-        $tanggalTerpilih = $request->input('tanggal', now()->format('Y-m-d'));
-        $tanggalTerpilihPagi = $request->input('tanggal_pagi', $tanggalTerpilih);
-        $tanggalTerpilihMalam = $request->input('tanggal_malam', $tanggalTerpilih);
+        $tanggalPagi = $request->filled('tanggal_pagi') 
+            ? $request->input('tanggal_pagi') 
+            : now()->format('Y-m-d');
+            
+        $tanggalMalam = $request->filled('tanggal_malam') 
+            ? $request->input('tanggal_malam') 
+            : now()->format('Y-m-d');
         
         
         $jenisPatroliOptions = collect([
@@ -99,9 +103,8 @@ class PatroliController extends Controller
             'dataPatroliMalam' => $dataPatroliMalam,
             
             
-            'tanggalTerpilih' => $tanggalTerpilih,
-            'tanggalTerpilihPagi' => $tanggalTerpilihPagi,
-            'tanggalTerpilihMalam' => $tanggalTerpilihMalam,
+            'tanggalPagi' => $tanggalPagi,
+            'tanggalMalam' => $tanggalMalam,
             'jenisPatroliTerpilihPagi' => $jenisPatroliTerpilihPagi,
             'jenisPatroliTerpilihMalam' => $jenisPatroliTerpilihMalam,
             
