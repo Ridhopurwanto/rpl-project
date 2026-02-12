@@ -9,8 +9,9 @@
             <tr style="background-color: #cccccc;">
                 <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 4%">NO</th>
                 <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 12%">FOTO</th>
-                <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 12%">WAKTU LAPOR</th>
-                <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 16%">NAMA BARANG</th>
+                <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 9%">WAKTU LAPOR</th>
+                <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 9%">WAKTU AMBIL</th>
+                <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 10%">NAMA BARANG</th>
                 <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 14%">PELAPOR</th>
                 <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 14%">LOKASI</th>
                 <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 10%">STATUS</th>
@@ -41,6 +42,9 @@
                     <td style="border: 1px solid #000; padding: 6px; text-align: center;">
                         {{ \Carbon\Carbon::parse($item->waktu_lapor ?? $item->created_at)->format('d/m/Y H:i') }}
                     </td>
+                    <td style="border: 1px solid #000; padding: 6px; text-align: center;">
+                        {{ $item->waktu_selesai ? \Carbon\Carbon::parse($item->waktu_selesai)->format('d/m/Y H:i') : '-' }}
+                    </td>
                     <td style="border: 1px solid #000; padding: 6px;">{{ $item->nama_barang ?? '-' }}</td>
                     <td style="border: 1px solid #000; padding: 6px;">
                         <strong>Pelapor :</strong><br>
@@ -69,8 +73,9 @@
             <tr style="background-color: #cccccc;">
                 <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 4%">NO</th>
                 <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 12%">FOTO</th>
-                <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 12%">WAKTU TITIP</th>
-                <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 16%">NAMA BARANG</th>
+                <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 9%">WAKTU TITIP</th>
+                <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 9%">WAKTU TERIMA</th>
+                <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 10%">NAMA BARANG</th>
                 <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 14%">PENITIP</th>
                 <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 14%">PENERIMA</th>
                 <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 10%">STATUS</th>
@@ -101,13 +106,11 @@
                     <td style="border: 1px solid #000; padding: 6px; text-align: center;">
                         {{ \Carbon\Carbon::parse($item->waktu_titip ?? $item->created_at)->format('d/m/Y H:i') }}
                     </td>
-                    <td style="border: 1px solid #000; padding: 6px;">{{ $item->nama_barang ?? '-' }}</td>
-                    <td style="border: 1px solid #000; padding: 6px;">
-                        <strong>Penitip :</strong><br>
-                        {{ $item->nama_penitip ?? '-' }}<br><br>
-                        <strong>Penerima :</strong><br>
-                        {{ $item->tujuan ?? '-' }}
+                    <td style="border: 1px solid #000; padding: 6px; text-align: center;">
+                        {{ $item->waktu_selesai ? \Carbon\Carbon::parse($item->waktu_selesai)->format('d/m/Y H:i') : '-' }}
                     </td>
+                    <td style="border: 1px solid #000; padding: 6px;">{{ $item->nama_barang ?? '-' }}</td>
+                    <td style="border: 1px solid #000; padding: 6px;">{{ $item->nama_penitip ?? '-' }}</td>
                     <td style="border: 1px solid #000; padding: 6px;">{{ $item->tujuan ?? '-' }}</td>
                     <td style="border: 1px solid #000; padding: 6px; text-align: center;">{{ ucfirst($item->status ?? '-') }}</td>
                     <td style="border: 1px solid #000; padding: 6px;">{{ $item->catatan ?? '-' }}</td>

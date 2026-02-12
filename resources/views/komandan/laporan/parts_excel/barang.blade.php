@@ -5,7 +5,7 @@
             <tr>
                 <th style="{{ $thStyle }}">NO</th>
                 <th style="{{ $thStyle }}">FOTO</th>
-                <th style="{{ $thStyle }}">WAKTU LAPOR</th>
+                <th style="{{ $thStyle }}">TANGGAL</th>
                 <th style="{{ $thStyle }}">NAMA BARANG</th>
                 <th style="{{ $thStyle }}">PELAPOR / PEMILIK</th>
                 <th style="{{ $thStyle }}">LOKASI</th>
@@ -30,7 +30,13 @@
                              <br><br>
                         @endif
                     </td>
-                    <td style="{{ $tdCenterStyle }}">{{ \Carbon\Carbon::parse($item->waktu_lapor ?? $item->created_at)->format('d/m/Y H:i') }}</td>
+                    <td style="{{ $tdStyle }}">
+                        <strong>Lapor :</strong><br>
+                        {{ \Carbon\Carbon::parse($item->waktu_lapor ?? $item->created_at)->format('d/m/Y H:i') }}
+                        <br><br>
+                        <strong>Ambil :</strong><br>
+                        {{ $item->waktu_selesai ? \Carbon\Carbon::parse($item->waktu_selesai)->format('d/m/Y H:i') : '-' }}
+                    </td>
                     <td style="{{ $tdStyle }}">{{ $item->nama_barang ?? '-' }}</td>
                     <td style="{{ $tdStyle }} font-weight: normal;">
                         <strong>Pelapor :</strong><br>
@@ -55,7 +61,7 @@
             <tr>
                 <th style="{{ $thStyle }}">NO</th>
                 <th style="{{ $thStyle }}">FOTO</th>
-                <th style="{{ $thStyle }}">WAKTU TITIP</th>
+                <th style="{{ $thStyle }}">TANGGAL</th>
                 <th style="{{ $thStyle }}">NAMA BARANG</th>
                 <th style="{{ $thStyle }}" colspan="2">PENITIP / PENERIMA</th>
                 <th style="{{ $thStyle }}">STATUS</th>
@@ -77,7 +83,13 @@
                             <br><br>
                         @endif
                     </td>
-                    <td style="{{ $tdCenterStyle }}">{{ \Carbon\Carbon::parse($item->waktu_titip ?? $item->created_at)->format('d/m/Y H:i') }}</td>
+                    <td style="{{ $tdStyle }}">
+                        <strong>Titip :</strong><br>
+                        {{ \Carbon\Carbon::parse($item->waktu_titip ?? $item->created_at)->format('d/m/Y H:i') }}
+                        <br><br>
+                        <strong>Terima :</strong><br>
+                        {{ $item->waktu_selesai ? \Carbon\Carbon::parse($item->waktu_selesai)->format('d/m/Y H:i') : '-' }}
+                    </td>
                     <td style="{{ $tdStyle }}">{{ $item->nama_barang ?? '-' }}</td>
                     <td style="{{ $tdStyle }} font-weight: normal;" colspan="2">
                         <strong>Penitip :</strong><br>
