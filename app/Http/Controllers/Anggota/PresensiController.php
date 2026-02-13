@@ -85,7 +85,7 @@ class PresensiController extends Controller
         }
 
         if (!$activeShiftData) {
-             $activeShiftData = Shift::with('shiftRule')
+                $activeShiftData = Shift::with('shiftRule')
                             ->where('id_pengguna', $user->id_pengguna)
                             ->whereDate('tanggal', Carbon::today())
                             ->first();
@@ -199,29 +199,31 @@ class PresensiController extends Controller
     public function store(Request $request)
     {        
         $user = Auth::user();
+        // CRITICAL: Always use server time (Carbon::now()) to prevent client-side time manipulation
+        // User cannot change this timestamp by modifying device time
         $now = Carbon::now();
         $status = 'tepat waktu';
         $isGeotagEnabled = true;
 
         if ($request->jenis_presensi == 'pulang') {
-             $lastMasukTag = Presensi::where('id_pengguna', $user->id_pengguna)
+                $lastMasukTag = Presensi::where('id_pengguna', $user->id_pengguna)
                         ->where('jenis_presensi', 'masuk')
                         ->orderBy('waktu', 'desc')
                         ->first();
-             if ($lastMasukTag && $lastMasukTag->id_shift) {
-                  $shiftOrigin = Shift::with('shiftRule')->find($lastMasukTag->id_shift);
-                  if ($shiftOrigin && $shiftOrigin->shiftRule) {
-                      $isGeotagEnabled = $shiftOrigin->shiftRule->is_geotag_enabled;
-                  }
-             }
+                if ($lastMasukTag && $lastMasukTag->id_shift) {
+                    $shiftOrigin = Shift::with('shiftRule')->find($lastMasukTag->id_shift);
+                    if ($shiftOrigin && $shiftOrigin->shiftRule) {
+                        $isGeotagEnabled = $shiftOrigin->shiftRule->is_geotag_enabled;
+                    }
+                }
         } else {
-             $shiftHariIni = Shift::with('shiftRule')
+                $shiftHariIni = Shift::with('shiftRule')
                         ->where('id_pengguna', $user->id_pengguna)
                         ->whereDate('tanggal', $now)
                         ->first();
-             if ($shiftHariIni && $shiftHariIni->shiftRule) {
-                 $isGeotagEnabled = $shiftHariIni->shiftRule->is_geotag_enabled;
-             }
+                if ($shiftHariIni && $shiftHariIni->shiftRule) {
+                    $isGeotagEnabled = $shiftHariIni->shiftRule->is_geotag_enabled;
+                }
         }
 
         $rules = [
@@ -260,7 +262,7 @@ class PresensiController extends Controller
                         'Lokasi Anda ' . round($distance) . 'm dari titik presensi. Maksimal ' . $maxDistance . 'm.');
                 }
             }
-                  
+                
             
             $cekDuplikat = Presensi::where('id_pengguna', $user->id_pengguna)
                             ->whereDate('waktu', $now) 
@@ -268,27 +270,27 @@ class PresensiController extends Controller
                             ->exists();
             
             if ($request->jenis_presensi == 'masuk') {
-                 if ($cekDuplikat) {
-                     return redirect()->back()->with('error', 'Anda sudah presensi masuk hari ini.');
-                 }
+                    if ($cekDuplikat) {
+                        return redirect()->back()->with('error', 'Anda sudah presensi masuk hari ini.');
+                    }
             } else {
-                 $lastMasukForDup = Presensi::where('id_pengguna', $user->id_pengguna)
+                    $lastMasukForDup = Presensi::where('id_pengguna', $user->id_pengguna)
                             ->where('jenis_presensi', 'masuk')
                             ->orderBy('waktu', 'desc')
                             ->first();
 
-                 if ($lastMasukForDup) {
-                      $alreadyPulang = Presensi::where('id_shift', $lastMasukForDup->id_shift)
+                    if ($lastMasukForDup) {
+                        $alreadyPulang = Presensi::where('id_shift', $lastMasukForDup->id_shift)
                                         ->where('jenis_presensi', 'pulang')
                                         ->exists();
-                      if ($alreadyPulang) {
-                          return redirect()->back()->with('error', 'Anda sudah melakukan presensi pulang untuk shift ini.');
-                      }
-                 } else {
-                      if ($cekDuplikat) {
-                          return redirect()->back()->with('error', 'Anda sudah presensi pulang hari ini.');
-                      }
-                 }
+                        if ($alreadyPulang) {
+                            return redirect()->back()->with('error', 'Anda sudah melakukan presensi pulang untuk shift ini.');
+                        }
+                    } else {
+                        if ($cekDuplikat) {
+                            return redirect()->back()->with('error', 'Anda sudah presensi pulang hari ini.');
+                        }
+                    }
             }
 
             
@@ -323,7 +325,7 @@ class PresensiController extends Controller
                 }
                 
                 if (!$activeShift) {
-                     $activeShift = Shift::with('shiftRule')
+                        $activeShift = Shift::with('shiftRule')
                                 ->where('id_pengguna', $user->id_pengguna)
                                 ->whereDate('tanggal', $now)
                                 ->first();
@@ -331,35 +333,36 @@ class PresensiController extends Controller
             }
             
             if ($activeShift && $activeShift->shiftRule) {
-                 $rule = $activeShift->shiftRule;
-                 $tanggalShift = Carbon::parse($activeShift->tanggal);
+                    $rule = $activeShift->shiftRule;
+                    $tanggalShift = Carbon::parse($activeShift->tanggal);
 
-                 $jamMasuk = Carbon::createFromFormat('Y-m-d H:i:s', $tanggalShift->format('Y-m-d') . ' ' . $rule->jam_masuk);
-                 
-                 $jamKeluar = Carbon::createFromFormat('Y-m-d H:i:s', $tanggalShift->format('Y-m-d') . ' ' . $rule->jam_keluar);
-                 if ($jamKeluar->lessThan($jamMasuk)) {
-                     $jamKeluar->addDay();
-                 }
+                    $jamMasuk = Carbon::createFromFormat('Y-m-d H:i:s', $tanggalShift->format('Y-m-d') . ' ' . $rule->jam_masuk);
+                    
+                    $jamKeluar = Carbon::createFromFormat('Y-m-d H:i:s', $tanggalShift->format('Y-m-d') . ' ' . $rule->jam_keluar);
+                    if ($jamKeluar->lessThan($jamMasuk)) {
+                        $jamKeluar->addDay();
+                    }
 
-                 $waktuSekarang = Carbon::now();
+                 // Use the same server timestamp for consistency
+                    $waktuSekarang = $now;
 
-                 if ($request->jenis_presensi == 'masuk') {
-                      if ($rule->jam_masuk) {
-                           $batasTerlambat = $jamMasuk->copy()->addMinutes($rule->toleransi);
-                           
-                           if ($waktuSekarang->gt($batasTerlambat)) {
-                               $status = 'terlambat';
-                           }
-                      }
-                 } elseif ($request->jenis_presensi == 'pulang') {
-                      if ($rule->jam_keluar) {
-                           $batasAwalPulang = $jamKeluar->copy()->subMinutes($rule->toleransi);
+                    if ($request->jenis_presensi == 'masuk') {
+                        if ($rule->jam_masuk) {
+                            $batasTerlambat = $jamMasuk->copy()->addMinutes($rule->toleransi);
+                            
+                            if ($waktuSekarang->gt($batasTerlambat)) {
+                                $status = 'terlambat';
+                            }
+                        }
+                    } elseif ($request->jenis_presensi == 'pulang') {
+                        if ($rule->jam_keluar) {
+                            $batasAwalPulang = $jamKeluar->copy()->subMinutes($rule->toleransi);
 
-                           if ($waktuSekarang->lt($batasAwalPulang)) {
-                               $status = 'terlalu cepat';
-                           }
-                      }
-                 }
+                            if ($waktuSekarang->lt($batasAwalPulang)) {
+                                $status = 'terlalu cepat';
+                            }
+                        }
+                    }
             }
 
 
@@ -378,14 +381,14 @@ class PresensiController extends Controller
             ]);
 
             return redirect()->route('anggota.presensi.index')
-                             ->with('success', 'Presensi ' . $request->jenis_presensi . ' berhasil! Status: ' . $status);
+                            ->with('success', 'Presensi ' . $request->jenis_presensi . ' berhasil! Status: ' . $status);
 
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal: ' . $e->getMessage());
         }
     }
 
-     
+    
     private function calculateDistance($lat1, $lon1, $lat2, $lon2)
     {
         $earthRadius = 6371000; 
@@ -396,7 +399,7 @@ class PresensiController extends Controller
         $a = sin($dLat/2) * sin($dLat/2) +
              cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
              sin($dLon/2) * sin($dLon/2);
-             
+            
         $c = 2 * atan2(sqrt($a), sqrt(1-$a));
         
         $distance = $earthRadius * $c;
