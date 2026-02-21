@@ -39,12 +39,12 @@
                     {{ $item->nama_lengkap ?? optional($item->pengguna)->nama_lengkap ?? '-' }}
                 </td>
                 <td style="border: 1px solid #000; padding: 6px; text-align: center;">
-                    @if($item->id_shift == 1 || $item->id_shift == 4)
+                    @if($item->jenis_shift == 1 || $item->jenis_shift == 4)
                         Pagi
-                    @elseif($item->id_shift == 2)
+                    @elseif($item->jenis_shift == 2)
                         Malam
                     @else
-                        {{ $item->id_shift }}
+                        {{ $item->jenis_shift }}
                     @endif                    
                 </td>
                 <td style="border: 1px solid #000; padding: 6px; text-align: center;">
@@ -105,12 +105,12 @@
                     {{ $item->nama_lengkap ?? optional($item->pengguna)->nama_lengkap ?? '-' }}
                 </td>
                 <td style="border: 1px solid #000; padding: 6px; text-align: center;">
-                    @if($item->id_shift == 1 || $item->id_shift == 4)
+                    @if($item->jenis_shift == 1 || $item->jenis_shift == 4)
                         Pagi
-                    @elseif($item->id_shift == 2)
+                    @elseif($item->jenis_shift == 2)
                         Malam
                     @else
-                        {{ $item->id_shift }}
+                        {{ $item->jenis_shift }}
                     @endif                    
                 </td>
                 <td style="border: 1px solid #000; padding: 6px; text-align: center;">

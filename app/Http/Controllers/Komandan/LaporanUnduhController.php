@@ -185,8 +185,9 @@ class LaporanUnduhController extends Controller
         switch ($type) {
             case 'presensi':    
                 return Presensi::with('pengguna')
-                               ->whereBetween('tanggal', [$start, $end])
-                               ->orderBy('tanggal', 'asc')
+                               ->join('shift', 'presensi.id_shift', '=', 'shift.id_shift')
+                               ->whereBetween('presensi.tanggal', [$start, $end])
+                               ->orderBy('presensi.tanggal', 'asc')
                                ->orderBy('waktu', 'asc')
                                ->get();
             case 'patroli':     

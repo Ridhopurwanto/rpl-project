@@ -28,12 +28,12 @@
                 <td style="{{ $tdCenterStyle }}">{{ \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}</td>
                 <td style="{{ $tdStyle }}">{{ $item->nama_lengkap ?? $item->user->nama_lengkap ?? '-' }}</td>
                 <td style="{{ $tdCenterStyle }}">
-                    @if($item->id_shift == 1 || $item->id_shift == 4)
+                    @if($item->jenis_shift == 1 || $item->jenis_shift == 4)
                         Pagi
-                    @elseif($item->id_shift == 2)
+                    @elseif($item->jenis_shift == 2)
                         Malam
                     @else
-                        {{ $item->id_shift }}
+                        {{ $item->jenis_shift }}
                     @endif
                 </td>
                 <td style="{{ $tdCenterStyle }}">{{ \Carbon\Carbon::parse($item->waktu)->format('H:i') }}</td>
@@ -72,12 +72,12 @@
                 <td style="{{ $tdCenterStyle }}">{{ \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}</td>
                 <td style="{{ $tdStyle }}">{{ $item->nama_lengkap ?? $item->user->nama_lengkap ?? '-' }}</td>
                 <td style="{{ $tdCenterStyle }}">
-                    @if($item->id_shift == 1 || $item->id_shift == 4)
+                    @if($item->jenis_shift == 1 || $item->jenis_shift == 4)
                         Pagi
-                    @elseif($item->id_shift == 2)
+                    @elseif($item->jenis_shift == 2)
                         Malam
                     @else
-                        {{ $item->id_shift }}
+                        {{ $item->jenis_shift }}
                     @endif
                 </td>
                 <td style="{{ $tdCenterStyle }}">{{ \Carbon\Carbon::parse($item->waktu)->format('H:i') }}</td>
