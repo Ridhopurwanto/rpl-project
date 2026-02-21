@@ -22,7 +22,7 @@
         // 1. TENTUKAN TOTAL KOLOM TABEL DATA ($totalCol)
         // Ini penting agar Header & Footer bisa merge selebar tabel data
         $colspans = [
-            'presensi' => 6,
+            'presensi' => 7,
             'patroli' => 7,
             'barang' => 8,
             'kendaraan' => 7,

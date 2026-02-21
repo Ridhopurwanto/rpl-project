@@ -10,7 +10,8 @@
             <th style="{{ $thStyle }}" width="8">NO</th>
             <th style="{{ $thStyle }}" width="20">FOTO</th>
             <th style="{{ $thStyle }}" width="20">TANGGAL</th>
-            <th style="{{ $thStyle }}" width="40">NAMA ANGGOTA</th>
+            <th style="{{ $thStyle }}" width="30">NAMA ANGGOTA</th>
+            <th style="{{ $thStyle }}" width="10">JENIS SHIFT</th>
             <th style="{{ $thStyle }}" width="20">WAKTU ABSEN</th>
             <th style="{{ $thStyle }}" width="20">STATUS</th>
         </tr>
@@ -26,6 +27,15 @@
                 </td>
                 <td style="{{ $tdCenterStyle }}">{{ \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}</td>
                 <td style="{{ $tdStyle }}">{{ $item->nama_lengkap ?? $item->user->nama_lengkap ?? '-' }}</td>
+                <td style="{{ $tdCenterStyle }}">
+                    @if($item->id_shift == 1 || $item->id_shift == 4)
+                        Pagi
+                    @elseif($item->id_shift == 2)
+                        Malam
+                    @else
+                        {{ $item->id_shift }}
+                    @endif
+                </td>
                 <td style="{{ $tdCenterStyle }}">{{ \Carbon\Carbon::parse($item->waktu)->format('H:i') }}</td>
                 <td style="{{ $tdCenterStyle }}">{{ ucfirst($item->status) }}</td>
             </tr>
@@ -44,7 +54,8 @@
             <th style="{{ $thStyle }}" width="8">NO</th>
             <th style="{{ $thStyle }}" width="20">FOTO</th>
             <th style="{{ $thStyle }}" width="20">TANGGAL</th>
-            <th style="{{ $thStyle }}" width="40">NAMA ANGGOTA</th>
+            <th style="{{ $thStyle }}" width="30">NAMA ANGGOTA</th>
+            <th style="{{ $thStyle }}" width="10">JENIS SHIFT</th>
             <th style="{{ $thStyle }}" width="20">WAKTU ABSEN</th>
             <th style="{{ $thStyle }}" width="20">STATUS</th>
         </tr>
@@ -60,6 +71,15 @@
                 </td>
                 <td style="{{ $tdCenterStyle }}">{{ \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}</td>
                 <td style="{{ $tdStyle }}">{{ $item->nama_lengkap ?? $item->user->nama_lengkap ?? '-' }}</td>
+                <td style="{{ $tdCenterStyle }}">
+                    @if($item->id_shift == 1 || $item->id_shift == 4)
+                        Pagi
+                    @elseif($item->id_shift == 2)
+                        Malam
+                    @else
+                        {{ $item->id_shift }}
+                    @endif
+                </td>
                 <td style="{{ $tdCenterStyle }}">{{ \Carbon\Carbon::parse($item->waktu)->format('H:i') }}</td>
                 <td style="{{ $tdCenterStyle }}">{{ ucfirst($item->status) }}</td>
             </tr>

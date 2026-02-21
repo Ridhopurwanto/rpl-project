@@ -9,7 +9,8 @@
             <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 4%">NO</th>
             <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 10%">FOTO</th>
             <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 12%">TANGGAL</th>
-            <th style="border: 1px solid #000; padding: 6px; text-align: left; width: 30%">NAMA ANGGOTA</th>
+            <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 20%">NAMA ANGGOTA</th>
+            <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 9%">JENIS SHIFT</th>
             <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 12%">WAKTU ABSEN</th>
             <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 12%">STATUS</th>
         </tr>
@@ -36,6 +37,15 @@
                 </td>
                 <td style="border: 1px solid #000; padding: 6px;">
                     {{ $item->nama_lengkap ?? optional($item->pengguna)->nama_lengkap ?? '-' }}
+                </td>
+                <td style="border: 1px solid #000; padding: 6px; text-align: center;">
+                    @if($item->id_shift == 1 || $item->id_shift == 4)
+                        Pagi
+                    @elseif($item->id_shift == 2)
+                        Malam
+                    @else
+                        {{ $item->id_shift }}
+                    @endif                    
                 </td>
                 <td style="border: 1px solid #000; padding: 6px; text-align: center;">
                     {{ \Carbon\Carbon::parse($item->waktu)->format('H:i') }}
@@ -65,7 +75,8 @@
             <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 4%">NO</th>
             <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 10%">FOTO</th>
             <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 12%">TANGGAL</th>
-            <th style="border: 1px solid #000; padding: 6px; text-align: left; width: 30%">NAMA ANGGOTA</th>
+            <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 20%">NAMA ANGGOTA</th>
+            <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 9%">JENIS SHIFT</th>
             <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 12%">WAKTU ABSEN</th>
             <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 12%">STATUS</th>
         </tr>
@@ -92,6 +103,15 @@
                 </td>
                 <td style="border: 1px solid #000; padding: 6px;">
                     {{ $item->nama_lengkap ?? optional($item->pengguna)->nama_lengkap ?? '-' }}
+                </td>
+                <td style="border: 1px solid #000; padding: 6px; text-align: center;">
+                    @if($item->id_shift == 1 || $item->id_shift == 4)
+                        Pagi
+                    @elseif($item->id_shift == 2)
+                        Malam
+                    @else
+                        {{ $item->id_shift }}
+                    @endif                    
                 </td>
                 <td style="border: 1px solid #000; padding: 6px; text-align: center;">
                     {{ \Carbon\Carbon::parse($item->waktu)->format('H:i') }}
